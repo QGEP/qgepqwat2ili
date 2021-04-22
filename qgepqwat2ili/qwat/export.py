@@ -72,15 +72,15 @@ def qwat_export():
         """
         return {
             # --- leitungsknoten ---
-            # "bemerkung": row.REPLACE_ME,
-            # "druckzone": row.REPLACE_ME,
-            # "eigentuemer": row.REPLACE_ME,
-            # "einbaujahr": row.REPLACE_ME,
+            # "bemerkung": DOES_NOT_EXIST_IN_QWAT,
+            # "druckzone": DOES_NOT_EXIST_IN_QWAT,
+            "eigentuemer": row.fk_owner__REL.name,
+            "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
-            # "hoehenbestimmung": row.REPLACE_ME,
+            "hoehenbestimmung": row.fk_precisionalti__REL.value_de,
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
-            "lagebestimmung": "undefined",
+            "lagebestimmung": row.fk_precision__REL.value_de,
             "symbolori": 0,
         }
 
@@ -106,12 +106,12 @@ def qwat_export():
             # FIELDS TO MAP TO WASSER.hydraulischer_knoten
             **base_common(row, "hydraulischer_knoten", QWAT.node),
             # --- hydraulischer_knoten ---
-            # bemerkung=row.REPLACE_ME,
-            # druck=row.REPLACE_ME,
+            # bemerkung=DOES_NOT_EXIST_IN_QWAT,
+            # druck=OPEN_QUESTION ,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
-            # verbrauch=row.REPLACE_ME,
+            # verbrauch=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(hydraulischer_knoten)
         create_metaattributes(hydraulischer_knoten)
@@ -147,16 +147,16 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- hydrant ---
-            # art=row.REPLACE_ME,
-            # dimension=row.REPLACE_ME,
-            # entnahme=row.REPLACE_ME,
-            # fliessdruck=row.REPLACE_ME,
-            # hersteller=row.REPLACE_ME,
-            # material=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # typ=row.REPLACE_ME,
-            # versorgungsdruck=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            art="Unterflurhydrant" if row.underground else "Oberflurhydrant",
+            # dimension=DOES_NOT_EXIST_IN_QWAT,
+            entnahme=row.flow,
+            fliessdruck=row.pressure_dynamic,
+            hersteller=row.fk_provider__REL.value_fr,
+            material="Metall" if row.fk_material__REL.id in [7002, 7003, 7004] else "unbekannt",
+            name_nummer=row.identification,
+            typ=f"{row.fk_model_sup} / {row.fk_model_inf}",
+            versorgungsdruck=row.pressure_static,
+            zustand=row.fk_status__REL.value_de,
         )
         wasser_session.add(hydrant)
         create_metaattributes(hydrant)
