@@ -1,4 +1,4 @@
-# NO SMART MAPPING (remove usless params) 
+# NO SMART MAPPING (remove usless params)
 java -jar 'C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\ili2pg-4.4.2\ili2pg-4.4.2.jar' --schemaimport --dbhost 127.0.0.1 --dbusr postgres --dbpwd postgres --dbdatabase ili2pgtest --dbschema ili2pg_nosmart --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --noSmartMapping --defaultSrsCode 2056 --log debug-create.txt --nameLang de 'C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\ili\SIA405_Abwasser_2015_2_d-20180417.ili'
 
 # IMPORT VSA_KEK SCHEMA
@@ -9,4 +9,3 @@ java -jar 'C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\ili2pg-4.4.
 
 # IMPORT VSA_KEK DATA (data fixed by Matthias)
 java -jar 'C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\ili2pg-4.4.2\ili2pg-4.4.2.jar' --import --deleteData --dbhost 127.0.0.1 --dbusr postgres --dbpwd postgres --dbdatabase ili2pgtest --dbschema ili2pg_vsakek3 --disableValidation --defaultSrsCode 2056 --createTidCol --trace --modeldir C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\ili 'C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\interlis\data\test_without_abwasserbauwerkref.xtf'
-
