@@ -73,7 +73,7 @@
   <customwidget>
    <class>FeatureSelectorWidget</class>
    <extends>QWidget</extends>
-   <header location="global">qgepplugin.interlis.plugin.featureselectorwidget</header>
+   <header>qgepqwat2ili.gui.featureselectorwidget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
