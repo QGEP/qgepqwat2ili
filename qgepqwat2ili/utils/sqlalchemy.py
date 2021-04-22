@@ -1,25 +1,16 @@
-import sqlalchemy
-import pickle
 import logging
-import os
-from sqlalchemy.orm import interfaces
-from sqlalchemy import inspect
 
-from sqlalchemy.ext.automap import (
-    name_for_collection_relationship,
-    name_for_scalar_relationship,
-    generate_relationship,
-)
+import sqlalchemy
+from sqlalchemy import inspect
+from sqlalchemy.ext.automap import generate_relationship
 
 from .various import get_pgconf
-
-from .. import config
 
 
 def create_engine(logger_name=None):
     logging_args = {}
     if logger_name:
-        handler = logging.FileHandler(f'qgep_export.{logger_name}.log', mode="w")
+        handler = logging.FileHandler(f"qgep_export.{logger_name}.log", mode="w")
         handler.setLevel(logging.DEBUG)
         logging.getLogger(f"sqlalchemy.engine.base.Engine.{logger_name}").addHandler(handler)
         logging_args = {"logging_name": logger_name, "echo": True}
@@ -28,7 +19,7 @@ def create_engine(logger_name=None):
 
     return sqlalchemy.create_engine(
         f"postgresql://{pgconf['user']}:{pgconf['password']}@{pgconf['host']}:{pgconf['port']}/{pgconf['dbname']}",
-        **logging_args
+        **logging_args,
     )
 
 
@@ -50,7 +41,7 @@ def custom_generate_relationship(base, direction, return_fn, attrname, local_cls
     """
     # disabling type checks on all relations, allowing to flush subclasses instead of abstract classes in relations
     # without requiring to configure polymorphism
-    kw['enable_typechecks'] = False
+    kw["enable_typechecks"] = False
     return generate_relationship(base, direction, return_fn, attrname, local_cls, referred_cls, **kw)
 
 

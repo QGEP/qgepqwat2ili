@@ -1,29 +1,27 @@
-from pkg_resources import parse_version
+import os
 from types import SimpleNamespace
 
+from pkg_resources import parse_version
+from qgis.core import Qgis, QgsProject, QgsSettings
+from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QMessageBox, QProgressDialog
 from qgis.utils import plugins
-from qgis.core import Qgis
+from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
 
-import os
-
-from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QMessageBox
-
-from qgis.core import QgsProject, QgsSettings
-
-from QgisModelBaker.libili2db import ili2dbutils, ili2dbconfig, globals
-
-from ..qgep.import_ import qgep_import
+from .. import config
 from ..qgep.export import qgep_export
+from ..qgep.import_ import qgep_import
+from ..utils.ili2db import (
+    create_ili_schema,
+    export_xtf_data,
+    import_xtf_data,
+    validate_xtf_data,
+)
+from ..utils.various import logger
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
-from .. import config
-from ..utils.various import logger
-from ..utils.ili2db import create_ili_schema, import_xtf_data, export_xtf_data, validate_xtf_data
-
-
 import_dialog = None
+
 
 def action_import(plugin):
     """
@@ -34,14 +32,14 @@ def action_import(plugin):
     if not configure_from_modelbaker(plugin.iface):
         return
 
-    default_folder = QgsSettings().value('qgep_pluging/last_interlis_path', QgsProject.instance().absolutePath())
+    default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
         None, plugin.tr("Import file"), default_folder, plugin.tr("Interlis transfer files (*.xtf)")
     )
     if not file_name:
         # Operation canceled
         return
-    QgsSettings().setValue('qgep_pluging/last_interlis_path', os.path.dirname(file_name))
+    QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
     progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
     progress_dialog.setCancelButton(None)
@@ -55,7 +53,11 @@ def action_import(plugin):
         validate_xtf_data(file_name)
     except Exception:
         progress_dialog.close()
-        QMessageBox.critical(None, "Invalid file", "The selected file is not a valid XTF file. Open the logs for more details on the error.")
+        QMessageBox.critical(
+            None,
+            "Invalid file",
+            "The selected file is not a valid XTF file. Open the logs for more details on the error.",
+        )
         return
 
     # Prepare the temporary ili2pg model
@@ -90,14 +92,17 @@ def action_export(plugin):
 
     def action_do_export():
 
-        default_folder = QgsSettings().value('qgep_pluging/last_interlis_path', QgsProject.instance().absolutePath())
+        default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
         file_name, _ = QFileDialog.getSaveFileName(
-            None, plugin.tr("Export to file"), os.path.join(default_folder, 'qgep-export.xtf'), plugin.tr("Interlis transfer files (*.xtf)")
+            None,
+            plugin.tr("Export to file"),
+            os.path.join(default_folder, "qgep-export.xtf"),
+            plugin.tr("Interlis transfer files (*.xtf)"),
         )
         if not file_name:
             # Operation canceled
             return
-        QgsSettings().setValue('qgep_pluging/last_interlis_path', os.path.dirname(file_name))
+        QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
         progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
         progress_dialog.setCancelButton(None)
@@ -128,11 +133,17 @@ def action_export(plugin):
             validate_xtf_data(file_name)
         except Exception:
             progress_dialog.close()
-            QMessageBox.critical(None, "Invalid file", "The created file is not a valid XTF file. Open the logs for more details on the error.")
+            QMessageBox.critical(
+                None,
+                "Invalid file",
+                "The created file is not a valid XTF file. Open the logs for more details on the error.",
+            )
             return
         progress_dialog.setValue(100)
 
-        plugin.iface.messageBar().pushMessage("Sucess", f"Data successfully exported to {file_name}", level=Qgis.Success)
+        plugin.iface.messageBar().pushMessage(
+            "Sucess", f"Data successfully exported to {file_name}", level=Qgis.Success
+        )
 
     export_dialog.accepted.connect(action_do_export)
     export_dialog.show()
@@ -143,21 +154,21 @@ def configure_from_modelbaker(iface):
     Configures config.JAVA/ILI2PG paths using modelbaker.
     Returns whether modelbaker is available, and displays instructions if not.
     """
-    REQUIRED_VERSION = 'v6.4.0'  # TODO : update once https://github.com/opengisch/QgisModelBaker/pull/473 is released
-    modelbaker = plugins.get('QgisModelBaker')
+    REQUIRED_VERSION = "v6.4.0"  # TODO : update once https://github.com/opengisch/QgisModelBaker/pull/473 is released
+    modelbaker = plugins.get("QgisModelBaker")
     if modelbaker is None:
         iface.messageBar().pushMessage(
             "Error",
             "This feature requires the ModelBaker plugin. Please install and activate it from the plugin manager.",
-            level=Qgis.Critical
+            level=Qgis.Critical,
         )
         return False
 
-    elif modelbaker.__version__ != 'dev' and parse_version(modelbaker.__version__) < parse_version(REQUIRED_VERSION):
+    elif modelbaker.__version__ != "dev" and parse_version(modelbaker.__version__) < parse_version(REQUIRED_VERSION):
         iface.messageBar().pushMessage(
             "Error",
             f"This feature requires a more recent version of the ModelBaker plugin (currently : {modelbaker.__version__}). Please install and activate version {REQUIRED_VERSION} or newer from the plugin manager.",
-            level=Qgis.Critical
+            level=Qgis.Critical,
         )
         return False
 

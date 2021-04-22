@@ -1,25 +1,23 @@
 import os
-
-from sqlalchemy.orm import Session
-from sqlalchemy import inspect
 from collections import defaultdict
 
+from qgis.core import Qgis
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QFont, QBrush, QColor
-from qgis.PyQt.QtWidgets import QDialog, QTreeWidgetItem, QHeaderView
+from qgis.PyQt.QtGui import QFont
+from qgis.PyQt.QtWidgets import QDialog, QHeaderView, QTreeWidgetItem
 from qgis.PyQt.uic import loadUi
 from qgis.utils import iface
-from qgis.core import Qgis
+from sqlalchemy import inspect
+from sqlalchemy.orm import Session
 
-from .editors.base import Editor
 from ..qgep.model_qgep import get_qgep_model
+from .editors.base import Editor
 
 
 class GuiImport(QDialog):
-
     def __init__(self, parent):
         super().__init__(parent)
-        loadUi(os.path.join(os.path.dirname(__file__), 'gui_import.ui'), self)
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
         self.accepted.connect(self.commit_session)
         self.rejected.connect(self.rollback_session)
@@ -65,7 +63,7 @@ class GuiImport(QDialog):
             cls = obj.__class__
 
             # Hide unmodified value lists items that may have been added to the session
-            if editor.status == Editor.EXISTING and cls.__table__.schema == 'qgep_vl':
+            if editor.status == Editor.EXISTING and cls.__table__.schema == "qgep_vl":
                 continue
 
             if cls not in self.category_items:
@@ -171,7 +169,7 @@ class GuiImport(QDialog):
             self.debugTextEdit.append(f"{c.key}: {val}")
         #   Show sqlalchemy state in the debug text edit
         self.debugTextEdit.append("-- SQLALCHEMY STATUS --")
-        for status_name in ['transient', 'pending', 'persistent', 'deleted', 'detached', 'modified', 'expired']:
+        for status_name in ["transient", "pending", "persistent", "deleted", "detached", "modified", "expired"]:
             if getattr(inspect(editor.obj), status_name):
                 self.debugTextEdit.append(f"{status_name} ")
         self.debugTextEdit.append("-- DEBUG --")
@@ -180,13 +178,13 @@ class GuiImport(QDialog):
         #   Show the validity label
         self.validityLabel.setText(editor.message)
         if editor.validity == Editor.INVALID:
-            self.validityLabel.setStyleSheet('background-color: red; padding: 15px;')
+            self.validityLabel.setStyleSheet("background-color: red; padding: 15px;")
         elif editor.validity == Editor.WARNING:
-            self.validityLabel.setStyleSheet('background-color: orange; padding: 15px;')
+            self.validityLabel.setStyleSheet("background-color: orange; padding: 15px;")
         elif editor.validity == Editor.VALID:
-            self.validityLabel.setStyleSheet('background-color: lightgreen; padding: 15px;')
+            self.validityLabel.setStyleSheet("background-color: lightgreen; padding: 15px;")
         else:
-            self.validityLabel.setStyleSheet('background-color: lightgray; padding: 15px;')
+            self.validityLabel.setStyleSheet("background-color: lightgray; padding: 15px;")
 
         # Update the actual widget
         editor.update_widget()

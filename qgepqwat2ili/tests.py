@@ -2,20 +2,17 @@
 python -m unittest interlis.tests
 """
 
+import decimal
+import logging
 import os
 import sys
-import unittest
-import decimal
 import tempfile
-import logging
+import unittest
 
 from sqlalchemy.orm import Session
 
-from . import main
-from . import utils
-
+from . import main, utils
 from .qgep.model_qgep import get_qgep_model
-
 
 # Display logging in unittest output
 logger = logging.getLogger()
@@ -24,8 +21,8 @@ handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.WARNING)
 logger.addHandler(handler)
 
-class TestQGEPUseCases(unittest.TestCase):
 
+class TestQGEPUseCases(unittest.TestCase):
     def test_case_a_import_wincan_xtf(self):
         """
         # A. import Wincan-generated xtf data into QGEP
@@ -34,7 +31,7 @@ class TestQGEPUseCases(unittest.TestCase):
         """
 
         # Validate the incomming XTF
-        path = os.path.join(os.path.dirname(__file__), 'data', 'test_data', 'case_a_import_from_wincan.xtf')
+        path = os.path.join(os.path.dirname(__file__), "data", "test_data", "case_a_import_from_wincan.xtf")
         utils.ili2db.validate_xtf_data(path)
 
         # Prepare db (we import in a full schema)
@@ -79,7 +76,10 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(session.query(QGEP.organisation).count(), 18)
         session.close()
 
-    @unittest.skipIf(os.getenv("INCLUDE_SLOW_TESTS", "").lower() != 'true', "slow test excluded by default, set INCLUDE_SLOW_TESTS=true to run")
+    @unittest.skipIf(
+        os.getenv("INCLUDE_SLOW_TESTS", "").lower() != "true",
+        "slow test excluded by default, set INCLUDE_SLOW_TESTS=true to run",
+    )
     def test_case_b_export_complete_qgep_to_xtf(self):
         """
         # B. export the whole QGEP model to interlis
@@ -103,7 +103,7 @@ class TestQGEPUseCases(unittest.TestCase):
 
         # Incomming XTF
         # THIS INPUT FILE IS INVALID !
-        path = os.path.join(os.path.dirname(__file__), 'data', 'test_data', 'case_c_import_all.xtf')
+        path = os.path.join(os.path.dirname(__file__), "data", "test_data", "case_c_import_all.xtf")
 
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])
@@ -135,11 +135,23 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        main(["qgep", "export", path, "--recreate_schema", "--upstream_of", 'ch13p7mzWN008128', "--downstream_of", 'ch13p7mzWN005856'])
+        main(
+            [
+                "qgep",
+                "export",
+                path,
+                "--recreate_schema",
+                "--upstream_of",
+                "ch13p7mzWN008128",
+                "--downstream_of",
+                "ch13p7mzWN005856",
+            ]
+        )
 
         # Validate the outgoing XTF
         print(f"Saved to {path}")
         utils.ili2db.validate_xtf_data(path)
+
 
 class TestRegressions(unittest.TestCase):
 
@@ -152,7 +164,9 @@ class TestRegressions(unittest.TestCase):
         Currently passing because metaattribute_common is disabled on organisation
         """
 
-        path = os.path.join(os.path.dirname(__file__), 'data', 'test_data', 'regression_001_self_referencing_organisation.xtf')
+        path = os.path.join(
+            os.path.dirname(__file__), "data", "test_data", "regression_001_self_referencing_organisation.xtf"
+        )
 
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])

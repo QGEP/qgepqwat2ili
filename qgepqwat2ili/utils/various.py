@@ -1,11 +1,9 @@
-import psycopg2
+import collections
+import configparser
+import logging
 import os
 import subprocess
 import time
-import collections
-import configparser
-import sys
-import logging
 
 from .. import config
 
@@ -14,6 +12,7 @@ logger = logging.getLogger(__package__)
 
 class CmdException(BaseException):
     pass
+
 
 def exec_(command, check=True):
     logger.info(f"EXECUTING: {command}")
@@ -27,7 +26,7 @@ def exec_(command, check=True):
         )
     except subprocess.CalledProcessError as e:
         if check:
-            logger.exception(e.output.decode('windows-1252' if os.name == 'nt' else 'utf-8'))
+            logger.exception(e.output.decode("windows-1252" if os.name == "nt" else "utf-8"))
             raise CmdException(f"Command errored ! See logs for more info.")
         return e.returncode
     return proc.returncode
@@ -54,7 +53,9 @@ def setup_test_db(template="full"):
     if r != 0:
         logger.info("Test container not running, we create it")
 
-        exec_(f"docker run -d --rm -v qgepqwat_db:/var/lib/postgresql/data -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis")
+        exec_(
+            f"docker run -d --rm -v qgepqwat_db:/var/lib/postgresql/data -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis"
+        )
 
         # Wait for PG
         while exec_("docker exec qgepqwat pg_isready", check=False) != 0:
@@ -77,11 +78,21 @@ def setup_test_db(template="full"):
             dexec_("apt-get install -y wget")
 
             # Getting data
-            dexec_("wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_and_demo_data.backup")
-            dexec_("wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_with_value_lists.sql")
-            dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_data_and_structure_sample.backup")
-            dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_structure_only.sql")
-            dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_value_list_data_only.sql")
+            dexec_(
+                "wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_and_demo_data.backup"
+            )
+            dexec_(
+                "wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_with_value_lists.sql"
+            )
+            dexec_(
+                "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_data_and_structure_sample.backup"
+            )
+            dexec_(
+                "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_structure_only.sql"
+            )
+            dexec_(
+                "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_value_list_data_only.sql"
+            )
 
             # Creating the template DB with empty structure
             dexec_("psql -f qgep_1.5.4_structure_with_value_lists.sql qgep_prod postgres")
@@ -90,17 +101,25 @@ def setup_test_db(template="full"):
             dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
 
             # Creating the template DB with full data
-            dexec_('psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"')
+            dexec_(
+                'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
+            )
             dexec_("dropdb -U postgres qgep_prod --if-exists")
             dexec_("createdb -U postgres qgep_prod")
-            dexec_("pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.4_structure_and_demo_data.backup")
-            dexec_("pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.5_data_and_structure_sample.backup")
+            dexec_(
+                "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.4_structure_and_demo_data.backup"
+            )
+            dexec_(
+                "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.5_data_and_structure_sample.backup"
+            )
             dexec_("createdb -U postgres --template=qgep_prod tpl_full")
 
             # Hotfix invalid data
-            delta_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'test_data', 'qgep_demodata_hotfix.sql')
-            exec_(f'docker cp {delta_path} qgepqwat:/tpl_full_hotfix.sql')
-            dexec_('psql -U postgres -d tpl_full -f /tpl_full_hotfix.sql')
+            delta_path = os.path.join(
+                os.path.dirname(__file__), "..", "data", "test_data", "qgep_demodata_hotfix.sql"
+            )
+            exec_(f"docker cp {delta_path} qgepqwat:/tpl_full_hotfix.sql")
+            dexec_("psql -U postgres -d tpl_full -f /tpl_full_hotfix.sql")
 
             # Creating the template DB with subset data
             # THIS IS QUITE SLOW, WE DISABLE IT FOR NOW
@@ -144,7 +163,9 @@ def setup_test_db(template="full"):
             # exec_(r'docker cp C:\Users\Olivier\Code\QWAT\data-model\update\delta\delta_1.3.6_add_vl_for_SIA_export.sql qgepqwatbuilder:/delta_1.3.6_add_vl_for_SIA_export.sql')
             # dexec_(f'psql -U postgres -d qgep_prod -f /delta_1.3.6_add_vl_for_SIA_export.sql')
 
-    dexec_(f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"')
+    dexec_(
+        f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
+    )
     dexec_(f"dropdb -U postgres qgep_prod --if-exists")
     dexec_(f"createdb -U postgres --template=tpl_{template} qgep_prod")
 
@@ -163,12 +184,12 @@ def read_pgservice(service_name):
     """
 
     # Path for pg_service.conf
-    if os.environ.get('PGSERVICEFILE'):
-        PG_CONFIG_PATH = os.environ.get('PGSERVICEFILE')
-    elif os.environ.get('PGSYSCONFDIR'):
-        PG_CONFIG_PATH = os.path.join(os.environ.get('PGSYSCONFDIR'), 'pg_service.conf')
+    if os.environ.get("PGSERVICEFILE"):
+        PG_CONFIG_PATH = os.environ.get("PGSERVICEFILE")
+    elif os.environ.get("PGSYSCONFDIR"):
+        PG_CONFIG_PATH = os.path.join(os.environ.get("PGSYSCONFDIR"), "pg_service.conf")
     else:
-        PG_CONFIG_PATH = ' ~/.pg_service.conf'
+        PG_CONFIG_PATH = " ~/.pg_service.conf"
 
     config = configparser.ConfigParser()
     if os.path.exists(PG_CONFIG_PATH):
@@ -188,14 +209,14 @@ def get_pgconf():
         pgconf = {}
 
     if config.PGHOST:
-        pgconf['host'] = config.PGHOST
+        pgconf["host"] = config.PGHOST
     if config.PGPORT:
-        pgconf['port'] = config.PGPORT
+        pgconf["port"] = config.PGPORT
     if config.PGDATABASE:
-        pgconf['dbname'] = config.PGDATABASE
+        pgconf["dbname"] = config.PGDATABASE
     if config.PGUSER:
-        pgconf['user'] = config.PGUSER
+        pgconf["user"] = config.PGUSER
     if config.PGPASS:
-        pgconf['password'] = config.PGPASS
+        pgconf["password"] = config.PGPASS
 
     return collections.defaultdict(str, pgconf)

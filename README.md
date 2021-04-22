@@ -72,7 +72,13 @@ This will be integrated into the official QGEP and QWAT plugin installable throu
 
 Import/export scripts templates can be generated using `python -m qgepqwat2ili tpl`. This uses the mapping defined in `datamodels/mapping.py` to auto-generate import script templates, that can then be manually merged into the existing scripts.
 
-Tests are run with 
+Tests are run with
 ```
 python -m unittest qgepqwat2ili.tests
+```
+
+Style is done with pre-commit
+```
+pip install pre-commit
+pre-commit install
 ```

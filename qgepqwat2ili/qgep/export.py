@@ -1,15 +1,13 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import inspect
-from sqlalchemy import or_
-from geoalchemy2.functions import ST_Transform, ST_Force2D, ST_CurveToLine
 import warnings
 
+from geoalchemy2.functions import ST_Force2D
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
 from .. import utils
-
-from .model_qgep import get_qgep_model
-from .model_abwasser import get_abwasser_model
-
 from ..utils.various import logger
+from .model_abwasser import get_abwasser_model
+from .model_qgep import get_qgep_model
 
 
 def qgep_export(downstream_of=None, upstream_of=None):
@@ -29,7 +27,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
     # abwasser_session = Session(utils.sqlalchemy.create_engine(logger_name="abwasser"), autocommit=False, autoflush=False)
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    tid_maker = utils.ili2db.TidMaker(id_attribute='obj_id')
+    tid_maker = utils.ili2db.TidMaker(id_attribute="obj_id")
 
     # Upstream/Downstream filtering
     subset_ids = None
@@ -40,7 +38,8 @@ def qgep_export(downstream_of=None, upstream_of=None):
         params = {}
         select_clauses = []
         if upstream_of:
-            common_table_expressions.append("""
+            common_table_expressions.append(
+                """
                 node_with_child AS (
                     SELECT n.id, s.to_node AS child_id, n.ne_id FROM qgep_network.node n
                     LEFT JOIN qgep_network.segment s ON s.from_node = n.id
@@ -56,12 +55,14 @@ def qgep_export(downstream_of=None, upstream_of=None):
                     FROM node_with_child n
                     INNER JOIN upstream ON upstream.id = n.child_id
                 )
-            """)
+            """
+            )
             select_clauses.append("SELECT ne_id FROM upstream")
-            params['upstream_of'] = upstream_of
+            params["upstream_of"] = upstream_of
 
         if downstream_of:
-            common_table_expressions.append("""
+            common_table_expressions.append(
+                """
                 node_with_parent AS (
                     SELECT n.id, s.from_node AS parent_id, n.ne_id FROM qgep_network.node n
                     LEFT JOIN qgep_network.segment s ON s.to_node = n.id
@@ -77,9 +78,10 @@ def qgep_export(downstream_of=None, upstream_of=None):
                     FROM node_with_parent n
                     INNER JOIN downstream ON downstream.id = n.parent_id
                 )
-            """)
+            """
+            )
             select_clauses.append("SELECT ne_id FROM downstream")
-            params['downstream_of'] = downstream_of
+            params["downstream_of"] = downstream_of
 
         subset_query = f"WITH RECURSIVE {','.join(common_table_expressions)} {' INTERSECT '.join(select_clauses)};"
 
@@ -106,8 +108,8 @@ def qgep_export(downstream_of=None, upstream_of=None):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
-            datenherr=getattr(row.fk_dataowner__REL, "name", 'unknown'),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "name", 'unknown'),  # TODO : is unknown ok ?
+            datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
@@ -131,30 +133,30 @@ def qgep_export(downstream_of=None, upstream_of=None):
         """
         Returns common attributes for wastewater_structure
         """
-        warnings.warn(f'Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.')
+        warnings.warn(f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.")
         return {
             # --- abwasserbauwerk ---
             # 'akten': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
-            'astatus': get_vl(row.status__REL),
-            'baujahr': row.year_of_construction,
-            'baulicherzustand': get_vl(row.structure_condition__REL),
+            "astatus": get_vl(row.status__REL),
+            "baujahr": row.year_of_construction,
+            "baulicherzustand": get_vl(row.structure_condition__REL),
             # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
-            'bemerkung': row.remark,
-            'betreiberref': get_tid(row.fk_operator__REL),
-            'bezeichnung': row.identifier,
-            'bruttokosten': row.gross_costs,
-            'detailgeometrie': ST_Force2D(row.detail_geometry_geometry),
-            'eigentuemerref': get_tid(row.fk_owner__REL),
-            'ersatzjahr': row.year_of_replacement,
-            'finanzierung': row.financing,
-            'inspektionsintervall': row.inspection_interval,
-            'sanierungsbedarf': get_vl(row.renovation_necessity__REL),
-            'standortname': row.location_name,
-            'subventionen': row.subsidies,
-            'wbw_basisjahr': row.rv_base_year,
-            'wbw_bauart': get_vl(row.rv_construction_type__REL),
-            'wiederbeschaffungswert': row.replacement_value,
-            'zugaenglichkeit': get_vl(row.accessibility__REL),
+            "bemerkung": row.remark,
+            "betreiberref": get_tid(row.fk_operator__REL),
+            "bezeichnung": row.identifier,
+            "bruttokosten": row.gross_costs,
+            "detailgeometrie": ST_Force2D(row.detail_geometry_geometry),
+            "eigentuemerref": get_tid(row.fk_owner__REL),
+            "ersatzjahr": row.year_of_replacement,
+            "finanzierung": row.financing,
+            "inspektionsintervall": row.inspection_interval,
+            "sanierungsbedarf": get_vl(row.renovation_necessity__REL),
+            "standortname": row.location_name,
+            "subventionen": row.subsidies,
+            "wbw_basisjahr": row.rv_base_year,
+            "wbw_bauart": get_vl(row.rv_construction_type__REL),
+            "wiederbeschaffungswert": row.replacement_value,
+            "zugaenglichkeit": get_vl(row.accessibility__REL),
         }
 
     def wastewater_network_element_common(row):
@@ -163,9 +165,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
         """
 
         return {
-            'abwasserbauwerkref': get_tid(row.fk_wastewater_structure__REL),
-            'bemerkung': row.remark,
-            'bezeichnung': row.identifier,
+            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": row.remark,
+            "bezeichnung": row.identifier,
         }
 
     def structure_part_common(row):
@@ -173,10 +175,10 @@ def qgep_export(downstream_of=None, upstream_of=None):
         Returns common attributes for structure_part
         """
         return {
-            'abwasserbauwerkref': get_tid(row.fk_wastewater_structure__REL),
-            'bemerkung': row.remark,
-            'bezeichnung': row.identifier,
-            'instandstellung': get_vl(row.renovation_demand__REL),
+            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": row.remark,
+            "bezeichnung": row.identifier,
+            "instandstellung": get_vl(row.renovation_demand__REL),
         }
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
@@ -197,11 +199,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         organisation = ABWASSER.organisation(
             # FIELDS TO MAP TO ABWASSER.organisation
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "organisation"),
-
             # --- organisation ---
             auid=row.uid,
             bemerkung=row.remark,
@@ -216,14 +216,15 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.channel -> ABWASSER.kanal, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.channel)
     if subset_ids:
-        query = query.join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.channel
 
         # --- wastewater_structure ---
         # _bottom_label, _cover_label, _depth, _function_hierarchic, _input_label, _label, _output_label, _usage_current, accessibility, contract_section, detail_geometry_geometry, financing, fk_dataowner, fk_main_cover, fk_main_wastewater_node, fk_operator, fk_owner, fk_provider, gross_costs, identifier, inspection_interval, last_modification, location_name, records, remark, renovation_necessity, replacement_value, rv_base_year, rv_construction_type, status, structure_condition, subsidies, year_of_construction, year_of_replacement
-
 
         # --- _bwrel_ ---
         # measuring_point__BWREL_fk_wastewater_structure, mechanical_pretreatment__BWREL_fk_wastewater_structure, re_maintenance_event_wastewater_structure__BWREL_fk_wastewater_structure, structure_part__BWREL_fk_wastewater_structure, txt_symbol__BWREL_fk_wastewater_structure, txt_text__BWREL_fk_wastewater_structure, wastewater_networkelement__BWREL_fk_wastewater_structure, wastewater_structure_symbol__BWREL_fk_wastewater_structure, wastewater_structure_text__BWREL_fk_wastewater_structure, wwtp_structure_kind__BWREL_obj_id
@@ -233,14 +234,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         kanal = ABWASSER.kanal(
             # FIELDS TO MAP TO ABWASSER.kanal
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "kanal"),
-
             # --- abwasserbauwerk ---
             **wastewater_structure_common(row),
-
             # --- kanal ---
             bettung_umhuellung=get_vl(row.bedding_encasement__REL),
             funktionhierarchisch=get_vl(row.function_hierarchic__REL),
@@ -260,16 +258,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.manhole -> ABWASSER.normschacht, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.manhole)
     if subset_ids:
-        query = query.join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         normschacht = ABWASSER.normschacht(
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "normschacht"),
-
             # --- abwasserbauwerk ---
             **wastewater_structure_common(row),
-
             # --- normschacht ---
             dimension1=row.dimension1,
             dimension2=row.dimension2,
@@ -286,17 +284,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.discharge_point -> ABWASSER.einleitstelle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.discharge_point)
     if subset_ids:
-        query = query.join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         einleitstelle = ABWASSER.einleitstelle(
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "einleitstelle"),
-
             # --- abwasserbauwerk ---
             **wastewater_structure_common(row),
-
             # --- einleitstelle ---
             hochwasserkote=row.highwater_level,
             relevanz=get_vl(row.relevance__REL),
@@ -312,7 +309,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.special_structure)
     if subset_ids:
-        query = query.join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.special_structure
@@ -328,17 +327,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
-        warnings.warn(f'QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored.')
+        warnings.warn(
+            f"QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
+        )
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "spezialbauwerk"),
-
             # --- abwasserbauwerk ---
             **wastewater_structure_common(row),
-
             # --- spezialbauwerk ---
             # TODO : WARNING : upper_elevation is not mapped
             bypass=get_vl(row.bypass__REL),
@@ -355,7 +353,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.infiltration_installation)
     if subset_ids:
-        query = query.join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.infiltration_installation
@@ -372,17 +372,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
         # --- _rel_ ---
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
-        warnings.warn(f'QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored.')
+        warnings.warn(
+            f"QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
+        )
         versickerungsanlage = ABWASSER.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "versickerungsanlage"),
-
             # --- abwasserbauwerk ---
             **wastewater_structure_common(row),
-
             # --- versickerungsanlage ---
             # TODO : NOT MAPPED : upper_elevation
             art=get_vl(row.kind__REL),
@@ -423,11 +422,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         rohrprofil = ABWASSER.rohrprofil(
             # FIELDS TO MAP TO ABWASSER.rohrprofil
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "rohrprofil"),
-
             # --- rohrprofil ---
             bemerkung=row.remark,
             bezeichnung=row.identifier,
@@ -443,7 +440,13 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.reach_point)
     if subset_ids:
-        query = query.join(QGEP.reach, or_(QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from, QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to)).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(
+            QGEP.reach,
+            or_(
+                QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from,
+                QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
+            ),
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.reach_point
@@ -459,11 +462,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         haltungspunkt = ABWASSER.haltungspunkt(
             # FIELDS TO MAP TO ABWASSER.haltungspunkt
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "haltungspunkt"),
-
             # --- haltungspunkt ---
             abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
@@ -499,17 +500,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
-        warnings.warn(f'QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.')
+        warnings.warn(
+            f"QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
+        )
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "abwasserknoten"),
-
             # --- abwassernetzelement ---
             **wastewater_network_element_common(row),
-
             # --- abwasserknoten ---
             # TODO : WARNING : fk_hydr_geometry is not mapped
             lage=ST_Force2D(row.situation_geometry),
@@ -542,16 +542,16 @@ def qgep_export(downstream_of=None, upstream_of=None):
         # --- _rel_ ---
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
-        warnings.warn(f'QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored.')
+        warnings.warn(
+            f"QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
+        )
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "haltung"),
             # --- abwassernetzelement ---
             **wastewater_network_element_common(row),
-
             # --- haltung ---
             # NOT MAPPED : elevation_determination
             innenschutz=get_vl(row.inside_coating__REL),
@@ -581,7 +581,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.dryweather_downspout)
     if subset_ids:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_downspout
@@ -600,14 +602,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         trockenwetterfallrohr = ABWASSER.trockenwetterfallrohr(
             # FIELDS TO MAP TO ABWASSER.trockenwetterfallrohr
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "trockenwetterfallrohr"),
-
             # --- bauwerksteil ---
             **structure_part_common(row),
-
             # --- trockenwetterfallrohr ---
             durchmesser=row.diameter,
         )
@@ -620,7 +619,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.access_aid)
     if subset_ids:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.access_aid
@@ -639,14 +640,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         einstiegshilfe = ABWASSER.einstiegshilfe(
             # FIELDS TO MAP TO ABWASSER.einstiegshilfe
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "einstiegshilfe"),
-
             # --- bauwerksteil ---
             **structure_part_common(row),
-
             # --- einstiegshilfe ---
             art=get_vl(row.kind__REL),
         )
@@ -659,7 +657,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.dryweather_flume)
     if subset_ids:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_flume
@@ -678,14 +678,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         trockenwetterrinne = ABWASSER.trockenwetterrinne(
             # FIELDS TO MAP TO ABWASSER.trockenwetterrinne
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "trockenwetterrinne"),
-
             # --- bauwerksteil ---
             **structure_part_common(row),
-
             # --- trockenwetterrinne ---
             material=get_vl(row.material__REL),
         )
@@ -698,7 +695,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.cover)
     if subset_ids:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.cover
@@ -717,14 +716,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         deckel = ABWASSER.deckel(
             # FIELDS TO MAP TO ABWASSER.deckel
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "deckel"),
-
             # --- bauwerksteil ---
             **structure_part_common(row),
-
             # --- deckel ---
             deckelform=get_vl(row.cover_shape__REL),
             durchmesser=row.diameter,
@@ -746,7 +742,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.benching)
     if subset_ids:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.benching
@@ -765,17 +763,13 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         bankett = ABWASSER.bankett(
             # FIELDS TO MAP TO ABWASSER.bankett
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "bankett"),
-
             # --- sia405_baseclass ---
             obj_id=row.obj_id,
-
             # --- bauwerksteil ---
             **structure_part_common(row),
-
             # --- bankett ---
             art=get_vl(row.kind__REL),
         )
@@ -788,7 +782,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.examination)
     if subset_ids:
-        query = query.join(QGEP.reach_point).join(QGEP.reach, QGEP.reach_point.fk_wastewater_networkelement == QGEP.reach.obj_id).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(QGEP.reach_point)
+            .join(QGEP.reach, QGEP.reach_point.fk_wastewater_networkelement == QGEP.reach.obj_id)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.examination
@@ -802,15 +800,15 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         # --- _rel_ ---
         # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
-        warnings.warn(f'QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored.')
+        warnings.warn(
+            f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
+        )
 
         untersuchung = ABWASSER.untersuchung(
             # FIELDS TO MAP TO ABWASSER.untersuchung
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "untersuchung"),
-
             # --- erhaltungsereignis ---
             # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
             art=row.kind,
@@ -826,7 +824,6 @@ def qgep_export(downstream_of=None, upstream_of=None):
             grund=row.reason,
             kosten=row.cost,
             zeitpunkt=row.time_point,
-
             # --- untersuchung ---
             bispunktbezeichnung=row.to_point_identifier,
             erfassungsart=row.recording_type,
@@ -847,7 +844,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.damage_manhole)
     if subset_ids:
-        query = query.join(QGEP.examination, QGEP.reach_point, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.examination, QGEP.reach_point, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.damage_manhole
@@ -865,11 +864,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         normschachtschaden = ABWASSER.normschachtschaden(
             # FIELDS TO MAP TO ABWASSER.normschachtschaden
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "normschachtschaden"),
-
             # --- schaden ---
             anmerkung=row.comments,
             ansichtsparameter=row.view_parameters,
@@ -878,7 +875,6 @@ def qgep_export(downstream_of=None, upstream_of=None):
             untersuchungref=get_tid(row.fk_examination__REL),
             verbindung=get_vl(row.connection__REL),
             videozaehlerstand=row.video_counter,
-
             # --- normschachtschaden ---
             distanz=row.distance,
             quantifizierung1=row.quantification1,
@@ -897,7 +893,12 @@ def qgep_export(downstream_of=None, upstream_of=None):
     logger.info("Exporting QGEP.damage_channel -> ABWASSER.kanalschaden, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.damage_channel)
     if subset_ids:
-        query = query.join(QGEP.examination).join(QGEP.reach_point).join(QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(QGEP.examination)
+            .join(QGEP.reach_point)
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.damage_channel
@@ -916,11 +917,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         kanalschaden = ABWASSER.kanalschaden(
             # FIELDS TO MAP TO ABWASSER.kanalschaden
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "kanalschaden"),
-
             # --- schaden ---
             anmerkung=row.comments,
             ansichtsparameter=row.view_parameters,
@@ -929,7 +928,6 @@ def qgep_export(downstream_of=None, upstream_of=None):
             untersuchungref=get_tid(row.fk_examination__REL),
             verbindung=get_vl(row.connection__REL),
             videozaehlerstand=row.video_counter,
-
             # --- kanalschaden ---
             distanz=row.distance,
             kanalschadencode=get_vl(row.channel_damage_code__REL),
@@ -958,11 +956,9 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         datentraeger = ABWASSER.datentraeger(
             # FIELDS TO MAP TO ABWASSER.datentraeger
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "datentraeger"),
-
             # --- datentraeger ---
             art=row.kind,
             bemerkung=row.remark,
@@ -993,13 +989,11 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
         datei = ABWASSER.datei(
             # FIELDS TO MAP TO ABWASSER.datei
-
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "datei"),
-
             # --- datei ---
-            art=get_vl(row.kind__REL) or '???',
+            art=get_vl(row.kind__REL) or "???",
             bemerkung=row.remark,
             bezeichnung=row.identifier,
             datentraegerref=get_tid(row.data_media__REL),

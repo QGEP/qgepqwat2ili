@@ -1,15 +1,11 @@
-import os
 import collections
+import os
 
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 
-from .sqlalchemy import create_engine
-
-
 def generate_template(model_name, ilimodel_name, model_base, ilimodel_base, mapping):
-
     def filter_classfields(cls):
         """Jinja filter used in the template"""
         available_fields = collections.defaultdict(list)
@@ -19,11 +15,11 @@ def generate_template(model_name, ilimodel_name, model_base, ilimodel_base, mapp
             if not isinstance(attr, InstrumentedAttribute):
                 continue
             if not hasattr(attr.property, "columns"):
-                key = "_rel_" if attr_name.endswith('__REL') else '_bwrel_'
+                key = "_rel_" if attr_name.endswith("__REL") else "_bwrel_"
             else:
                 key = attr.property.columns[0].table.name
             available_fields[key].append(attr_name)
-        ordered_tables = ["_rel_","_bwrel_"] + list(c.__table__.name for c in cls.__mro__ if hasattr(c, "__table__"))
+        ordered_tables = ["_rel_", "_bwrel_"] + list(c.__table__.name for c in cls.__mro__ if hasattr(c, "__table__"))
         return sorted(
             available_fields.items(),
             key=lambda i: ordered_tables.index(i[0]),
@@ -38,7 +34,7 @@ def generate_template(model_name, ilimodel_name, model_base, ilimodel_base, mapp
         """Jinja filter used in the template"""
         return ", ".join(f"{ilimodel_name.upper()}.{c.__name__}" for c in classes)
 
-    tpl_folder = os.path.join(os.path.dirname(__file__), '..', 'tpl')
+    tpl_folder = os.path.join(os.path.dirname(__file__), "..", "tpl")
     env = Environment(loader=FileSystemLoader(tpl_folder), lstrip_blocks=True, trim_blocks=True)
     env.filters["classfields"] = filter_classfields
     env.filters["classesnames"] = filter_classesnames

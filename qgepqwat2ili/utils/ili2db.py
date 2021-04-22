@@ -1,13 +1,13 @@
-import psycopg2
-import os
-import datetime
-import tempfile
 import collections
+import datetime
+import os
+import tempfile
 
+import psycopg2
 from sqlalchemy.ext.automap import AutomapBase
 
 from .. import config
-from .various import logger, exec_, get_pgconf
+from .various import exec_, get_pgconf, logger
 
 
 def _log_path(name):
@@ -45,7 +45,9 @@ def create_ili_schema(schema, model, recreate_schema=False):
 
     logger.info(f"ILIDB SCHEMAIMPORT INTO {schema}...")
     pgconf = get_pgconf()
-    exec_(f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --log {_log_path("create")} --nameLang de {model}')
+    exec_(
+        f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --log {_log_path("create")} --nameLang de {model}'
+    )
 
 
 def validate_xtf_data(xtf_file):

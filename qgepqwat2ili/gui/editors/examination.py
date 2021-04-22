@@ -1,11 +1,10 @@
-from sqlalchemy.orm import aliased
 from itertools import chain
 
+from qgis.core import QgsFeature, QgsProject
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QListWidgetItem, QTreeWidgetItem, QHeaderView
-
+from qgis.PyQt.QtWidgets import QHeaderView, QListWidgetItem, QTreeWidgetItem
 from qgis.utils import iface
-from qgis.core import QgsProject, QgsFeature
+from sqlalchemy.orm import aliased
 
 from ...qgep.model_qgep import get_qgep_model
 from .base import Editor
@@ -13,15 +12,17 @@ from .base import Editor
 
 class ExaminationEditor(Editor):
 
-    class_name = 'examination'
-    widget_name = 'examination.ui'
+    class_name = "examination"
+    widget_name = "examination.ui"
 
     def preprocess(self):
         # We auto assign all examinations that have exactly one suggested structure,
         # as 99% of the time, this will be a good match
 
         QGEP = get_qgep_model()
-        suggested_structures = list(self._get_suggested_structures(inverted=False)) + list(self._get_suggested_structures(inverted=True))
+        suggested_structures = list(self._get_suggested_structures(inverted=False)) + list(
+            self._get_suggested_structures(inverted=True)
+        )
         if len(suggested_structures) == 1:
             assigned_structure = suggested_structures[0]
 
@@ -70,7 +71,9 @@ class ExaminationEditor(Editor):
             if editor:  # there may be items that are already in the DB
                 widget_item.setCheckState(0, editor.listitem.checkState(0))
             widget_item.setText(1, str(damage.distance))
-            widget_item.setText(2, damage.channel_damage_code__REL.value_de if damage.channel_damage_code__REL else '')
+            widget_item.setText(
+                2, damage.channel_damage_code__REL.value_de if damage.channel_damage_code__REL else ""
+            )
             widget_item.setText(3, damage.comments)
             self.widget.damagesTreeWidget.addTopLevelItem(widget_item)
         self.widget.damagesTreeWidget.header().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -79,13 +82,13 @@ class ExaminationEditor(Editor):
         count = len(list(self._get_assigned_structures()))
         if count == 0:
             self.validity = Editor.WARNING
-            self.message = 'Not associated any wastewater structures.'
+            self.message = "Not associated any wastewater structures."
         elif count == 1:
             self.validity = Editor.VALID
-            self.message = 'Assigned'
+            self.message = "Assigned"
         else:
             self.validity = Editor.WARNING
-            self.message = f'Associated to more than one ({count}) wastewater structures. This is allowed by the datamodel, but discouraged.'
+            self.message = f"Associated to more than one ({count}) wastewater structures. This is allowed by the datamodel, but discouraged."
 
     def _suggested_reach_changed(self, current_item, _previous_item):
         if current_item is None:
@@ -125,15 +128,13 @@ class ExaminationEditor(Editor):
         QGEP = get_qgep_model()
 
         structure_id = self.widget.assignedWidget.currentItem().data(Qt.UserRole)
-        self.session.query(QGEP.re_maintenance_event_wastewater_structure) \
-            .filter(QGEP.re_maintenance_event_wastewater_structure.fk_maintenance_event == self.obj.obj_id) \
-            .filter(QGEP.re_maintenance_event_wastewater_structure.fk_wastewater_structure == structure_id) \
-            .delete()
+        self.session.query(QGEP.re_maintenance_event_wastewater_structure).filter(
+            QGEP.re_maintenance_event_wastewater_structure.fk_maintenance_event == self.obj.obj_id
+        ).filter(QGEP.re_maintenance_event_wastewater_structure.fk_wastewater_structure == structure_id).delete()
 
         # also uncheck relations that have not yet been flushed to DB
         for rel in [i for i in self.session.new if isinstance(i, QGEP.re_maintenance_event_wastewater_structure)]:
-            if (rel.fk_maintenance_event == self.obj.obj_id and
-                rel.fk_wastewater_structure == structure_id):
+            if rel.fk_maintenance_event == self.obj.obj_id and rel.fk_wastewater_structure == structure_id:
                 if rel in self.main_dialog.editors:
                     self.main_dialog.editors[rel].listitem.setCheckState(0, False)
 
@@ -166,28 +167,32 @@ class ExaminationEditor(Editor):
         rp_from = aliased(QGEP.reach_point)
         rp_to = aliased(QGEP.reach_point)
 
-        return self.session.query(QGEP.wastewater_structure) \
-            .join(QGEP.reach) \
-            .join(rp_from, rp_from.obj_id == QGEP.reach.fk_reach_point_from) \
-            .join(wastewater_ne_from, wastewater_ne_from.obj_id == rp_from.fk_wastewater_networkelement) \
-            .join(rp_to, rp_to.obj_id == QGEP.reach.fk_reach_point_to) \
-            .join(wastewater_ne_to, wastewater_ne_to.obj_id == rp_to.fk_wastewater_networkelement) \
+        return (
+            self.session.query(QGEP.wastewater_structure)
+            .join(QGEP.reach)
+            .join(rp_from, rp_from.obj_id == QGEP.reach.fk_reach_point_from)
+            .join(wastewater_ne_from, wastewater_ne_from.obj_id == rp_from.fk_wastewater_networkelement)
+            .join(rp_to, rp_to.obj_id == QGEP.reach.fk_reach_point_to)
+            .join(wastewater_ne_to, wastewater_ne_to.obj_id == rp_to.fk_wastewater_networkelement)
             .filter(wastewater_ne_from.identifier == from_id, wastewater_ne_to.identifier == to_id)
+        )
 
     def _get_assigned_structures(self):
 
         QGEP = get_qgep_model()
 
-        structures_from_db = self.session.query(QGEP.wastewater_structure) \
-            .join(QGEP.re_maintenance_event_wastewater_structure) \
+        structures_from_db = (
+            self.session.query(QGEP.wastewater_structure)
+            .join(QGEP.re_maintenance_event_wastewater_structure)
             .filter(QGEP.re_maintenance_event_wastewater_structure.fk_maintenance_event == self.obj.obj_id)
+        )
 
         # also retrieve structures from relations that have not yet been flushed to DB
         structures_in_session = [
             self.session.query(QGEP.wastewater_structure).get(rel.fk_wastewater_structure)
-            for rel
-            in self.session
-            if isinstance(rel, QGEP.re_maintenance_event_wastewater_structure) and rel.fk_maintenance_event == self.obj.obj_id
+            for rel in self.session
+            if isinstance(rel, QGEP.re_maintenance_event_wastewater_structure)
+            and rel.fk_maintenance_event == self.obj.obj_id
         ]
 
         seen = set()
@@ -199,13 +204,13 @@ class ExaminationEditor(Editor):
     def _get_child_damages(self):
         QGEP = get_qgep_model()
 
-        from_db = self.session.query(QGEP.damage_channel) \
-            .filter(QGEP.damage_channel.fk_examination == self.obj.obj_id)
+        from_db = self.session.query(QGEP.damage_channel).filter(
+            QGEP.damage_channel.fk_examination == self.obj.obj_id
+        )
 
         in_session = [
             inst
-            for inst
-            in self.main_dialog.editors.keys()
+            for inst in self.main_dialog.editors.keys()
             if isinstance(inst, QGEP.damage_channel) and inst.fk_examination == self.obj.obj_id
         ]
 

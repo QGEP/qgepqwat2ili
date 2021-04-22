@@ -1,9 +1,9 @@
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # QGIS wincan 2 QGEP Plugin
 # Copyright (C) 2016 Denis Rouzaud
 #
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # licensed under the terms of GNU GPL 2
 #
@@ -21,15 +21,21 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-#---------------------------------------------------------------------
+# ---------------------------------------------------------------------
 
 
-from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QSettings, QTimer
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsExpression,
+    QgsExpressionContext,
+    QgsExpressionContextScope,
+    QgsFeature,
+)
+from qgis.gui import QgsHighlight, QgsMapToolIdentifyFeature
+from qgis.PyQt.QtCore import QSettings, QTimer, pyqtSignal, pyqtSlot
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtWidgets import QWidget, QHBoxLayout, QLineEdit, QToolButton, QAction
-
-from qgis.core import Qgis, QgsApplication, QgsFeature, QgsExpression, QgsExpressionContext, QgsExpressionContextScope
-from qgis.gui import QgsMapToolIdentifyFeature, QgsHighlight
+from qgis.PyQt.QtWidgets import QAction, QHBoxLayout, QLineEdit, QToolButton, QWidget
 
 
 class CanvasExtent(object):
@@ -55,9 +61,15 @@ class FeatureSelectorWidget(QWidget):
 
         self.highlight_feature_button = QToolButton(self)
         self.highlight_feature_button.setPopupMode(QToolButton.MenuButtonPopup)
-        self.highlight_feature_action = QAction(QgsApplication.getThemeIcon("/mActionHighlightFeature.svg"), "Highlight feature", self)
-        self.scale_highlight_feature_action = QAction(QgsApplication.getThemeIcon("/mActionScaleHighlightFeature.svg"), "Scale and highlight feature", self)
-        self.pan_highlight_feature_action = QAction(QgsApplication.getThemeIcon("/mActionPanHighlightFeature.svg"), "Pan and highlight feature", self)
+        self.highlight_feature_action = QAction(
+            QgsApplication.getThemeIcon("/mActionHighlightFeature.svg"), "Highlight feature", self
+        )
+        self.scale_highlight_feature_action = QAction(
+            QgsApplication.getThemeIcon("/mActionScaleHighlightFeature.svg"), "Scale and highlight feature", self
+        )
+        self.pan_highlight_feature_action = QAction(
+            QgsApplication.getThemeIcon("/mActionPanHighlightFeature.svg"), "Pan and highlight feature", self
+        )
         self.highlight_feature_button.addAction(self.highlight_feature_action)
         self.highlight_feature_button.addAction(self.scale_highlight_feature_action)
         self.highlight_feature_button.addAction(self.pan_highlight_feature_action)
@@ -88,7 +100,7 @@ class FeatureSelectorWidget(QWidget):
     def set_layer(self, layer):
         self.layer = layer
 
-    def set_feature(self, feature, canvas_extent = CanvasExtent.Fixed):
+    def set_feature(self, feature, canvas_extent=CanvasExtent.Fixed):
         self.line_edit.clear()
         self.feature = feature
 
@@ -101,7 +113,7 @@ class FeatureSelectorWidget(QWidget):
         context.appendScope(scope)
         scope.setFeature(feature)
         feature_title = expression.evaluate(context)
-        if feature_title == '':
+        if feature_title == "":
             feature_title = feature.id()
         self.line_edit.setText(str(feature_title))
         self.highlight_feature(canvas_extent)
@@ -170,8 +182,8 @@ class FeatureSelectorWidget(QWidget):
         settings = QSettings()
         color = QColor(settings.value("/Map/highlight/color", Qgis.DEFAULT_HIGHLIGHT_COLOR.name()))
         alpha = int(settings.value("/Map/highlight/colorAlpha", Qgis.DEFAULT_HIGHLIGHT_COLOR.alpha()))
-        buffer = 2*float(settings.value("/Map/highlight/buffer", Qgis.DEFAULT_HIGHLIGHT_BUFFER_MM))
-        min_width = 2*float(settings.value("/Map/highlight/min_width", Qgis.DEFAULT_HIGHLIGHT_MIN_WIDTH_MM))
+        buffer = 2 * float(settings.value("/Map/highlight/buffer", Qgis.DEFAULT_HIGHLIGHT_BUFFER_MM))
+        min_width = 2 * float(settings.value("/Map/highlight/min_width", Qgis.DEFAULT_HIGHLIGHT_MIN_WIDTH_MM))
 
         self.highlight.setColor(color)  # sets also fill with default alpha
         color.setAlpha(alpha)

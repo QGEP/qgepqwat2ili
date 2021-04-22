@@ -1,4 +1,3 @@
-
 from .model_qwat import get_qwat_model
 from .model_wasser import get_wasser_model
 
@@ -10,7 +9,6 @@ def get_qwat_mapping():
     return {
         # Node
         QWAT.node: [WASSER.hydraulischer_knoten],
-
         # Network elements
         QWAT.hydrant: [WASSER.hydrant],
         QWAT.tank: [WASSER.wasserbehaelter],
@@ -23,7 +21,6 @@ def get_qwat_mapping():
         # QWAT.???: [WASSER.rohrleitungsteil], # not sure to what this maps
         # QWAT.???: [WASSER.uebrige], # not sure to what this maps
         # QWAT.???: [WASSER.muffen], # does not exist in QWAT
-
         # Pipe
         QWAT.pipe: [WASSER.hydraulischer_strang, WASSER.leitung],
         QWAT.leak: [WASSER.schadenstelle],

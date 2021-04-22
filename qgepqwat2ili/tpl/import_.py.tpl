@@ -47,4 +47,3 @@ def import_():
 
     {{model_name}}_session.close()
     {{ilimodel_name}}_session.close()
-

@@ -1,15 +1,14 @@
 import os
-
 from collections import defaultdict
-from sqlalchemy import inspect
 
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QFont, QBrush, QColor
-from qgis.PyQt.QtWidgets import QWidget, QTreeWidgetItem
+from qgis.PyQt.QtGui import QBrush, QColor
+from qgis.PyQt.QtWidgets import QTreeWidgetItem, QWidget
 from qgis.PyQt.uic import loadUi
+from sqlalchemy import inspect
 
 
-class Editor():
+class Editor:
     """
     Base class to manage import options for QGEP classes.
 
@@ -21,19 +20,19 @@ class Editor():
     """
 
     # Validity
-    INVALID = 'INVALID'
-    UNKNOWN = 'UNKNOWN'
-    WARNING = 'WARNING'
-    VALID = 'VALID'
+    INVALID = "INVALID"
+    UNKNOWN = "UNKNOWN"
+    WARNING = "WARNING"
+    VALID = "VALID"
 
     # State
-    NEW = 'NEW'
-    DELETED = 'DELETED'
-    MODIFIED = 'MODIFIED'
-    EXISTING = 'EXISTING'
+    NEW = "NEW"
+    DELETED = "DELETED"
+    MODIFIED = "MODIFIED"
+    EXISTING = "EXISTING"
 
-    class_name = 'base'
-    widget_name = 'base.ui'
+    class_name = "base"
+    widget_name = "base.ui"
 
     registry = defaultdict(lambda: Editor)
 
@@ -65,14 +64,16 @@ class Editor():
         """
         The editor's listitem (created on the fly if needed)
         """
-        if not hasattr(self, '_listitem'):
+        if not hasattr(self, "_listitem"):
             self._listitem = QTreeWidgetItem()
             self._listitem.setCheckState(0, Qt.Checked if self.initially_checked() else Qt.Unchecked)
             self.update_listitem()
         return self._listitem
 
     def update_listitem(self):
-        disp_id = str(getattr(self.obj, "obj_id", getattr(self.obj, "value_en", "?")))  # some elements may not have obj_id, such as value_lists
+        disp_id = str(
+            getattr(self.obj, "obj_id", getattr(self.obj, "value_en", "?"))
+        )  # some elements may not have obj_id, such as value_lists
         self.listitem.setText(0, getattr(self.obj, "identifier", disp_id))
         self.listitem.setToolTip(0, disp_id)
 
@@ -96,9 +97,11 @@ class Editor():
         """
         The editor's widget (created on the fly if needed)
         """
-        if not hasattr(self, '_widget'):
+        if not hasattr(self, "_widget"):
+
             class BaseWidget(QWidget):
                 pass
+
             self._widget = BaseWidget()
             loadUi(os.path.join(os.path.dirname(__file__), self.widget_name), self._widget)
             self.init_widget()
@@ -108,19 +111,16 @@ class Editor():
         """
         Run some preprocessing steps (such as auto-assigning data)... To be overriden by subclasses.
         """
-        pass
 
     def init_widget(self):
         """
         Initialize the widget here, for things like connecting signals... To be overriden by subclasses.
         """
-        pass
 
     def update_widget(self):
         """
         Update the widget here, for things like repopulating from session... To be overriden by subclasses.
         """
-        pass
 
     def update_state(self):
         """
