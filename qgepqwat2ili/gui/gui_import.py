@@ -1,4 +1,5 @@
 import os
+import sys
 from collections import defaultdict
 
 from qgis.core import Qgis
@@ -12,6 +13,9 @@ from sqlalchemy.orm import Session
 
 from ..qgep.model_qgep import get_qgep_model
 from .editors.base import Editor
+
+# Required for loadUi to find the custom widget
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 class GuiImport(QDialog):
