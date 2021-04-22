@@ -30,9 +30,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: |
-          cd qgepplugin
-          python -m unittest qgepqwat2ili.tests
+        run: python -m unittest qgepqwat2ili.tests
         env:
             INCLUDE_SLOW_TESTS: ${{ matrix.slow }}
             PGHOST: 127.0.0.1
