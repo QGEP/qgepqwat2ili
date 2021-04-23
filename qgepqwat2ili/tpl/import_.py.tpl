@@ -3,11 +3,14 @@ from geoalchemy2.functions import ST_Transform, ST_Force2D
 
 from .. import utils
 
-from .model_{{model_name}} import {{model_name|upper}}
-from .model_{{ilimodel_name}} import {{ilimodel_name|upper}}
+from .model_{{model_name}} import get_{{model_name}}_model
+from .model_{{ilimodel_name}} import get_{{ilimodel_name}}_model
 
 
-def import_():
+def {{model_name}}_import():
+
+    {{model_name|upper}} = get_{{model_name}}_model()
+    {{ilimodel_name|upper}} = get_{{ilimodel_name}}_model()
 
     {{ilimodel_name}}_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     {{model_name}}_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
@@ -22,8 +25,7 @@ def import_():
 
 {% for class_from in classes_from %}
 {% for src_table, fields in class_from|classfields %}
-
-        # {{src_table}} --- {{fields|sort|join(", ")}}
+        # {{src_table}} --- {{fields|join(", ")}}
 {% endfor %}
 
 {% endfor %}
@@ -32,8 +34,8 @@ def import_():
 {% if dst_table != '_rel_' and dst_table != '_bwrel_' %}
 
             # --- {{dst_table}} ---
-{% for field in fields|sort %}
-            # {{field}}=row.REPLACE_ME,
+{% for field in fields %}
+            # {{field.name}}=row.REPLACE_ME,  # {{field.property.columns[0].type}}
 {% endfor %}
 {% endif %}
 {% endfor %}

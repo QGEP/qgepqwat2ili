@@ -9,6 +9,9 @@ def get_qwat_mapping():
     return {
         # Node
         QWAT.node: [WASSER.hydraulischer_knoten],
+        # Pipe
+        QWAT.pipe: [WASSER.hydraulischer_strang, WASSER.leitung],
+        QWAT.leak: [WASSER.schadenstelle],
         # Network elements
         QWAT.hydrant: [WASSER.hydrant],
         QWAT.tank: [WASSER.wasserbehaelter],
@@ -16,14 +19,11 @@ def get_qwat_mapping():
         QWAT.treatment: [WASSER.anlage],
         QWAT.subscriber: [WASSER.hausanschluss],
         QWAT.source: [WASSER.wassergewinnungsanlage],
-        QWAT.chamber: [WASSER.absperrorgan],
-        QWAT.valve: [WASSER.absperrorgan],
         # QWAT.???: [WASSER.rohrleitungsteil], # not sure to what this maps
         # QWAT.???: [WASSER.uebrige], # not sure to what this maps
         # QWAT.???: [WASSER.muffen], # does not exist in QWAT
-        # Pipe
-        QWAT.pipe: [WASSER.hydraulischer_strang, WASSER.leitung],
-        QWAT.leak: [WASSER.schadenstelle],
+        QWAT.chamber: [WASSER.absperrorgan],
+        QWAT.valve: [WASSER.absperrorgan],
     }
 
     # AVAILABLE TABLES

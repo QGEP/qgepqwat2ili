@@ -18,10 +18,10 @@ def generate_template(model_name, ilimodel_name, model_base, ilimodel_base, mapp
                 key = "_rel_" if attr_name.endswith("__REL") else "_bwrel_"
             else:
                 key = attr.property.columns[0].table.name
-            available_fields[key].append(attr_name)
+            available_fields[key].append(attr)
         ordered_tables = ["_rel_", "_bwrel_"] + list(c.__table__.name for c in cls.__mro__ if hasattr(c, "__table__"))
         return sorted(
-            available_fields.items(),
+            sorted(available_fields.items(), key=lambda j: j[0]),
             key=lambda i: ordered_tables.index(i[0]),
             reverse=True,
         )
