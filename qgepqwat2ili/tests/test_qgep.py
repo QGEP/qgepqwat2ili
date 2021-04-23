@@ -143,6 +143,30 @@ class TestQGEPUseCases(unittest.TestCase):
         print(f"Saved to {path}")
         utils.ili2db.validate_xtf_data(path)
 
+    def test_case_e_export_selection(self):
+        """
+        # E. export a selection
+        """
+
+        # Prepare db
+        main(["setupdb", "full"])
+
+        path = os.path.join(tempfile.mkdtemp(), "export.xtf")
+        main(
+            [
+                "qgep",
+                "export",
+                path,
+                "--recreate_schema",
+                "--selection",
+                "ch13p7mzWN008128,ch13p7mzWN005856",
+            ]
+        )
+
+        # Validate the outgoing XTF
+        print(f"Saved to {path}")
+        utils.ili2db.validate_xtf_data(path)
+
 
 class TestRegressions(unittest.TestCase):
     def test_regression_001_self_referencing_organisation(self):
