@@ -10,11 +10,12 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(downstream_of=None, upstream_of=None):
+def qgep_export(selection=None, downstream_of=None, upstream_of=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
     Args:
+        selection:      if provided, limits the export to nodes that are provided in the selection
         downstream_of:  if provided, limits the export to nodes that are downstream of the provided node
         upstream_of:    if provided, limits the export to nodes that are upstream of the provided node
     """
@@ -30,8 +31,8 @@ def qgep_export(downstream_of=None, upstream_of=None):
     tid_maker = utils.ili2db.TidMaker(id_attribute="obj_id")
 
     # Upstream/Downstream filtering
-    subset_ids = None
-
+    filtered = selection or upstream_of or downstream_of
+    subset_ids = selection if selection is not None else []
     if upstream_of or downstream_of:
 
         common_table_expressions = []
@@ -86,7 +87,8 @@ def qgep_export(downstream_of=None, upstream_of=None):
         subset_query = f"WITH RECURSIVE {','.join(common_table_expressions)} {' INTERSECT '.join(select_clauses)};"
 
         rows = qgep_session.execute(subset_query, params)
-        subset_ids = list(row[0] for row in rows)
+
+        subset_ids.extend(row[0] for row in rows)
 
     def get_tid(relation):
         """
@@ -215,7 +217,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.channel -> ABWASSER.kanal, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.channel)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -257,7 +259,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.manhole -> ABWASSER.normschacht, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.manhole)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -283,7 +285,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.discharge_point -> ABWASSER.einleitstelle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.discharge_point)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -308,7 +310,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.special_structure)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -352,7 +354,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.infiltration_installation)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -405,7 +407,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.pipe_profile -> ABWASSER.rohrprofil, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.pipe_profile)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.reach).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
@@ -439,7 +441,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.reach_point)
-    if subset_ids:
+    if filtered:
         query = query.join(
             QGEP.reach,
             or_(
@@ -483,7 +485,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.wastewater_node)
-    if subset_ids:
+    if filtered:
         query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
@@ -524,7 +526,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.reach)
-    if subset_ids:
+    if filtered:
         query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
@@ -580,7 +582,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.dryweather_downspout)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -618,7 +620,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.access_aid)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -656,7 +658,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.dryweather_flume)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -694,7 +696,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.cover)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -741,7 +743,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.benching)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -781,7 +783,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.examination)
-    if subset_ids:
+    if filtered:
         query = (
             query.join(QGEP.reach_point)
             .join(QGEP.reach, QGEP.reach_point.fk_wastewater_networkelement == QGEP.reach.obj_id)
@@ -843,7 +845,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.damage_manhole)
-    if subset_ids:
+    if filtered:
         query = query.join(QGEP.examination, QGEP.reach_point, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
@@ -892,7 +894,7 @@ def qgep_export(downstream_of=None, upstream_of=None):
 
     logger.info("Exporting QGEP.damage_channel -> ABWASSER.kanalschaden, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.damage_channel)
-    if subset_ids:
+    if filtered:
         query = (
             query.join(QGEP.examination)
             .join(QGEP.reach_point)

@@ -23,6 +23,7 @@ def main(args):
     parser_qgep = subparsers.add_parser("qgep", help="import/export QGEP datamodel")
     # group = parser_qgep.add_mutually_exclusive_group(required=True)
     parser_qgep.add_argument("direction", choices=["import", "export"])
+    parser_qgep.add_argument("--selection", help="limit to provided nodes (comma separated list of ids)")
     parser_qgep.add_argument("--upstream_of", help="limit to network upstream of network element (id)")
     parser_qgep.add_argument("--downstream_of", help="limit to network downstream of network element (id)")
     parser_qgep.add_argument(
@@ -65,7 +66,9 @@ def main(args):
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
         if args.direction == "export":
             utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
-            qgep_export(upstream_of=args.upstream_of, downstream_of=args.downstream_of)
+            qgep_export(
+                selection=args.selection.split(","), upstream_of=args.upstream_of, downstream_of=args.downstream_of
+            )
             utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path)
             if not args.skip_validation:
                 try:
