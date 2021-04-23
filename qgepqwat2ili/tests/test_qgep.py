@@ -1,7 +1,3 @@
-"""
-python -m unittest interlis.tests
-"""
-
 import decimal
 import logging
 import os
@@ -9,10 +5,9 @@ import sys
 import tempfile
 import unittest
 
+from qgepqwat2ili import main, utils
+from qgepqwat2ili.qgep.model_qgep import get_qgep_model
 from sqlalchemy.orm import Session
-
-from . import main, utils
-from .qgep.model_qgep import get_qgep_model
 
 # Display logging in unittest output
 logger = logging.getLogger()
@@ -31,7 +26,7 @@ class TestQGEPUseCases(unittest.TestCase):
         """
 
         # Validate the incomming XTF
-        path = os.path.join(os.path.dirname(__file__), "data", "test_data", "case_a_import_from_wincan.xtf")
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_a_import_from_wincan.xtf")
         utils.ili2db.validate_xtf_data(path)
 
         # Prepare db (we import in a full schema)
@@ -85,7 +80,7 @@ class TestQGEPUseCases(unittest.TestCase):
         # B. export the whole QGEP model to interlis
         """
 
-        # Prepare subset db
+        # Prepare db
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
@@ -103,7 +98,7 @@ class TestQGEPUseCases(unittest.TestCase):
 
         # Incomming XTF
         # THIS INPUT FILE IS INVALID !
-        path = os.path.join(os.path.dirname(__file__), "data", "test_data", "case_c_import_all.xtf")
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_c_import_all.xtf")
 
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])
@@ -131,7 +126,7 @@ class TestQGEPUseCases(unittest.TestCase):
         # D. export a subset
         """
 
-        # Prepare subset db
+        # Prepare db
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
@@ -165,10 +160,10 @@ class TestRegressions(unittest.TestCase):
         """
 
         path = os.path.join(
-            os.path.dirname(__file__), "data", "test_data", "regression_001_self_referencing_organisation.xtf"
+            os.path.dirname(__file__), "..", "data", "test_data", "regression_001_self_referencing_organisation.xtf"
         )
 
-        # Prepare subset db (we import in an empty schema)
+        # Prepare db (we import in an empty schema)
         main(["setupdb", "empty"])
 
         QGEP = get_qgep_model()

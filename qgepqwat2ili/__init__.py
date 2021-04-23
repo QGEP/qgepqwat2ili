@@ -51,7 +51,7 @@ def main(args):
 
     parser_setupdb = subparsers.add_parser("setupdb", help="setup test db")
     parser_setupdb.set_defaults(parser="setupdb")
-    parser_setupdb.add_argument("type", choices=["empty", "full", "subset"], help="type")
+    parser_setupdb.add_argument("type", choices=["empty", "full"], help="type")
 
     args = parser.parse_args(args)
 
@@ -125,10 +125,6 @@ def main(args):
         utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
 
     elif args.parser == "setupdb":
-        if args.type == "subset":
-            raise Exception(
-                "subset is currently disabled as quite slow, uncomment corresponding lines utils/various.py"
-            )
         utils.various.setup_test_db(args.type)
 
     else:
