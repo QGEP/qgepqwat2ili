@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
         matrix:
-            slow: ["true", "false"]
+            suite: ["qgep", "qwat"]
 
     steps:
       - uses: actions/checkout@v2
@@ -30,9 +30,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: python -m unittest qgepqwat2ili.tests
+        run: python -m unittest qgepqwat2ili.tests.test_$SUITE
         env:
-            INCLUDE_SLOW_TESTS: ${{ matrix.slow }}
+            SUITE: ${{ matrix.suite }}
             PGHOST: 127.0.0.1
             PGPORT: 5432
             PGDATABASE: qgep_prod

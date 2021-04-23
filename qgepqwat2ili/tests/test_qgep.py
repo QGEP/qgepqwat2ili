@@ -71,10 +71,6 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(session.query(QGEP.organisation).count(), 18)
         session.close()
 
-    @unittest.skipIf(
-        os.getenv("INCLUDE_SLOW_TESTS", "").lower() != "true",
-        "slow test excluded by default, set INCLUDE_SLOW_TESTS=true to run",
-    )
     def test_case_b_export_complete_qgep_to_xtf(self):
         """
         # B. export the whole QGEP model to interlis
@@ -149,9 +145,6 @@ class TestQGEPUseCases(unittest.TestCase):
 
 
 class TestRegressions(unittest.TestCase):
-
-    # FIXME
-    # @unittest.skip("...")
     def test_regression_001_self_referencing_organisation(self):
         """
         Due to current logic of the import script, organisations may be created multiple times.
