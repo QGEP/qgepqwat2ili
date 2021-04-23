@@ -1,4 +1,4 @@
-from .model_abwasser import get_abwasser_model
+# from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 

@@ -3,6 +3,7 @@ geoalchemy2~=0.8.4
 
 # provided by qgis
 psycopg2
+https://download.lfd.uci.edu/pythonlibs/w4tscw6k/GDAL-3.2.2-cp38-cp38-win_amd64.whl
 
 # dev only
 jinja2
