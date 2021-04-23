@@ -89,9 +89,9 @@ def main(args):
             qgep_import()
 
     elif args.parser == "qwat":
-        SCHEMA = config.ABWASSER_SCHEMA if args.model == "qgep" else config.WASSER_SCHEMA
-        ILI_MODEL = config.ABWASSER_ILI_MODEL if args.model == "qgep" else config.WASSER_ILI_MODEL
-        ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME if args.model == "qgep" else config.WASSER_ILI_MODEL_NAME
+        SCHEMA = config.WASSER_SCHEMA
+        ILI_MODEL = config.WASSER_ILI_MODEL
+        ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
         if args.direction == "export":
             utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
             qwat_export()
