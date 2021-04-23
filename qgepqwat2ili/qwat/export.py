@@ -74,7 +74,7 @@ def qwat_export():
             # --- leitungsknoten ---
             # "bemerkung": DOES_NOT_EXIST_IN_QWAT,
             # "druckzone": DOES_NOT_EXIST_IN_QWAT,
-            "eigentuemer": row.fk_owner__REL.name,
+            # "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
             "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
@@ -564,3 +564,5 @@ def qwat_export():
     wasser_session.flush()
 
     wasser_session.commit()
+    wasser_session.close()
+    qwat_session.close()
