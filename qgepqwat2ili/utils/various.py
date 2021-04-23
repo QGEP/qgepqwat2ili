@@ -69,8 +69,8 @@ def setup_test_db(template="full"):
     if db_didnt_exist:
         logger.info("Test templates don't exist, we create them")
 
-        dexec_("dropdb -U postgres tpl_empty")
-        dexec_("dropdb -U postgres tpl_full")
+        dexec_("dropdb -U postgres tpl_empty --if-exists")
+        dexec_("dropdb -U postgres tpl_full --if-exists")
 
         dexec_("apt-get update")
         dexec_("apt-get install -y wget")
