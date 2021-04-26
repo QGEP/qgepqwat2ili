@@ -36,6 +36,14 @@ def qwat_export():
             return None
         return tid_maker.tid_for_row(relation, for_class=for_class)
 
+    def get_vl(relation, attr_name="value_de"):
+        """
+        Gets a literal value from a value list relation
+        """
+        if relation is None:
+            return None
+        return getattr(relation, attr_name)
+
     def create_metaattributes(instance):
         warnings.warn(
             f"QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
@@ -78,9 +86,9 @@ def qwat_export():
             "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
-            "hoehenbestimmung": row.fk_precisionalti__REL.value_de,
+            "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
-            "lagebestimmung": row.fk_precision__REL.value_de,
+            "lagebestimmung": get_vl(row.fk_precision__REL),
             "symbolori": 0,
         }
 
@@ -130,12 +138,12 @@ def qwat_export():
             # durchfluss=NOT_AVAILABLE_IN_QGEP,
             # fliessgeschwindigkeit=NOT_AVAILABLE_IN_QGEP,
             name_nummer=str(get_tid(row, WASSER.hydraulischer_strang)),
-            referenz_durchmesser=row.fk_material__REL.diameter_nominal,
+            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal"),
             referenz_laenge=row._length2d,
             # referenz_rauheit=NOT_AVAILABLE_IN_QGEP,
             # verbrauch=NOT_AVAILABLE_IN_QGEP,
             vonknotenref=get_tid(row.fk_node_a__REL, QWAT.node),
-            zustand=row.fk_status__REL.value_de,
+            zustand=get_vl(row.fk_status__REL, "value_en"),
         )
         wasser_session.add(hydraulischer_strang)
         create_metaattributes(hydraulischer_strang)
@@ -146,27 +154,27 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "leitung", tid_for_class=WASSER.leitung),
             # --- leitung ---
-            astatus=row.fk_status__REL.value_en,
-            aussenbeschichtung=row.fk_protection__REL.value_en,
+            astatus=get_vl(row.fk_status__REL, "value_en"),
+            aussenbeschichtung=get_vl(row.fk_protection__REL),
             baujahr=row.year,
             bemerkung=row.remark,
-            betreiber=row.fk_distributor__REL.name,
+            betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
-            bettung=row.fk_bedding.value_en,
-            druckzone=row.fk_pressurezone__REL.name,
-            durchmesser=row.fk_material__REL.diameter_nominal,
-            durchmesseraussen=row.fk_material__REL.diameter_external,
-            durchmesserinnen=row.fk_material__REL.diameter_internal,
+            bettung=get_vl(row.fk_bedding__REL, "value_en"),
+            druckzone=get_vl(row.fk_pressurezone__REL, "name"),
+            durchmesser=get_vl(row.fk_material__REL, "diameter_nominal"),
+            durchmesseraussen=get_vl(row.fk_material__REL, "diameter_external"),
+            durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
             # eigentuemer=NOT_AVAILABLE_IN_QGEP,
-            funktion=row.fk_function__REL.value_en,
+            funktion=get_vl(row.fk_function__REL, "value_en"),
             geometrie=ST_ForceCurve(ST_Force2D(ST_Transform(row.geometry, 2056))),
             # hydraulische_rauheit=NOT_AVAILABLE_IN_QGEP,
             # innenbeschichtung=NOT_AVAILABLE_IN_QGEP,
             # kathodischer_schutz=NOT_AVAILABLE_IN_QGEP,
             # konzessionaer=NOT_AVAILABLE_IN_QGEP,
             laenge=row._length2d,
-            lagebestimmung=row.fk_precision__REL.value_en,
-            material=row.fk_material__REL.value_en,
+            lagebestimmung=get_vl(row.fk_precision__REL, "value_en"),
+            material=get_vl(row.fk_material__REL, "value_en"),
             name_nummer=str(get_tid(row, WASSER.leitung)),
             nennweite=str(row.fk_material__REL.diameter_nominal),
             # sanierung_erneuerung=NOT_AVAILABLE_IN_QGEP,
@@ -176,10 +184,10 @@ def qwat_export():
             # unterhalt=NOT_AVAILABLE_IN_QGEP,
             # unterhaltspflichtiger=NOT_AVAILABLE_IN_QGEP,
             # verbindungsart=NOT_AVAILABLE_IN_QGEP,
-            verlegeart=row.fk_installmethod__REL.value_en,
-            wasserqualitaet=row.fk_watertype__REL.value_en,
-            zulaessiger_bauteil_betriebsdruck=row.fk_material__REL.pressure_nominal,
-            zustand=row.fk_status__REL.value_de,
+            verlegeart=get_vl(row.fk_installmethod__REL, "value_en"),
+            wasserqualitaet=get_vl(row.fk_watertype__REL, "value_en"),
+            zulaessiger_bauteil_betriebsdruck=get_vl(row.fk_material__REL, "pressure_nominal"),
+            zustand=get_vl(row.fk_status__REL, "value_en"),
         )
         wasser_session.add(leitung)
         create_metaattributes(leitung)
@@ -248,7 +256,7 @@ def qwat_export():
             name_nummer=row.identification,
             typ=f"{row.fk_model_sup} / {row.fk_model_inf}",
             versorgungsdruck=row.pressure_static,
-            zustand=row.fk_status__REL.value_de,
+            zustand=row.fk_status__REL.value_en,
         )
         wasser_session.add(hydrant)
         create_metaattributes(hydrant)
