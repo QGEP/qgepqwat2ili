@@ -67,7 +67,9 @@ def main(args):
         if args.direction == "export":
             utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
             qgep_export(
-                selection=args.selection.split(","), upstream_of=args.upstream_of, downstream_of=args.downstream_of
+                selection=args.selection.split(",") if args.selection else None,
+                upstream_of=args.upstream_of,
+                downstream_of=args.downstream_of,
             )
             utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path)
             if not args.skip_validation:
