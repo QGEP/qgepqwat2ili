@@ -8,6 +8,17 @@
 
 ## Remarks for export
 
+# General
+* notion of owner / distributor|actor / operator
+
+## value lists
+* translations to german are missing
+
+## Pipes
+* protection needs to be normalized
+* rugosity no defined
+* relining is missing
+
 ### Nodes
 * Geometries are transformed to 2056. With older versions of proj on the system, this will lead to a not precise transformation (if the grid is missing).
 * Consommation is not available in QWAT
@@ -16,4 +27,3 @@
 ### Hydrant
 * no diameter/dimensions in QWAT
 * sprinkler should be in hydrant?
-
