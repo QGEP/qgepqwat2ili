@@ -40,13 +40,24 @@ def qwat_export():
             return None
         return tid_maker.tid_for_row(relation, for_class=for_class)
 
-    def get_vl(relation, attr_name="value_de"):
+    def get_vl(relation, attr_name="value_fr"):
         """
         Gets a literal value from a value list relation
         """
+        # TODO default to a SIA405 compliant column instead of value_fr once these are defined in QWAT
         if relation is None:
             return None
         return getattr(relation, attr_name)
+
+    def truncate(val, max_length):
+        """
+        Raises a warning if values gets truncated
+        """
+        if val is None:
+            return None
+        if len(val) > max_length:
+            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})")
+        return val[0:max_length]
 
     def create_metaattributes(instance):
         warnings.warn(
@@ -90,9 +101,9 @@ def qwat_export():
             "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
-            "hoehenbestimmung": get_vl(row.fk_precisionalti__REL, "value_en"),
+            "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
-            "lagebestimmung": get_vl(row.fk_precision__REL, "value_en"),
+            "lagebestimmung": get_vl(row.fk_precision__REL),
             "symbolori": 0,
         }
 
@@ -141,13 +152,13 @@ def qwat_export():
             bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
             durchfluss=DOES_NOT_EXIST_IN_QWAT,
             fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
-            name_nummer=str(get_tid(row, WASSER.hydraulischer_strang)),
-            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or 0,
+            name_nummer=str(row.id),
+            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or -1,
             referenz_laenge=row._length2d,
             referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
             vonknotenref=get_tid(row.fk_node_a__REL, QWAT.node),
-            zustand=get_vl(row.fk_status__REL, "value_en"),
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(hydraulischer_strang)
         create_metaattributes(hydraulischer_strang)
@@ -158,29 +169,29 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "leitung", tid_for_class=WASSER.leitung),
             # --- leitung ---
-            astatus=get_vl(row.fk_status__REL, "value_en"),
-            aussenbeschichtung=get_vl(row.fk_protection__REL, "value_en"),
-            baujahr=row.year,
+            astatus=get_vl(row.fk_status__REL),
+            aussenbeschichtung=get_vl(row.fk_protection__REL),
+            baujahr=row.year or -1,
             bemerkung=row.remark,
             betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
-            bettung=get_vl(row.fk_bedding__REL, "value_en"),
+            bettung=get_vl(row.fk_bedding__REL),
             druckzone=get_vl(row.fk_pressurezone__REL, "name"),
             durchmesser=get_vl(row.fk_material__REL, "diameter_nominal"),
             durchmesseraussen=get_vl(row.fk_material__REL, "diameter_external"),
             durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
-            funktion=get_vl(row.fk_function__REL, "value_en"),
+            funktion=get_vl(row.fk_function__REL),
             geometrie=ST_ForceCurve(ST_Force2D(ST_Transform(row.geometry, 2056))),
             hydraulische_rauheit=DOES_NOT_EXIST_IN_QWAT,
             innenbeschichtung=DOES_NOT_EXIST_IN_QWAT,
             kathodischer_schutz=DOES_NOT_EXIST_IN_QWAT,
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             laenge=row._length2d,
-            lagebestimmung=get_vl(row.fk_precision__REL, "value_en"),
-            material=get_vl(row.fk_material__REL, "value_en"),
-            name_nummer=str(get_tid(row, WASSER.leitung)),
-            nennweite=str(row.fk_material__REL.diameter_nominal),
+            lagebestimmung=get_vl(row.fk_precision__REL),
+            material=get_vl(row.fk_material__REL),
+            name_nummer=str(row.id),
+            nennweite=str(get_vl(row.fk_material__REL, "diameter_nominal")),
             sanierung_erneuerung=DOES_NOT_EXIST_IN_QWAT,
             schubsicherung=DOES_NOT_EXIST_IN_QWAT,
             strangref=hydraulischer_strang.t_id,
@@ -188,10 +199,10 @@ def qwat_export():
             unterhalt=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
             verbindungsart=DOES_NOT_EXIST_IN_QWAT,
-            verlegeart=get_vl(row.fk_installmethod__REL, "value_en"),
-            wasserqualitaet=get_vl(row.fk_watertype__REL, "value_en"),
+            verlegeart=get_vl(row.fk_installmethod__REL),
+            wasserqualitaet=get_vl(row.fk_watertype__REL),
             zulaessiger_bauteil_betriebsdruck=get_vl(row.fk_material__REL, "pressure_nominal"),
-            zustand=get_vl(row.fk_status__REL, "value_en"),
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(leitung)
         create_metaattributes(leitung)
@@ -217,15 +228,15 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "schadenstelle"),
             # --- schadenstelle ---
-            art=get_vl(row.fk_cause__REL, "value_en"),
+            art=get_vl(row.fk_cause__REL),
             ausloeser=DOES_NOT_EXIST_IN_QWAT,
             behebungsdatum=row.repair_date,
             bemerkung=row.description,
             erhebungsdatum=row.detection_date,
             geometrie=ST_Transform(row.geometry, 2056),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
-            name_nummer=str(get_tid(row)),
-            ursache=get_vl(row.fk_cause__REL, "value_en"),
+            name_nummer=str(row.id),
+            ursache=get_vl(row.fk_cause__REL),
             zustand=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(schadenstelle)
@@ -254,12 +265,12 @@ def qwat_export():
             dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
-            hersteller=row.fk_provider__REL.value_fr,
-            material="Metall" if row.fk_material__REL.id in [7002, 7003, 7004] else "unbekannt",
+            hersteller=get_vl(row.fk_provider__REL, "value_fr"),
+            material="Metall" if get_vl(row.fk_material__REL, "id") in [7002, 7003, 7004] else "unbekannt",
             name_nummer=row.identification,
-            typ=f"{row.fk_model_sup} / {row.fk_model_inf}",
+            typ=truncate(f"{row.fk_model_sup} / {row.fk_model_inf}", 10),
             versorgungsdruck=row.pressure_static,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(hydrant)
         create_metaattributes(hydrant)
@@ -286,14 +297,14 @@ def qwat_export():
             # --- wasserbehaelter ---
             art=DOES_NOT_EXIST_IN_QWAT,
             beschichtung=DOES_NOT_EXIST_IN_QWAT,
-            brauchwasserreserve=row.storage_supply / 1000,
-            fassungsvermoegen=row.storage_total / 1000,
+            brauchwasserreserve=row.storage_supply / 1000 if row.storage_supply else -1,
+            fassungsvermoegen=row.storage_total / 1000 if row.storage_total else -1,
             leistung=DOES_NOT_EXIST_IN_QWAT,
-            loeschwasserreserve=row.storage_fire / 1000,
+            loeschwasserreserve=row.storage_fire / 1000 if row.storage_fire else -1,
             material=DOES_NOT_EXIST_IN_QWAT,
-            name_nummer=str(get_tid(row)),
-            ueberlaufhoehe=row.altitude_overflow,
-            zustand=row.fk_status__REL.value_en,
+            name_nummer=str(row.id),
+            ueberlaufhoehe=row.altitude_overflow or -1,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wasserbehaelter)
         create_metaattributes(wasserbehaelter)
@@ -318,10 +329,10 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- foerderanlage ---
-            art=row.fk_type__REL.value_fr,
+            art=get_vl(row.fk_pump_type__REL),
             leistung=f"{row.rejected_flow} m3/s",
             name_nummer=str(row.id),
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(foerderanlage)
         create_metaattributes(foerderanlage)
@@ -352,7 +363,7 @@ def qwat_export():
             betreiber=row.fk_distributor__REL.name,
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wassergewinnungsanlage)
         print(".", end="")
@@ -368,7 +379,7 @@ def qwat_export():
         # _bwrel_ --- subscriber.samplingpoint__BWREL_id, subscriber.subscriber_reference__BWREL_fk_subscriber, subscriber.meter__BWREL_id, subscriber.pipe__BWREL_fk_node_b, subscriber.pipe__BWREL_fk_node_a
         # _rel_ --- subscriber.fk_pipe__REL, subscriber.fk_subscriber_type__REL, subscriber.fk_object_reference__REL, subscriber.label_1_visible__REL, subscriber.label_2_visible__REL, subscriber.fk_precisionalti__REL, subscriber.fk_folder__REL, subscriber.fk_precision__REL, subscriber.fk_distributor__REL, subscriber.fk_status__REL, subscriber.fk_district__REL, subscriber.fk_pressurezone__REL
 
-        if row.fk_type__REL.value_en == "Fountain":
+        if get_vl(row.fk_subscriber_type__REL) == "Fountain":
 
             anlage = WASSER.anlage(
                 # --- baseclass ---
@@ -381,16 +392,16 @@ def qwat_export():
                 art="Brunnen",
                 material=DOES_NOT_EXIST_IN_QWAT,
                 leistung=f"{row.flow_current}",
-                betreiber=row.fk_distributor__REL.name,
+                betreiber=get_vl(row.fk_distributor__REL, "name"),
                 konzessionaer=DOES_NOT_EXIST_IN_QWAT,
                 unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
-                zustand=row.fk_status__REL.value_de,
+                zustand=get_vl(row.fk_status__REL),
                 dimension1=DOES_NOT_EXIST_IN_QWAT,
             )
             wasser_session.add(anlage)
             print(".", end="")
 
-        else:  # incl. row.fk_type__REL.value_en == "Subscriber"
+        else:  # incl. row.fk_subscriber_type__REL.value_en == "Subscriber"
 
             hausanschluss = WASSER.hausanschluss(
                 # --- baseclass ---
@@ -399,7 +410,7 @@ def qwat_export():
                 # --- leitungsknoten ---
                 **leitungsknoten_common(row),
                 # --- hausanschluss ---
-                art=row.fk_type__REL.value_en,
+                art=get_vl(row.fk_subscriber_type__REL),
                 dimension=DOES_NOT_EXIST_IN_QWAT,
                 gebaeudeanschluss=DOES_NOT_EXIST_IN_QWAT,
                 isolierstueck=DOES_NOT_EXIST_IN_QWAT,
@@ -409,7 +420,7 @@ def qwat_export():
                 verbrauch=row.flow_current,
                 zuordnung_hydraulischer_knoten="undefined",
                 zuordnung_hydraulischer_strang="undefined",
-                zustand=row.fk_status__REL.value_de,
+                zustand=get_vl(row.fk_status__REL),
             )
             wasser_session.add(hausanschluss)
             create_metaattributes(hausanschluss)
@@ -435,13 +446,13 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- wassergewinnungsanlage ---
-            art=row.fk_source__REL.value_fr,
-            betreiber=row.fk_distributor__REL.name,
+            art=get_vl(row.fk_source_type__REL),
+            betreiber=get_vl(row.fk_distributor__REL, "name"),
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             leistung=str(row.flow_average),
             name_nummer=str(row.id),
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wassergewinnungsanlage)
         create_metaattributes(wassergewinnungsanlage)
@@ -466,14 +477,14 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- anlage ---
-            name_nummer=str(id),
-            art="Schacht/Zonentrennung" if row.network_separation else "Schacht",
+            name_nummer=str(row.id),
+            art="Schacht/Zonentrennung" if row.networkseparation else "Schacht",
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
-            betreiber=row.fk_distributor__REL.name,
+            betreiber=get_vl(row.fk_distributor__REL, "name"),
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
@@ -498,13 +509,15 @@ def qwat_export():
             **leitungsknoten_common(row),
             # --- anlage ---
             name_nummer=str(row.id),
-            art="Druckbrecher" if row.fk_type__REL.value_en in ["reducer", "pressure cut"] else "Schacht",
+            art="Druckbrecher"
+            if get_vl(row.fk_pressurecontrol_type__REL) in ["reducer", "pressure cut"]
+            else "Schacht",
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
-            betreiber=row.fk_distributor__REL.name,
+            betreiber=get_vl(row.fk_distributor__REL, "name"),
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
@@ -550,24 +563,25 @@ def qwat_export():
             einbaujahr=row.year,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             hoehe=ST_Z(row.geometry),
-            hoehenbestimmung=row.fk_precisionalti__REL.value_en,
+            hoehenbestimmung=get_vl(row.fk_precisionalti__REL),
             knotenref__REL=hydraulischer_knoten,
-            lagebestimmung=row.fk_precision__REL.value_en,
+            lagebestimmung=get_vl(row.fk_precision__REL),
             symbolori=0,
             # --- absperrorgan ---
             art=row.fk_valve_type__REL.value_en,
             hersteller=DOES_NOT_EXIST_IN_QWAT,
             material=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
-            nennweite=row.fk_diameter_nominal__REL.value_en,
-            schaltantrieb="motorisch.ohne_Fernsteuerung"
-            if row.fk_actuation__REL.id == 6403
-            else ("motorisch.mit_Fernsteuerung" if row.fk_actuation__REL.id == 6404 else "keiner"),
+            nennweite=truncate(get_vl(row.fk_nominal_diameter__REL), 10),
+            schaltantrieb={
+                6403: "motorisch.ohne_Fernsteuerung",
+                6406: "motorisch.mit_Fernsteuerung",
+            }.get(get_vl(row.fk_valve_actuation__REL, "id"), "keiner"),
             schaltzustand="unbekannt" if row.closed is None else ("geschlossen" if row.closed else "offen"),
-            schliessrichtung="links" if row.fk_actuation__REL.id == 6402 else "rechts",
+            schliessrichtung="links" if get_vl(row.fk_valve_actuation__REL, "id") == 6402 else "rechts",
             typ=DOES_NOT_EXIST_IN_QWAT,
             zulaessiger_bauteil_betriebsdruck=DOES_NOT_EXIST_IN_QWAT,
-            zustand=row.fk_status__REL.value_en,
+            zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(absperrorgan)
         create_metaattributes(absperrorgan)
