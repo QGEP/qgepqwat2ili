@@ -69,6 +69,11 @@ class source(installation):
     __table_args__ = {"schema": SCHEMA}
 
 
+class pressurecontrol(installation):
+    __tablename__ = "pressurecontrol"
+    __table_args__ = {"schema": SCHEMA}
+
+
 class pipe(Base):
     __tablename__ = "pipe"
     __table_args__ = {"schema": SCHEMA}

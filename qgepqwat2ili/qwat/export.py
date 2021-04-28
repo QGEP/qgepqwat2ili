@@ -217,17 +217,16 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "schadenstelle"),
             # --- schadenstelle ---
-            # art=row.REPLACE_ME,
-            # ausloeser=row.REPLACE_ME,
-            # behebungsdatum=row.REPLACE_ME,
-            # bemerkung=row.REPLACE_ME,
-            erhebungsdatum=datetime.datetime.min,
+            art=get_vl(row.fk_cause__REL, "value_en"),
+            ausloeser=DOES_NOT_EXIST_IN_QWAT,
+            behebungsdatum=row.repair_date,
+            bemerkung=row.description,
+            erhebungsdatum=row.detection_date,
             geometrie=ST_Transform(row.geometry, 2056),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
-            # name_nummer=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # ursache=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            name_nummer=str(get_tid(row)),
+            ursache=get_vl(row.fk_cause__REL, "value_en"),
+            zustand=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(schadenstelle)
         create_metaattributes(schadenstelle)
@@ -285,16 +284,16 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- wasserbehaelter ---
-            # art=row.REPLACE_ME,
-            # beschichtung=row.REPLACE_ME,
-            brauchwasserreserve=0,
-            fassungsvermoegen=0,
-            # leistung=row.REPLACE_ME,
-            loeschwasserreserve=0,
-            # material=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            ueberlaufhoehe=0,
-            # zustand=row.REPLACE_ME,
+            art=DOES_NOT_EXIST_IN_QWAT,
+            beschichtung=DOES_NOT_EXIST_IN_QWAT,
+            brauchwasserreserve=row.storage_supply / 1000,
+            fassungsvermoegen=row.storage_total / 1000,
+            leistung=DOES_NOT_EXIST_IN_QWAT,
+            loeschwasserreserve=row.storage_fire / 1000,
+            material=DOES_NOT_EXIST_IN_QWAT,
+            name_nummer=str(get_tid(row)),
+            ueberlaufhoehe=row.altitude_overflow,
+            zustand=row.fk_status__REL.value_en,
         )
         wasser_session.add(wasserbehaelter)
         create_metaattributes(wasserbehaelter)
@@ -319,11 +318,10 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- foerderanlage ---
-            # art=row.REPLACE_ME,
-            leistung="undefined",
-            # name_nummer=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            art=row.fk_type__REL.value_fr,
+            leistung=f"{row.rejected_flow} m3/s",
+            name_nummer=str(row.id),
+            zustand=row.fk_status__REL.value_en,
         )
         wasser_session.add(foerderanlage)
         create_metaattributes(foerderanlage)
@@ -331,36 +329,32 @@ def qwat_export():
     print("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.treatment -> WASSER.anlage")
+    print("Exporting QWAT.treatment -> WASSER.wassergewinnungsanlage")
     for row in qwat_session.query(QWAT.treatment):
 
         # node --- treatment.fk_district, treatment.fk_pressurezone, treatment.fk_printmap, treatment._printmaps, treatment._geometry_alt1_used, treatment._geometry_alt2_used, treatment._pipe_node_type, treatment._pipe_orientation, treatment._pipe_schema_visible, treatment.geometry, treatment.geometry_alt1, treatment.geometry_alt2, treatment.update_geometry_alt1, treatment.update_geometry_alt2
         # network_element --- treatment.identification, treatment.fk_distributor, treatment.fk_status, treatment.fk_folder, treatment.fk_locationtype, treatment.fk_precision, treatment.fk_precisionalti, treatment.fk_object_reference, treatment.altitude, treatment.year, treatment.year_end, treatment.orientation, treatment.remark, treatment.label_1_visible, treatment.label_1_x, treatment.label_1_y, treatment.label_1_rotation, treatment.label_1_text, treatment.label_2_visible, treatment.label_2_x, treatment.label_2_y, treatment.label_2_rotation, treatment.label_2_text
         # installation --- treatment.name, treatment.fk_parent, treatment.fk_remote, treatment.fk_watertype, treatment.parcel, treatment.eca, treatment.open_water_surface, treatment.geometry_polygon
         # treatment --- treatment.id, treatment.sanitization_uv, treatment.sanitization_chlorine_liquid, treatment.sanitization_chlorine_gas, treatment.sanitization_ozone, treatment.filtration_membrane, treatment.filtration_sandorgravel, treatment.flocculation, treatment.activatedcharcoal, treatment.settling, treatment.treatment_capacity
-        # _bwrel_ --- treatment.samplingpoint__BWREL_id, treatment.cover__BWREL_fk_installation, treatment.pressurecontrol_type__BWREL_id, treatment.meter__BWREL_id, treatment.pipe__BWREL_fk_node_b, treatment.pipe__BWREL_fk_node_a, treatment.installation__BWREL_fk_parent
-        # _rel_ --- treatment.fk_remote__REL, treatment.fk_watertype__REL, treatment.fk_parent__REL, treatment.fk_object_reference__REL, treatment.label_1_visible__REL, treatment.label_2_visible__REL, treatment.fk_precisionalti__REL, treatment.fk_folder__REL, treatment.fk_precision__REL, treatment.fk_distributor__REL, treatment.fk_status__REL, treatment.fk_district__REL, treatment.fk_pressurezone__REL
+        # _bwrel_ --- treatment.pressurecontrol_type__BWREL_id, treatment.meter__BWREL_id, treatment.pipe__BWREL_fk_node_b, treatment.pipe__BWREL_fk_node_a, treatment.samplingpoint__BWREL_id, treatment.cover__BWREL_fk_installation, treatment.installation__BWREL_fk_parent
+        # _rel_ --- treatment.fk_remote__REL, treatment.fk_parent__REL, treatment.fk_watertype__REL, treatment.fk_distributor__REL, treatment.fk_status__REL, treatment.fk_object_reference__REL, treatment.fk_precision__REL, treatment.fk_folder__REL, treatment.label_1_visible__REL, treatment.label_2_visible__REL, treatment.fk_precisionalti__REL, treatment.fk_district__REL, treatment.fk_pressurezone__REL
 
-        anlage = WASSER.anlage(
+        wassergewinnungsanlage = WASSER.wassergewinnungsanlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "anlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
-            # --- anlage ---
-            # art=row.REPLACE_ME,
-            # betreiber=row.REPLACE_ME,
-            # dimension1=row.REPLACE_ME,
-            # konzessionaer=row.REPLACE_ME,
-            # leistung=row.REPLACE_ME,
-            # material=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # unterhaltspflichtiger=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            # --- wassergewinnungsanlage ---
+            name_nummer=str(row.id),
+            art="Aufbereitungsanlage/unbekannt",
+            leistung=f"{row.treatment_capacity}",
+            betreiber=row.fk_distributor__REL.name,
+            konzessionaer=DOES_NOT_EXIST_IN_QWAT,
+            unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+            zustand=row.fk_status__REL.value_en,
         )
-        wasser_session.add(anlage)
-        create_metaattributes(anlage)
+        wasser_session.add(wassergewinnungsanlage)
         print(".", end="")
     print("done")
     wasser_session.flush()
@@ -374,28 +368,52 @@ def qwat_export():
         # _bwrel_ --- subscriber.samplingpoint__BWREL_id, subscriber.subscriber_reference__BWREL_fk_subscriber, subscriber.meter__BWREL_id, subscriber.pipe__BWREL_fk_node_b, subscriber.pipe__BWREL_fk_node_a
         # _rel_ --- subscriber.fk_pipe__REL, subscriber.fk_subscriber_type__REL, subscriber.fk_object_reference__REL, subscriber.label_1_visible__REL, subscriber.label_2_visible__REL, subscriber.fk_precisionalti__REL, subscriber.fk_folder__REL, subscriber.fk_precision__REL, subscriber.fk_distributor__REL, subscriber.fk_status__REL, subscriber.fk_district__REL, subscriber.fk_pressurezone__REL
 
-        hausanschluss = WASSER.hausanschluss(
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "hausanschluss"),
-            # --- leitungsknoten ---
-            **leitungsknoten_common(row),
-            # --- hausanschluss ---
-            # art=row.REPLACE_ME,
-            # dimension=row.REPLACE_ME,
-            # gebaeudeanschluss=row.REPLACE_ME,
-            # isolierstueck=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # standort=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # typ=row.REPLACE_ME,
-            # verbrauch=row.REPLACE_ME,
-            zuordnung_hydraulischer_knoten="undefined",
-            zuordnung_hydraulischer_strang="undefined",
-            # zustand=row.REPLACE_ME,
-        )
-        wasser_session.add(hausanschluss)
-        create_metaattributes(hausanschluss)
+        if row.fk_type__REL.value_en == "Fountain":
+
+            anlage = WASSER.anlage(
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **base_common(row, "hausanschluss"),
+                # --- leitungsknoten ---
+                **leitungsknoten_common(row),
+                # --- anlage ---
+                name_nummer=str(row.id),
+                art="Brunnen",
+                material=DOES_NOT_EXIST_IN_QWAT,
+                leistung=f"{row.flow_current}",
+                betreiber=row.fk_distributor__REL.name,
+                konzessionaer=DOES_NOT_EXIST_IN_QWAT,
+                unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+                zustand=row.fk_status__REL.value_de,
+                dimension1=DOES_NOT_EXIST_IN_QWAT,
+            )
+            wasser_session.add(anlage)
+            print(".", end="")
+
+        else:  # incl. row.fk_type__REL.value_en == "Subscriber"
+
+            hausanschluss = WASSER.hausanschluss(
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **base_common(row, "hausanschluss"),
+                # --- leitungsknoten ---
+                **leitungsknoten_common(row),
+                # --- hausanschluss ---
+                art=row.fk_type__REL.value_en,
+                dimension=DOES_NOT_EXIST_IN_QWAT,
+                gebaeudeanschluss=DOES_NOT_EXIST_IN_QWAT,
+                isolierstueck=DOES_NOT_EXIST_IN_QWAT,
+                name_nummer=str(row.id),
+                standort=DOES_NOT_EXIST_IN_QWAT,
+                typ=DOES_NOT_EXIST_IN_QWAT,
+                verbrauch=row.flow_current,
+                zuordnung_hydraulischer_knoten="undefined",
+                zuordnung_hydraulischer_strang="undefined",
+                zustand=row.fk_status__REL.value_de,
+            )
+            wasser_session.add(hausanschluss)
+            create_metaattributes(hausanschluss)
+
         print(".", end="")
     print("done")
     wasser_session.flush()
@@ -417,14 +435,13 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- wassergewinnungsanlage ---
-            # art=row.REPLACE_ME,
-            # betreiber=row.REPLACE_ME,
-            # konzessionaer=row.REPLACE_ME,
-            # leistung=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # unterhaltspflichtiger=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            art=row.fk_source__REL.value_fr,
+            betreiber=row.fk_distributor__REL.name,
+            konzessionaer=DOES_NOT_EXIST_IN_QWAT,
+            leistung=str(row.flow_average),
+            name_nummer=str(row.id),
+            unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+            zustand=row.fk_status__REL.value_en,
         )
         wasser_session.add(wassergewinnungsanlage)
         create_metaattributes(wassergewinnungsanlage)
@@ -432,48 +449,67 @@ def qwat_export():
     print("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.chamber -> WASSER.absperrorgan - PARTIAL")
+    print("Exporting QWAT.chamber -> WASSER.anlage")
     for row in qwat_session.query(QWAT.chamber):
-        """
-        Some (NOT ALL) QWAT chambers are translated to absperrorgan.
-        """
-
-        # WARNING ! ONLY SOME CHAMBERS ARE MAPPED TO VALVES
-        if not row.networkseparation:
-            continue
 
         # node --- chamber.fk_district, chamber.fk_pressurezone, chamber.fk_printmap, chamber._printmaps, chamber._geometry_alt1_used, chamber._geometry_alt2_used, chamber._pipe_node_type, chamber._pipe_orientation, chamber._pipe_schema_visible, chamber.geometry, chamber.geometry_alt1, chamber.geometry_alt2, chamber.update_geometry_alt1, chamber.update_geometry_alt2
         # network_element --- chamber.identification, chamber.fk_distributor, chamber.fk_status, chamber.fk_folder, chamber.fk_locationtype, chamber.fk_precision, chamber.fk_precisionalti, chamber.fk_object_reference, chamber.altitude, chamber.year, chamber.year_end, chamber.orientation, chamber.remark, chamber.label_1_visible, chamber.label_1_x, chamber.label_1_y, chamber.label_1_rotation, chamber.label_1_text, chamber.label_2_visible, chamber.label_2_x, chamber.label_2_y, chamber.label_2_rotation, chamber.label_2_text
         # installation --- chamber.name, chamber.fk_parent, chamber.fk_remote, chamber.fk_watertype, chamber.parcel, chamber.eca, chamber.open_water_surface, chamber.geometry_polygon
         # chamber --- chamber.id, chamber.networkseparation, chamber.flow_meter, chamber.water_meter, chamber.manometer, chamber.depth, chamber.no_valves
-        # _bwrel_ --- chamber.samplingpoint__BWREL_id, chamber.cover__BWREL_fk_installation, chamber.pressurecontrol_type__BWREL_id, chamber.meter__BWREL_id, chamber.pipe__BWREL_fk_node_b, chamber.pipe__BWREL_fk_node_a, chamber.installation__BWREL_fk_parent
-        # _rel_ --- chamber.fk_remote__REL, chamber.fk_watertype__REL, chamber.fk_parent__REL, chamber.fk_object_reference__REL, chamber.label_1_visible__REL, chamber.label_2_visible__REL, chamber.fk_precisionalti__REL, chamber.fk_folder__REL, chamber.fk_precision__REL, chamber.fk_distributor__REL, chamber.fk_status__REL, chamber.fk_district__REL, chamber.fk_pressurezone__REL
+        # _bwrel_ --- chamber.samplingpoint__BWREL_id, chamber.pipe__BWREL_fk_node_b, chamber.pipe__BWREL_fk_node_a, chamber.cover__BWREL_fk_installation, chamber.pressurecontrol_type__BWREL_id, chamber.meter__BWREL_id, chamber.installation__BWREL_fk_parent
+        # _rel_ --- chamber.fk_watertype__REL, chamber.fk_remote__REL, chamber.fk_parent__REL, chamber.fk_distributor__REL, chamber.fk_status__REL, chamber.label_1_visible__REL, chamber.fk_precision__REL, chamber.fk_object_reference__REL, chamber.label_2_visible__REL, chamber.fk_folder__REL, chamber.fk_precisionalti__REL, chamber.fk_district__REL, chamber.fk_pressurezone__REL
 
-        absperrorgan = WASSER.absperrorgan(
+        anlage = WASSER.anlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "absperrorgan"),
+            **base_common(row, "wassergewinnungsanlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
-            # --- absperrorgan ---
-            # art=row.REPLACE_ME,
-            # hersteller=row.REPLACE_ME,
-            # material=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # nennweite=row.REPLACE_ME,
-            # schaltantrieb=row.REPLACE_ME,
-            # schaltzustand=row.REPLACE_ME,
-            # schliessrichtung=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # typ=row.REPLACE_ME,
-            # zulaessiger_bauteil_betriebsdruck=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            # --- anlage ---
+            name_nummer=str(id),
+            art="Schacht/Zonentrennung" if row.network_separation else "Schacht",
+            material=DOES_NOT_EXIST_IN_QWAT,
+            leistung=DOES_NOT_EXIST_IN_QWAT,
+            betreiber=row.fk_distributor__REL.name,
+            konzessionaer=DOES_NOT_EXIST_IN_QWAT,
+            unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+            zustand=row.fk_status__REL.value_en,
+            dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
-        wasser_session.add(absperrorgan)
-        create_metaattributes(absperrorgan)
+        wasser_session.add(anlage)
         print(".", end="")
     print("done")
-    wasser_session.flush()
+
+    print("Exporting QWAT.pressurecontrol -> WASSER.anlage")
+    for row in qwat_session.query(QWAT.pressurecontrol):
+
+        # node --- pressurecontrol.fk_district, pressurecontrol.fk_pressurezone, pressurecontrol.fk_printmap, pressurecontrol._printmaps, pressurecontrol._geometry_alt1_used, pressurecontrol._geometry_alt2_used, pressurecontrol._pipe_node_type, pressurecontrol._pipe_orientation, pressurecontrol._pipe_schema_visible, pressurecontrol.geometry, pressurecontrol.geometry_alt1, pressurecontrol.geometry_alt2, pressurecontrol.update_geometry_alt1, pressurecontrol.update_geometry_alt2
+        # network_element --- pressurecontrol.identification, pressurecontrol.fk_distributor, pressurecontrol.fk_status, pressurecontrol.fk_folder, pressurecontrol.fk_locationtype, pressurecontrol.fk_precision, pressurecontrol.fk_precisionalti, pressurecontrol.fk_object_reference, pressurecontrol.altitude, pressurecontrol.year, pressurecontrol.year_end, pressurecontrol.orientation, pressurecontrol.remark, pressurecontrol.label_1_visible, pressurecontrol.label_1_x, pressurecontrol.label_1_y, pressurecontrol.label_1_rotation, pressurecontrol.label_1_text, pressurecontrol.label_2_visible, pressurecontrol.label_2_x, pressurecontrol.label_2_y, pressurecontrol.label_2_rotation, pressurecontrol.label_2_text
+        # installation --- pressurecontrol.name, pressurecontrol.fk_parent, pressurecontrol.fk_remote, pressurecontrol.fk_watertype, pressurecontrol.parcel, pressurecontrol.eca, pressurecontrol.open_water_surface, pressurecontrol.geometry_polygon
+        # pressurecontrol --- pressurecontrol.id, pressurecontrol.fk_pressurecontrol_type
+        # _bwrel_ --- pressurecontrol.samplingpoint__BWREL_id, pressurecontrol.pipe__BWREL_fk_node_b, pressurecontrol.pipe__BWREL_fk_node_a, pressurecontrol.cover__BWREL_fk_installation, pressurecontrol.pressurecontrol_type__BWREL_id, pressurecontrol.meter__BWREL_id, pressurecontrol.installation__BWREL_fk_parent
+        # _rel_ --- pressurecontrol.fk_pressurecontrol_type__REL, pressurecontrol.fk_watertype__REL, pressurecontrol.fk_remote__REL, pressurecontrol.fk_parent__REL, pressurecontrol.fk_distributor__REL, pressurecontrol.fk_status__REL, pressurecontrol.label_1_visible__REL, pressurecontrol.fk_precision__REL, pressurecontrol.fk_object_reference__REL, pressurecontrol.label_2_visible__REL, pressurecontrol.fk_folder__REL, pressurecontrol.fk_precisionalti__REL, pressurecontrol.fk_district__REL, pressurecontrol.fk_pressurezone__REL
+
+        anlage = WASSER.anlage(
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "wassergewinnungsanlage"),
+            # --- leitungsknoten ---
+            **leitungsknoten_common(row),
+            # --- anlage ---
+            name_nummer=str(row.id),
+            art="Druckbrecher" if row.fk_type__REL.value_en in ["reducer", "pressure cut"] else "Schacht",
+            material=DOES_NOT_EXIST_IN_QWAT,
+            leistung=DOES_NOT_EXIST_IN_QWAT,
+            betreiber=row.fk_distributor__REL.name,
+            konzessionaer=DOES_NOT_EXIST_IN_QWAT,
+            unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+            zustand=row.fk_status__REL.value_en,
+            dimension1=DOES_NOT_EXIST_IN_QWAT,
+        )
+        wasser_session.add(anlage)
+        print(".", end="")
+    print("done")
 
     print("Exporting QWAT.valve -> WASSER.absperrorgan")
     for row in qwat_session.query(QWAT.valve):
@@ -493,12 +529,12 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.valve),
             # --- hydraulischer_knoten ---
-            # bemerkung=row.REPLACE_ME,
-            # druck=row.REPLACE_ME,
+            bemerkung=row.remark,
+            druck=DOES_NOT_EXIST_IN_QWAT,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
-            # verbrauch=row.REPLACE_ME,
+            verbrauch=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(hydraulischer_knoten)
         create_metaattributes(hydraulischer_knoten)
@@ -508,29 +544,30 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "absperrorgan"),
             # --- leitungsknoten ---
-            # bemerkung=row.REPLACE_ME,
-            # druckzone=row.REPLACE_ME,
-            # eigentuemer=row.REPLACE_ME,
-            # einbaujahr=row.REPLACE_ME,
+            bemerkung=row.remark,
+            druckzone=DOES_NOT_EXIST_IN_QWAT,
+            eigentuemer=DOES_NOT_EXIST_IN_QWAT,
+            einbaujahr=row.year,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             hoehe=ST_Z(row.geometry),
-            # hoehenbestimmung=row.REPLACE_ME,
+            hoehenbestimmung=row.fk_precisionalti__REL.value_en,
             knotenref__REL=hydraulischer_knoten,
-            lagebestimmung="undefined",
+            lagebestimmung=row.fk_precision__REL.value_en,
             symbolori=0,
             # --- absperrorgan ---
-            # art=row.REPLACE_ME,
-            # hersteller=row.REPLACE_ME,
-            # material=row.REPLACE_ME,
-            # name_nummer=row.REPLACE_ME,
-            # nennweite=row.REPLACE_ME,
-            # schaltantrieb=row.REPLACE_ME,
-            # schaltzustand=row.REPLACE_ME,
-            # schliessrichtung=row.REPLACE_ME,
-            # t_id=row.REPLACE_ME,
-            # typ=row.REPLACE_ME,
-            # zulaessiger_bauteil_betriebsdruck=row.REPLACE_ME,
-            # zustand=row.REPLACE_ME,
+            art=row.fk_valve_type__REL.value_en,
+            hersteller=DOES_NOT_EXIST_IN_QWAT,
+            material=DOES_NOT_EXIST_IN_QWAT,
+            name_nummer=str(row.id),
+            nennweite=row.fk_diameter_nominal__REL.value_en,
+            schaltantrieb="motorisch.ohne_Fernsteuerung"
+            if row.fk_actuation__REL.id == 6403
+            else ("motorisch.mit_Fernsteuerung" if row.fk_actuation__REL.id == 6404 else "keiner"),
+            schaltzustand="unbekannt" if row.closed is None else ("geschlossen" if row.closed else "offen"),
+            schliessrichtung="links" if row.fk_actuation__REL.id == 6402 else "rechts",
+            typ=DOES_NOT_EXIST_IN_QWAT,
+            zulaessiger_bauteil_betriebsdruck=DOES_NOT_EXIST_IN_QWAT,
+            zustand=row.fk_status__REL.value_en,
         )
         wasser_session.add(absperrorgan)
         create_metaattributes(absperrorgan)
