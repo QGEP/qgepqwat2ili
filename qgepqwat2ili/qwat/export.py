@@ -86,9 +86,9 @@ def qwat_export():
             "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
-            "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
+            "hoehenbestimmung": get_vl(row.fk_precisionalti__REL, "value_en"),
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
-            "lagebestimmung": get_vl(row.fk_precision__REL),
+            "lagebestimmung": get_vl(row.fk_precision__REL, "value_en"),
             "symbolori": 0,
         }
 
@@ -138,7 +138,7 @@ def qwat_export():
             # durchfluss=NOT_AVAILABLE_IN_QGEP,
             # fliessgeschwindigkeit=NOT_AVAILABLE_IN_QGEP,
             name_nummer=str(get_tid(row, WASSER.hydraulischer_strang)),
-            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal"),
+            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or 0,
             referenz_laenge=row._length2d,
             # referenz_rauheit=NOT_AVAILABLE_IN_QGEP,
             # verbrauch=NOT_AVAILABLE_IN_QGEP,
@@ -155,7 +155,7 @@ def qwat_export():
             **base_common(row, "leitung", tid_for_class=WASSER.leitung),
             # --- leitung ---
             astatus=get_vl(row.fk_status__REL, "value_en"),
-            aussenbeschichtung=get_vl(row.fk_protection__REL),
+            aussenbeschichtung=get_vl(row.fk_protection__REL, "value_en"),
             baujahr=row.year,
             bemerkung=row.remark,
             betreiber=get_vl(row.fk_distributor__REL, "name"),
