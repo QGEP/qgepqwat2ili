@@ -21,6 +21,10 @@ def qwat_export():
     QWAT = get_qwat_model()
     WASSER = get_wasser_model()
 
+    # We use these to identify fields that are not matched
+    DOES_NOT_EXIST_IN_QWAT = None
+    MAPPING_OPEN_QUESTION = None
+
     # Logging disabled (very slow)
     # qwat_session = Session(utils.sqlalchemy.create_engine(logger_name='qwat'), autocommit=False, autoflush=False)
     # wasser_session = Session(utils.sqlalchemy.create_engine(logger_name='wasser'), autocommit=False, autoflush=False)
@@ -80,9 +84,9 @@ def qwat_export():
         """
         return {
             # --- leitungsknoten ---
-            # "bemerkung": DOES_NOT_EXIST_IN_QWAT,
-            # "druckzone": DOES_NOT_EXIST_IN_QWAT,
-            # "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
+            "bemerkung": DOES_NOT_EXIST_IN_QWAT,
+            "druckzone": DOES_NOT_EXIST_IN_QWAT,
+            "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
             "einbaujahr": row.year,
             "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
             "hoehe": ST_Z(row.geometry),
@@ -108,12 +112,12 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "hydraulischer_knoten", QWAT.node),
             # --- hydraulischer_knoten ---
-            # bemerkung=DOES_NOT_EXIST_IN_QWAT,
-            # druck=OPEN_QUESTION ,
+            bemerkung=DOES_NOT_EXIST_IN_QWAT,
+            druck=MAPPING_OPEN_QUESTION,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
-            # verbrauch=DOES_NOT_EXIST_IN_QWAT,
+            verbrauch=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(hydraulischer_knoten)
         create_metaattributes(hydraulischer_knoten)
@@ -135,13 +139,13 @@ def qwat_export():
             # --- hydraulischer_strang ---
             bemerkung=row.remark,
             bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
-            # durchfluss=NOT_AVAILABLE_IN_QGEP,
-            # fliessgeschwindigkeit=NOT_AVAILABLE_IN_QGEP,
+            durchfluss=DOES_NOT_EXIST_IN_QWAT,
+            fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(get_tid(row, WASSER.hydraulischer_strang)),
             referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or 0,
             referenz_laenge=row._length2d,
-            # referenz_rauheit=NOT_AVAILABLE_IN_QGEP,
-            # verbrauch=NOT_AVAILABLE_IN_QGEP,
+            referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
+            verbrauch=DOES_NOT_EXIST_IN_QWAT,
             vonknotenref=get_tid(row.fk_node_a__REL, QWAT.node),
             zustand=get_vl(row.fk_status__REL, "value_en"),
         )
@@ -165,25 +169,25 @@ def qwat_export():
             durchmesser=get_vl(row.fk_material__REL, "diameter_nominal"),
             durchmesseraussen=get_vl(row.fk_material__REL, "diameter_external"),
             durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
-            # eigentuemer=NOT_AVAILABLE_IN_QGEP,
+            eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             funktion=get_vl(row.fk_function__REL, "value_en"),
             geometrie=ST_ForceCurve(ST_Force2D(ST_Transform(row.geometry, 2056))),
-            # hydraulische_rauheit=NOT_AVAILABLE_IN_QGEP,
-            # innenbeschichtung=NOT_AVAILABLE_IN_QGEP,
-            # kathodischer_schutz=NOT_AVAILABLE_IN_QGEP,
-            # konzessionaer=NOT_AVAILABLE_IN_QGEP,
+            hydraulische_rauheit=DOES_NOT_EXIST_IN_QWAT,
+            innenbeschichtung=DOES_NOT_EXIST_IN_QWAT,
+            kathodischer_schutz=DOES_NOT_EXIST_IN_QWAT,
+            konzessionaer=DOES_NOT_EXIST_IN_QWAT,
             laenge=row._length2d,
             lagebestimmung=get_vl(row.fk_precision__REL, "value_en"),
             material=get_vl(row.fk_material__REL, "value_en"),
             name_nummer=str(get_tid(row, WASSER.leitung)),
             nennweite=str(row.fk_material__REL.diameter_nominal),
-            # sanierung_erneuerung=NOT_AVAILABLE_IN_QGEP,
-            # schubsicherung=NOT_AVAILABLE_IN_QGEP,
+            sanierung_erneuerung=DOES_NOT_EXIST_IN_QWAT,
+            schubsicherung=DOES_NOT_EXIST_IN_QWAT,
             strangref=hydraulischer_strang,
-            # ueberdeckung=NOT_AVAILABLE_IN_QGEP,
-            # unterhalt=NOT_AVAILABLE_IN_QGEP,
-            # unterhaltspflichtiger=NOT_AVAILABLE_IN_QGEP,
-            # verbindungsart=NOT_AVAILABLE_IN_QGEP,
+            ueberdeckung=DOES_NOT_EXIST_IN_QWAT,
+            unterhalt=DOES_NOT_EXIST_IN_QWAT,
+            unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
+            verbindungsart=DOES_NOT_EXIST_IN_QWAT,
             verlegeart=get_vl(row.fk_installmethod__REL, "value_en"),
             wasserqualitaet=get_vl(row.fk_watertype__REL, "value_en"),
             zulaessiger_bauteil_betriebsdruck=get_vl(row.fk_material__REL, "pressure_nominal"),
@@ -248,7 +252,7 @@ def qwat_export():
             **leitungsknoten_common(row),
             # --- hydrant ---
             art="Unterflurhydrant" if row.underground else "Oberflurhydrant",
-            # dimension=DOES_NOT_EXIST_IN_QWAT,
+            dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
             hersteller=row.fk_provider__REL.value_fr,
