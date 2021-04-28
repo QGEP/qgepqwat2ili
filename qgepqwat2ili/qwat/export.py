@@ -183,7 +183,7 @@ def qwat_export():
             nennweite=str(row.fk_material__REL.diameter_nominal),
             sanierung_erneuerung=DOES_NOT_EXIST_IN_QWAT,
             schubsicherung=DOES_NOT_EXIST_IN_QWAT,
-            strangref=hydraulischer_strang,
+            strangref=hydraulischer_strang.t_id,
             ueberdeckung=DOES_NOT_EXIST_IN_QWAT,
             unterhalt=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
