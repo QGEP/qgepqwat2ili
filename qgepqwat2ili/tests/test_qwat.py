@@ -4,7 +4,7 @@ import sys
 import tempfile
 import unittest
 
-from qgepqwat2ili import main, utils
+from qgepqwat2ili import main
 
 # Display logging in unittest output
 logger = logging.getLogger()
@@ -31,10 +31,6 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qwat", "export", path, "--recreate_schema"])
 
-        # Validate the outgoing XTF
-        print(f"Saved to {path}")
-        utils.ili2db.validate_xtf_data(path)
-
     def test_case_b_export_complete_qwat_to_xtf_without_validation(self):
         """
         # B. export the whole QWAT model to interlis
@@ -46,8 +42,4 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        main(["qwat", "export", path, "--recreate_schema"])
-
-        # Validate the outgoing XTF
-        # print(f"Saved to {path}")
-        # utils.ili2db.validate_xtf_data(path)
+        main(["qwat", "export", path, "--recreate_schema", "--skip_validation"])
