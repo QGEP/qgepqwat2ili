@@ -9,10 +9,11 @@ QWAT_TO_WASSER = {
     QWAT.hydrant: [WASSER.hydrant],
     QWAT.tank: [WASSER.wasserbehaelter],
     QWAT.pump: [WASSER.foerderanlage],
-    QWAT.treatment: [WASSER.anlage],
-    QWAT.subscriber: [WASSER.hausanschluss],
+    QWAT.treatment: [WASSER.wassergewinnungsanlage],
+    QWAT.subscriber: [WASSER.hausanschluss, WASSER.anlage],
     QWAT.source: [WASSER.wassergewinnungsanlage],
-    QWAT.chamber: [WASSER.absperrorgan],
+    QWAT.chamber: [WASSER.anlage],
+    QWAT.pressurecontrol: [WASSER.anlage],
     QWAT.valve: [WASSER.absperrorgan],
 
     # AVAILABLE TABLES
