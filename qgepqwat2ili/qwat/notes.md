@@ -1,20 +1,17 @@
 
-## Questions
-* druck vs druckzone ? are they both pressure values
 
-## Opportunities for QWAT
+## General / Opportunities for QWAT
 * add consommation
-
-
-## Remarks for export
-
-# General
+* units are often not explicit
+* add SIA 405 values in value lists
 * notion of owner / distributor|actor / operator
 
 ## value lists
 * translations to german are missing
 
-## Pipes
+## Tables
+
+### Pipes
 * protection needs to be normalized
 * rugosity no defined
 * relining is missing
@@ -27,3 +24,8 @@
 ### Hydrant
 * no diameter/dimensions in QWAT
 * sprinkler should be in hydrant?
+
+
+
+## Questions
+* druck vs druckzone ? are they both pressure values
