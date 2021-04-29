@@ -755,8 +755,8 @@ def qgep_export(selection=None):
             **base_common(row, "untersuchung"),
             # --- erhaltungsereignis ---
             # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
-            art=row.kind,
-            astatus=row.status,
+            art=get_vl(row.kind__REL),
+            astatus=get_vl(row.status__REL),
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
             bemerkung=row.remark,
@@ -770,14 +770,14 @@ def qgep_export(selection=None):
             zeitpunkt=row.time_point,
             # --- untersuchung ---
             bispunktbezeichnung=row.to_point_identifier,
-            erfassungsart=row.recording_type,
+            erfassungsart=get_vl(row.recording_type__REL),
             fahrzeug=row.vehicle,
             geraet=row.equipment,
             haltungspunktref=get_tid(row.fk_reach_point__REL),
             inspizierte_laenge=row.inspected_length,
             videonummer=row.videonumber,
             vonpunktbezeichnung=row.from_point_identifier,
-            witterung=row.weather,
+            witterung=get_vl(row.weather__REL),
         )
         abwasser_session.add(untersuchung)
         create_metaattributes(row)
@@ -904,7 +904,7 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "datentraeger"),
             # --- datentraeger ---
-            art=row.kind,
+            art=get_vl(row.kind__REL),
             bemerkung=row.remark,
             bezeichnung=row.identifier,
             pfad=row.path,
@@ -937,11 +937,11 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "datei"),
             # --- datei ---
-            art=get_vl(row.kind__REL) or "???",
+            art=get_vl(row.kind__REL) or "andere",
             bemerkung=row.remark,
             bezeichnung=row.identifier,
             datentraegerref=get_tid(row.data_media__REL),
-            klasse=getattr(row, "class"),  # class is a python keyword, this is equivalent to `klasse=row.class`,
+            klasse=get_vl(row.class__REL),
             objekt=row.object,
             relativpfad=row.path_relative,
         )
