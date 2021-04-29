@@ -1,13 +1,8 @@
 import os
-import sys
 
 from qgis.core import QgsProject
 from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUi
-from qgis.utils import iface
-
-# Required for loadUi to find the custom widget
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 class GuiExport(QDialog):
@@ -21,10 +16,6 @@ class GuiExport(QDialog):
         structures_layer = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")[0]
         reaches_layer = QgsProject.instance().mapLayersByName("vw_qgep_reach")[0]
 
-        self.upstream_widget.set_layer(structures_layer)
-        self.upstream_widget.set_canvas(iface.mapCanvas())
-        self.downstream_widget.set_layer(structures_layer)
-        self.downstream_widget.set_canvas(iface.mapCanvas())
         QgsProject.instance().mapLayersByName("vw_qgep_reach")[0]
 
         self.structures = structures_layer.selectedFeatures()
@@ -45,18 +36,4 @@ class GuiExport(QDialog):
                 ids.append(str(reach["rp_to_fk_wastewater_networkelement"]))
             return ids
         else:
-            return None
-
-    @property
-    def upstream_id(self):
-        try:
-            return self.upstream_widget.feature["wn_obj_id"]
-        except KeyError:
-            return None
-
-    @property
-    def downstream_id(self):
-        try:
-            return self.downstream_widget.feature["wn_obj_id"]
-        except KeyError:
             return None

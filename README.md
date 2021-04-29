@@ -15,12 +15,12 @@ python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf
 
 Export example
 ```
-python -m qgepqwat2ili qgep export desktop/my_export.xtf --upstream_of "WN00000"
+python -m qgepqwat2ili qgep export desktop/my_export.xtf --selection "ch13p7mzRE001221,ch13p7mzWN003445,ch13p7mzWN008122"
 ```
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qgep [-h] [--upstream_of UPSTREAM_OF] [--downstream_of DOWNSTREAM_OF] [--recreate_schema] [--skip_validation] {import,export} path
+usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] {import,export} path
 
 positional arguments:
   {import,export}
@@ -28,10 +28,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --upstream_of UPSTREAM_OF
-                        limit to network upstream of network element (id)
-  --downstream_of DOWNSTREAM_OF
-                        limit to network downstream of network element (id)
+  --selection SELECTION
+                        if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)
   --recreate_schema     drops schema and reruns ili2pg importschema
   --skip_validation     skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
 ```
@@ -40,12 +38,12 @@ optional arguments:
 
 Import example
 ```
-python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf
+# QWAT import not implemented yet
 ```
 
 Export example
 ```
-python -m qgepqwat2ili qgep export desktop/my_export.xtf --upstream_of "WN00000"
+python -m qgepqwat2ili qwat export desktop/my_export.xtf
 ```
 
 Full usage

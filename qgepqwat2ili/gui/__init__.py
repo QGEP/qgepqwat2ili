@@ -118,11 +118,7 @@ def action_export(plugin):
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
-        qgep_export(
-            selection=export_dialog.selected_ids,
-            downstream_of=export_dialog.downstream_id,
-            upstream_of=export_dialog.upstream_id,
-        )
+        qgep_export(selection=export_dialog.selected_ids)
         progress_dialog.setValue(50)
 
         # Export from ili2pg model to file

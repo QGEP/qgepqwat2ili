@@ -10,14 +10,12 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None, downstream_of=None, upstream_of=None):
+def qgep_export(selection=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
     Args:
         selection:      if provided, limits the export to networkelements that are provided in the selection
-        downstream_of:  if provided, limits the export to nodes that are downstream of the provided node
-        upstream_of:    if provided, limits the export to nodes that are upstream of the provided node
     """
 
     QGEP = get_qgep_model()
@@ -30,65 +28,9 @@ def qgep_export(selection=None, downstream_of=None, upstream_of=None):
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     tid_maker = utils.ili2db.TidMaker(id_attribute="obj_id")
 
-    # Upstream/Downstream filtering
-    filtered = selection or upstream_of or downstream_of
+    # Filtering
+    filtered = selection is not None
     subset_ids = selection if selection is not None else []
-    if upstream_of or downstream_of:
-
-        common_table_expressions = []
-        params = {}
-        select_clauses = []
-        if upstream_of:
-            common_table_expressions.append(
-                """
-                node_with_child AS (
-                    SELECT n.id, s.to_node AS child_id, n.ne_id FROM qgep_network.node n
-                    LEFT JOIN qgep_network.segment s ON s.from_node = n.id
-                ),
-                upstream AS (
-                    SELECT id, child_id, ne_id
-                    FROM node_with_child
-                    WHERE ne_id = :upstream_of
-
-                    UNION ALL
-
-                    SELECT n.id, n.child_id, n.ne_id
-                    FROM node_with_child n
-                    INNER JOIN upstream ON upstream.id = n.child_id
-                )
-            """
-            )
-            select_clauses.append("SELECT ne_id FROM upstream")
-            params["upstream_of"] = upstream_of
-
-        if downstream_of:
-            common_table_expressions.append(
-                """
-                node_with_parent AS (
-                    SELECT n.id, s.from_node AS parent_id, n.ne_id FROM qgep_network.node n
-                    LEFT JOIN qgep_network.segment s ON s.to_node = n.id
-                ),
-                downstream AS (
-                    SELECT id, parent_id, ne_id
-                    FROM node_with_parent
-                    WHERE ne_id = :downstream_of
-
-                    UNION ALL
-
-                    SELECT n.id, n.parent_id, n.ne_id
-                    FROM node_with_parent n
-                    INNER JOIN downstream ON downstream.id = n.parent_id
-                )
-            """
-            )
-            select_clauses.append("SELECT ne_id FROM downstream")
-            params["downstream_of"] = downstream_of
-
-        subset_query = f"WITH RECURSIVE {','.join(common_table_expressions)} {' INTERSECT '.join(select_clauses)};"
-
-        rows = qgep_session.execute(subset_query, params)
-
-        subset_ids.extend(row[0] for row in rows)
 
     def get_tid(relation):
         """

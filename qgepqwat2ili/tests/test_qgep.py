@@ -117,28 +117,6 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(session.query(QGEP.manhole).get("ch080qwzNS000113").year_of_construction, 1950)
         session.close()
 
-    def test_case_d_export_subset(self):
-        """
-        # D. export a subset
-        """
-
-        # Prepare db
-        main(["setupdb", "full"])
-
-        path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        main(
-            [
-                "qgep",
-                "export",
-                path,
-                "--recreate_schema",
-                "--upstream_of",
-                "ch13p7mzWN008128",
-                "--downstream_of",
-                "ch13p7mzWN005856",
-            ]
-        )
-
     def test_case_e_export_selection(self):
         """
         # E. export a selection
