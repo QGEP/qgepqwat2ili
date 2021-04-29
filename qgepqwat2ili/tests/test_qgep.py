@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 
 from qgepqwat2ili import main, utils
 from qgepqwat2ili.qgep.model_qgep import get_qgep_model
@@ -15,6 +16,11 @@ logger.setLevel(logging.WARNING)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.WARNING)
 logger.addHandler(handler)
+
+
+def findall_in_xml(root, tag, basket="VSA_KEK_2019_LV95.KEK"):
+    ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
+    return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
 
 
 class TestQGEPUseCases(unittest.TestCase):
@@ -142,6 +148,14 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
+        selection = [
+            # reach_id
+            "ch13p7mzRE001221",
+            # node_a_id
+            "ch13p7mzWN003445",
+            # node_b_id
+            "ch13p7mzWN008122",
+        ]
         main(
             [
                 "qgep",
@@ -149,9 +163,13 @@ class TestQGEPUseCases(unittest.TestCase):
                 path,
                 "--recreate_schema",
                 "--selection",
-                "ch13p7mzWN008128,ch13p7mzWN005856",
+                ",".join(selection),
             ]
         )
+        # Perform various checks
+        root = ET.parse(path)
+        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
 
 
 class TestRegressions(unittest.TestCase):

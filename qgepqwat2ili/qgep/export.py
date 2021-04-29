@@ -15,7 +15,7 @@ def qgep_export(selection=None, downstream_of=None, upstream_of=None):
     Export data from the QGEP model into the ili2pg model.
 
     Args:
-        selection:      if provided, limits the export to nodes that are provided in the selection
+        selection:      if provided, limits the export to networkelements that are provided in the selection
         downstream_of:  if provided, limits the export to nodes that are downstream of the provided node
         upstream_of:    if provided, limits the export to nodes that are upstream of the provided node
     """
