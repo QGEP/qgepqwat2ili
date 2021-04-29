@@ -16,7 +16,7 @@ from ..utils.ili2db import (
     import_xtf_data,
     validate_xtf_data,
 )
-from ..utils.various import logger
+from ..utils.various import CmdException, logger
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
@@ -131,7 +131,7 @@ def action_export(plugin):
         QApplication.processEvents()
         try:
             validate_xtf_data(file_name)
-        except Exception:
+        except CmdException:
             progress_dialog.close()
             QMessageBox.critical(
                 None,
