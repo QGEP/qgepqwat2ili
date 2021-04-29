@@ -727,10 +727,12 @@ def qgep_export(selection=None):
     query = qgep_session.query(QGEP.examination)
     if filtered:
         query = (
-            query.join(QGEP.reach_point)
-            .join(QGEP.reach, QGEP.reach_point.fk_wastewater_networkelement == QGEP.reach.obj_id)
+            query.join(QGEP.re_maintenance_event_wastewater_structure)
+            .join(QGEP.wastewater_structure)
+            .join(QGEP.wastewater_networkelement)
             .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.examination
@@ -788,8 +790,12 @@ def qgep_export(selection=None):
     logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.damage_manhole)
     if filtered:
-        query = query.join(QGEP.examination, QGEP.reach_point, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(QGEP.examination)
+            .join(QGEP.re_maintenance_event_wastewater_structure)
+            .join(QGEP.wastewater_structure)
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
     for row in query:
 
@@ -839,7 +845,8 @@ def qgep_export(selection=None):
     if filtered:
         query = (
             query.join(QGEP.examination)
-            .join(QGEP.reach_point)
+            .join(QGEP.re_maintenance_event_wastewater_structure)
+            .join(QGEP.wastewater_structure)
             .join(QGEP.wastewater_networkelement)
             .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
@@ -918,6 +925,18 @@ def qgep_export(selection=None):
 
     logger.info("Exporting QGEP.file -> ABWASSER.datei, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.file)
+    if filtered:
+        query = (
+            query.outerjoin(QGEP.damage, QGEP.file.object == QGEP.damage.obj_id)
+            .join(
+                QGEP.examination,
+                or_(QGEP.file.object == QGEP.damage.obj_id, QGEP.file.object == QGEP.examination.obj_id),
+            )
+            .join(QGEP.re_maintenance_event_wastewater_structure)
+            .join(QGEP.wastewater_structure)
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.file
