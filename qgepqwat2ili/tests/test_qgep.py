@@ -25,9 +25,7 @@ class TestQGEPUseCases(unittest.TestCase):
         We recieve data from a TV inspection company as a Wincan exported .xtf file. We want this data loaded into QGEP.
         """
 
-        # Validate the incomming XTF
         path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_a_import_from_wincan.xtf")
-        utils.ili2db.validate_xtf_data(path)
 
         # Prepare db (we import in a full schema)
         main(["setupdb", "full"])
@@ -82,10 +80,6 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qgep", "export", path, "--recreate_schema"])
 
-        # Validate the outgoing XTF
-        print(f"Saved to {path}")
-        utils.ili2db.validate_xtf_data(path)
-
     @unittest.expectedFailure
     def test_case_c_import_complete_xtf_to_qgep(self):
         """
@@ -139,10 +133,6 @@ class TestQGEPUseCases(unittest.TestCase):
             ]
         )
 
-        # Validate the outgoing XTF
-        print(f"Saved to {path}")
-        utils.ili2db.validate_xtf_data(path)
-
     def test_case_e_export_selection(self):
         """
         # E. export a selection
@@ -162,10 +152,6 @@ class TestQGEPUseCases(unittest.TestCase):
                 "ch13p7mzWN008128,ch13p7mzWN005856",
             ]
         )
-
-        # Validate the outgoing XTF
-        print(f"Saved to {path}")
-        utils.ili2db.validate_xtf_data(path)
 
 
 class TestRegressions(unittest.TestCase):
