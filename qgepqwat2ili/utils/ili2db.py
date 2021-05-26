@@ -10,12 +10,12 @@ from .. import config
 from .various import exec_, get_pgconf, logger
 
 
-def _log_path(name):
+def log_path(name):
     now = datetime.datetime.now()
     return os.path.join(tempfile.gettempdir(), f"ili2qgepqwat-{now:%Y-%m-%d-%H-%M-%S}-{name}.log")
 
 
-def create_ili_schema(schema, model, recreate_schema=False):
+def create_ili_schema(schema, model, recreate_schema=False, log_path=None):
     logger.info("CONNECTING TO DATABASE...")
 
     pgconf = get_pgconf()
@@ -45,29 +45,33 @@ def create_ili_schema(schema, model, recreate_schema=False):
 
     logger.info(f"ILIDB SCHEMAIMPORT INTO {schema}...")
     pgconf = get_pgconf()
+    log_path = log_path or log_path("create")
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --log {_log_path("create")} --nameLang de {model}'
+        f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --log {log_path} --nameLang de {model}'
     )
 
 
-def validate_xtf_data(xtf_file):
+def validate_xtf_data(xtf_file, log_path=None):
     logger.info("VALIDATING XTF DATA...")
-    exec_(f'"{config.JAVA}" -jar {config.ILIVALIDATOR} --modeldir {config.ILI_FOLDER} {xtf_file}')
+    log_path = log_path or log_path("validation")
+    exec_(f'"{config.JAVA}" -jar {config.ILIVALIDATOR} --modeldir {config.ILI_FOLDER} --log {log_path} {xtf_file}')
 
 
-def import_xtf_data(schema, xtf_file):
+def import_xtf_data(schema, xtf_file, log_path=None):
     logger.info("IMPORTING XTF DATA...")
     pgconf = get_pgconf()
+    log_path = log_path or log_path("import")
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --import --deleteData --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {_log_path("import")} {xtf_file}'
+        f'"{config.JAVA}" -jar {config.ILI2PG} --import --deleteData --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} {xtf_file}'
     )
 
 
-def export_xtf_data(schema, model_name, xtf_file):
+def export_xtf_data(schema, model_name, xtf_file, log_path=None):
     logger.info("EXPORT ILIDB...")
     pgconf = get_pgconf()
+    log_path = log_path or log_path("export")
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --export --models {model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {_log_path("export")} --trace {xtf_file}'
+        f'"{config.JAVA}" -jar {config.ILI2PG} --export --models {model_name} --exportModels SIA405_EAUX_USEES_2015 --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} --trace {xtf_file}'
     )
 
 
