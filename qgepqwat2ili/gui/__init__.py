@@ -15,7 +15,7 @@ from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
     import_xtf_data,
-    log_path,
+    make_log_path,
     validate_xtf_data,
 )
 from ..utils.various import CmdException, logger
@@ -62,30 +62,30 @@ def action_import(plugin):
     # Validating the input file
     progress_dialog.setLabelText("Validating the input file...")
     QApplication.processEvents()
-    log = log_path("validate")
+    log_path = make_log_path("validate")
     try:
-        validate_xtf_data(file_name, log_path=log)
+        validate_xtf_data(file_name, log_path=log_path)
     except CmdException:
         progress_dialog.close()
         show_failure(
             "Invalid file",
             "The input file is not a valid XTF file. Open the logs for more details on the error.",
-            log,
+            log_path,
         )
         return
 
     # Prepare the temporary ili2pg model
     progress_dialog.setLabelText("Creating ili schema...")
     QApplication.processEvents()
-    log = log_path("create")
+    log_path = make_log_path("create")
     try:
-        create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log)
+        create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log_path)
     except CmdException:
         progress_dialog.close()
         show_failure(
             "Could not create the ili2pg schema",
             "Open the logs for more details on the error.",
-            log,
+            log_path,
         )
         return
     progress_dialog.setValue(33)
@@ -93,15 +93,15 @@ def action_import(plugin):
     # Export from ili2pg model to file
     progress_dialog.setLabelText("Importing XTF data...")
     QApplication.processEvents()
-    log = log_path("import")
+    log_path = make_log_path("import")
     try:
-        import_xtf_data(config.ABWASSER_SCHEMA, file_name, log_path=log)
+        import_xtf_data(config.ABWASSER_SCHEMA, file_name, log_path=log_path)
     except CmdException:
         progress_dialog.close()
         show_failure(
             "Could not import data",
             "Open the logs for more details on the error.",
-            log,
+            log_path,
         )
         return
     progress_dialog.setValue(66)
@@ -146,15 +146,17 @@ def action_export(plugin):
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema...")
         QApplication.processEvents()
-        log = log_path("create")
+        log_path = make_log_path("create")
         try:
-            create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log)
+            create_ili_schema(
+                config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log_path
+            )
         except CmdException:
             progress_dialog.close()
             show_failure(
                 "Could not create the ili2pg schema",
                 "Open the logs for more details on the error.",
-                log,
+                log_path,
             )
             return
         progress_dialog.setValue(25)
@@ -168,30 +170,30 @@ def action_export(plugin):
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file...")
         QApplication.processEvents()
-        log = log_path("export")
+        log_path = make_log_path("export")
         try:
-            export_xtf_data(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL_NAME, file_name, log_path=log)
+            export_xtf_data(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL_NAME, file_name, log_path=log_path)
         except CmdException:
             progress_dialog.close()
             show_failure(
                 "Could not export the ili2pg schema",
                 "Open the logs for more details on the error.",
-                log,
+                log_path,
             )
             return
         progress_dialog.setValue(75)
 
         progress_dialog.setLabelText("Validating the output file...")
         QApplication.processEvents()
-        log = log_path("validate")
+        log_path = make_log_path("validate")
         try:
-            validate_xtf_data(file_name, log_path=log)
+            validate_xtf_data(file_name, log_path=log_path)
         except CmdException:
             progress_dialog.close()
             show_failure(
                 "Invalid file",
                 "The created file is not a valid XTF file.",
-                log,
+                log_path,
             )
             return
         progress_dialog.setValue(100)
