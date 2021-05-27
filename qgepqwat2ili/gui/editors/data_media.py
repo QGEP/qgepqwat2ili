@@ -1,3 +1,5 @@
+import os
+
 from .base import Editor
 
 
@@ -29,6 +31,12 @@ class DataMediaEditor(Editor):
         if not self._path_was_changed:
             self.validity = Editor.WARNING
             self.message = "Path was not adapted."
+        elif not os.path.exists(self.obj.path):
+            self.validity = Editor.WARNING
+            self.message = "This path does not exist on the current system"
+        elif not os.path.isdir(self.obj.path):
+            self.validity = Editor.WARNING
+            self.message = "This path is not a directory"
         else:
             self.validity = Editor.VALID
             self.message = "No warning"
