@@ -20,9 +20,9 @@ class ExaminationEditor(Editor):
         # as 99% of the time, this will be a good match
 
         QGEP = get_qgep_model()
-        suggested_structures = list(self._get_suggested_structures(inverted=False)) + list(
-            self._get_suggested_structures(inverted=True)
-        )
+        suggested_structures = self._get_suggested_structures()
+        # TODO : Only assign if there's no already assigned structures. For now, this is fine, as due to
+        # ili2pg's limitations, assigned structures are not imported (see import_.py:968 near `if row.abwasserbauwerkref`)
         if len(suggested_structures) == 1:
             assigned_structure = suggested_structures[0]
 
@@ -44,15 +44,11 @@ class ExaminationEditor(Editor):
         self.update_widget()
 
     def update_widget(self):
-        # 1. Populate suggested channels
+        # 1. Populate suggested structures
         self.widget.suggestedListWidget.clear()
-        for channel in self._get_suggested_structures():
-            widget_item = QListWidgetItem(f"Channel {channel.obj_id}/{channel.identifier}")
-            widget_item.setData(Qt.UserRole, channel.obj_id)
-            self.widget.suggestedListWidget.addItem(widget_item)
-        for channel in self._get_suggested_structures(inverted=True):
-            widget_item = QListWidgetItem(f"Channel {channel.obj_id}/{channel.identifier} [inverted]")
-            widget_item.setData(Qt.UserRole, channel.obj_id)
+        for structure in self._get_suggested_structures():
+            widget_item = QListWidgetItem(f"Structure {structure.obj_id}/{structure.identifier}")
+            widget_item.setData(Qt.UserRole, structure.obj_id)
             self.widget.suggestedListWidget.addItem(widget_item)
 
         # 2. Populated assigned structures
@@ -151,16 +147,27 @@ class ExaminationEditor(Editor):
                 editor.listitem.setCheckState(0, check_state)
                 break
 
-    def _get_suggested_structures(self, inverted=False):
+    def _get_suggested_structures(self):
+
+        from_id = self.obj.from_point_identifier
+        to_id = self.obj.to_point_identifier
+
+        if from_id is not None and to_id is not None:
+            # If both from/to point identifier are set, we are trying to find a channel
+            structures_nrm = self._get_suggested_structures_for_channel(from_id, to_id)
+            structures_rev = self._get_suggested_structures_for_channel(to_id, from_id)
+            return list(structures_nrm) + list(structures_rev)
+        elif from_id is not None:
+            # If just from point identifier is set, we are trying to find a manhole
+            structures = self._get_suggested_structures_for_manhole(from_id)
+            return list(structures)
+        else:
+            # Otherwise we don't have anything to suggest
+            return []
+
+    def _get_suggested_structures_for_channel(self, from_id, to_id):
 
         QGEP = get_qgep_model()
-
-        if not inverted:
-            from_id = self.obj.from_point_identifier
-            to_id = self.obj.to_point_identifier
-        else:
-            from_id = self.obj.to_point_identifier
-            to_id = self.obj.from_point_identifier
 
         wastewater_ne_from = aliased(QGEP.wastewater_networkelement)
         wastewater_ne_to = aliased(QGEP.wastewater_networkelement)
@@ -176,6 +183,12 @@ class ExaminationEditor(Editor):
             .join(wastewater_ne_to, wastewater_ne_to.obj_id == rp_to.fk_wastewater_networkelement)
             .filter(wastewater_ne_from.identifier == from_id, wastewater_ne_to.identifier == to_id)
         )
+
+    def _get_suggested_structures_for_manhole(self, from_id):
+
+        QGEP = get_qgep_model()
+
+        return self.session.query(QGEP.wastewater_structure).filter(QGEP.wastewater_structure.identifier == from_id)
 
     def _get_assigned_structures(self):
 
