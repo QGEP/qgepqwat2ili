@@ -71,7 +71,7 @@ def export_xtf_data(schema, model_name, xtf_file, log_path=None):
     pgconf = get_pgconf()
     log_path = log_path or make_log_path("export")
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --export --models {model_name} --exportModels SIA405_EAUX_USEES_2015 --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} --trace {xtf_file}'
+        f'"{config.JAVA}" -jar {config.ILI2PG} --export --models {model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} --trace {xtf_file}'
     )
 
 
