@@ -1,2 +1,2 @@
 include requirements.txt
-global-include *.jar
+global-include *.jar *.ili
