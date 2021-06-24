@@ -6,7 +6,9 @@ It can be used as a command line tool or integrated in QGIS plugins.
 
 ## Command line tool
 
-The command line tool can be installed as any other python library
+### Installation
+
+The tool requires **python** (3.6 or newer) and **java** to be available. Then, it can be installed like any other python library:
 ```
 pip install --upgrade qgepqwat2ili
 ```
