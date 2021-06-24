@@ -85,3 +85,7 @@ Style is done with pre-commit
 pip install pre-commit
 pre-commit install
 ```
+
+## Releases
+
+Releases to PyPi are made automatically via github workflows whenever a new tag matching `v*` is pushed.

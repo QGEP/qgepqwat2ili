@@ -22,7 +22,7 @@ jobs:
         python-version: 3.7
 
     - name: Inject version name
-      run: sed -i "s/__dev__/${GITHUB_REF##*/}/" setup.py
+      run: sed -i "s/999\.dev0/${GITHUB_REF##*/}/" setup.py
 
     - name: Install pypa/build
       run: pip install build
