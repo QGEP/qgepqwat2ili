@@ -78,6 +78,17 @@ optional arguments:
                         name of the pgservice to use to connect to the database (default: qwat)
 ```
 
+### Logging
+
+Logging output to a file can be achieved by redirecting stdout to a file :
+```
+python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf > output.log
+```
+
+Please include this when reporting issues.
+
+Additionally, ili2db and ilivalidator related commands will create a log file named `ili2qgepqwat-yyyy-mm-dd-hh-mm-ss-STEP.log` in your temporary directory (`/tmp` on linux or `C:\Users\You\AppData\Local\Temp\` on Windows).
+
 
 ## QGIS integration
 

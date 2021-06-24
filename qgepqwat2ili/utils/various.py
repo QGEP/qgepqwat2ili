@@ -3,12 +3,14 @@ import configparser
 import logging
 import os
 import subprocess
+import sys
 import time
 import warnings
 
 from .. import config
 
 logger = logging.getLogger(__package__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class CmdException(BaseException):
