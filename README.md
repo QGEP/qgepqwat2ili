@@ -27,7 +27,9 @@ python -m qgepqwat2ili qgep export desktop/my_export.xtf --selection "ch13p7mzRE
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] {import,export} path
+usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] {import,export} path
+
+ili2QGEP entrypoint
 
 positional arguments:
   {import,export}
@@ -37,8 +39,12 @@ optional arguments:
   -h, --help            show this help message and exit
   --selection SELECTION
                         if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)
-  --recreate_schema     drops schema and reruns ili2pg importschema
+                        (default: None)
+  --recreate_schema     drops schema and reruns ili2pg importschema (default: False)
   --skip_validation     skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
+                        (default: False)
+  --pgservice PGSERVICE
+                        name of the pgservice to use to connect to the database (default: pg_qgep)
 ```
 
 ### Import/export QWAT
@@ -55,16 +61,21 @@ python -m qgepqwat2ili qwat export desktop/my_export.xtf
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] {import,export} path
+usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] {import,export} path
+
+ili2QWAT entrypoint
 
 positional arguments:
   {import,export}
-  path               path to the input/output .xtf file
+  path                  path to the input/output .xtf file
 
 optional arguments:
-  -h, --help         show this help message and exit
-  --recreate_schema  drops schema and reruns ili2pg importschema
-  --skip_validation  skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
+  -h, --help            show this help message and exit
+  --recreate_schema     drops schema and reruns ili2pg importschema (default: False)
+  --skip_validation     skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
+                        (default: False)
+  --pgservice PGSERVICE
+                        name of the pgservice to use to connect to the database (default: qwat)
 ```
 
 

@@ -147,7 +147,10 @@ def read_pgservice(service_name):
     if os.path.exists(PG_CONFIG_PATH):
         config.read(PG_CONFIG_PATH)
 
-    return config[service_name] if service_name in config else {}
+    if service_name not in config:
+        raise RuntimeError(f"Service `{service_name}` not found in {PG_CONFIG_PATH}.")
+
+    return config[service_name]
 
 
 def get_pgconf():

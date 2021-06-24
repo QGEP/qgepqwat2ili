@@ -16,11 +16,19 @@ from .qwat.model_wasser import Base as BaseWasser
 
 def main(args):
 
-    parser = argparse.ArgumentParser(description="ili2QWAT / ili2QGEP prototype entrypoint")
+    parser = argparse.ArgumentParser(
+        description="ili2QWAT / ili2QGEP entrypoint", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
     subparsers = parser.add_subparsers(title="subcommands", dest="parser")
     # subparsers.required = True
 
-    parser_qgep = subparsers.add_parser("qgep", help="import/export QGEP datamodel")
+    parser_qgep = subparsers.add_parser(
+        "qgep",
+        help="import/export QGEP datamodel",
+        description="ili2QGEP entrypoint",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     # group = parser_qgep.add_mutually_exclusive_group(required=True)
     parser_qgep.add_argument("direction", choices=["import", "export"])
     parser_qgep.add_argument(
@@ -36,8 +44,18 @@ def main(args):
         help="skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)",
     )
     parser_qgep.add_argument("path", help="path to the input/output .xtf file")
+    parser_qgep.add_argument(
+        "--pgservice",
+        help="name of the pgservice to use to connect to the database",
+        default=config.QGEP_DEFAULT_PGSERVICE,
+    )
 
-    parser_qwat = subparsers.add_parser("qwat", help="import/export QWAT datamodel")
+    parser_qwat = subparsers.add_parser(
+        "qwat",
+        help="import/export QWAT datamodel",
+        description="ili2QWAT entrypoint",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser_qwat.add_argument("direction", choices=["import", "export"])
     parser_qwat.add_argument(
         "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
@@ -48,10 +66,24 @@ def main(args):
         help="skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)",
     )
     parser_qwat.add_argument("path", help="path to the input/output .xtf file")
+    parser_qwat.add_argument(
+        "--pgservice",
+        help="name of the pgservice to use to connect to the database",
+        default=config.QWAT_DEFAULT_PGSERVICE,
+    )
 
-    parser_tpl = subparsers.add_parser("tpl", help="generate code templates [dev]")
+    parser_tpl = subparsers.add_parser(
+        "tpl", help="generate code templates [dev]", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser_tpl.add_argument("model", choices=["qgep", "qwat"])
+    parser_tpl.add_argument(
+        "--pgservice",
+        help=f"name of the pgservice to use to connect to the database (defaults to {config.QGEP_DEFAULT_PGSERVICE} or {config.QWAT_DEFAULT_PGSERVICE})",
+    )
 
-    parser_setupdb = subparsers.add_parser("setupdb", help="setup test db")
+    parser_setupdb = subparsers.add_parser(
+        "setupdb", help="setup test db", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser_setupdb.set_defaults(parser="setupdb")
     parser_setupdb.add_argument("type", choices=["empty", "full"], help="type")
 
@@ -61,7 +93,9 @@ def main(args):
         parser.print_help(sys.stderr)
         exit(1)
 
-    elif args.parser == "qgep":
+    config.PGSERVICE = args.pgservice
+
+    if args.parser == "qgep":
         SCHEMA = config.ABWASSER_SCHEMA
         ILI_MODEL = config.ABWASSER_ILI_MODEL
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
@@ -117,14 +151,24 @@ def main(args):
             qwat_import()
 
     elif args.parser == "tpl":
-        utils.ili2db.create_ili_schema(config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True)
-        utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
 
-        QWATMAPPING = get_qwat_mapping()
-        QGEPMAPPING = get_qgep_mapping()
+        if args.model == "qgep":
+            if config.pgservice is None:
+                config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
+            utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
+            QGEPMAPPING = get_qgep_mapping()
+            utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
 
-        utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
-        utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
+        elif args.model == "qwat":
+            if config.pgservice is None:
+                config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
+            utils.ili2db.create_ili_schema(config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True)
+            QWATMAPPING = get_qwat_mapping()
+            utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
+
+        else:
+            print("Unknown model")
+            exit(1)
 
     elif args.parser == "setupdb":
         utils.various.setup_test_db(args.type)
