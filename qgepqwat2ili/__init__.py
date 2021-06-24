@@ -93,9 +93,8 @@ def main(args):
         parser.print_help(sys.stderr)
         exit(1)
 
-    config.PGSERVICE = args.pgservice
-
     if args.parser == "qgep":
+        config.PGSERVICE = args.pgservice
         SCHEMA = config.ABWASSER_SCHEMA
         ILI_MODEL = config.ABWASSER_ILI_MODEL
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
@@ -125,6 +124,7 @@ def main(args):
             qgep_import()
 
     elif args.parser == "qwat":
+        config.PGSERVICE = args.pgservice
         SCHEMA = config.WASSER_SCHEMA
         ILI_MODEL = config.WASSER_ILI_MODEL
         ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
@@ -151,6 +151,7 @@ def main(args):
             qwat_import()
 
     elif args.parser == "tpl":
+        config.PGSERVICE = args.pgservice
 
         if args.model == "qgep":
             if config.pgservice is None:
