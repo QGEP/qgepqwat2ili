@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import time
+import warnings
 
 from .. import config
 
@@ -148,7 +149,8 @@ def read_pgservice(service_name):
         config.read(PG_CONFIG_PATH)
 
     if service_name not in config:
-        raise RuntimeError(f"Service `{service_name}` not found in {PG_CONFIG_PATH}.")
+        warnings.warn(f"Service `{service_name}` not found in {PG_CONFIG_PATH}.")
+        return {}
 
     return config[service_name]
 
