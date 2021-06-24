@@ -6,6 +6,11 @@ It can be used as a command line tool or integrated in QGIS plugins.
 
 ## Command line tool
 
+The command line tool can be installed as any other python library
+```
+pip install --upgrade qgepqwat2ili
+```
+
 ### Import/export QGEP
 
 Import example
