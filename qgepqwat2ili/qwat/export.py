@@ -597,6 +597,7 @@ def qwat_export():
 
         if row.fk_pipe__REL is None:
             # If there's no related pipe, we keep the valve as a standalone
+            print(".", end="")
             continue
         # Otherwise, we split the pipe at the valve.
 
