@@ -1,5 +1,4 @@
 import datetime
-import warnings
 
 from geoalchemy2.functions import (
     ST_Z,
@@ -57,7 +56,7 @@ def qwat_export():
         if val is None:
             return None
         if len(val) > max_length:
-            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})")
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
     def blank_to_none(val):
@@ -67,7 +66,7 @@ def qwat_export():
         return None if val == "" else val
 
     def create_metaattributes(instance):
-        warnings.warn(
+        logger.warning(
             f"QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
         )
 
@@ -224,7 +223,7 @@ def qwat_export():
         # _rel_ --- leak.label_2_visible__REL, leak.label_1_visible__REL, leak.fk_cause__REL, leak.fk_pipe__REL
 
         if row.fk_pipe__REL is None:
-            warnings.warn(
+            logger.warning(
                 f"Cannot export QWAT.leak {row.id} as it has no related pipe, which are mandatory in SIA405."
             )
             continue
