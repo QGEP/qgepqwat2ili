@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from .. import utils
+from ..utils.various import logger
 from .model_qwat import get_qwat_model
 from .model_wasser import get_wasser_model
 
@@ -13,7 +14,7 @@ def qwat_import():
     wasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     qwat_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
-    print("Importing WASSER.hydraulischer_knoten -> QWAT.node")
+    logger.info("Importing WASSER.hydraulischer_knoten -> QWAT.node")
     for row in wasser_session.query(WASSER.hydraulischer_knoten):
 
         # baseclass --- hydraulischer_knoten.t_type, hydraulischer_knoten.t_ili_tid
@@ -41,9 +42,9 @@ def qwat_import():
         )
         qwat_session.add(node)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.hydraulischer_strang, WASSER.leitung -> QWAT.pipe")
+    logger.info("Importing WASSER.hydraulischer_strang, WASSER.leitung -> QWAT.pipe")
     for row, leitung in wasser_session.query(WASSER.hydraulischer_strang, WASSER.leitung).join(WASSER.leitung):
 
         # baseclass --- hydraulischer_strang.t_type, hydraulischer_strang.t_ili_tid
@@ -106,9 +107,9 @@ def qwat_import():
         )
         qwat_session.add(pipe)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.schadenstelle -> QWAT.leak")
+    logger.info("Importing WASSER.schadenstelle -> QWAT.leak")
     for row in wasser_session.query(WASSER.schadenstelle):
 
         # baseclass --- schadenstelle.t_type, schadenstelle.t_ili_tid
@@ -144,9 +145,9 @@ def qwat_import():
         )
         qwat_session.add(leak)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.hydrant -> QWAT.hydrant")
+    logger.info("Importing WASSER.hydrant -> QWAT.hydrant")
     for row in wasser_session.query(WASSER.hydrant):
 
         # baseclass --- hydrant.t_type, hydrant.t_ili_tid
@@ -213,9 +214,9 @@ def qwat_import():
         )
         qwat_session.add(hydrant)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.wasserbehaelter -> QWAT.tank")
+    logger.info("Importing WASSER.wasserbehaelter -> QWAT.tank")
     for row in wasser_session.query(WASSER.wasserbehaelter):
 
         # baseclass --- wasserbehaelter.t_type, wasserbehaelter.t_ili_tid
@@ -300,9 +301,9 @@ def qwat_import():
         )
         qwat_session.add(tank)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.foerderanlage -> QWAT.pump")
+    logger.info("Importing WASSER.foerderanlage -> QWAT.pump")
     for row in wasser_session.query(WASSER.foerderanlage):
 
         # baseclass --- foerderanlage.t_type, foerderanlage.t_ili_tid
@@ -373,9 +374,9 @@ def qwat_import():
         )
         qwat_session.add(pump)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.anlage -> QWAT.treatment")
+    logger.info("Importing WASSER.anlage -> QWAT.treatment")
     for row in wasser_session.query(WASSER.anlage):
 
         # baseclass --- anlage.t_type, anlage.t_ili_tid
@@ -449,9 +450,9 @@ def qwat_import():
         )
         qwat_session.add(treatment)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.hausanschluss -> QWAT.subscriber")
+    logger.info("Importing WASSER.hausanschluss -> QWAT.subscriber")
     for row in wasser_session.query(WASSER.hausanschluss):
 
         # baseclass --- hausanschluss.t_type, hausanschluss.t_ili_tid
@@ -511,9 +512,9 @@ def qwat_import():
         )
         qwat_session.add(subscriber)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.wassergewinnungsanlage -> QWAT.source")
+    logger.info("Importing WASSER.wassergewinnungsanlage -> QWAT.source")
     for row in wasser_session.query(WASSER.wassergewinnungsanlage):
 
         # baseclass --- wassergewinnungsanlage.t_type, wassergewinnungsanlage.t_ili_tid
@@ -584,9 +585,9 @@ def qwat_import():
         )
         qwat_session.add(source)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.absperrorgan -> QWAT.chamber")
+    logger.info("Importing WASSER.absperrorgan -> QWAT.chamber")
     for row in wasser_session.query(WASSER.absperrorgan):
 
         # baseclass --- absperrorgan.t_type, absperrorgan.t_ili_tid
@@ -656,9 +657,9 @@ def qwat_import():
         )
         qwat_session.add(chamber)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Importing WASSER.absperrorgan -> QWAT.valve")
+    logger.info("Importing WASSER.absperrorgan -> QWAT.valve")
     for row in wasser_session.query(WASSER.absperrorgan):
 
         # baseclass --- absperrorgan.t_type, absperrorgan.t_ili_tid
@@ -725,7 +726,7 @@ def qwat_import():
         )
         qwat_session.add(valve)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
     qwat_session.commit()
 

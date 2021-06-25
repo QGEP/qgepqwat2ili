@@ -1,5 +1,7 @@
 import argparse
+import logging
 import sys
+from logging import INFO, FileHandler, Formatter
 
 from . import config, utils
 from .qgep.export import qgep_export
@@ -49,6 +51,11 @@ def main(args):
         help="name of the pgservice to use to connect to the database",
         default=config.QGEP_DEFAULT_PGSERVICE,
     )
+    parser_qgep.add_argument(
+        "--log",
+        action="store_true",
+        help="saves a log file next to the input/output file",
+    )
 
     parser_qwat = subparsers.add_parser(
         "qwat",
@@ -71,6 +78,11 @@ def main(args):
         help="name of the pgservice to use to connect to the database",
         default=config.QWAT_DEFAULT_PGSERVICE,
     )
+    parser_qwat.add_argument(
+        "--log",
+        action="store_true",
+        help="saves a log file next to the input/output file",
+    )
 
     parser_tpl = subparsers.add_parser(
         "tpl", help="generate code templates [dev]", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -92,6 +104,14 @@ def main(args):
     if not args.parser:
         parser.print_help(sys.stderr)
         exit(1)
+
+    if args.parser in ["qgep", "qwat"] and args.log:
+        # Write root logger to file
+        filename = f"{args.path}.{args.direction}.log"
+        file_handler = FileHandler(filename, mode="w", encoding="utf-8")
+        file_handler.setLevel(INFO)
+        file_handler.setFormatter(Formatter("%(levelname)-8s %(message)s"))
+        logging.getLogger("").addHandler(file_handler)
 
     if args.parser == "qgep":
         config.PGSERVICE = args.pgservice

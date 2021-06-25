@@ -27,7 +27,7 @@ python -m qgepqwat2ili qgep export desktop/my_export.xtf --selection "ch13p7mzRE
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] {import,export} path
+usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] {import,export} path
 
 ili2QGEP entrypoint
 
@@ -45,6 +45,7 @@ optional arguments:
                         (default: False)
   --pgservice PGSERVICE
                         name of the pgservice to use to connect to the database (default: pg_qgep)
+  --log                 saves a log file next to the input/output file (default: False)
 ```
 
 ### Import/export QWAT
@@ -61,7 +62,7 @@ python -m qgepqwat2ili qwat export desktop/my_export.xtf
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] {import,export} path
+usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] {import,export} path
 
 ili2QWAT entrypoint
 
@@ -76,18 +77,20 @@ optional arguments:
                         (default: False)
   --pgservice PGSERVICE
                         name of the pgservice to use to connect to the database (default: qwat)
+  --log                 saves a log file next to the input/output file (default: False)
 ```
 
 ### Logging
 
-Logging output to a file can be achieved by redirecting stdout to a file :
+Logging output to a file can be achieved by adding `--log` to your command. The file will be saved next to the input/output xtf.
+
 ```
-python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf > output.log
+python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf --log
 ```
 
 Please include this when reporting issues.
 
-Additionally, ili2db and ilivalidator related commands will create a log file named `ili2qgepqwat-yyyy-mm-dd-hh-mm-ss-STEP.log` in your temporary directory (`/tmp` on linux or `C:\Users\You\AppData\Local\Temp\` on Windows).
+For unknown reasons at time of writing, the above logs don't show full errors for ili2db and ilivalidator related outputs. Thus, you may want to look at the native ili2db and ilivalidator related logs, named `ili2qgepqwat-yyyy-mm-dd-hh-mm-ss-STEP.log` in your temporary directory (`/tmp` on linux or `C:\Users\You\AppData\Local\Temp\` on Windows).
 
 
 ## QGIS integration

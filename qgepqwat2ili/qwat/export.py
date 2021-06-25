@@ -12,6 +12,7 @@ from geoalchemy2.functions import (
 from sqlalchemy.orm import Session
 
 from .. import utils
+from ..utils.various import logger
 from .model_qwat import get_qwat_model
 from .model_wasser import get_wasser_model
 
@@ -113,7 +114,7 @@ def qwat_export():
             "symbolori": 0,
         }
 
-    print("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
+    logger.info("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
     for row in qwat_session.query(QWAT.node):
         """
         We map QWAT nodes to hydraulischer_knoten. QWAT nodes subclasses (such as hydrant)
@@ -139,10 +140,10 @@ def qwat_export():
         wasser_session.add(hydraulischer_knoten)
         create_metaattributes(hydraulischer_knoten)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.pipe -> WASSER.hydraulischer_strang, WASSER.leitung")
+    logger.info("Exporting QWAT.pipe -> WASSER.hydraulischer_strang, WASSER.leitung")
     for row in qwat_session.query(QWAT.pipe):
 
         # pipe --- pipe.id, pipe.fk_parent, pipe.fk_function, pipe.fk_installmethod, pipe.fk_material, pipe.fk_distributor, pipe.fk_precision, pipe.fk_bedding, pipe.fk_protection, pipe.fk_status, pipe.fk_watertype, pipe.fk_locationtype, pipe.fk_folder, pipe.year, pipe.year_rehabilitation, pipe.year_end, pipe.tunnel_or_bridge, pipe.pressure_nominal, pipe.remark, pipe._valve_count, pipe._valve_closed, pipe.label_1_visible, pipe.label_1_text, pipe.label_2_visible, pipe.label_2_text, pipe.fk_node_a, pipe.fk_node_b, pipe.fk_district, pipe.fk_pressurezone, pipe.fk_printmap, pipe._length2d, pipe._length3d, pipe._diff_elevation, pipe._printmaps, pipe._geometry_alt1_used, pipe._geometry_alt2_used, pipe.update_geometry_alt1, pipe.update_geometry_alt2, pipe.geometry, pipe.geometry_alt1, pipe.geometry_alt2, pipe.schema_force_visible, pipe._schema_visible
@@ -213,10 +214,10 @@ def qwat_export():
         wasser_session.add(leitung)
         create_metaattributes(leitung)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.leak -> WASSER.schadenstelle")
+    logger.info("Exporting QWAT.leak -> WASSER.schadenstelle")
     for row in qwat_session.query(QWAT.leak):
 
         # leak --- leak.id, leak.fk_cause, leak.fk_pipe, leak.widespread_damage, leak.detection_date, leak.repair_date, leak._repaired, leak.address, leak.pipe_replaced, leak.description, leak.repair, leak.geometry, leak.label_1_visible, leak.label_1_x, leak.label_1_y, leak.label_1_rotation, leak.label_1_text, leak.label_2_visible, leak.label_2_x, leak.label_2_y, leak.label_2_rotation, leak.label_2_text
@@ -248,10 +249,10 @@ def qwat_export():
         wasser_session.add(schadenstelle)
         create_metaattributes(schadenstelle)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.hydrant -> WASSER.hydrant")
+    logger.info("Exporting QWAT.hydrant -> WASSER.hydrant")
     for row in qwat_session.query(QWAT.hydrant):
 
         # node --- hydrant.fk_district, hydrant.fk_pressurezone, hydrant.fk_printmap, hydrant._printmaps, hydrant._geometry_alt1_used, hydrant._geometry_alt2_used, hydrant._pipe_node_type, hydrant._pipe_orientation, hydrant._pipe_schema_visible, hydrant.geometry, hydrant.geometry_alt1, hydrant.geometry_alt2, hydrant.update_geometry_alt1, hydrant.update_geometry_alt2
@@ -281,10 +282,10 @@ def qwat_export():
         wasser_session.add(hydrant)
         create_metaattributes(hydrant)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.tank -> WASSER.wasserbehaelter")
+    logger.info("Exporting QWAT.tank -> WASSER.wasserbehaelter")
     for row in qwat_session.query(QWAT.tank):
 
         # node --- tank.fk_district, tank.fk_pressurezone, tank.fk_printmap, tank._printmaps, tank._geometry_alt1_used, tank._geometry_alt2_used, tank._pipe_node_type, tank._pipe_orientation, tank._pipe_schema_visible, tank.geometry, tank.geometry_alt1, tank.geometry_alt2, tank.update_geometry_alt1, tank.update_geometry_alt2
@@ -315,10 +316,10 @@ def qwat_export():
         wasser_session.add(wasserbehaelter)
         create_metaattributes(wasserbehaelter)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.pump -> WASSER.foerderanlage")
+    logger.info("Exporting QWAT.pump -> WASSER.foerderanlage")
     for row in qwat_session.query(QWAT.pump):
 
         # node --- pump.fk_district, pump.fk_pressurezone, pump.fk_printmap, pump._printmaps, pump._geometry_alt1_used, pump._geometry_alt2_used, pump._pipe_node_type, pump._pipe_orientation, pump._pipe_schema_visible, pump.geometry, pump.geometry_alt1, pump.geometry_alt2, pump.update_geometry_alt1, pump.update_geometry_alt2
@@ -343,10 +344,10 @@ def qwat_export():
         wasser_session.add(foerderanlage)
         create_metaattributes(foerderanlage)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.treatment -> WASSER.wassergewinnungsanlage")
+    logger.info("Exporting QWAT.treatment -> WASSER.wassergewinnungsanlage")
     for row in qwat_session.query(QWAT.treatment):
 
         # node --- treatment.fk_district, treatment.fk_pressurezone, treatment.fk_printmap, treatment._printmaps, treatment._geometry_alt1_used, treatment._geometry_alt2_used, treatment._pipe_node_type, treatment._pipe_orientation, treatment._pipe_schema_visible, treatment.geometry, treatment.geometry_alt1, treatment.geometry_alt2, treatment.update_geometry_alt1, treatment.update_geometry_alt2
@@ -373,10 +374,10 @@ def qwat_export():
         )
         wasser_session.add(wassergewinnungsanlage)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.subscriber -> WASSER.hausanschluss")
+    logger.info("Exporting QWAT.subscriber -> WASSER.hausanschluss")
     for row in qwat_session.query(QWAT.subscriber):
 
         # node --- subscriber.fk_district, subscriber.fk_pressurezone, subscriber.fk_printmap, subscriber._printmaps, subscriber._geometry_alt1_used, subscriber._geometry_alt2_used, subscriber._pipe_node_type, subscriber._pipe_orientation, subscriber._pipe_schema_visible, subscriber.geometry, subscriber.geometry_alt1, subscriber.geometry_alt2, subscriber.update_geometry_alt1, subscriber.update_geometry_alt2
@@ -432,10 +433,10 @@ def qwat_export():
             create_metaattributes(hausanschluss)
 
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.source -> WASSER.wassergewinnungsanlage")
+    logger.info("Exporting QWAT.source -> WASSER.wassergewinnungsanlage")
     for row in qwat_session.query(QWAT.source):
 
         # node --- source.fk_district, source.fk_pressurezone, source.fk_printmap, source._printmaps, source._geometry_alt1_used, source._geometry_alt2_used, source._pipe_node_type, source._pipe_orientation, source._pipe_schema_visible, source.geometry, source.geometry_alt1, source.geometry_alt2, source.update_geometry_alt1, source.update_geometry_alt2
@@ -463,10 +464,10 @@ def qwat_export():
         wasser_session.add(wassergewinnungsanlage)
         create_metaattributes(wassergewinnungsanlage)
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
-    print("Exporting QWAT.chamber -> WASSER.anlage")
+    logger.info("Exporting QWAT.chamber -> WASSER.anlage")
     for row in qwat_session.query(QWAT.chamber):
 
         # node --- chamber.fk_district, chamber.fk_pressurezone, chamber.fk_printmap, chamber._printmaps, chamber._geometry_alt1_used, chamber._geometry_alt2_used, chamber._pipe_node_type, chamber._pipe_orientation, chamber._pipe_schema_visible, chamber.geometry, chamber.geometry_alt1, chamber.geometry_alt2, chamber.update_geometry_alt1, chamber.update_geometry_alt2
@@ -495,9 +496,9 @@ def qwat_export():
         )
         wasser_session.add(anlage)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Exporting QWAT.pressurecontrol -> WASSER.anlage")
+    logger.info("Exporting QWAT.pressurecontrol -> WASSER.anlage")
     for row in qwat_session.query(QWAT.pressurecontrol):
 
         # node --- pressurecontrol.fk_district, pressurecontrol.fk_pressurezone, pressurecontrol.fk_printmap, pressurecontrol._printmaps, pressurecontrol._geometry_alt1_used, pressurecontrol._geometry_alt2_used, pressurecontrol._pipe_node_type, pressurecontrol._pipe_orientation, pressurecontrol._pipe_schema_visible, pressurecontrol.geometry, pressurecontrol.geometry_alt1, pressurecontrol.geometry_alt2, pressurecontrol.update_geometry_alt1, pressurecontrol.update_geometry_alt2
@@ -528,9 +529,9 @@ def qwat_export():
         )
         wasser_session.add(anlage)
         print(".", end="")
-    print("done")
+    logger.info("done")
 
-    print("Exporting QWAT.valve -> WASSER.absperrorgan")
+    logger.info("Exporting QWAT.valve -> WASSER.absperrorgan")
     for row in qwat_session.query(QWAT.valve):
         """
         Valves are reprsented on the pipes in QWAT, and as nodes in SIA405.
@@ -628,7 +629,7 @@ def qwat_export():
         create_metaattributes(leitung_b)
 
         print(".", end="")
-    print("done")
+    logger.info("done")
     wasser_session.flush()
 
     wasser_session.commit()
