@@ -155,7 +155,7 @@ def qwat_export():
         hydraulischer_strang = WASSER.hydraulischer_strang(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "leitung", tid_for_class=WASSER.hydraulischer_strang),
+            **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
             # --- hydraulischer_strang ---
             bemerkung=blank_to_none(row.remark),
             bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
