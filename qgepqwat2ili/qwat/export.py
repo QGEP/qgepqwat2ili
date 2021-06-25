@@ -1,12 +1,10 @@
 import datetime
 import warnings
 
-from geoalchemy2.functions import (
+from geoalchemy2.functions import (  # ST_LineSubstring, ST_CurveToLine,
     ST_Z,
-    ST_CurveToLine,
     ST_Force2D,
     ST_ForceCurve,
-    ST_LineSubstring,
     ST_Transform,
 )
 from sqlalchemy.orm import Session
@@ -601,6 +599,9 @@ def qwat_export():
             continue
         # Otherwise, we split the pipe at the valve.
 
+        # TODO : Reenable this, it was temporarily disabled as we got missing metaattributes
+        warnings.warn("Splitting strang/leitung at absperrorgan is currently disabled.")
+        """
         # Get the related pipe
         strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
             get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
@@ -630,6 +631,7 @@ def qwat_export():
         wasser_session.add(leitung_b)
         create_metaattributes(strang_b)
         create_metaattributes(leitung_b)
+        """
 
         print(".", end="")
     logger.info("done")
