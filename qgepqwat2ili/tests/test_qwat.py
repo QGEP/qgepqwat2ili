@@ -15,9 +15,6 @@ logger.addHandler(handler)
 
 
 class TestQGEPUseCases(unittest.TestCase):
-
-    # TODO once this passes, remove test without validation
-    @unittest.expectedFailure
     def test_case_b_export_complete_qwat_to_xtf_with_validation(self):
         """
         # B. export the whole QWAT model to interlis
@@ -30,16 +27,3 @@ class TestQGEPUseCases(unittest.TestCase):
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qwat", "export", path, "--recreate_schema"])
-
-    def test_case_b_export_complete_qwat_to_xtf_without_validation(self):
-        """
-        # B. export the whole QWAT model to interlis
-
-        This is the same as above but without validation until we have valid exports.
-        """
-
-        # Prepare db
-        main(["setupdb", "full"])
-
-        path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        main(["qwat", "export", path, "--recreate_schema", "--skip_validation"])
