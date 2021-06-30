@@ -1,4 +1,5 @@
 import datetime
+import unicodedata
 import warnings
 
 from geoalchemy2.functions import (  # ST_LineSubstring, ST_CurveToLine,
@@ -58,11 +59,32 @@ def qwat_export():
             warnings.warn(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
-    def blank_to_none(val):
+    def clamp(val, min_val=None, max_val=None, accept_none=False):
         """
-        Converts blank strings to NULLs to work around https://github.com/claeis/ili2db/issues/388
+        Raises a warning if values gets clamped
         """
-        return None if val == "" else val
+        if val is None:
+            if accept_none:
+                return None
+            else:
+                warnings.warn(f"Value '{val}' was clamped to {min_val}")
+                val = min_val
+        if min_val is not None and val < min_val:
+            warnings.warn(f"Value '{val}' was clamped to {min_val}")
+            val = min_val
+        elif max_val is not None and val > max_val:
+            warnings.warn(f"Value '{val}' was clamped to {max_val}")
+            val = max_val
+        return val
+
+    def sanitize_str(val):
+        """
+        Converts blank strings to NULLs (see https://github.com/claeis/ili2db/issues/388) and removes control characters
+        """
+        if not val:
+            return None
+        # from https://stackoverflow.com/a/19016117/13690651
+        return "".join(ch for ch in val if unicodedata.category(ch)[0] != "C")
 
     def create_metaattributes(instance):
         warnings.warn(
@@ -155,12 +177,12 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
             # --- hydraulischer_strang ---
-            bemerkung=blank_to_none(row.remark),
+            bemerkung=sanitize_str(row.remark),
             bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
             durchfluss=DOES_NOT_EXIST_IN_QWAT,
             fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
-            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or -1,
+            referenz_durchmesser=clamp(get_vl(row.fk_material__REL, "diameter_nominal"), min_val=0),
             referenz_laenge=row._length2d,
             referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -178,8 +200,8 @@ def qwat_export():
             # --- leitung ---
             astatus=get_vl(row.fk_status__REL),
             aussenbeschichtung=get_vl(row.fk_protection__REL),
-            baujahr=row.year or -1,
-            bemerkung=blank_to_none(row.remark),
+            baujahr=clamp(row.year, min_val=0),
+            bemerkung=sanitize_str(row.remark),
             betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
             bettung=get_vl(row.fk_bedding__REL),
@@ -238,7 +260,7 @@ def qwat_export():
             art=get_vl(row.fk_cause__REL),
             ausloeser=DOES_NOT_EXIST_IN_QWAT,
             behebungsdatum=row.repair_date,
-            bemerkung=blank_to_none(row.description),
+            bemerkung=sanitize_str(row.description),
             erhebungsdatum=row.detection_date,
             geometrie=ST_Transform(row.geometry, 2056),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
@@ -304,13 +326,13 @@ def qwat_export():
             # --- wasserbehaelter ---
             art=DOES_NOT_EXIST_IN_QWAT,
             beschichtung=DOES_NOT_EXIST_IN_QWAT,
-            brauchwasserreserve=row.storage_supply / 1000 if row.storage_supply else -1,
-            fassungsvermoegen=row.storage_total / 1000 if row.storage_total else -1,
+            brauchwasserreserve=clamp(row.storage_supply, min_val=0) / 1000,
+            fassungsvermoegen=clamp(row.storage_total, min_val=0) / 1000,
             leistung=DOES_NOT_EXIST_IN_QWAT,
-            loeschwasserreserve=row.storage_fire / 1000 if row.storage_fire else -1,
+            loeschwasserreserve=clamp(row.storage_fire, min_val=0) / 1000,
             material=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
-            ueberlaufhoehe=row.altitude_overflow or -1,
+            ueberlaufhoehe=clamp(row.altitude_overflow, min_val=0),
             zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wasserbehaelter)
@@ -549,7 +571,7 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.valve),
             # --- hydraulischer_knoten ---
-            bemerkung=blank_to_none(row.remark),
+            bemerkung=sanitize_str(row.remark),
             druck=DOES_NOT_EXIST_IN_QWAT,
             geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
             knotentyp="Normalknoten",
@@ -564,7 +586,7 @@ def qwat_export():
             # --- sia405_baseclass ---
             **base_common(row, "absperrorgan"),
             # --- leitungsknoten ---
-            bemerkung=blank_to_none(row.remark),
+            bemerkung=sanitize_str(row.remark),
             druckzone=DOES_NOT_EXIST_IN_QWAT,
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             einbaujahr=row.year,
