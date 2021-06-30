@@ -384,7 +384,7 @@ def qwat_export():
         wassergewinnungsanlage = WASSER.wassergewinnungsanlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "anlage"),
+            **base_common(row, "wassergewinnungsanlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- wassergewinnungsanlage ---
@@ -415,7 +415,7 @@ def qwat_export():
             anlage = WASSER.anlage(
                 # --- baseclass ---
                 # --- sia405_baseclass ---
-                **base_common(row, "hausanschluss"),
+                **base_common(row, "anlage"),
                 # --- leitungsknoten ---
                 **leitungsknoten_common(row),
                 # --- anlage ---
@@ -504,7 +504,7 @@ def qwat_export():
         anlage = WASSER.anlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "wassergewinnungsanlage"),
+            **base_common(row, "anlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- anlage ---
@@ -535,7 +535,7 @@ def qwat_export():
         anlage = WASSER.anlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "wassergewinnungsanlage"),
+            **base_common(row, "anlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- anlage ---
