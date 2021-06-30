@@ -41,11 +41,10 @@ def qwat_export():
             return None
         return tid_maker.tid_for_row(relation, for_class=for_class)
 
-    def get_vl(relation, attr_name="value_fr"):
+    def get_vl(relation, attr_name="sia405_de"):
         """
         Gets a literal value from a value list relation
         """
-        # TODO default to a SIA405 compliant column instead of value_fr once these are defined in QWAT
         if relation is None:
             return None
         if not hasattr(relation, attr_name):
@@ -293,12 +292,12 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- hydrant ---
-            art="Unterflurhydrant" if row.underground else "Oberflurhydrant",
+            art=get_vl(row.fk_model_inf__REL) if row.underground else get_vl(row.fk_model_sup__REL),
             dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
             hersteller=get_vl(row.fk_provider__REL),
-            material="Metall" if get_vl(row.fk_material__REL, "id") in [7002, 7003, 7004] else "unbekannt",
+            material=get_vl(row.fk_material__REL),
             name_nummer=row.identification,
             typ=truncate(f"{row.fk_model_sup} / {row.fk_model_inf}", 10),
             versorgungsdruck=row.pressure_static,

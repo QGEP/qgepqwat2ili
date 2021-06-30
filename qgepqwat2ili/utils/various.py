@@ -114,8 +114,16 @@ def setup_test_db(template="full"):
 
         # Hotfix invalid data
         delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qgep_demodata_hotfix.sql")
-        exec_(f"docker cp {delta_path} qgepqwat:/tpl_full_hotfix.sql")
-        dexec_("psql -U postgres -d tpl_full -f /tpl_full_hotfix.sql")
+        exec_(f"docker cp {delta_path} qgepqwat:/tpl_qgep_hotfix.sql")
+        dexec_("psql -U postgres -d tpl_full -f /tpl_qgep_hotfix.sql")
+
+        # Hotfix invalid data
+        # TODO : publish a QWAT datamodel upgrade and remove this
+        logger.warning("A HOTFIX DELTA WILL BE APPIED TO QWAT, THIS MUST NOT BE APPLIED TO PRODUCTION")
+        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_temp_migration.sql")
+        exec_(f"docker cp {delta_path} qgepqwat:/tpl_qwat_hotfix.sql")
+        dexec_("psql -U postgres -d tpl_full -f /tpl_qwat_hotfix.sql")
+        dexec_("psql -U postgres -d tpl_empty -f /tpl_qwat_hotfix.sql")
 
     dexec_(
         f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
