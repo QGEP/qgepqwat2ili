@@ -86,6 +86,9 @@ def qwat_export():
         # from https://stackoverflow.com/a/19016117/13690651
         return "".join(ch for ch in val if unicodedata.category(ch)[0] != "C")
 
+    def sanitize_geom(val):
+        return ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(val, 2056)), 0.002)
+
     def create_metaattributes(instance):
         warnings.warn(
             f"QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
@@ -128,7 +131,7 @@ def qwat_export():
             "druckzone": DOES_NOT_EXIST_IN_QWAT,
             "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
             "einbaujahr": clamp(row.year, min_val=1800, max_val=2100),
-            "geometrie": ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
+            "geometrie": sanitize_geom(row.geometry),
             "hoehe": ST_Z(row.geometry),
             "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
@@ -154,7 +157,7 @@ def qwat_export():
             # --- hydraulischer_knoten ---
             bemerkung=DOES_NOT_EXIST_IN_QWAT,
             druck=MAPPING_OPEN_QUESTION,
-            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
+            geometrie=sanitize_geom(row.geometry),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -211,7 +214,7 @@ def qwat_export():
             durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             funktion=get_vl(row.fk_function__REL),
-            geometrie=ST_ForceCurve(ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001)),
+            geometrie=ST_ForceCurve(sanitize_geom(row.geometry)),
             hydraulische_rauheit=DOES_NOT_EXIST_IN_QWAT,
             innenbeschichtung=DOES_NOT_EXIST_IN_QWAT,
             kathodischer_schutz=DOES_NOT_EXIST_IN_QWAT,
@@ -262,7 +265,7 @@ def qwat_export():
             behebungsdatum=row.repair_date,
             bemerkung=sanitize_str(row.description),
             erhebungsdatum=row.detection_date,
-            geometrie=ST_Transform(row.geometry, 2056),
+            geometrie=sanitize_geom(row.geometry),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
             name_nummer=str(row.id),
             ursache=DOES_NOT_EXIST_IN_QWAT,  # somehow overlapping with art, but not exactly
@@ -573,7 +576,7 @@ def qwat_export():
             # --- hydraulischer_knoten ---
             bemerkung=sanitize_str(row.remark),
             druck=DOES_NOT_EXIST_IN_QWAT,
-            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
+            geometrie=sanitize_geom(row.geometry),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -590,7 +593,7 @@ def qwat_export():
             druckzone=DOES_NOT_EXIST_IN_QWAT,
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             einbaujahr=clamp(row.year, min_val=1800, max_val=2100),
-            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
+            geometrie=sanitize_geom(row.geometry),
             hoehe=ST_Z(row.geometry),
             hoehenbestimmung=get_vl(row.fk_precisionalti__REL),
             knotenref__REL=hydraulischer_knoten,
