@@ -509,7 +509,7 @@ def qwat_export():
             **leitungsknoten_common(row),
             # --- anlage ---
             name_nummer=str(row.id),
-            art="Schacht/Zonentrennung" if row.networkseparation else "Schacht",
+            art="Schacht.Zonentrennung" if row.networkseparation else "Schacht.unbekannt",
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
             betreiber=get_vl(row.fk_distributor__REL, "name"),
