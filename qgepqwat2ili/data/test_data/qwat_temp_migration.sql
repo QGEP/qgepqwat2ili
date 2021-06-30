@@ -177,11 +177,6 @@ UPDATE qwat_vl.tank_firestorage SET sia405_de = CASE
 END;
 
 -- TODO : complete mapping
-UPDATE qwat_vl.value_list_base SET sia405_de = CASE
-    WHEN TRUE THEN 'unbekannt'
-END;
-
--- TODO : complete mapping
 UPDATE qwat_vl.valve_actuation SET sia405_de = CASE
     WHEN TRUE THEN 'unbekannt'
 END;
