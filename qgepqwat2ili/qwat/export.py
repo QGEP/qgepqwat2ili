@@ -6,6 +6,7 @@ from geoalchemy2.functions import (  # ST_LineSubstring, ST_CurveToLine,
     ST_Z,
     ST_Force2D,
     ST_ForceCurve,
+    ST_RemoveRepeatedPoints,
     ST_Transform,
 )
 from sqlalchemy.orm import Session
@@ -47,6 +48,9 @@ def qwat_export():
         # TODO default to a SIA405 compliant column instead of value_fr once these are defined in QWAT
         if relation is None:
             return None
+        if not hasattr(relation, attr_name):
+            warnings.warn(f"{relation} has no attribute {attr_name}", stacklevel=2)
+            return None
         return getattr(relation, attr_name)
 
     def truncate(val, max_length):
@@ -56,24 +60,20 @@ def qwat_export():
         if val is None:
             return None
         if len(val) > max_length:
-            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})")
+            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
         return val[0:max_length]
 
     def clamp(val, min_val=None, max_val=None, accept_none=False):
         """
         Raises a warning if values gets clamped
         """
-        if val is None:
-            if accept_none:
-                return None
-            else:
-                warnings.warn(f"Value '{val}' was clamped to {min_val}")
-                val = min_val
-        if min_val is not None and val < min_val:
-            warnings.warn(f"Value '{val}' was clamped to {min_val}")
+        if val is None and accept_none:
+            return None
+        if (val is None) or (min_val is not None and val < min_val):
+            warnings.warn(f"Value '{val}' was clamped to {min_val}", stacklevel=2)
             val = min_val
         elif max_val is not None and val > max_val:
-            warnings.warn(f"Value '{val}' was clamped to {max_val}")
+            warnings.warn(f"Value '{val}' was clamped to {max_val}", stacklevel=2)
             val = max_val
         return val
 
@@ -127,8 +127,8 @@ def qwat_export():
             "bemerkung": DOES_NOT_EXIST_IN_QWAT,
             "druckzone": DOES_NOT_EXIST_IN_QWAT,
             "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
-            "einbaujahr": row.year,
-            "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
+            "einbaujahr": clamp(row.year, min_val=1800, max_val=2100),
+            "geometrie": ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
             "hoehe": ST_Z(row.geometry),
             "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
             "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
@@ -154,7 +154,7 @@ def qwat_export():
             # --- hydraulischer_knoten ---
             bemerkung=DOES_NOT_EXIST_IN_QWAT,
             druck=MAPPING_OPEN_QUESTION,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
+            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -200,7 +200,7 @@ def qwat_export():
             # --- leitung ---
             astatus=get_vl(row.fk_status__REL),
             aussenbeschichtung=get_vl(row.fk_protection__REL),
-            baujahr=clamp(row.year, min_val=0),
+            baujahr=clamp(row.year, min_val=1800, max_val=2100),
             bemerkung=sanitize_str(row.remark),
             betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
@@ -211,7 +211,7 @@ def qwat_export():
             durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             funktion=get_vl(row.fk_function__REL),
-            geometrie=ST_ForceCurve(ST_Force2D(ST_Transform(row.geometry, 2056))),
+            geometrie=ST_ForceCurve(ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001)),
             hydraulische_rauheit=DOES_NOT_EXIST_IN_QWAT,
             innenbeschichtung=DOES_NOT_EXIST_IN_QWAT,
             kathodischer_schutz=DOES_NOT_EXIST_IN_QWAT,
@@ -265,7 +265,7 @@ def qwat_export():
             geometrie=ST_Transform(row.geometry, 2056),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
             name_nummer=str(row.id),
-            ursache=get_vl(row.fk_cause__REL),
+            ursache=DOES_NOT_EXIST_IN_QWAT,  # somehow overlapping with art, but not exactly
             zustand=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(schadenstelle)
@@ -294,7 +294,7 @@ def qwat_export():
             dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
-            hersteller=get_vl(row.fk_provider__REL, "value_fr"),
+            hersteller=get_vl(row.fk_provider__REL),
             material="Metall" if get_vl(row.fk_material__REL, "id") in [7002, 7003, 7004] else "unbekannt",
             name_nummer=row.identification,
             typ=truncate(f"{row.fk_model_sup} / {row.fk_model_inf}", 10),
@@ -573,7 +573,7 @@ def qwat_export():
             # --- hydraulischer_knoten ---
             bemerkung=sanitize_str(row.remark),
             druck=DOES_NOT_EXIST_IN_QWAT,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
+            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
             knotentyp="Normalknoten",
             name_nummer=str(row.id),
             verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -589,15 +589,15 @@ def qwat_export():
             bemerkung=sanitize_str(row.remark),
             druckzone=DOES_NOT_EXIST_IN_QWAT,
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
-            einbaujahr=row.year,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
+            einbaujahr=clamp(row.year, min_val=1800, max_val=2100),
+            geometrie=ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(row.geometry, 2056)), 0.001),
             hoehe=ST_Z(row.geometry),
             hoehenbestimmung=get_vl(row.fk_precisionalti__REL),
             knotenref__REL=hydraulischer_knoten,
             lagebestimmung=get_vl(row.fk_precision__REL),
             symbolori=0,
             # --- absperrorgan ---
-            art=row.fk_valve_type__REL.value_en,
+            art=get_vl(row.fk_valve_type__REL),
             hersteller=DOES_NOT_EXIST_IN_QWAT,
             material=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
