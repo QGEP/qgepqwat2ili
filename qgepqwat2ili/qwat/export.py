@@ -397,6 +397,7 @@ def qwat_export():
             zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wassergewinnungsanlage)
+        create_metaattributes(wassergewinnungsanlage)
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -430,6 +431,7 @@ def qwat_export():
                 dimension1=DOES_NOT_EXIST_IN_QWAT,
             )
             wasser_session.add(anlage)
+            create_metaattributes(anlage)
             print(".", end="")
 
         else:  # incl. row.fk_subscriber_type__REL.value_en == "Subscriber"
@@ -519,6 +521,7 @@ def qwat_export():
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
+        create_metaattributes(anlage)
         print(".", end="")
     logger.info("done")
 
@@ -550,6 +553,7 @@ def qwat_export():
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
+        create_metaattributes(anlage)
         print(".", end="")
     logger.info("done")
 
