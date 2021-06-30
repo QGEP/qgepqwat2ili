@@ -389,7 +389,7 @@ def qwat_export():
             **leitungsknoten_common(row),
             # --- wassergewinnungsanlage ---
             name_nummer=str(row.id),
-            art="Aufbereitungsanlage/unbekannt",
+            art="Aufbereitungsanlage.unbekannt",
             leistung=f"{row.treatment_capacity}",
             betreiber=row.fk_distributor__REL.name,
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
@@ -540,9 +540,7 @@ def qwat_export():
             **leitungsknoten_common(row),
             # --- anlage ---
             name_nummer=str(row.id),
-            art="Druckbrecher"
-            if get_vl(row.fk_pressurecontrol_type__REL) in ["reducer", "pressure cut"]
-            else "Schacht",
+            art=get_vl(row.fk_pressurecontrol_type__REL),
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
             betreiber=get_vl(row.fk_distributor__REL, "name"),

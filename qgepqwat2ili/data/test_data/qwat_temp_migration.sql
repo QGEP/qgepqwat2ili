@@ -152,7 +152,10 @@ END;
 
 -- TODO : complete mapping
 UPDATE qwat_vl.pressurecontrol_type SET sia405_de = CASE
-    WHEN TRUE THEN 'unbekannt'
+    WHEN value_en = 'reducer' THEN 'Schacht.Druckbrecher'
+    WHEN value_en = 'pressure cut' THEN 'Schacht.Druckbrecher'
+    WHEN value_en = 'gathering' THEN 'Schacht.unbekannt'
+    ELSE 'unbekannt'
 END;
 
 -- TODO : complete mapping
@@ -182,11 +185,11 @@ END;
 
 -- TODO : complete mapping
 UPDATE qwat_vl.source_type SET sia405_de = CASE
-    WHEN value_fr = 'captage eau lac' THEN 'Fassungsanlage'
+    WHEN value_fr = 'captage eau lac' THEN 'Fassungsanlage.Fluss_Seewasserfassung'
     WHEN value_fr = 'captage eau nappe' THEN 'Fassungsanlage.Grundwasserfassung'
-    WHEN value_fr = 'captage eau source' THEN 'Fassungsanlage.Fluss_Seewasserfassung'
+    WHEN value_fr = 'captage eau source' THEN 'Fassungsanlage.Quellfassung'
     WHEN value_fr = 'captage eau rivière' THEN 'Fassungsanlage.Fluss_Seewasserfassung'
-    ELSE 'unbekannt'
+    ELSE 'Fassungsanlage.unbekannt'
 END;
 
 -- TODO : complete mapping
