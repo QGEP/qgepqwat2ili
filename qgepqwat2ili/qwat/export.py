@@ -104,7 +104,7 @@ def qwat_export(skip_hydraulics=False):
             # --- metaattribute ---
             datenherr="unknown",
             datenlieferant="unknown",
-            letzte_aenderung=datetime.datetime(1970, 1, 1),
+            letzte_aenderung=datetime.datetime.today(),
             sia405_baseclass_metaattribute=instance.t_id,
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=instance.t_id,
