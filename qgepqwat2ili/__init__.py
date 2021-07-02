@@ -65,6 +65,11 @@ def main(args):
     )
     parser_qwat.add_argument("direction", choices=["import", "export"])
     parser_qwat.add_argument(
+        "--skip_hydraulics",
+        action="store_true",
+        help="if provided, exports will skip hydraulischer_strang and hydraulischer_node classes",
+    )
+    parser_qwat.add_argument(
         "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
     )
     parser_qwat.add_argument(
@@ -150,7 +155,7 @@ def main(args):
         ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
         if args.direction == "export":
             utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
-            qwat_export()
+            qwat_export(skip_hydraulics=args.skip_hydraulics)
             utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path)
             if not args.skip_validation:
                 try:
@@ -160,6 +165,9 @@ def main(args):
                     exit(1)
 
         elif args.direction == "import":
+            if args.skip_hydraulics:
+                print("--skip_hydraulics is only supported on export")
+                exit(1)
             if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path)
