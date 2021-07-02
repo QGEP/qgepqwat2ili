@@ -182,14 +182,14 @@ def main(args):
         config.PGSERVICE = args.pgservice
 
         if args.model == "qgep":
-            if config.pgservice is None:
+            if config.PGSERVICE is None:
                 config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
             utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
             QGEPMAPPING = get_qgep_mapping()
             utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
 
         elif args.model == "qwat":
-            if config.pgservice is None:
+            if config.PGSERVICE is None:
                 config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
             utils.ili2db.create_ili_schema(config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True)
             QWATMAPPING = get_qwat_mapping()
