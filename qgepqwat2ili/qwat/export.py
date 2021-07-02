@@ -2,10 +2,12 @@ import datetime
 import unicodedata
 import warnings
 
-from geoalchemy2.functions import (  # ST_LineSubstring, ST_CurveToLine,
+from geoalchemy2.functions import (
     ST_Z,
+    ST_CurveToLine,
     ST_Force2D,
     ST_ForceCurve,
+    ST_LineSubstring,
     ST_RemoveRepeatedPoints,
     ST_Transform,
 )
@@ -37,6 +39,9 @@ def qwat_export(skip_hydraulics=False):
     qwat_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     wasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     tid_maker = utils.ili2db.TidMaker(id_attribute="id")
+
+    def tid2oid(tid):
+        return f"ch{tid:014}"  # convert to OID
 
     def get_tid(relation, for_class=None):
         """
@@ -117,7 +122,7 @@ def qwat_export(skip_hydraulics=False):
         Returns common attributes for base
         """
         tid = get_tid(row, tid_for_class)
-        oid = f"ch{tid:014}"  # convert to OID
+        oid = tid2oid(tid)
         return {
             "t_ili_tid": oid,
             "t_type": type_name,
@@ -635,39 +640,51 @@ def qwat_export(skip_hydraulics=False):
             continue
         # Otherwise, we split the pipe at the valve.
 
-        # TODO : Reenable this, it was temporarily disabled as we got missing metaattributes
-        warnings.warn("Splitting strang/leitung at absperrorgan is currently disabled.")
-        """
         # Get the related pipe
-        strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
-            get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
-        )
         leitung_a = wasser_session.query(WASSER.leitung).get(get_tid(row.fk_pipe__REL, for_class=WASSER.leitung))
 
         # We clone the pipe
-        strang_b = utils.sqlalchemy.copy_instance(strang_a)
-        strang_b.t_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
-        strang_b.obj_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
-        strang_b.t_ili_tid = get_tid(row, for_class=WASSER.hydraulischer_strang)
         leitung_b = utils.sqlalchemy.copy_instance(leitung_a)
         leitung_b.t_id = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.obj_id = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.t_ili_tid = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.strangref__REL = strang_b
+        leitung_b.obj_id = tid2oid(leitung_b.t_id)
+        leitung_b.t_ili_tid = leitung_b.obj_id
 
-        # We connect to the midpoint and adapt geom
-        strang_a.bisknotenref__REL = hydraulischer_knoten
-        strang_b.vonknotenref__REL = hydraulischer_knoten
+        # We split the geometry
+        warnings.warn(
+            f"Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
+        )
         # TODO the geometry of the new node does not necessarily lie in the middle (nor on the segment)
-        leitung_a.geometrie = ST_ForceCurve(ST_LineSubstring(ST_CurveToLine(leitung_a.geometrie), 0, 0.5))
-        leitung_b.geometrie = ST_ForceCurve(ST_LineSubstring(ST_CurveToLine(leitung_b.geometrie), 0.5, 1))
+        leitung_a.geometrie = ST_ForceCurve(
+            sanitize_geom(ST_LineSubstring(ST_CurveToLine(leitung_a.geometrie), 0, 0.5))
+        )
+        leitung_b.geometrie = ST_ForceCurve(
+            sanitize_geom(ST_LineSubstring(ST_CurveToLine(leitung_b.geometrie), 0.5, 1))
+        )
 
-        # And add to session
-        wasser_session.add(strang_b)
+        # And add the new pipe to the session
         wasser_session.add(leitung_b)
-        create_metaattributes(strang_b)
         create_metaattributes(leitung_b)
-        """
+
+        if not skip_hydraulics:
+            strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
+                get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
+            )
+
+        # We do the same for hydraulics
+        if not skip_hydraulics:
+            strang_b = utils.sqlalchemy.copy_instance(strang_a)
+            strang_b.t_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
+            strang_b.obj_id = tid2oid(strang_b.t_id)
+            strang_b.t_ili_tid = strang_b.obj_id
+            leitung_b.strangref__REL = strang_b
+
+            # We connect to the midpoint
+            strang_a.bisknotenref__REL = hydraulischer_knoten
+            strang_b.vonknotenref__REL = hydraulischer_knoten
+
+            # And add the new pipe to the session
+            wasser_session.add(strang_b)
+            create_metaattributes(strang_b)
 
         print(".", end="")
     logger.info("done")

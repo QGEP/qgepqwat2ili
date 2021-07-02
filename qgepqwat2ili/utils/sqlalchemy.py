@@ -3,6 +3,7 @@ import logging
 import sqlalchemy
 from sqlalchemy import inspect
 from sqlalchemy.ext.automap import generate_relationship
+from sqlalchemy.orm import ColumnProperty
 
 from .various import get_pgconf
 
@@ -90,5 +91,6 @@ def copy_instance(instance):
     mapper = inspect(klass)
     new_instance = klass()
     for attr in mapper.attrs:
-        setattr(new_instance, attr.key, getattr(instance, attr.key))
+        if isinstance(attr, ColumnProperty):
+            setattr(new_instance, attr.key, getattr(instance, attr.key))
     return new_instance
