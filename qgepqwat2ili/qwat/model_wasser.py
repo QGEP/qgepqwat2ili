@@ -62,6 +62,11 @@ class wassergewinnungsanlage(leitungsknoten):
     __table_args__ = {"schema": SCHEMA}
 
 
+class rohrleitungsteil(leitungsknoten):
+    __tablename__ = "rohrleitungsteil"
+    __table_args__ = {"schema": SCHEMA}
+
+
 class hydraulischer_strang(sia405_baseclass):  # troncon_hydraulique
     __tablename__ = "hydraulischer_strang"
     __table_args__ = {"schema": SCHEMA}

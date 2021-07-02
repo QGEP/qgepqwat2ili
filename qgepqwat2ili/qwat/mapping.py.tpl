@@ -3,7 +3,7 @@ from .wasser import Classes as WASSER
 
 QWAT_TO_WASSER = {
     # ALREADY MAPPED
-    QWAT.node: [WASSER.hydraulischer_knoten],
+    QWAT.node: [WASSER.hydraulischer_knoten, WASSER.rohrleitungsteil],
     QWAT.pipe: [WASSER.hydraulischer_strang, WASSER.leitung],
     QWAT.leak: [WASSER.schadenstelle],
     QWAT.hydrant: [WASSER.hydrant],

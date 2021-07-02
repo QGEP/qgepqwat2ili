@@ -29,7 +29,7 @@ def qwat_export():
         )
         session.add(metaattribute)
 
-    print("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
+    print("Exporting QWAT.node -> WASSER.hydraulischer_knoten, WASSER.rohrleitungsteil")
     for row in qwat_session.query(QWAT.node):
 
         # node --- node._geometry_alt1_used, node._geometry_alt2_used, node._pipe_node_type, node._pipe_orientation, node._pipe_schema_visible, node._printmaps, node.fk_district, node.fk_pressurezone, node.fk_printmap, node.geometry, node.geometry_alt1, node.geometry_alt2, node.id, node.update_geometry_alt1, node.update_geometry_alt2
@@ -55,6 +55,39 @@ def qwat_export():
             # verbrauch=row.REPLACE_ME,  # INTEGER
         )
         wasser_session.add(hydraulischer_knoten)
+        rohrleitungsteil = WASSER.rohrleitungsteil(
+
+            # --- baseclass ---
+            # t_ili_tid=row.REPLACE_ME,  # VARCHAR(200)
+            # t_type=row.REPLACE_ME,  # VARCHAR(60)
+
+            # --- sia405_baseclass ---
+            # obj_id=row.REPLACE_ME,  # VARCHAR(16)
+
+            # --- leitungsknoten ---
+            # bemerkung=row.REPLACE_ME,  # VARCHAR(80)
+            # druckzone=row.REPLACE_ME,  # NUMERIC(3, 1)
+            # eigentuemer=row.REPLACE_ME,  # VARCHAR(80)
+            # einbaujahr=row.REPLACE_ME,  # INTEGER
+            # geometrie=row.REPLACE_ME,  # geometry(POINT,2056)
+            # hoehe=row.REPLACE_ME,  # NUMERIC(7, 3)
+            # hoehenbestimmung=row.REPLACE_ME,  # VARCHAR(255)
+            # knotenref=row.REPLACE_ME,  # BIGINT
+            # lagebestimmung=row.REPLACE_ME,  # VARCHAR(255)
+            # symbolori=row.REPLACE_ME,  # NUMERIC(4, 1)
+
+            # --- rohrleitungsteil ---
+            # abwinklung=row.REPLACE_ME,  # VARCHAR(10)
+            # art=row.REPLACE_ME,  # VARCHAR(255)
+            # dimension=row.REPLACE_ME,  # INTEGER
+            # material=row.REPLACE_ME,  # VARCHAR(255)
+            # name_nummer=row.REPLACE_ME,  # VARCHAR(40)
+            # t_id=row.REPLACE_ME,  # BIGINT
+            # verbindung=row.REPLACE_ME,  # VARCHAR(255)
+            # zulaessiger_betriebsdruck=row.REPLACE_ME,  # NUMERIC(3, 1)
+            # zustand=row.REPLACE_ME,  # VARCHAR(40)
+        )
+        wasser_session.add(rohrleitungsteil)
         print(".", end="")
     print("done")
 

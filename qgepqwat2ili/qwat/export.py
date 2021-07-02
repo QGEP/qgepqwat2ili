@@ -152,11 +152,8 @@ def qwat_export(skip_hydraulics=False):
         logger.info("Skipping QWAT.node -> WASSER.hydraulischer_knoten")
     else:
         logger.info("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
+        # Mapping all QWAT nodes to hydraulischer_knoten.
         for row in qwat_session.query(QWAT.node):
-            """
-            We map QWAT nodes to hydraulischer_knoten. QWAT nodes subclasses (such as hydrant)
-            will be mapped to leitungsknoten. This is why we need to specify a class for t_id maker.
-            """
 
             # node --- node.id, node.fk_district, node.fk_pressurezone, node.fk_printmap, node._printmaps, node._geometry_alt1_used, node._geometry_alt2_used, node._pipe_node_type, node._pipe_orientation, node._pipe_schema_visible, node.geometry, node.geometry_alt1, node.geometry_alt2, node.update_geometry_alt1, node.update_geometry_alt2
             # _bwrel_ --- node.pipe__BWREL_fk_node_b, node.pipe__BWREL_fk_node_a
@@ -165,7 +162,7 @@ def qwat_export(skip_hydraulics=False):
             hydraulischer_knoten = WASSER.hydraulischer_knoten(
                 # --- baseclass ---
                 # --- sia405_baseclass ---
-                **base_common(row, "hydraulischer_knoten", QWAT.node),
+                **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.node),
                 # --- hydraulischer_knoten ---
                 bemerkung=DOES_NOT_EXIST_IN_QWAT,
                 druck=MAPPING_OPEN_QUESTION,
@@ -179,6 +176,46 @@ def qwat_export(skip_hydraulics=False):
             print(".", end="")
         logger.info("done")
         wasser_session.flush()
+
+    # In most cases, leitungsknoten will be created further down by subclasses.
+    # But we still need to create leitungsknoten for plain nodes (not subclass instances)
+    logger.info("Exporting QWAT.node -> WASSER.rohrleitungsteil")
+    for row in (
+        qwat_session.query(QWAT.node).join(QWAT.network_element, isouter=True).filter(QWAT.network_element.id == None)
+    ):
+        # In most cases, leitungsknoten will be created further down by subclasses.
+        # But we still need to create leitungsknoten for plain nodes (not subclass instances)
+
+        rohrleitungsteil = WASSER.rohrleitungsteil(
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "rohrleitungsteil"),
+            # --- leitungsknoten ---
+            bemerkung=DOES_NOT_EXIST_IN_QWAT,
+            druckzone=DOES_NOT_EXIST_IN_QWAT,
+            eigentuemer=DOES_NOT_EXIST_IN_QWAT,
+            einbaujahr=None,
+            geometrie=sanitize_geom(row.geometry),
+            hoehe=ST_Z(row.geometry),
+            hoehenbestimmung="unbekannt",
+            knotenref=None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
+            lagebestimmung="unbekannt",
+            symbolori=0,
+            # --- rohrleitungsteil ---
+            # abwinklung=row.REPLACE_ME,  # VARCHAR(10)
+            # art=row.REPLACE_ME,  # VARCHAR(255)
+            # dimension=row.REPLACE_ME,  # INTEGER
+            # material=row.REPLACE_ME,  # VARCHAR(255)
+            # name_nummer=row.REPLACE_ME,  # VARCHAR(40)
+            # verbindung=row.REPLACE_ME,  # VARCHAR(255)
+            # zulaessiger_betriebsdruck=row.REPLACE_ME,  # NUMERIC(3, 1)
+            # zustand=row.REPLACE_ME,  # VARCHAR(40)
+        )
+        wasser_session.add(rohrleitungsteil)
+        create_metaattributes(rohrleitungsteil)
+        print(".", end="")
+    logger.info("done")
+    wasser_session.flush()
 
     logger.info("Exporting QWAT.pipe -> WASSER.hydraulischer_strang, WASSER.leitung")
     for row in qwat_session.query(QWAT.pipe):

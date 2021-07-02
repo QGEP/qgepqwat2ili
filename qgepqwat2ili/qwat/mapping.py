@@ -6,9 +6,14 @@ def get_qwat_mapping():
     QWAT = get_qwat_model()
     WASSER = get_wasser_model()
 
+    # Quick hack to list QWAT.node twice in the dict, TODO : use list of 2uple instead
+    class QWATnodeclone(QWAT.node):
+        pass
+
     return {
         # Node
         QWAT.node: [WASSER.hydraulischer_knoten],
+        QWATnodeclone: [WASSER.rohrleitungsteil],
         # Pipe
         QWAT.pipe: [WASSER.hydraulischer_strang, WASSER.leitung],
         QWAT.leak: [WASSER.schadenstelle],
