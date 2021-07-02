@@ -143,7 +143,7 @@ def qwat_export(skip_hydraulics=False):
             "geometrie": sanitize_geom(row.geometry),
             "hoehe": ST_Z(row.geometry),
             "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
-            # "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
+            "knotenref": None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
             "lagebestimmung": get_vl(row.fk_precision__REL),
             "symbolori": 0,
         }
