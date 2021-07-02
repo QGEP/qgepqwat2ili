@@ -41,7 +41,7 @@ def qwat_export():
             return None
         return tid_maker.tid_for_row(relation, for_class=for_class)
 
-    def get_vl(relation, attr_name="sia405_de"):
+    def get_vl(relation, attr_name="sia405code"):
         """
         Gets a literal value from a value list relation
         """
