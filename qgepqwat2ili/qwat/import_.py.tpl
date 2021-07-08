@@ -15,13 +15,19 @@ def qwat_import():
     wasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     qwat_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
-    print("Importing WASSER.hydraulischer_knoten -> QWAT.node")
-    for row in wasser_session.query(WASSER.hydraulischer_knoten):
+    print("Importing WASSER.hydraulischer_knoten, WASSER.rohrleitungsteil -> QWAT.node")
+    for row, rohrleitungsteil in wasser_session.query(WASSER.hydraulischer_knoten, WASSER.rohrleitungsteil).join(WASSER.rohrleitungsteil):
 
         # baseclass --- hydraulischer_knoten.t_ili_tid, hydraulischer_knoten.t_type
         # sia405_baseclass --- hydraulischer_knoten.obj_id
         # hydraulischer_knoten --- hydraulischer_knoten.bemerkung, hydraulischer_knoten.druck, hydraulischer_knoten.geometrie, hydraulischer_knoten.knotentyp, hydraulischer_knoten.name_nummer, hydraulischer_knoten.t_id, hydraulischer_knoten.verbrauch
-        # _bwrel_ --- hydraulischer_knoten.hydraulischer_strang__BWREL_bisknotenref, hydraulischer_knoten.hydraulischer_strang__BWREL_vonknotenref, hydraulischer_knoten.leitungsknoten__BWREL_knotenref, hydraulischer_knoten.metaattribute__BWREL_sia405_baseclass_metaattribute, hydraulischer_knoten.sia405_textpos__BWREL_hydraulischer_knotenref, hydraulischer_knoten.spezialbauwerk__BWREL_t_id, hydraulischer_knoten.symbolpos__BWREL_t_id, hydraulischer_knoten.textpos__BWREL_t_id
+
+        # baseclass --- rohrleitungsteil.t_ili_tid, rohrleitungsteil.t_type
+        # sia405_baseclass --- rohrleitungsteil.obj_id
+        # leitungsknoten --- rohrleitungsteil.bemerkung, rohrleitungsteil.druckzone, rohrleitungsteil.eigentuemer, rohrleitungsteil.einbaujahr, rohrleitungsteil.geometrie, rohrleitungsteil.hoehe, rohrleitungsteil.hoehenbestimmung, rohrleitungsteil.knotenref, rohrleitungsteil.lagebestimmung, rohrleitungsteil.symbolori
+        # rohrleitungsteil --- rohrleitungsteil.abwinklung, rohrleitungsteil.art, rohrleitungsteil.dimension, rohrleitungsteil.material, rohrleitungsteil.name_nummer, rohrleitungsteil.t_id, rohrleitungsteil.verbindung, rohrleitungsteil.zulaessiger_betriebsdruck, rohrleitungsteil.zustand
+        # _bwrel_ --- rohrleitungsteil.sia405_symbolpos__BWREL_objekt
+        # _rel_ --- rohrleitungsteil.knotenref__REL
 
         node = QWAT.node(
 

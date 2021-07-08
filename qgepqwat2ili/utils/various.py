@@ -56,7 +56,7 @@ def setup_test_db(template="full"):
         logger.info("Test container not running, we create it")
 
         exec_(
-            f"docker run -d --rm -v qgepqwat_db:/var/lib/postgresql/data -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis"
+            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis"
         )
 
     # Wait for PG
@@ -112,10 +112,23 @@ def setup_test_db(template="full"):
         )
         dexec_("createdb -U postgres --template=qgep_prod tpl_full")
 
-        # Hotfix invalid data
+        # Hotfix qgep invalid demo data
         delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qgep_demodata_hotfix.sql")
-        exec_(f"docker cp {delta_path} qgepqwat:/tpl_full_hotfix.sql")
-        dexec_("psql -U postgres -d tpl_full -f /tpl_full_hotfix.sql")
+        exec_(f"docker cp {delta_path} qgepqwat:/qgep_demodata_hotfix.sql")
+        dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qgep_demodata_hotfix.sql")
+
+        # Hotfix qwat invalid demo data
+        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_demodata_hotfix.sql")
+        exec_(f"docker cp {delta_path} qgepqwat:/qwat_demodata_hotfix.sql")
+        dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qwat_demodata_hotfix.sql")
+
+        # Hotfix qwat datamodel migration
+        # TODO : publish a QWAT datamodel upgrade and remove this
+        logger.warning("A HOTFIX DELTA WILL BE APPIED TO QWAT, THIS MUST NOT BE APPLIED TO PRODUCTION")
+        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_temp_migration.sql")
+        exec_(f"docker cp {delta_path} qgepqwat:/qwat_temp_migration.sql")
+        dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qwat_temp_migration.sql")
+        dexec_("psql -U postgres -d tpl_empty -v ON_ERROR_STOP=1 -f /qwat_temp_migration.sql")
 
     dexec_(
         f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'

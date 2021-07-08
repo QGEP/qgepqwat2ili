@@ -1,10 +1,14 @@
 import datetime
+import unicodedata
 import warnings
 
-from geoalchemy2.functions import (  # ST_LineSubstring, ST_CurveToLine,
+from geoalchemy2.functions import (
     ST_Z,
+    ST_CurveToLine,
     ST_Force2D,
     ST_ForceCurve,
+    ST_LineSubstring,
+    ST_RemoveRepeatedPoints,
     ST_Transform,
 )
 from sqlalchemy.orm import Session
@@ -15,7 +19,12 @@ from .model_qwat import get_qwat_model
 from .model_wasser import get_wasser_model
 
 
-def qwat_export():
+def qwat_export(skip_hydraulics=False):
+
+    if not skip_hydraulics:
+        warnings.warn(
+            "Exports with hydraulics are currently broken (invalid). Pass skip_hydraulics to export valid files."
+        )
 
     QWAT = get_qwat_model()
     WASSER = get_wasser_model()
@@ -31,6 +40,9 @@ def qwat_export():
     wasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     tid_maker = utils.ili2db.TidMaker(id_attribute="id")
 
+    def tid2oid(tid):
+        return f"ch{tid:014}"  # convert to OID
+
     def get_tid(relation, for_class=None):
         """
         Makes a tid for a relation
@@ -39,12 +51,14 @@ def qwat_export():
             return None
         return tid_maker.tid_for_row(relation, for_class=for_class)
 
-    def get_vl(relation, attr_name="value_fr"):
+    def get_vl(relation, attr_name="sia405code"):
         """
         Gets a literal value from a value list relation
         """
-        # TODO default to a SIA405 compliant column instead of value_fr once these are defined in QWAT
         if relation is None:
+            return None
+        if not hasattr(relation, attr_name):
+            warnings.warn(f"{relation} has no attribute {attr_name}", stacklevel=2)
             return None
         return getattr(relation, attr_name)
 
@@ -55,14 +69,34 @@ def qwat_export():
         if val is None:
             return None
         if len(val) > max_length:
-            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})")
+            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
         return val[0:max_length]
 
-    def blank_to_none(val):
+    def clamp(val, min_val=None, max_val=None, accept_none=False):
         """
-        Converts blank strings to NULLs to work around https://github.com/claeis/ili2db/issues/388
+        Raises a warning if values gets clamped
         """
-        return None if val == "" else val
+        if val is None and accept_none:
+            return None
+        if (val is None) or (min_val is not None and val < min_val):
+            warnings.warn(f"Value '{val}' was clamped to {min_val}", stacklevel=2)
+            val = min_val
+        elif max_val is not None and val > max_val:
+            warnings.warn(f"Value '{val}' was clamped to {max_val}", stacklevel=2)
+            val = max_val
+        return val
+
+    def sanitize_str(val):
+        """
+        Converts blank strings to NULLs (see https://github.com/claeis/ili2db/issues/388) and removes control characters
+        """
+        if not val:
+            return None
+        # from https://stackoverflow.com/a/19016117/13690651
+        return "".join(ch for ch in val if unicodedata.category(ch)[0] != "C")
+
+    def sanitize_geom(val):
+        return ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(val, 2056)), 0.002)
 
     def create_metaattributes(instance):
         warnings.warn(
@@ -75,7 +109,7 @@ def qwat_export():
             # --- metaattribute ---
             datenherr="unknown",
             datenlieferant="unknown",
-            letzte_aenderung=datetime.datetime(1970, 1, 1),
+            letzte_aenderung=datetime.datetime.today(),
             sia405_baseclass_metaattribute=instance.t_id,
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=instance.t_id,
@@ -88,7 +122,7 @@ def qwat_export():
         Returns common attributes for base
         """
         tid = get_tid(row, tid_for_class)
-        oid = f"ch{tid:014}"  # convert to OID
+        oid = tid2oid(tid)
         return {
             "t_ili_tid": oid,
             "t_type": type_name,
@@ -105,40 +139,80 @@ def qwat_export():
             "bemerkung": DOES_NOT_EXIST_IN_QWAT,
             "druckzone": DOES_NOT_EXIST_IN_QWAT,
             "eigentuemer": DOES_NOT_EXIST_IN_QWAT,
-            "einbaujahr": row.year,
-            "geometrie": ST_Force2D(ST_Transform(row.geometry, 2056)),
+            "einbaujahr": clamp(row.year, min_val=1800, max_val=2100, accept_none=True),
+            "geometrie": sanitize_geom(row.geometry),
             "hoehe": ST_Z(row.geometry),
             "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
-            "knotenref": tid_maker.tid_for_row(row, QWAT.node),  # we use the generated hydraulischer_knoten t_id
+            "knotenref": None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
             "lagebestimmung": get_vl(row.fk_precision__REL),
             "symbolori": 0,
         }
 
-    logger.info("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
-    for row in qwat_session.query(QWAT.node):
-        """
-        We map QWAT nodes to hydraulischer_knoten. QWAT nodes subclasses (such as hydrant)
-        will be mapped to leitungsknoten. This is why we need to specify a class for t_id maker.
-        """
+    if skip_hydraulics:
+        logger.info("Skipping QWAT.node -> WASSER.hydraulischer_knoten")
+    else:
+        logger.info("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
+        # Mapping all QWAT nodes to hydraulischer_knoten.
+        for row in qwat_session.query(QWAT.node):
 
-        # node --- node.id, node.fk_district, node.fk_pressurezone, node.fk_printmap, node._printmaps, node._geometry_alt1_used, node._geometry_alt2_used, node._pipe_node_type, node._pipe_orientation, node._pipe_schema_visible, node.geometry, node.geometry_alt1, node.geometry_alt2, node.update_geometry_alt1, node.update_geometry_alt2
-        # _bwrel_ --- node.pipe__BWREL_fk_node_b, node.pipe__BWREL_fk_node_a
-        # _rel_ --- node.fk_district__REL, node.fk_pressurezone__REL
+            # node --- node.id, node.fk_district, node.fk_pressurezone, node.fk_printmap, node._printmaps, node._geometry_alt1_used, node._geometry_alt2_used, node._pipe_node_type, node._pipe_orientation, node._pipe_schema_visible, node.geometry, node.geometry_alt1, node.geometry_alt2, node.update_geometry_alt1, node.update_geometry_alt2
+            # _bwrel_ --- node.pipe__BWREL_fk_node_b, node.pipe__BWREL_fk_node_a
+            # _rel_ --- node.fk_district__REL, node.fk_pressurezone__REL
 
-        hydraulischer_knoten = WASSER.hydraulischer_knoten(
+            hydraulischer_knoten = WASSER.hydraulischer_knoten(
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.node),
+                # --- hydraulischer_knoten ---
+                bemerkung=DOES_NOT_EXIST_IN_QWAT,
+                druck=MAPPING_OPEN_QUESTION,
+                geometrie=sanitize_geom(row.geometry),
+                knotentyp="Normalknoten",
+                name_nummer=str(row.id),
+                verbrauch=DOES_NOT_EXIST_IN_QWAT,
+            )
+            wasser_session.add(hydraulischer_knoten)
+            create_metaattributes(hydraulischer_knoten)
+            print(".", end="")
+        logger.info("done")
+        wasser_session.flush()
+
+    # In most cases, leitungsknoten will be created further down by subclasses.
+    # But we still need to create leitungsknoten for plain nodes (not subclass instances)
+    logger.info("Exporting QWAT.node -> WASSER.rohrleitungsteil")
+    for row in (
+        qwat_session.query(QWAT.node).join(QWAT.network_element, isouter=True).filter(QWAT.network_element.id == None)
+    ):
+        # In most cases, leitungsknoten will be created further down by subclasses.
+        # But we still need to create leitungsknoten for plain nodes (not subclass instances)
+
+        rohrleitungsteil = WASSER.rohrleitungsteil(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "hydraulischer_knoten", QWAT.node),
-            # --- hydraulischer_knoten ---
+            **base_common(row, "rohrleitungsteil"),
+            # --- leitungsknoten ---
             bemerkung=DOES_NOT_EXIST_IN_QWAT,
-            druck=MAPPING_OPEN_QUESTION,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
-            knotentyp="Normalknoten",
-            name_nummer=str(row.id),
-            verbrauch=DOES_NOT_EXIST_IN_QWAT,
+            druckzone=DOES_NOT_EXIST_IN_QWAT,
+            eigentuemer=DOES_NOT_EXIST_IN_QWAT,
+            einbaujahr=None,
+            geometrie=sanitize_geom(row.geometry),
+            hoehe=ST_Z(row.geometry),
+            hoehenbestimmung="unbekannt",
+            knotenref=None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
+            lagebestimmung="unbekannt",
+            symbolori=0,
+            # --- rohrleitungsteil ---
+            # abwinklung=row.REPLACE_ME,  # VARCHAR(10)
+            # art=row.REPLACE_ME,  # VARCHAR(255)
+            # dimension=row.REPLACE_ME,  # INTEGER
+            # material=row.REPLACE_ME,  # VARCHAR(255)
+            # name_nummer=row.REPLACE_ME,  # VARCHAR(40)
+            # verbindung=row.REPLACE_ME,  # VARCHAR(255)
+            # zulaessiger_betriebsdruck=row.REPLACE_ME,  # NUMERIC(3, 1)
+            # zustand=row.REPLACE_ME,  # VARCHAR(40)
         )
-        wasser_session.add(hydraulischer_knoten)
-        create_metaattributes(hydraulischer_knoten)
+        wasser_session.add(rohrleitungsteil)
+        create_metaattributes(rohrleitungsteil)
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -150,25 +224,26 @@ def qwat_export():
         # _bwrel_ --- pipe.meter__BWREL_fk_pipe, pipe.leak__BWREL_fk_pipe, pipe.valve__BWREL_fk_pipe, pipe.crossing__BWREL__pipe2_id, pipe.crossing__BWREL__pipe1_id, pipe.pipe__BWREL_fk_parent, pipe.part__BWREL_fk_pipe, pipe.subscriber__BWREL_fk_pipe, pipe.pump__BWREL_fk_pipe_in, pipe.pump__BWREL_fk_pipe_out
         # _rel_ --- pipe.fk_precision__REL, pipe.schema_force_visible__REL, pipe.fk_installmethod__REL, pipe.fk_material__REL, pipe.label_1_visible__REL, pipe.fk_function__REL, pipe.fk_watertype__REL, pipe.fk_parent__REL, pipe.label_2_visible__REL, pipe.fk_status__REL, pipe.fk_node_b__REL, pipe.fk_pressurezone__REL, pipe.fk_folder__REL, pipe.fk_protection__REL, pipe.fk_district__REL, pipe.fk_bedding__REL, pipe.fk_node_a__REL, pipe.fk_distributor__REL
 
-        hydraulischer_strang = WASSER.hydraulischer_strang(
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
-            # --- hydraulischer_strang ---
-            bemerkung=blank_to_none(row.remark),
-            bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
-            durchfluss=DOES_NOT_EXIST_IN_QWAT,
-            fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
-            name_nummer=str(row.id),
-            referenz_durchmesser=get_vl(row.fk_material__REL, "diameter_nominal") or -1,
-            referenz_laenge=row._length2d,
-            referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
-            verbrauch=DOES_NOT_EXIST_IN_QWAT,
-            vonknotenref=get_tid(row.fk_node_a__REL, QWAT.node),
-            zustand=get_vl(row.fk_status__REL),
-        )
-        wasser_session.add(hydraulischer_strang)
-        create_metaattributes(hydraulischer_strang)
+        if not skip_hydraulics:
+            hydraulischer_strang = WASSER.hydraulischer_strang(
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
+                # --- hydraulischer_strang ---
+                bemerkung=sanitize_str(row.remark),
+                bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
+                durchfluss=DOES_NOT_EXIST_IN_QWAT,
+                fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
+                name_nummer=str(row.id),
+                referenz_durchmesser=clamp(get_vl(row.fk_material__REL, "diameter_nominal"), min_val=0),
+                referenz_laenge=row._length2d,
+                referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
+                verbrauch=DOES_NOT_EXIST_IN_QWAT,
+                vonknotenref=get_tid(row.fk_node_a__REL, QWAT.node),
+                zustand=get_vl(row.fk_status__REL),
+            )
+            wasser_session.add(hydraulischer_strang)
+            create_metaattributes(hydraulischer_strang)
 
         leitung = WASSER.leitung(
             # FIELDS TO MAP TO WASSER.leitung
@@ -178,8 +253,8 @@ def qwat_export():
             # --- leitung ---
             astatus=get_vl(row.fk_status__REL),
             aussenbeschichtung=get_vl(row.fk_protection__REL),
-            baujahr=row.year or -1,
-            bemerkung=blank_to_none(row.remark),
+            baujahr=clamp(row.year, min_val=1800, max_val=2100),
+            bemerkung=sanitize_str(row.remark),
             betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
             bettung=get_vl(row.fk_bedding__REL),
@@ -189,7 +264,7 @@ def qwat_export():
             durchmesserinnen=get_vl(row.fk_material__REL, "diameter_internal"),
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             funktion=get_vl(row.fk_function__REL),
-            geometrie=ST_ForceCurve(ST_Force2D(ST_Transform(row.geometry, 2056))),
+            geometrie=ST_ForceCurve(sanitize_geom(row.geometry)),
             hydraulische_rauheit=DOES_NOT_EXIST_IN_QWAT,
             innenbeschichtung=DOES_NOT_EXIST_IN_QWAT,
             kathodischer_schutz=DOES_NOT_EXIST_IN_QWAT,
@@ -201,7 +276,7 @@ def qwat_export():
             nennweite=str(get_vl(row.fk_material__REL, "diameter_nominal")),
             sanierung_erneuerung=DOES_NOT_EXIST_IN_QWAT,
             schubsicherung=DOES_NOT_EXIST_IN_QWAT,
-            strangref=hydraulischer_strang.t_id,
+            strangref=None if skip_hydraulics else hydraulischer_strang.t_id,
             ueberdeckung=DOES_NOT_EXIST_IN_QWAT,
             unterhalt=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
@@ -238,12 +313,12 @@ def qwat_export():
             art=get_vl(row.fk_cause__REL),
             ausloeser=DOES_NOT_EXIST_IN_QWAT,
             behebungsdatum=row.repair_date,
-            bemerkung=blank_to_none(row.description),
+            bemerkung=sanitize_str(row.description),
             erhebungsdatum=row.detection_date,
-            geometrie=ST_Transform(row.geometry, 2056),
+            geometrie=sanitize_geom(row.geometry),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
             name_nummer=str(row.id),
-            ursache=get_vl(row.fk_cause__REL),
+            ursache=DOES_NOT_EXIST_IN_QWAT,  # somehow overlapping with art, but not exactly
             zustand=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(schadenstelle)
@@ -268,12 +343,12 @@ def qwat_export():
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- hydrant ---
-            art="Unterflurhydrant" if row.underground else "Oberflurhydrant",
+            art=get_vl(row.fk_model_inf__REL) if row.underground else get_vl(row.fk_model_sup__REL),
             dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
-            hersteller=get_vl(row.fk_provider__REL, "value_fr"),
-            material="Metall" if get_vl(row.fk_material__REL, "id") in [7002, 7003, 7004] else "unbekannt",
+            hersteller=get_vl(row.fk_provider__REL),
+            material=get_vl(row.fk_material__REL),
             name_nummer=row.identification,
             typ=truncate(f"{row.fk_model_sup} / {row.fk_model_inf}", 10),
             versorgungsdruck=row.pressure_static,
@@ -304,13 +379,13 @@ def qwat_export():
             # --- wasserbehaelter ---
             art=DOES_NOT_EXIST_IN_QWAT,
             beschichtung=DOES_NOT_EXIST_IN_QWAT,
-            brauchwasserreserve=row.storage_supply / 1000 if row.storage_supply else -1,
-            fassungsvermoegen=row.storage_total / 1000 if row.storage_total else -1,
+            brauchwasserreserve=clamp(row.storage_supply, min_val=0) / 1000,
+            fassungsvermoegen=clamp(row.storage_total, min_val=0) / 1000,
             leistung=DOES_NOT_EXIST_IN_QWAT,
-            loeschwasserreserve=row.storage_fire / 1000 if row.storage_fire else -1,
+            loeschwasserreserve=clamp(row.storage_fire, min_val=0) / 1000,
             material=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
-            ueberlaufhoehe=row.altitude_overflow or -1,
+            ueberlaufhoehe=clamp(row.altitude_overflow, min_val=0),
             zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wasserbehaelter)
@@ -360,12 +435,12 @@ def qwat_export():
         wassergewinnungsanlage = WASSER.wassergewinnungsanlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "anlage"),
+            **base_common(row, "wassergewinnungsanlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- wassergewinnungsanlage ---
             name_nummer=str(row.id),
-            art="Aufbereitungsanlage/unbekannt",
+            art="Aufbereitungsanlage.unbekannt",
             leistung=f"{row.treatment_capacity}",
             betreiber=row.fk_distributor__REL.name,
             konzessionaer=DOES_NOT_EXIST_IN_QWAT,
@@ -373,6 +448,7 @@ def qwat_export():
             zustand=get_vl(row.fk_status__REL),
         )
         wasser_session.add(wassergewinnungsanlage)
+        create_metaattributes(wassergewinnungsanlage)
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -391,7 +467,7 @@ def qwat_export():
             anlage = WASSER.anlage(
                 # --- baseclass ---
                 # --- sia405_baseclass ---
-                **base_common(row, "hausanschluss"),
+                **base_common(row, "anlage"),
                 # --- leitungsknoten ---
                 **leitungsknoten_common(row),
                 # --- anlage ---
@@ -406,6 +482,7 @@ def qwat_export():
                 dimension1=DOES_NOT_EXIST_IN_QWAT,
             )
             wasser_session.add(anlage)
+            create_metaattributes(anlage)
             print(".", end="")
 
         else:  # incl. row.fk_subscriber_type__REL.value_en == "Subscriber"
@@ -480,12 +557,12 @@ def qwat_export():
         anlage = WASSER.anlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "wassergewinnungsanlage"),
+            **base_common(row, "anlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- anlage ---
             name_nummer=str(row.id),
-            art="Schacht/Zonentrennung" if row.networkseparation else "Schacht",
+            art="Schacht.Zonentrennung" if row.networkseparation else "Schacht.unbekannt",
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
             betreiber=get_vl(row.fk_distributor__REL, "name"),
@@ -495,6 +572,7 @@ def qwat_export():
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
+        create_metaattributes(anlage)
         print(".", end="")
     logger.info("done")
 
@@ -511,14 +589,12 @@ def qwat_export():
         anlage = WASSER.anlage(
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "wassergewinnungsanlage"),
+            **base_common(row, "anlage"),
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- anlage ---
             name_nummer=str(row.id),
-            art="Druckbrecher"
-            if get_vl(row.fk_pressurecontrol_type__REL) in ["reducer", "pressure cut"]
-            else "Schacht",
+            art=get_vl(row.fk_pressurecontrol_type__REL),
             material=DOES_NOT_EXIST_IN_QWAT,
             leistung=DOES_NOT_EXIST_IN_QWAT,
             betreiber=get_vl(row.fk_distributor__REL, "name"),
@@ -528,6 +604,7 @@ def qwat_export():
             dimension1=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(anlage)
+        create_metaattributes(anlage)
         print(".", end="")
     logger.info("done")
 
@@ -543,39 +620,40 @@ def qwat_export():
         # valve --- valve.id, valve.fk_valve_type, valve.fk_valve_function, valve.fk_valve_actuation, valve.fk_pipe, valve.fk_handle_precision, valve.fk_handle_precisionalti, valve.fk_maintenance, valve.closed, valve.networkseparation, valve.handle_altitude, valve.handle_geometry, valve.fk_district, valve.fk_pressurezone, valve.fk_distributor, valve.fk_precision, valve.fk_precisionalti, valve.fk_status, valve.fk_object_reference, valve.fk_folder, valve.year, valve.year_end, valve.altitude, valve.orientation, valve.fk_locationtype, valve.identification, valve.remark, valve.fk_printmap, valve._geometry_alt1_used, valve._geometry_alt2_used, valve._pipe_node_type, valve._pipe_orientation, valve._pipe_schema_visible, valve._printmaps, valve.geometry, valve.geometry_alt1, valve.geometry_alt2, valve.update_geometry_alt1, valve.update_geometry_alt2, valve.label_1_visible, valve.label_1_x, valve.label_1_y, valve.label_1_rotation, valve.label_1_text, valve.label_2_visible, valve.label_2_x, valve.label_2_y, valve.label_2_rotation, valve.label_2_text, valve.schema_force_visible, valve._schema_visible, valve.fk_nominal_diameter
         # _rel_ --- valve.label_2_visible__REL, valve.fk_precisionalti__REL, valve.fk_valve_function__REL, valve.fk_valve_actuation__REL, valve.fk_valve_type__REL, valve.fk_district__REL, valve.fk_nominal_diameter__REL, valve.fk_object_reference__REL, valve.fk_pipe__REL, valve.fk_precision__REL, valve.label_1_visible__REL, valve.fk_folder__REL, valve.fk_handle_precision__REL, valve.fk_pressurezone__REL, valve.fk_handle_precisionalti__REL, valve.fk_distributor__REL, valve.fk_status__REL, valve.schema_force_visible__REL
 
-        # We add an intermediate node to split the pipe
-        hydraulischer_knoten = WASSER.hydraulischer_knoten(
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.valve),
-            # --- hydraulischer_knoten ---
-            bemerkung=blank_to_none(row.remark),
-            druck=DOES_NOT_EXIST_IN_QWAT,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
-            knotentyp="Normalknoten",
-            name_nummer=str(row.id),
-            verbrauch=DOES_NOT_EXIST_IN_QWAT,
-        )
-        wasser_session.add(hydraulischer_knoten)
-        create_metaattributes(hydraulischer_knoten)
+        if not skip_hydraulics:
+            # We add an intermediate node to split the pipe
+            hydraulischer_knoten = WASSER.hydraulischer_knoten(
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.valve),
+                # --- hydraulischer_knoten ---
+                bemerkung=sanitize_str(row.remark),
+                druck=DOES_NOT_EXIST_IN_QWAT,
+                geometrie=sanitize_geom(row.geometry),
+                knotentyp="Normalknoten",
+                name_nummer=str(row.id),
+                verbrauch=DOES_NOT_EXIST_IN_QWAT,
+            )
+            wasser_session.add(hydraulischer_knoten)
+            create_metaattributes(hydraulischer_knoten)
 
         absperrorgan = WASSER.absperrorgan(
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "absperrorgan"),
             # --- leitungsknoten ---
-            bemerkung=blank_to_none(row.remark),
+            bemerkung=sanitize_str(row.remark),
             druckzone=DOES_NOT_EXIST_IN_QWAT,
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
-            einbaujahr=row.year,
-            geometrie=ST_Force2D(ST_Transform(row.geometry, 2056)),
+            einbaujahr=clamp(row.year, min_val=1800, max_val=2100, accept_none=True),
+            geometrie=sanitize_geom(row.geometry),
             hoehe=ST_Z(row.geometry),
             hoehenbestimmung=get_vl(row.fk_precisionalti__REL),
-            knotenref__REL=hydraulischer_knoten,
+            knotenref__REL=None if skip_hydraulics else hydraulischer_knoten,
             lagebestimmung=get_vl(row.fk_precision__REL),
             symbolori=0,
             # --- absperrorgan ---
-            art=row.fk_valve_type__REL.value_en,
+            art=get_vl(row.fk_valve_type__REL),
             hersteller=DOES_NOT_EXIST_IN_QWAT,
             material=DOES_NOT_EXIST_IN_QWAT,
             name_nummer=str(row.id),
@@ -599,39 +677,51 @@ def qwat_export():
             continue
         # Otherwise, we split the pipe at the valve.
 
-        # TODO : Reenable this, it was temporarily disabled as we got missing metaattributes
-        warnings.warn("Splitting strang/leitung at absperrorgan is currently disabled.")
-        """
         # Get the related pipe
-        strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
-            get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
-        )
         leitung_a = wasser_session.query(WASSER.leitung).get(get_tid(row.fk_pipe__REL, for_class=WASSER.leitung))
 
         # We clone the pipe
-        strang_b = utils.sqlalchemy.copy_instance(strang_a)
-        strang_b.t_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
-        strang_b.obj_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
-        strang_b.t_ili_tid = get_tid(row, for_class=WASSER.hydraulischer_strang)
         leitung_b = utils.sqlalchemy.copy_instance(leitung_a)
         leitung_b.t_id = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.obj_id = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.t_ili_tid = get_tid(row, for_class=WASSER.leitung)
-        leitung_b.strangref__REL = strang_b
+        leitung_b.obj_id = tid2oid(leitung_b.t_id)
+        leitung_b.t_ili_tid = leitung_b.obj_id
 
-        # We connect to the midpoint and adapt geom
-        strang_a.bisknotenref__REL = hydraulischer_knoten
-        strang_b.vonknotenref__REL = hydraulischer_knoten
+        # We split the geometry
+        warnings.warn(
+            f"Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
+        )
         # TODO the geometry of the new node does not necessarily lie in the middle (nor on the segment)
-        leitung_a.geometrie = ST_ForceCurve(ST_LineSubstring(ST_CurveToLine(leitung_a.geometrie), 0, 0.5))
-        leitung_b.geometrie = ST_ForceCurve(ST_LineSubstring(ST_CurveToLine(leitung_b.geometrie), 0.5, 1))
+        leitung_a.geometrie = ST_ForceCurve(
+            sanitize_geom(ST_LineSubstring(ST_CurveToLine(leitung_a.geometrie), 0, 0.5))
+        )
+        leitung_b.geometrie = ST_ForceCurve(
+            sanitize_geom(ST_LineSubstring(ST_CurveToLine(leitung_b.geometrie), 0.5, 1))
+        )
 
-        # And add to session
-        wasser_session.add(strang_b)
+        # And add the new pipe to the session
         wasser_session.add(leitung_b)
-        create_metaattributes(strang_b)
         create_metaattributes(leitung_b)
-        """
+
+        if not skip_hydraulics:
+            strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
+                get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
+            )
+
+        # We do the same for hydraulics
+        if not skip_hydraulics:
+            strang_b = utils.sqlalchemy.copy_instance(strang_a)
+            strang_b.t_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
+            strang_b.obj_id = tid2oid(strang_b.t_id)
+            strang_b.t_ili_tid = strang_b.obj_id
+            leitung_b.strangref__REL = strang_b
+
+            # We connect to the midpoint
+            strang_a.bisknotenref__REL = hydraulischer_knoten
+            strang_b.vonknotenref__REL = hydraulischer_knoten
+
+            # And add the new pipe to the session
+            wasser_session.add(strang_b)
+            create_metaattributes(strang_b)
 
         print(".", end="")
     logger.info("done")
