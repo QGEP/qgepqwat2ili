@@ -79,10 +79,10 @@ def setup_test_db(template="full"):
 
         # Getting data
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_and_demo_data.backup"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.5.6-1/qgep_1.5.6-1_structure_and_demo_data.backup"
         )
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.5.4/qgep_1.5.4_structure_with_value_lists.sql"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.5.6-1/qgep_1.5.6-1_structure_with_value_lists.sql"
         )
         dexec_(
             "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_data_and_structure_sample.backup"
@@ -93,7 +93,7 @@ def setup_test_db(template="full"):
         )
 
         # Creating the template DB with empty structure
-        dexec_("psql -f qgep_1.5.4_structure_with_value_lists.sql qgep_prod postgres")
+        dexec_("psql -f qgep_1.5.6-1_structure_with_value_lists.sql qgep_prod postgres")
         dexec_("psql -f qwat_v1.3.5_structure_only.sql qgep_prod postgres")
         dexec_("psql -f qwat_v1.3.5_value_list_data_only.sql qgep_prod postgres")
         dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
@@ -105,7 +105,7 @@ def setup_test_db(template="full"):
         dexec_("dropdb -U postgres qgep_prod --if-exists")
         dexec_("createdb -U postgres qgep_prod")
         dexec_(
-            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.4_structure_and_demo_data.backup"
+            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.6-1_structure_and_demo_data.backup"
         )
         dexec_(
             "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.5_data_and_structure_sample.backup"

@@ -25,15 +25,7 @@ def qgep_import(precommit_callback=None):
     ABWASSER = get_abwasser_model()
 
     pre_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    # We need to set some constraint as deferrable, as there are some cyclic dependencies preventing
-    # from inserting everything at once otherwise.
-    # TODO : DO THIS IN THE DATAMODEL
-    pre_session.execute(
-        "ALTER TABLE qgep_od.reach_point ALTER CONSTRAINT rel_reach_point_wastewater_networkelement DEFERRABLE INITIALLY IMMEDIATE;"
-    )
-    pre_session.execute(
-        "ALTER TABLE qgep_od.structure_part ALTER CONSTRAINT rel_structure_part_wastewater_structure DEFERRABLE INITIALLY IMMEDIATE;"
-    )
+
     # We also drop symbology triggers as they badly affect performance. This must be done in a separate session as it
     # would deadlock other sessions.
     pre_session.execute("SELECT qgep_sys.drop_symbology_triggers();")
