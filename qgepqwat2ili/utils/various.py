@@ -85,17 +85,17 @@ def setup_test_db(template="full"):
             "wget https://github.com/QGEP/datamodel/releases/download/1.5.6-1/qgep_1.5.6-1_structure_with_value_lists.sql"
         )
         dexec_(
-            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_data_and_structure_sample.backup"
+            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_data_and_structure_sample.backup"
         )
-        dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_structure_only.sql")
+        dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_structure_only.sql")
         dexec_(
-            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.5/qwat_v1.3.5_value_list_data_only.sql"
+            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_value_list_data_only.sql"
         )
 
         # Creating the template DB with empty structure
         dexec_("psql -f qgep_1.5.6-1_structure_with_value_lists.sql qgep_prod postgres")
-        dexec_("psql -f qwat_v1.3.5_structure_only.sql qgep_prod postgres")
-        dexec_("psql -f qwat_v1.3.5_value_list_data_only.sql qgep_prod postgres")
+        dexec_("psql -f qwat_v1.3.6_structure_only.sql qgep_prod postgres")
+        dexec_("psql -f qwat_v1.3.6_value_list_data_only.sql qgep_prod postgres")
         dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
 
         # Creating the template DB with full data
@@ -108,7 +108,7 @@ def setup_test_db(template="full"):
             "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.6-1_structure_and_demo_data.backup"
         )
         dexec_(
-            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.5_data_and_structure_sample.backup"
+            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.6_data_and_structure_sample.backup"
         )
         dexec_("createdb -U postgres --template=qgep_prod tpl_full")
 
@@ -121,14 +121,6 @@ def setup_test_db(template="full"):
         delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_demodata_hotfix.sql")
         exec_(f"docker cp {delta_path} qgepqwat:/qwat_demodata_hotfix.sql")
         dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qwat_demodata_hotfix.sql")
-
-        # Hotfix qwat datamodel migration
-        # TODO : publish a QWAT datamodel upgrade and remove this
-        logger.warning("A HOTFIX DELTA WILL BE APPIED TO QWAT, THIS MUST NOT BE APPLIED TO PRODUCTION")
-        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_temp_migration.sql")
-        exec_(f"docker cp {delta_path} qgepqwat:/qwat_temp_migration.sql")
-        dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qwat_temp_migration.sql")
-        dexec_("psql -U postgres -d tpl_empty -v ON_ERROR_STOP=1 -f /qwat_temp_migration.sql")
 
     dexec_(
         f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
