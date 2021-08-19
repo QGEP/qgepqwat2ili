@@ -19,11 +19,11 @@ from .model_qwat import get_qwat_model
 from .model_wasser import get_wasser_model
 
 
-def qwat_export(skip_hydraulics=False):
+def qwat_export(include_hydraulics=False):
 
-    if not skip_hydraulics:
+    if include_hydraulics:
         warnings.warn(
-            "Exports with hydraulics are currently broken (invalid). Pass skip_hydraulics to export valid files."
+            "Exports with hydraulics are currently broken (invalid). Remove --include_hydraulics to export valid files."
         )
 
     QWAT = get_qwat_model()
@@ -143,12 +143,12 @@ def qwat_export(skip_hydraulics=False):
             "geometrie": sanitize_geom(row.geometry),
             "hoehe": ST_Z(row.geometry),
             "hoehenbestimmung": get_vl(row.fk_precisionalti__REL),
-            "knotenref": None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
+            "knotenref": None if not include_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
             "lagebestimmung": get_vl(row.fk_precision__REL),
             "symbolori": 0,
         }
 
-    if skip_hydraulics:
+    if not include_hydraulics:
         logger.info("Skipping QWAT.node -> WASSER.hydraulischer_knoten")
     else:
         logger.info("Exporting QWAT.node -> WASSER.hydraulischer_knoten")
@@ -198,7 +198,7 @@ def qwat_export(skip_hydraulics=False):
             geometrie=sanitize_geom(row.geometry),
             hoehe=ST_Z(row.geometry),
             hoehenbestimmung="unbekannt",
-            knotenref=None if skip_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
+            knotenref=None if not include_hydraulics else tid_maker.tid_for_row(row, QWAT.node),
             lagebestimmung="unbekannt",
             symbolori=0,
             # --- rohrleitungsteil ---
@@ -224,7 +224,7 @@ def qwat_export(skip_hydraulics=False):
         # _bwrel_ --- pipe.meter__BWREL_fk_pipe, pipe.leak__BWREL_fk_pipe, pipe.valve__BWREL_fk_pipe, pipe.crossing__BWREL__pipe2_id, pipe.crossing__BWREL__pipe1_id, pipe.pipe__BWREL_fk_parent, pipe.part__BWREL_fk_pipe, pipe.subscriber__BWREL_fk_pipe, pipe.pump__BWREL_fk_pipe_in, pipe.pump__BWREL_fk_pipe_out
         # _rel_ --- pipe.fk_precision__REL, pipe.schema_force_visible__REL, pipe.fk_installmethod__REL, pipe.fk_material__REL, pipe.label_1_visible__REL, pipe.fk_function__REL, pipe.fk_watertype__REL, pipe.fk_parent__REL, pipe.label_2_visible__REL, pipe.fk_status__REL, pipe.fk_node_b__REL, pipe.fk_pressurezone__REL, pipe.fk_folder__REL, pipe.fk_protection__REL, pipe.fk_district__REL, pipe.fk_bedding__REL, pipe.fk_node_a__REL, pipe.fk_distributor__REL
 
-        if not skip_hydraulics:
+        if include_hydraulics:
             hydraulischer_strang = WASSER.hydraulischer_strang(
                 # --- baseclass ---
                 # --- sia405_baseclass ---
@@ -276,7 +276,7 @@ def qwat_export(skip_hydraulics=False):
             nennweite=str(get_vl(row.fk_material__REL, "diameter_nominal")),
             sanierung_erneuerung=DOES_NOT_EXIST_IN_QWAT,
             schubsicherung=DOES_NOT_EXIST_IN_QWAT,
-            strangref=None if skip_hydraulics else hydraulischer_strang.t_id,
+            strangref=None if not include_hydraulics else hydraulischer_strang.t_id,
             ueberdeckung=DOES_NOT_EXIST_IN_QWAT,
             unterhalt=DOES_NOT_EXIST_IN_QWAT,
             unterhaltspflichtiger=DOES_NOT_EXIST_IN_QWAT,
@@ -620,7 +620,7 @@ def qwat_export(skip_hydraulics=False):
         # valve --- valve.id, valve.fk_valve_type, valve.fk_valve_function, valve.fk_valve_actuation, valve.fk_pipe, valve.fk_handle_precision, valve.fk_handle_precisionalti, valve.fk_maintenance, valve.closed, valve.networkseparation, valve.handle_altitude, valve.handle_geometry, valve.fk_district, valve.fk_pressurezone, valve.fk_distributor, valve.fk_precision, valve.fk_precisionalti, valve.fk_status, valve.fk_object_reference, valve.fk_folder, valve.year, valve.year_end, valve.altitude, valve.orientation, valve.fk_locationtype, valve.identification, valve.remark, valve.fk_printmap, valve._geometry_alt1_used, valve._geometry_alt2_used, valve._pipe_node_type, valve._pipe_orientation, valve._pipe_schema_visible, valve._printmaps, valve.geometry, valve.geometry_alt1, valve.geometry_alt2, valve.update_geometry_alt1, valve.update_geometry_alt2, valve.label_1_visible, valve.label_1_x, valve.label_1_y, valve.label_1_rotation, valve.label_1_text, valve.label_2_visible, valve.label_2_x, valve.label_2_y, valve.label_2_rotation, valve.label_2_text, valve.schema_force_visible, valve._schema_visible, valve.fk_nominal_diameter
         # _rel_ --- valve.label_2_visible__REL, valve.fk_precisionalti__REL, valve.fk_valve_function__REL, valve.fk_valve_actuation__REL, valve.fk_valve_type__REL, valve.fk_district__REL, valve.fk_nominal_diameter__REL, valve.fk_object_reference__REL, valve.fk_pipe__REL, valve.fk_precision__REL, valve.label_1_visible__REL, valve.fk_folder__REL, valve.fk_handle_precision__REL, valve.fk_pressurezone__REL, valve.fk_handle_precisionalti__REL, valve.fk_distributor__REL, valve.fk_status__REL, valve.schema_force_visible__REL
 
-        if not skip_hydraulics:
+        if include_hydraulics:
             # We add an intermediate node to split the pipe
             hydraulischer_knoten = WASSER.hydraulischer_knoten(
                 # --- baseclass ---
@@ -649,7 +649,7 @@ def qwat_export(skip_hydraulics=False):
             geometrie=sanitize_geom(row.geometry),
             hoehe=ST_Z(row.geometry),
             hoehenbestimmung=get_vl(row.fk_precisionalti__REL),
-            knotenref__REL=None if skip_hydraulics else hydraulischer_knoten,
+            knotenref__REL=None if not include_hydraulics else hydraulischer_knoten,
             lagebestimmung=get_vl(row.fk_precision__REL),
             symbolori=0,
             # --- absperrorgan ---
@@ -702,13 +702,13 @@ def qwat_export(skip_hydraulics=False):
         wasser_session.add(leitung_b)
         create_metaattributes(leitung_b)
 
-        if not skip_hydraulics:
+        if include_hydraulics:
             strang_a = wasser_session.query(WASSER.hydraulischer_strang).get(
                 get_tid(row.fk_pipe__REL, for_class=WASSER.hydraulischer_strang)
             )
 
         # We do the same for hydraulics
-        if not skip_hydraulics:
+        if include_hydraulics:
             strang_b = utils.sqlalchemy.copy_instance(strang_a)
             strang_b.t_id = get_tid(row, for_class=WASSER.hydraulischer_strang)
             strang_b.obj_id = tid2oid(strang_b.t_id)

@@ -62,7 +62,7 @@ python -m qgepqwat2ili qwat export desktop/my_export.xtf
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] [--skip_hydraulics] {import,export} path
+usage: python -m qgepqwat2ili qwat [-h] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] [--include_hydraulics] {import,export} path
 
 ili2QWAT entrypoint
 
@@ -75,7 +75,7 @@ optional arguments:
   --recreate_schema     drops schema and reruns ili2pg importschema (default: False)
   --skip_validation     skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
                         (default: False)
-  --skip_hydraulics     if provided, exports will skip hydraulischer_strang and hydraulischer_node classes (default: False)
+  --include_hydraulics  if provided, exports will include hydraulischer_strang and hydraulischer_node classes (these are currently likely to make the export invalid due to issues with the current ili model) (default: False)
   --pgservice PGSERVICE
                         name of the pgservice to use to connect to the database (default: qwat)
   --log                 saves a log file next to the input/output file (default: False)
