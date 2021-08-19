@@ -82,6 +82,11 @@ class schadenstelle(sia405_baseclass):
     __table_args__ = {"schema": SCHEMA}
 
 
+class spezialbauwerk(sia405_baseclass):
+    __tablename__ = "spezialbauwerk"
+    __table_args__ = {"schema": SCHEMA}
+
+
 _prepared = False
 
 

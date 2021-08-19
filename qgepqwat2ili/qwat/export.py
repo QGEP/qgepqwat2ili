@@ -7,7 +7,9 @@ from geoalchemy2.functions import (
     ST_CurveToLine,
     ST_Force2D,
     ST_ForceCurve,
+    ST_GeometryN,
     ST_LineSubstring,
+    ST_NumGeometries,
     ST_RemoveRepeatedPoints,
     ST_Transform,
 )
@@ -116,6 +118,38 @@ def qwat_export(include_hydraulics=False):
             t_seq=0,
         )
         wasser_session.add(metaattribute)
+
+    def create_spezialbauwerk(row, spezialbauwerk_art):
+        """
+        Some objects (such as Anlage, Wasserbehaelter, Wassergewinnungsanlage, Foerderanlage, ...)
+        that have a polygonal representation are also to be represented with a spezialbauwerk
+        """
+
+        spezialbauwerk = WASSER.spezialbauwerk(
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "spezialbauwerk", tid_for_class=WASSER.spezialbauwerk),
+            # --- spezialbauwerk ---
+            name_nummer=str(row.id),
+            art=spezialbauwerk_art,
+            material=DOES_NOT_EXIST_IN_QWAT,
+            einbaujahr=clamp(row.year, min_val=1800, max_val=2100, accept_none=True),
+            eigentuemer=DOES_NOT_EXIST_IN_QWAT,
+            bemerkung=DOES_NOT_EXIST_IN_QWAT,
+        )
+        wasser_session.add(spezialbauwerk)
+        create_metaattributes(spezialbauwerk)
+
+        # TODO : using scalar here may cause many database roundtrips, we can probably do that client side
+        geom_count = wasser_session.scalar(ST_NumGeometries(row.geometry_polygon))
+        for geom_idx in range(geom_count):
+            spezialbauwerk_flaeche = WASSER.spezialbauwerk_flaeche(
+                # --- spezialbauwerk_flaeche ---
+                geometrie=ST_ForceCurve(ST_GeometryN(sanitize_geom(row.geometry_polygon), geom_idx + 1)),
+                spezialbauwerkref__REL=spezialbauwerk,
+            )
+            wasser_session.add(spezialbauwerk_flaeche)
+            # create_metaattributes(spezialbauwerk_flaeche)
 
     def base_common(row, type_name, tid_for_class=None):
         """
@@ -390,6 +424,10 @@ def qwat_export(include_hydraulics=False):
         )
         wasser_session.add(wasserbehaelter)
         create_metaattributes(wasserbehaelter)
+
+        if row.geometry_polygon:
+            create_spezialbauwerk(row, "Wasserbehaelter")
+
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -418,6 +456,10 @@ def qwat_export(include_hydraulics=False):
         )
         wasser_session.add(foerderanlage)
         create_metaattributes(foerderanlage)
+
+        if row.geometry_polygon:
+            create_spezialbauwerk(row, "Foerderanlage")
+
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -449,6 +491,10 @@ def qwat_export(include_hydraulics=False):
         )
         wasser_session.add(wassergewinnungsanlage)
         create_metaattributes(wassergewinnungsanlage)
+
+        if row.geometry_polygon:
+            create_spezialbauwerk(row, "Wassergewinnungsanlage.uebrige")
+
         print(".", end="")
     logger.info("done")
     wasser_session.flush()
@@ -483,7 +529,9 @@ def qwat_export(include_hydraulics=False):
             )
             wasser_session.add(anlage)
             create_metaattributes(anlage)
-            print(".", end="")
+
+            if row.geometry_polygon:
+                create_spezialbauwerk(row, "Anlage")
 
         else:  # incl. row.fk_subscriber_type__REL.value_en == "Subscriber"
 
@@ -573,6 +621,10 @@ def qwat_export(include_hydraulics=False):
         )
         wasser_session.add(anlage)
         create_metaattributes(anlage)
+
+        if row.geometry_polygon:
+            create_spezialbauwerk(row, "Anlage")
+
         print(".", end="")
     logger.info("done")
 
