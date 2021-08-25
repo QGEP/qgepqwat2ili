@@ -48,6 +48,18 @@ def qgep_export(selection=None):
             return None
         return relation.value_de
 
+    def null_to_emptystr(val):
+        """
+        Converts nulls to blank strings and raises a warning
+        """
+        if val is None:
+            warnings.warn(
+                f"A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
+                stacklevel=2,
+            )
+            val = ""
+        return val
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -87,7 +99,7 @@ def qgep_export(selection=None):
             # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
             "bemerkung": row.remark,
             "betreiberref": get_tid(row.fk_operator__REL),
-            "bezeichnung": row.identifier,
+            "bezeichnung": null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
             "detailgeometrie": ST_Force2D(row.detail_geometry_geometry),
             "eigentuemerref": get_tid(row.fk_owner__REL),
@@ -111,7 +123,7 @@ def qgep_export(selection=None):
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
             "bemerkung": row.remark,
-            "bezeichnung": row.identifier,
+            "bezeichnung": null_to_emptystr(row.identifier),
         }
 
     def structure_part_common(row):
@@ -121,7 +133,7 @@ def qgep_export(selection=None):
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
             "bemerkung": row.remark,
-            "bezeichnung": row.identifier,
+            "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
 
@@ -413,7 +425,7 @@ def qgep_export(selection=None):
             abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=row.remark,
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
             hoehengenauigkeit=get_vl(row.elevation_accuracy__REL),
             kote=row.level,
             lage=ST_Force2D(row.situation_geometry),
@@ -762,7 +774,7 @@ def qgep_export(selection=None):
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
             bemerkung=row.remark,
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
             datengrundlage=row.base_data,
             dauer=row.duration,
             detaildaten=row.data_details,
@@ -913,7 +925,7 @@ def qgep_export(selection=None):
             # --- datentraeger ---
             art=get_vl(row.kind__REL),
             bemerkung=row.remark,
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
             pfad=row.path,
             standort=row.location,
         )
@@ -958,10 +970,10 @@ def qgep_export(selection=None):
             # --- datei ---
             art=get_vl(row.kind__REL) or "andere",
             bemerkung=row.remark,
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
             datentraegerref=get_tid(row.data_media__REL),
             klasse=get_vl(row.class__REL),
-            objekt=row.object,
+            objekt=null_to_emptystr(row.object),
             relativpfad=row.path_relative,
         )
         abwasser_session.add(datei)
