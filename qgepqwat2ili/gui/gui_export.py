@@ -13,13 +13,17 @@ class GuiExport(QDialog):
         # Execute the dialog
         # self.resize(iface.mainWindow().size() * 0.75)
 
-        structures_layer = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")[0]
-        reaches_layer = QgsProject.instance().mapLayersByName("vw_qgep_reach")[0]
+        structures_layers = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
+        if structures_layers:
+            self.structures = structures_layers[0].selectedFeatures()
+        else:
+            self.structures = []
 
-        QgsProject.instance().mapLayersByName("vw_qgep_reach")[0]
-
-        self.structures = structures_layer.selectedFeatures()
-        self.reaches = reaches_layer.selectedFeatures()
+        reaches_layers = QgsProject.instance().mapLayersByName("vw_qgep_reach")
+        if reaches_layers:
+            self.reaches = reaches_layers[0].selectedFeatures()
+        else:
+            self.reaches = []
 
         self.limit_checkbox.setText(
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
