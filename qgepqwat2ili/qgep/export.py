@@ -347,9 +347,9 @@ def qgep_export(selection=None):
             gwdistanz=row.distance_to_aquifer,
             maengel=get_vl(row.defects__REL),
             notueberlauf=get_vl(row.emergency_spillway__REL),
-            saugwagen=get_vl(row.vehicle_access__REL),  # TODO : check mapping
-            schluckvermoegen=row.absorption_capacity,  # TODO : check mapping
-            versickerungswasser=get_vl(row.seepage_utilization__REL),  # TODO : check mapping
+            saugwagen=get_vl(row.vehicle_access__REL),
+            schluckvermoegen=row.absorption_capacity,
+            versickerungswasser=get_vl(row.seepage_utilization__REL),
             wasserdichtheit=get_vl(row.watertightness__REL),
             wirksameflaeche=row.effective_area,
         )
