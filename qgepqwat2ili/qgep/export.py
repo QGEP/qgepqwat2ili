@@ -64,8 +64,8 @@ def qgep_export(selection=None):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
-            datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            datenherr=getattr(row.fk_dataowner__REL, "identifier", ""),
+            datenlieferant=getattr(row.fk_provider__REL, "identifier", ""),
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
