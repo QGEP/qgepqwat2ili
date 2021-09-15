@@ -4,6 +4,8 @@ This is the toolkit to import/export between QGEP/QWAT and their counterpart SIA
 
 It can be used as a command line tool or integrated in QGIS plugins.
 
+Note that this currently only supports up to date QGEP and QWAT (1.5.6/1.3.6 respectively at the time of writing).
+
 ## Command line tool
 
 ### Installation
