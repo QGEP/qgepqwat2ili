@@ -236,14 +236,17 @@ def qwat_export(include_hydraulics=False):
             lagebestimmung="unbekannt",
             symbolori=0,
             # --- rohrleitungsteil ---
-            # abwinklung=row.REPLACE_ME,  # VARCHAR(10)
-            # art=row.REPLACE_ME,  # VARCHAR(255)
-            # dimension=row.REPLACE_ME,  # INTEGER
-            # material=row.REPLACE_ME,  # VARCHAR(255)
-            # name_nummer=row.REPLACE_ME,  # VARCHAR(40)
-            # verbindung=row.REPLACE_ME,  # VARCHAR(255)
-            # zulaessiger_betriebsdruck=row.REPLACE_ME,  # NUMERIC(3, 1)
-            # zustand=row.REPLACE_ME,  # VARCHAR(40)
+            # Note : there's no match for these attributes, as we are matching generic/abstract
+            # QWAT.node to specific WASSER.rohrleitungsteil, because WASSER.leitungsknoten is
+            # abstract.
+            abwinklung=DOES_NOT_EXIST_IN_QWAT,
+            art=DOES_NOT_EXIST_IN_QWAT,
+            dimension=DOES_NOT_EXIST_IN_QWAT,
+            material=DOES_NOT_EXIST_IN_QWAT,
+            name_nummer=DOES_NOT_EXIST_IN_QWAT,
+            verbindung=DOES_NOT_EXIST_IN_QWAT,
+            zulaessiger_betriebsdruck=DOES_NOT_EXIST_IN_QWAT,
+            zustand=DOES_NOT_EXIST_IN_QWAT,
         )
         wasser_session.add(rohrleitungsteil)
         create_metaattributes(rohrleitungsteil)
