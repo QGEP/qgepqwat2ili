@@ -23,14 +23,21 @@ from .gui_export import GuiExport
 from .gui_import import GuiImport
 
 
-def show_failure(title, message, log_path=None):
+def _show_results(title, message, log_path, level):
     widget = iface.messageBar().createMessage(title, message)
-    if log_path:
-        button = QPushButton(widget)
-        button.setText("Show logs")
-        button.pressed.connect(lambda p=log_path: webbrowser.open(p))
-        widget.layout().addWidget(button)
-    iface.messageBar().pushWidget(widget, Qgis.Warning)
+    button = QPushButton(widget)
+    button.setText("Show logs")
+    button.pressed.connect(lambda p=log_path: webbrowser.open(p))
+    widget.layout().addWidget(button)
+    iface.messageBar().pushWidget(widget, level)
+
+
+def show_failure(title, message, log_path):
+    return _show_results(title, message, log_path, Qgis.Warning)
+
+
+def show_success(title, message, log_path):
+    return _show_results(title, message, log_path, Qgis.Success)
 
 
 import_dialog = None
@@ -204,9 +211,7 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(100)
 
-        plugin.iface.messageBar().pushMessage(
-            "Sucess", f"Data successfully exported to {file_name}", level=Qgis.Success
-        )
+        show_success("Sucess", f"Data successfully exported to {file_name}", os.path.dirname(log_path))
 
     export_dialog.accepted.connect(action_do_export)
     export_dialog.show()
