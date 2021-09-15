@@ -60,6 +60,30 @@ def qgep_export(selection=None):
             val = ""
         return val
 
+    def emptystr_to_null(val):
+        """
+        Converts blank strings to nulls and raises a warning
+
+        This is needed as is seems ili2pg 4.4.6 crashes with emptystrings under certain circumstances (see https://github.com/QGEP/qgepqwat2ili/issues/33)
+        """
+        if val == "":
+            warnings.warn(
+                f"An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+                stacklevel=2,
+            )
+            val = None
+        return val
+
+    def truncate(val, max_length):
+        """
+        Raises a warning if values gets truncated
+        """
+        if val is None:
+            return None
+        if len(val) > max_length:
+            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+        return val[0:max_length]
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -97,7 +121,7 @@ def qgep_export(selection=None):
             "baujahr": row.year_of_construction,
             "baulicherzustand": get_vl(row.structure_condition__REL),
             # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
-            "bemerkung": row.remark,
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "betreiberref": get_tid(row.fk_operator__REL),
             "bezeichnung": null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
@@ -122,7 +146,7 @@ def qgep_export(selection=None):
 
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": row.remark,
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
 
@@ -132,7 +156,7 @@ def qgep_export(selection=None):
         """
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": row.remark,
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
