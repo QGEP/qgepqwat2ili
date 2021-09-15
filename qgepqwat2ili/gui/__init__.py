@@ -1,3 +1,4 @@
+import logging
 import os
 import webbrowser
 from types import SimpleNamespace
@@ -20,6 +21,13 @@ from ..utils.ili2db import (
 from ..utils.various import CmdException, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
+
+# Always log to temp dir
+filename = make_log_path(None, "qgepqwat2ili")
+file_handler = logging.FileHandler(filename, mode="w", encoding="utf-8")
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
+logger.addHandler(file_handler)
 
 
 def _show_results(title, message, log_path, level):
