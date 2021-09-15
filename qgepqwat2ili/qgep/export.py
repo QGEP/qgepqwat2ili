@@ -116,11 +116,11 @@ def qgep_export(selection=None):
         warnings.warn(f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.")
         return {
             # --- abwasserbauwerk ---
-            # 'akten': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
+            "akten": row.records,
             "astatus": get_vl(row.status__REL),
             "baujahr": row.year_of_construction,
             "baulicherzustand": get_vl(row.structure_condition__REL),
-            # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
+            "baulos": row.contract_section,
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "betreiberref": get_tid(row.fk_operator__REL),
             "bezeichnung": null_to_emptystr(row.identifier),
@@ -184,7 +184,7 @@ def qgep_export(selection=None):
             **base_common(row, "organisation"),
             # --- organisation ---
             auid=row.uid,
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=row.identifier,
         )
         abwasser_session.add(organisation)
@@ -406,7 +406,7 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "rohrprofil"),
             # --- rohrprofil ---
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=row.identifier,
             hoehenbreitenverhaeltnis=row.height_width_ratio,
             profiltyp=get_vl(row.profile_type__REL),
@@ -448,7 +448,7 @@ def qgep_export(selection=None):
             # --- haltungspunkt ---
             abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             hoehengenauigkeit=get_vl(row.elevation_accuracy__REL),
             kote=row.level,
@@ -797,7 +797,7 @@ def qgep_export(selection=None):
             astatus=get_vl(row.status__REL),
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             datengrundlage=row.base_data,
             dauer=row.duration,
@@ -948,7 +948,7 @@ def qgep_export(selection=None):
             **base_common(row, "datentraeger"),
             # --- datentraeger ---
             art=get_vl(row.kind__REL),
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             pfad=row.path,
             standort=row.location,
@@ -993,7 +993,7 @@ def qgep_export(selection=None):
             **base_common(row, "datei"),
             # --- datei ---
             art=get_vl(row.kind__REL) or "andere",
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             datentraegerref=get_tid(row.data_media__REL),
             klasse=get_vl(row.class__REL),
