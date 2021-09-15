@@ -1,5 +1,4 @@
 import argparse
-import logging
 import sys
 from logging import INFO, FileHandler, Formatter
 
@@ -14,6 +13,7 @@ from .qwat.import_ import qwat_import
 from .qwat.mapping import get_qwat_mapping
 from .qwat.model_qwat import Base as BaseQwat
 from .qwat.model_wasser import Base as BaseWasser
+from .utils.various import make_log_path
 
 
 def main(args):
@@ -54,7 +54,7 @@ def main(args):
     parser_qgep.add_argument(
         "--log",
         action="store_true",
-        help="saves a log file next to the input/output file",
+        help="saves the log files next to the input/output file",
     )
 
     parser_qwat = subparsers.add_parser(
@@ -110,13 +110,15 @@ def main(args):
         parser.print_help(sys.stderr)
         exit(1)
 
-    if args.parser in ["qgep", "qwat"] and args.log:
-        # Write root logger to file
-        filename = f"{args.path}.{args.direction}.log"
-        file_handler = FileHandler(filename, mode="w", encoding="utf-8")
-        file_handler.setLevel(INFO)
-        file_handler.setFormatter(Formatter("%(levelname)-8s %(message)s"))
-        logging.getLogger("").addHandler(file_handler)
+    # Set log path
+    log_path = args.path if args.parser in ["qgep", "qwat"] and args.log else None
+
+    # Write root logger to file
+    filename = make_log_path(log_path, "qgepqwat2ili")
+    file_handler = FileHandler(filename, mode="w", encoding="utf-8")
+    file_handler.setLevel(INFO)
+    file_handler.setFormatter(Formatter("%(levelname)-8s %(message)s"))
+    utils.various.logger.addHandler(file_handler)
 
     if args.parser == "qgep":
         config.PGSERVICE = args.pgservice
@@ -124,12 +126,14 @@ def main(args):
         ILI_MODEL = config.ABWASSER_ILI_MODEL
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
         if args.direction == "export":
-            utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
             qgep_export(selection=args.selection.split(",") if args.selection else None)
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path)
+            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path)
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
                     print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
                     exit(1)
@@ -140,12 +144,14 @@ def main(args):
                 exit(1)
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path)
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
                     print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
                     exit(1)
-            utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
-            utils.ili2db.import_xtf_data(SCHEMA, args.path)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
             qgep_import()
 
     elif args.parser == "qwat":
@@ -154,12 +160,14 @@ def main(args):
         ILI_MODEL = config.WASSER_ILI_MODEL
         ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
         if args.direction == "export":
-            utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
             qwat_export(include_hydraulics=args.include_hydraulics)
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path)
+            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path)
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
                     print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
                     exit(1)
@@ -170,12 +178,14 @@ def main(args):
                 exit(1)
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path)
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
                     print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
                     exit(1)
-            utils.ili2db.create_ili_schema(SCHEMA, ILI_MODEL, recreate_schema=args.recreate_schema)
-            utils.ili2db.import_xtf_data(SCHEMA, args.path)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
             qwat_import()
 
     elif args.parser == "tpl":

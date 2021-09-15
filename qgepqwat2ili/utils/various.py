@@ -1,8 +1,10 @@
 import collections
 import configparser
+import datetime
 import logging
 import os
 import subprocess
+import tempfile
 import time
 import warnings
 
@@ -183,3 +185,14 @@ def get_pgconf():
         pgconf["password"] = config.PGPASS
 
     return collections.defaultdict(str, pgconf)
+
+
+def make_log_path(next_to_path, step_name):
+    """Returns a path for logging purposes. If next_to_path is None, it will be saved in the temp directory"""
+    now = f"{datetime.datetime.now():%Y%m%d%H%M%S}"
+    if next_to_path:
+        return f"{next_to_path}.{now}.{step_name}.log"
+    else:
+        temp_path = os.path.join(tempfile.gettempdir(), "qgepqwat2ili")
+        os.makedirs(temp_path, exist_ok=True)
+        return os.path.join(temp_path, f"{now}.{step_name}.log")

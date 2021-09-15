@@ -93,7 +93,7 @@ python -m qgepqwat2ili qgep import data/test_without_abwasserbauwerkref.xtf --lo
 
 Please include this when reporting issues.
 
-For unknown reasons at time of writing, the above logs don't show full errors for ili2db and ilivalidator related outputs. Thus, you may want to look at the native ili2db and ilivalidator related logs, named `ili2qgepqwat-yyyy-mm-dd-hh-mm-ss-STEP.log` in your temporary directory (`/tmp` on linux or `C:\Users\You\AppData\Local\Temp\` on Windows).
+The above logs don't show full errors for ili2db and ilivalidator related outputs. Thus, you may want to look at the native ili2db and ilivalidator related logs, named `qgepqwat2ili/yyyymmddhhmmss.STEP.log` in your temporary directory (`/tmp` on linux or `C:\Users\You\AppData\Local\Temp\` on Windows).
 
 
 ## QGIS integration

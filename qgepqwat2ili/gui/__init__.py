@@ -15,10 +15,9 @@ from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
     import_xtf_data,
-    make_log_path,
     validate_xtf_data,
 )
-from ..utils.various import CmdException, logger
+from ..utils.various import CmdException, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
@@ -72,9 +71,12 @@ def action_import(plugin, pgservice=None):
     # Validating the input file
     progress_dialog.setLabelText("Validating the input file...")
     QApplication.processEvents()
-    log_path = make_log_path("validate")
+    log_path = make_log_path(None, "validate")
     try:
-        validate_xtf_data(file_name, log_path=log_path)
+        validate_xtf_data(
+            file_name,
+            log_path,
+        )
     except CmdException:
         progress_dialog.close()
         show_failure(
@@ -87,9 +89,14 @@ def action_import(plugin, pgservice=None):
     # Prepare the temporary ili2pg model
     progress_dialog.setLabelText("Creating ili schema...")
     QApplication.processEvents()
-    log_path = make_log_path("create")
+    log_path = make_log_path(None, "create")
     try:
-        create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log_path)
+        create_ili_schema(
+            config.ABWASSER_SCHEMA,
+            config.ABWASSER_ILI_MODEL,
+            log_path,
+            recreate_schema=True,
+        )
     except CmdException:
         progress_dialog.close()
         show_failure(
@@ -103,9 +110,13 @@ def action_import(plugin, pgservice=None):
     # Export from ili2pg model to file
     progress_dialog.setLabelText("Importing XTF data...")
     QApplication.processEvents()
-    log_path = make_log_path("import")
+    log_path = make_log_path(None, "import")
     try:
-        import_xtf_data(config.ABWASSER_SCHEMA, file_name, log_path=log_path)
+        import_xtf_data(
+            config.ABWASSER_SCHEMA,
+            file_name,
+            log_path,
+        )
     except CmdException:
         progress_dialog.close()
         show_failure(
@@ -121,7 +132,9 @@ def action_import(plugin, pgservice=None):
     QApplication.processEvents()
     import_dialog = GuiImport(plugin.iface.mainWindow())
     progress_dialog.setValue(100)
-    qgep_import(precommit_callback=import_dialog.init_with_session)
+    qgep_import(
+        precommit_callback=import_dialog.init_with_session,
+    )
 
 
 def action_export(plugin, pgservice=None):
@@ -159,10 +172,13 @@ def action_export(plugin, pgservice=None):
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema...")
         QApplication.processEvents()
-        log_path = make_log_path("create")
+        log_path = make_log_path(None, "create")
         try:
             create_ili_schema(
-                config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, log_path=log_path
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
             )
         except CmdException:
             progress_dialog.close()
@@ -183,9 +199,14 @@ def action_export(plugin, pgservice=None):
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file...")
         QApplication.processEvents()
-        log_path = make_log_path("export")
+        log_path = make_log_path(None, "export")
         try:
-            export_xtf_data(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL_NAME, file_name, log_path=log_path)
+            export_xtf_data(
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL_NAME,
+                file_name,
+                log_path,
+            )
         except CmdException:
             progress_dialog.close()
             show_failure(
@@ -198,9 +219,12 @@ def action_export(plugin, pgservice=None):
 
         progress_dialog.setLabelText("Validating the output file...")
         QApplication.processEvents()
-        log_path = make_log_path("validate")
+        log_path = make_log_path(None, "validate")
         try:
-            validate_xtf_data(file_name, log_path=log_path)
+            validate_xtf_data(
+                file_name,
+                log_path,
+            )
         except CmdException:
             progress_dialog.close()
             show_failure(
@@ -211,7 +235,11 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(100)
 
-        show_success("Sucess", f"Data successfully exported to {file_name}", os.path.dirname(log_path))
+        show_success(
+            "Sucess",
+            f"Data successfully exported to {file_name}",
+            os.path.dirname(log_path),
+        )
 
     export_dialog.accepted.connect(action_do_export)
     export_dialog.show()
