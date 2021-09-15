@@ -106,11 +106,11 @@ def qgep_export(selection=None):
         warnings.warn(f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.")
         return {
             # --- abwasserbauwerk ---
-            # 'akten': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
+            "akten": row.records,
             "astatus": get_vl(row.status__REL),
             "baujahr": row.year_of_construction,
             "baulicherzustand": get_vl(row.structure_condition__REL),
-            # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
+            "baulos": row.contract_section,
             "bemerkung": emptystr_to_null(row.remark),
             "betreiberref": get_tid(row.fk_operator__REL),
             "bezeichnung": null_to_emptystr(row.identifier),
