@@ -60,6 +60,20 @@ def qgep_export(selection=None):
             val = ""
         return val
 
+    def emptystr_to_null(val):
+        """
+        Converts blank strings to nulls and raises a warning
+
+        This is needed as is seems ili2pg 4.4.6 crashes with emptystrings under certain circumstances (see https://github.com/QGEP/qgepqwat2ili/issues/33)
+        """
+        if val == "":
+            warnings.warn(
+                f"An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+                stacklevel=2,
+            )
+            val = None
+        return val
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -97,7 +111,7 @@ def qgep_export(selection=None):
             "baujahr": row.year_of_construction,
             "baulicherzustand": get_vl(row.structure_condition__REL),
             # 'baulos': row.REPLACE_ME,  # TODO : not sure, is it contract_section or records ?
-            "bemerkung": row.remark,
+            "bemerkung": emptystr_to_null(row.remark),
             "betreiberref": get_tid(row.fk_operator__REL),
             "bezeichnung": null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
@@ -122,7 +136,7 @@ def qgep_export(selection=None):
 
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": row.remark,
+            "bemerkung": emptystr_to_null(row.remark),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
 
@@ -132,7 +146,7 @@ def qgep_export(selection=None):
         """
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": row.remark,
+            "bemerkung": emptystr_to_null(row.remark),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
@@ -160,7 +174,7 @@ def qgep_export(selection=None):
             **base_common(row, "organisation"),
             # --- organisation ---
             auid=row.uid,
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=row.identifier,
         )
         abwasser_session.add(organisation)
@@ -382,7 +396,7 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "rohrprofil"),
             # --- rohrprofil ---
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=row.identifier,
             hoehenbreitenverhaeltnis=row.height_width_ratio,
             profiltyp=get_vl(row.profile_type__REL),
@@ -424,7 +438,7 @@ def qgep_export(selection=None):
             # --- haltungspunkt ---
             abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             hoehengenauigkeit=get_vl(row.elevation_accuracy__REL),
             kote=row.level,
@@ -773,7 +787,7 @@ def qgep_export(selection=None):
             astatus=get_vl(row.status__REL),
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             datengrundlage=row.base_data,
             dauer=row.duration,
@@ -924,7 +938,7 @@ def qgep_export(selection=None):
             **base_common(row, "datentraeger"),
             # --- datentraeger ---
             art=get_vl(row.kind__REL),
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             pfad=row.path,
             standort=row.location,
@@ -969,7 +983,7 @@ def qgep_export(selection=None):
             **base_common(row, "datei"),
             # --- datei ---
             art=get_vl(row.kind__REL) or "andere",
-            bemerkung=row.remark,
+            bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
             datentraegerref=get_tid(row.data_media__REL),
             klasse=get_vl(row.class__REL),
