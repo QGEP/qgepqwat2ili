@@ -6,11 +6,36 @@ import os
 import subprocess
 import tempfile
 import time
-import warnings
 
 from .. import config
 
-logging.captureWarnings(True)
+
+class DeduplicatedLogger(logging.Logger):
+    """Logger that deduplicates messages
+
+    Multiple subsequent logging with the same message/level will result in [repeated N times]
+    message instead of many lines.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._last_message = None
+        self._repeated = 0
+
+    def _log(self, level, msg, args, exc_info=None, extra=None):
+        this_message = (level, msg)
+        if self._last_message is None or self._last_message != this_message:
+            if self._repeated > 0:
+                super()._log(self._last_message[0], f"[repeted {self._repeated} times]", args, exc_info, extra)
+
+            super()._log(level, msg, args, exc_info, extra)
+            self._repeated = 0
+        else:
+            self._repeated += 1
+        self._last_message = this_message
+
+
+logging.setLoggerClass(DeduplicatedLogger)
 logger = logging.getLogger(__package__)
 
 
@@ -157,7 +182,7 @@ def read_pgservice(service_name):
         config.read(PG_CONFIG_PATH)
 
     if service_name not in config:
-        warnings.warn(f"Service `{service_name}` not found in {PG_CONFIG_PATH}.")
+        logger.warning(f"Service `{service_name}` not found in {PG_CONFIG_PATH}.")
         return {}
 
     return config[service_name]

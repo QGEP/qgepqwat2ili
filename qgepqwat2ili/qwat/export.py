@@ -1,6 +1,5 @@
 import datetime
 import unicodedata
-import warnings
 
 from geoalchemy2.functions import (
     ST_Z,
@@ -24,7 +23,7 @@ from .model_wasser import get_wasser_model
 def qwat_export(include_hydraulics=False):
 
     if include_hydraulics:
-        warnings.warn(
+        logger.warning(
             "Exports with hydraulics are currently broken (invalid). Remove --include_hydraulics to export valid files."
         )
 
@@ -60,7 +59,7 @@ def qwat_export(include_hydraulics=False):
         if relation is None:
             return None
         if not hasattr(relation, attr_name):
-            warnings.warn(f"{relation} has no attribute {attr_name}", stacklevel=2)
+            logger.warning(f"{relation} has no attribute {attr_name}")
             return None
         return getattr(relation, attr_name)
 
@@ -71,7 +70,7 @@ def qwat_export(include_hydraulics=False):
         if val is None:
             return None
         if len(val) > max_length:
-            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
     def clamp(val, min_val=None, max_val=None, accept_none=False):
@@ -81,10 +80,10 @@ def qwat_export(include_hydraulics=False):
         if val is None and accept_none:
             return None
         if (val is None) or (min_val is not None and val < min_val):
-            warnings.warn(f"Value '{val}' was clamped to {min_val}", stacklevel=2)
+            logger.warning(f"Value '{val}' was clamped to {min_val}")
             val = min_val
         elif max_val is not None and val > max_val:
-            warnings.warn(f"Value '{val}' was clamped to {max_val}", stacklevel=2)
+            logger.warning(f"Value '{val}' was clamped to {max_val}")
             val = max_val
         return val
 
@@ -101,7 +100,7 @@ def qwat_export(include_hydraulics=False):
         return ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(val, 2056)), 0.002)
 
     def create_metaattributes(instance):
-        warnings.warn(
+        logger.warning(
             f"QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
         )
 
@@ -336,7 +335,7 @@ def qwat_export(include_hydraulics=False):
         # _rel_ --- leak.label_2_visible__REL, leak.label_1_visible__REL, leak.fk_cause__REL, leak.fk_pipe__REL
 
         if row.fk_pipe__REL is None:
-            warnings.warn(
+            logger.warning(
                 f"Cannot export QWAT.leak {row.id} as it has no related pipe, which are mandatory in SIA405."
             )
             continue
@@ -742,7 +741,7 @@ def qwat_export(include_hydraulics=False):
         leitung_b.t_ili_tid = leitung_b.obj_id
 
         # We split the geometry
-        warnings.warn(
+        logger.warning(
             f"Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
         )
         # TODO the geometry of the new node does not necessarily lie in the middle (nor on the segment)

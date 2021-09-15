@@ -1,4 +1,3 @@
-import warnings
 from functools import lru_cache
 
 from geoalchemy2.functions import ST_Force3D
@@ -49,7 +48,7 @@ def qgep_import(precommit_callback=None):
         # TODO : return "other" (or other applicable value) rather than None, or even throwing an exception, would probably be better
         row = qgep_session.query(vl_table).filter(vl_table.value_de == value).first()
         if row is None:
-            warnings.warn(
+            logger.warning(
                 f'Could not find value `{value}` in value list "{vl_table.__table__.schema}.{vl_table.__name__}". Setting to None instead.'
             )
             return None
@@ -919,7 +918,7 @@ def qgep_import(precommit_callback=None):
         ABWASSER.metaattribute
     ):
 
-        warnings.warn(
+        logger.warning(
             "QGEP examination.active_zone has no equivalent in the interlis model. This field will be null."
         )
         examination = create_or_update(
