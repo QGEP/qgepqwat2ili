@@ -264,7 +264,7 @@ def qwat_export(include_hydraulics=False):
                 # --- sia405_baseclass ---
                 **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
                 # --- hydraulischer_strang ---
-                bemerkung=sanitize_str(row.remark),
+                bemerkung=truncate(sanitize_str(row.remark), 80),
                 bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
                 durchfluss=DOES_NOT_EXIST_IN_QWAT,
                 fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
@@ -288,7 +288,7 @@ def qwat_export(include_hydraulics=False):
             astatus=get_vl(row.fk_status__REL),
             aussenbeschichtung=get_vl(row.fk_protection__REL),
             baujahr=clamp(row.year, min_val=1800, max_val=2100),
-            bemerkung=sanitize_str(row.remark),
+            bemerkung=truncate(sanitize_str(row.remark), 80),
             betreiber=get_vl(row.fk_distributor__REL, "name"),
             betriebsdruck=row.pressure_nominal,
             bettung=get_vl(row.fk_bedding__REL),
@@ -347,7 +347,7 @@ def qwat_export(include_hydraulics=False):
             art=get_vl(row.fk_cause__REL),
             ausloeser=DOES_NOT_EXIST_IN_QWAT,
             behebungsdatum=row.repair_date,
-            bemerkung=sanitize_str(row.description),
+            bemerkung=truncate(sanitize_str(row.description), 80),
             erhebungsdatum=row.detection_date,
             geometrie=sanitize_geom(row.geometry),
             leitungref=get_tid(row.fk_pipe__REL, for_class=WASSER.leitung),
@@ -679,7 +679,7 @@ def qwat_export(include_hydraulics=False):
                 # --- sia405_baseclass ---
                 **base_common(row, "hydraulischer_knoten", tid_for_class=QWAT.valve),
                 # --- hydraulischer_knoten ---
-                bemerkung=sanitize_str(row.remark),
+                bemerkung=truncate(sanitize_str(row.remark), 80),
                 druck=DOES_NOT_EXIST_IN_QWAT,
                 geometrie=sanitize_geom(row.geometry),
                 knotentyp="Normalknoten",
@@ -694,7 +694,7 @@ def qwat_export(include_hydraulics=False):
             # --- sia405_baseclass ---
             **base_common(row, "absperrorgan"),
             # --- leitungsknoten ---
-            bemerkung=sanitize_str(row.remark),
+            bemerkung=truncate(sanitize_str(row.remark), 80),
             druckzone=DOES_NOT_EXIST_IN_QWAT,
             eigentuemer=DOES_NOT_EXIST_IN_QWAT,
             einbaujahr=clamp(row.year, min_val=1800, max_val=2100, accept_none=True),

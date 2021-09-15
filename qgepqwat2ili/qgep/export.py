@@ -74,6 +74,16 @@ def qgep_export(selection=None):
             val = None
         return val
 
+    def truncate(val, max_length):
+        """
+        Raises a warning if values gets truncated
+        """
+        if val is None:
+            return None
+        if len(val) > max_length:
+            warnings.warn(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+        return val[0:max_length]
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -111,7 +121,7 @@ def qgep_export(selection=None):
             "baujahr": row.year_of_construction,
             "baulicherzustand": get_vl(row.structure_condition__REL),
             "baulos": row.contract_section,
-            "bemerkung": emptystr_to_null(row.remark),
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "betreiberref": get_tid(row.fk_operator__REL),
             "bezeichnung": null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
@@ -136,7 +146,7 @@ def qgep_export(selection=None):
 
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": emptystr_to_null(row.remark),
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
 
@@ -146,7 +156,7 @@ def qgep_export(selection=None):
         """
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": emptystr_to_null(row.remark),
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
