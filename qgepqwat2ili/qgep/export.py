@@ -124,7 +124,7 @@ def qgep_export(selection=None):
             "detailgeometrie": ST_Force2D(row.detail_geometry_geometry),
             "eigentuemerref": get_tid(row.fk_owner__REL),
             "ersatzjahr": row.year_of_replacement,
-            "finanzierung": row.financing,
+            "finanzierung": get_vl(row.financing__REL),
             "inspektionsintervall": row.inspection_interval,
             "sanierungsbedarf": get_vl(row.renovation_necessity__REL),
             "standortname": row.location_name,
