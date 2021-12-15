@@ -742,8 +742,6 @@ def qgep_export(selection=None):
             # --- baseclass ---
             # --- sia405_baseclass ---
             **base_common(row, "bankett"),
-            # --- sia405_baseclass ---
-            obj_id=row.obj_id,
             # --- bauwerksteil ---
             **structure_part_common(row),
             # --- bankett ---
