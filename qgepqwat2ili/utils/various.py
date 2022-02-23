@@ -175,7 +175,7 @@ def read_pgservice(service_name):
     elif os.environ.get("PGSYSCONFDIR"):
         PG_CONFIG_PATH = os.path.join(os.environ.get("PGSYSCONFDIR"), "pg_service.conf")
     else:
-        PG_CONFIG_PATH = " ~/.pg_service.conf"
+        PG_CONFIG_PATH = os.path.expanduser("~/.pg_service.conf")
 
     config = configparser.ConfigParser()
     if os.path.exists(PG_CONFIG_PATH):
