@@ -154,7 +154,7 @@ def qgep_import(precommit_callback=None):
             "year_of_replacement": row.ersatzjahr,
         }
 
-    def wastewater_network_element_common(row):
+    def wastewater_networkelement_common(row):
         """
         Returns common attributes for network_element
         """
@@ -596,7 +596,7 @@ def qgep_import(precommit_callback=None):
             **base_common(row),
             **metaattribute_common(metaattribute),
             # --- wastewater_networkelement ---
-            **wastewater_network_element_common(row),
+            **wastewater_networkelement_common(row),
             # --- wastewater_node ---
             # fk_hydr_geometry=row.REPLACE_ME,  # TODO : NOT MAPPED
             backflow_level=row.rueckstaukote,
@@ -645,7 +645,7 @@ def qgep_import(precommit_callback=None):
             **base_common(row),
             **metaattribute_common(metaattribute),
             # --- wastewater_networkelement ---
-            **wastewater_network_element_common(row),
+            **wastewater_networkelement_common(row),
             # --- reach ---
             clear_height=row.lichte_hoehe,
             coefficient_of_friction=row.reibungsbeiwert,

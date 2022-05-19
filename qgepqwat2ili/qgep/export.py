@@ -135,7 +135,7 @@ def qgep_export(selection=None):
             "zugaenglichkeit": get_vl(row.accessibility__REL),
         }
 
-    def wastewater_network_element_common(row):
+    def wastewater_networkelement_common(row):
         """
         Returns common attributes for network_element
         """
@@ -485,7 +485,7 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "abwasserknoten"),
             # --- abwassernetzelement ---
-            **wastewater_network_element_common(row),
+            **wastewater_networkelement_common(row),
             # --- abwasserknoten ---
             # TODO : WARNING : fk_hydr_geometry is not mapped
             lage=ST_Force2D(row.situation_geometry),
@@ -527,7 +527,7 @@ def qgep_export(selection=None):
             # --- sia405_baseclass ---
             **base_common(row, "haltung"),
             # --- abwassernetzelement ---
-            **wastewater_network_element_common(row),
+            **wastewater_networkelement_common(row),
             # --- haltung ---
             # NOT MAPPED : elevation_determination
             innenschutz=get_vl(row.inside_coating__REL),
