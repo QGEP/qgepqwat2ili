@@ -87,3 +87,8 @@ class TidMaker:
         #     # just for debugging
         #     logger.info(f"created tid {tid} for {key}")
         return tid
+
+    def next_tid(self):
+        """Get an arbitrary unused tid"""
+        key = len(self._autoincrementer)
+        return self._autoincrementer[key]

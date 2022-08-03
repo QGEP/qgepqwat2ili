@@ -1,4 +1,6 @@
-from geoalchemy2.functions import ST_Force2D
+import json
+
+from geoalchemy2.functions import ST_Force2D, ST_MakePoint
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -8,7 +10,7 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None):
+def qgep_export(selection=None, labels_file=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
@@ -155,6 +157,26 @@ def qgep_export(selection=None):
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
+        }
+
+    def textpos_common(row):
+        """
+        Returns common attributes for textpos
+        """
+        t_id = (tid_maker.next_tid(),)
+        return {
+            "t_id": t_id,
+            "t_type": "TODO",
+            "t_ili_tid": t_id,
+            # --- TextPos ---
+            "textpos": ST_MakePoint(*row["geometry"]["coordinates"]),
+            "textori": row["properties"]["LabelRotation"],
+            "texthali": "TODO",
+            "textvali": "TODO",
+            # --- SIA405_TextPos ---
+            "plantyp": "TODO",
+            "textinhalt": row["properties"]["LabelText"],
+            "bemerkung": "TODO",
         }
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
@@ -999,6 +1021,72 @@ def qgep_export(selection=None):
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
+
+    # Labels
+    if labels_file:
+        logger.info(f"Exporting label positions from {labels_file}")
+
+        with open(labels_file, "r") as labels_file_handle:
+            labels = json.load(labels_file_handle)
+
+        # print("*"*80)
+        # print("exported haltung")
+        # for row in abwasser_session.query(ABWASSER.haltung):
+        #     print(row.obj_id)
+        # print("exported abwasserbauwerk")
+        # for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
+        #     print(row.obj_id)
+        # print("*"*80)
+
+        for label in labels["features"]:
+
+            layer_name = label["properties"]["Layer"]
+            feature_id = label["properties"]["FeatureID"]
+
+            if layer_name == "vw_qgep_reach":
+                # The extract labels algorithm returns the ROWID instead of the primary key.
+                # This means we need to retrieve the original feature in the original unfiltered table,
+                # then only see if there's a matching feature in the export (could be filtered out).
+                reach = qgep_session.query(QGEP.reach)[feature_id]
+                print(f"trying to find {reach.obj_id} (fid {feature_id})")
+                exported_haltung = abwasser_session.query(ABWASSER.haltung).filter(
+                    ABWASSER.haltung.obj_id == reach.obj_id
+                )
+                if exported_haltung.count() == 0:
+                    print("x1", end="")
+                    continue
+                ili_label = ABWASSER.haltung_text(
+                    **textpos_common(label),
+                    haltungref=get_tid(reach),
+                )
+
+            elif layer_name == "vw_qgep_wastewater_structure":
+                # The extract labels algorithm returns the ROWID instead of the primary key.
+                # This means we need to retrieve the original feature in the original unfiltered table,
+                # then only see if there's a matching feature in the export (could be filtered out).
+                wastewater_structure = qgep_session.query(QGEP.wastewater_networkelement)[feature_id]
+                # print("trying to find {reach.obj_id}")
+                exported_abwasserbauwerk = abwasser_session.query(ABWASSER.abwasserbauwerk).filter(
+                    ABWASSER.abwasserbauwerk.obj_id == reach.obj_id
+                )
+                if exported_abwasserbauwerk.count() == 0:
+                    print("x2", end="")
+                    continue
+                ili_label = ABWASSER.abwasserbauwerk_text(
+                    **textpos_common(label),
+                    abwasserbauwerkref=get_tid(wastewater_structure),
+                )
+
+            else:
+                logger.warning(
+                    f"Unknown layer for label `{layer_name}`. Label will be ignored",
+                )
+                continue
+
+            abwasser_session.add(ili_label)
+            print("o", end="")
+        logger.info("done")
+        abwasser_session.flush()
 
     abwasser_session.commit()
 

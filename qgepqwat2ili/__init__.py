@@ -37,6 +37,11 @@ def main(args):
         "--selection",
         help="if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)",
     )
+    # TODO: this only makes sense for export
+    parser_qgep.add_argument(
+        "--labels_file",
+        help="if provided, includes the label positions in the export (the file should be a geojson of the `extract labels` QGIS algorithm)",
+    )
     parser_qgep.add_argument(
         "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
     )
@@ -129,7 +134,7 @@ def main(args):
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
             )
-            qgep_export(selection=args.selection.split(",") if args.selection else None)
+            qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
             utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             if not args.skip_validation:
                 try:
