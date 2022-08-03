@@ -40,7 +40,7 @@ def main(args):
     # TODO: this only makes sense for export
     parser_qgep.add_argument(
         "--labels_file",
-        help="if provided, includes the label positions in the export (the file should be a geojson of the `extract labels` QGIS algorithm)",
+        help="if provided, includes the label positions in the export (the file should be a geojson of the `extract labels` QGIS algorithm, with additional `qgep_obj_id` attribute)",
     )
     parser_qgep.add_argument(
         "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"

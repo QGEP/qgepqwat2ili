@@ -1029,49 +1029,27 @@ def qgep_export(selection=None, labels_file=None):
         with open(labels_file, "r") as labels_file_handle:
             labels = json.load(labels_file_handle)
 
-        # print("*"*80)
-        # print("exported haltung")
-        # for row in abwasser_session.query(ABWASSER.haltung):
-        #     print(row.obj_id)
-        # print("exported abwasserbauwerk")
-        # for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
-        #     print(row.obj_id)
-        # print("*"*80)
-
         for label in labels["features"]:
-
             layer_name = label["properties"]["Layer"]
-            feature_id = label["properties"]["FeatureID"]
+            obj_id = label["properties"]["qgep_obj_id"]
+
+            if filtered and obj_id not in subset_ids:
+                logger.warning(
+                    f"Label for object `{obj_id}` exists, but that object is not part of the export",
+                )
+                continue
 
             if layer_name == "vw_qgep_reach":
-                # The extract labels algorithm returns the ROWID instead of the primary key.
-                # This means we need to retrieve the original feature in the original unfiltered table,
-                # then only see if there's a matching feature in the export (could be filtered out).
-                reach = qgep_session.query(QGEP.reach)[feature_id]
-                print(f"trying to find {reach.obj_id} (fid {feature_id})")
-                exported_haltung = abwasser_session.query(ABWASSER.haltung).filter(
-                    ABWASSER.haltung.obj_id == reach.obj_id
-                )
-                if exported_haltung.count() == 0:
-                    print("x1", end="")
-                    continue
+                reach = qgep_session.query(QGEP.reach).get(obj_id)
+                logger.debug(f"Adding label for object {obj_id}")
                 ili_label = ABWASSER.haltung_text(
                     **textpos_common(label),
                     haltungref=get_tid(reach),
                 )
 
             elif layer_name == "vw_qgep_wastewater_structure":
-                # The extract labels algorithm returns the ROWID instead of the primary key.
-                # This means we need to retrieve the original feature in the original unfiltered table,
-                # then only see if there's a matching feature in the export (could be filtered out).
-                wastewater_structure = qgep_session.query(QGEP.wastewater_networkelement)[feature_id]
-                # print("trying to find {reach.obj_id}")
-                exported_abwasserbauwerk = abwasser_session.query(ABWASSER.abwasserbauwerk).filter(
-                    ABWASSER.abwasserbauwerk.obj_id == reach.obj_id
-                )
-                if exported_abwasserbauwerk.count() == 0:
-                    print("x2", end="")
-                    continue
+                wastewater_structure = qgep_session.query(QGEP.wastewater_structure).get(obj_id)
+                logger.debug(f"Adding label for object {obj_id}")
                 ili_label = ABWASSER.abwasserbauwerk_text(
                     **textpos_common(label),
                     abwasserbauwerkref=get_tid(wastewater_structure),
@@ -1084,7 +1062,7 @@ def qgep_export(selection=None, labels_file=None):
                 continue
 
             abwasser_session.add(ili_label)
-            print("o", end="")
+            print(".", end="")
         logger.info("done")
         abwasser_session.flush()
 
