@@ -42,3 +42,7 @@ class GuiExport(QDialog):
             return ids
         else:
             return None
+
+    @property
+    def limit_to_selection(self):
+        return self.limit_checkbox.isChecked()

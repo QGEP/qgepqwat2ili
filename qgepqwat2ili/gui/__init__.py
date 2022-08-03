@@ -1,12 +1,12 @@
-import json
 import logging
 import os
+import tempfile
 import webbrowser
 from types import SimpleNamespace
 
 from pkg_resources import parse_version
 from qgis import processing
-from qgis.core import Qgis, QgsMessageLog, QgsProject, QgsSettings
+from qgis.core import Qgis, QgsProject, QgsSettings
 from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QPushButton
 from qgis.utils import iface, plugins
 from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
@@ -179,60 +179,6 @@ def action_export(plugin, pgservice=None):
         progress_dialog.setModal(True)
         progress_dialog.show()
 
-        # labels_file = os.path.join(tempfile.TemporaryDirectory(), 'labels.geojson')
-
-        # TODO: remove (to use a unique tempdir)
-        labels_file_path = r"C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\qgepqwat2ili\my_export_labels.geojson"
-        if os.path.isfile(labels_file_path):
-            os.remove(labels_file_path)
-
-        # Export the labels file
-        QgsMessageLog.logMessage(f"saving labels to {labels_file_path}")
-        processing.run(
-            "native:extractlabels",
-            {
-                "DPI": 96,
-                # TODO: use selection extent
-                "EXTENT": "2747206.275800000,2747351.608300000,1262647.842700000,1262763.960100000 [EPSG:2056]",
-                "INCLUDE_UNPLACED": True,
-                "MAP_THEME": None,
-                "OUTPUT": labels_file_path,
-                "SCALE": 1000,
-            },
-        )
-
-        # Attach the obj_id here
-        # We must do that here through QGIS API, as otherwise rowid does not seem preserved...
-        # TODO: move this to a processing algorithm ?
-
-        with open(labels_file_path, "r") as labels_file_handle:
-            labels = json.load(labels_file_handle)
-
-        structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-        if len(structures_lyrs) > 0:
-            structures_feats = structures_lyrs[0].getFeatures()
-        else:
-            structures_feats = []
-
-        reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-        if len(reaches_lyrs) > 0:
-            reaches_feats = reaches_lyrs[0].getFeatures()
-        else:
-            reaches_feats = []
-
-        rowid_to_obj_id = {
-            "vw_qgep_reach": {f.id(): f.attribute("obj_id") for f in reaches_feats},
-            "vw_qgep_wastewater_structure": {f.id(): f.attribute("obj_id") for f in structures_feats},
-        }
-
-        for label in labels["features"]:
-            lyr = label["properties"]["Layer"]
-            rowid = label["properties"]["FeatureID"]
-            label["properties"]["qgep_obj_id"] = rowid_to_obj_id[lyr][rowid]
-
-        with open(labels_file_path, "w") as labels_file_handle:
-            json.dump(labels, labels_file_handle, indent=2)
-
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema...")
         QApplication.processEvents()
@@ -254,11 +200,45 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(25)
 
+        tempdir = tempfile.TemporaryDirectory()
+        labels_file_path = os.path.join(tempdir.name, "labels.geojson")
+
+        # Export the labels file
+        progress_dialog.setLabelText("Extracting labels...")
+
+        structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
+        reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
+        if len(structures_lyrs) == 0 or len(reaches_lyrs) == 0:
+            progress_dialog.close()
+            show_failure(
+                "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
+                "Make sure your QGEP project is open.",
+                None,
+            )
+            return
+        structures_lyr = structures_lyrs[0]
+        reaches_lyr = reaches_lyrs[0]
+
+        QApplication.processEvents()
+        processing.run(
+            "qgep:extractlabels_interlis",
+            {
+                "OUTPUT": labels_file_path,
+                "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
+                "STRUCTURE_VIEW_LAYER": structures_lyr,
+                "REACH_VIEW_LAYER": reaches_lyr,
+            },
+        )
+        progress_dialog.setValue(35)
+
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
         qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
         progress_dialog.setValue(50)
+
+        # TODO: reenable
+        # tempdir.cleanup()
 
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file...")
