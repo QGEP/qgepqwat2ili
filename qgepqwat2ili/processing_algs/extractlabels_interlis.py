@@ -19,9 +19,9 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     key of the reach and structure views is not an integer)"""
 
     OUTPUT = "OUTPUT"
-    RESTRICT_TO_SELECTION = "RESTRICT_TO_SELECTION"
-    STRUCTURE_VIEW_LAYER = "STRUCTURE_VIEW_LAYER"
-    REACH_VIEW_LAYER = "REACH_VIEW_LAYER"
+    INPUT_RESTRICT_TO_SELECTION = "RESTRICT_TO_SELECTION"
+    INPUT_STRUCTURE_VIEW_LAYER = "STRUCTURE_VIEW_LAYER"
+    INPUT_REACH_VIEW_LAYER = "REACH_VIEW_LAYER"
 
     def name(self):
         return "extractlabels_interlis"
@@ -43,21 +43,21 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterBoolean(
-                self.RESTRICT_TO_SELECTION,
+                self.INPUT_RESTRICT_TO_SELECTION,
                 description=self.tr("Restrict to selection"),
             )
         )
 
         self.addParameter(
             QgsProcessingParameterVectorLayer(
-                self.STRUCTURE_VIEW_LAYER,
+                self.INPUT_STRUCTURE_VIEW_LAYER,
                 description=self.tr("Structure view layer"),
             )
         )
 
         self.addParameter(
             QgsProcessingParameterVectorLayer(
-                self.REACH_VIEW_LAYER,
+                self.INPUT_REACH_VIEW_LAYER,
                 description=self.tr("Reach view layer"),
             )
         )
@@ -65,9 +65,9 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
 
         labels_file_path = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
-        restrict_to_selection = self.parameterAsBoolean(parameters, self.RESTRICT_TO_SELECTION, context)
-        structure_view_layer = self.parameterAsVectorLayer(parameters, self.STRUCTURE_VIEW_LAYER, context)
-        reach_view_layer = self.parameterAsVectorLayer(parameters, self.REACH_VIEW_LAYER, context)
+        restrict_to_selection = self.parameterAsBoolean(parameters, self.INPUT_RESTRICT_TO_SELECTION, context)
+        structure_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_STRUCTURE_VIEW_LAYER, context)
+        reach_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_REACH_VIEW_LAYER, context)
 
         if restrict_to_selection:
             extent = structure_view_layer.boundingBoxOfSelected()
