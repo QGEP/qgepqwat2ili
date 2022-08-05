@@ -12,10 +12,10 @@
       "type": "Feature",
       "properties": {
         "Layer": "vw_qgep_reach",
-        "FeatureID": 2521,
+        "FeatureID": 2230,
         "LabelText": "CS 250 75.06m 99.3\u2030",
-        "LabelWidth": 32.03138889,
-        "LabelHeight": 3.44138889,
+        "LabelWidth": 31.98841777,
+        "LabelHeight": 3.43677216,
         "LabelRotation": 326.19,
         "LabelUnplaced": false,
         "Family": "MS Shell Dlg 2",
@@ -39,44 +39,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          2747274.0711050434,
-          1262710.028705049
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "Layer": "vw_qgep_reach",
-        "FeatureID": 2669,
-        "LabelText": "CS 200 42.92m 61.7\u2030",
-        "LabelWidth": 32.03138889,
-        "LabelHeight": 3.44138889,
-        "LabelRotation": 334.94,
-        "LabelUnplaced": false,
-        "Family": "MS Shell Dlg 2",
-        "Size": 8.25,
-        "Italic": false,
-        "Bold": false,
-        "Underline": false,
-        "FontStyle": null,
-        "FontLetterSpacing": 0.0,
-        "FontWordSpacing": 0.0,
-        "MultiLineAlignment": "left",
-        "MultiLineHeight": 1.0,
-        "Color": "#660066",
-        "FontOpacity": 100.0,
-        "BufferDraw": true,
-        "BufferSize": 2.8346,
-        "BufferColor": "#ffffff",
-        "BufferOpacity": 100.0,
-        "qgep_obj_id": "ch13p7mzRE008742"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2747222.2804041076,
-          1262682.2016746353
+          2747274.089154583,
+          1262710.0403656426
         ]
       }
     },
@@ -85,45 +49,9 @@
       "properties": {
         "Layer": "vw_qgep_wastewater_structure",
         "FeatureID": 1,
-        "LabelText": "5420.0770",
-        "LabelWidth": 11.38305556,
-        "LabelHeight": 2.91194444,
-        "LabelRotation": 0.0,
-        "LabelUnplaced": false,
-        "Family": "MS Shell Dlg 2",
-        "Size": 6.75,
-        "Italic": false,
-        "Bold": false,
-        "Underline": false,
-        "FontStyle": null,
-        "FontLetterSpacing": 0.0,
-        "FontWordSpacing": 0.0,
-        "MultiLineAlignment": "left",
-        "MultiLineHeight": 1.0,
-        "Color": "#660066",
-        "FontOpacity": 100.0,
-        "BufferDraw": false,
-        "BufferSize": 0.0,
-        "BufferColor": null,
-        "BufferOpacity": 0.0,
-        "qgep_obj_id": "ch13p7mzMA003100"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2747222.463158498,
-          1262678.1997342038
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "Layer": "vw_qgep_wastewater_structure",
-        "FeatureID": 3,
         "LabelText": "5420.0750",
-        "LabelWidth": 11.38305556,
-        "LabelHeight": 2.91194444,
+        "LabelWidth": 11.36778483,
+        "LabelHeight": 2.90803798,
         "LabelRotation": 0.0,
         "LabelUnplaced": false,
         "Family": "MS Shell Dlg 2",
@@ -147,8 +75,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          2747323.332356551,
-          1262741.5201281013
+          2747317.2895609085,
+          1262731.7017550478
         ]
       }
     },
@@ -156,10 +84,10 @@
       "type": "Feature",
       "properties": {
         "Layer": "vw_qgep_wastewater_structure",
-        "FeatureID": 5,
+        "FeatureID": 2,
         "LabelText": "5420.0760",
-        "LabelWidth": 11.38305556,
-        "LabelHeight": 2.91194444,
+        "LabelWidth": 11.36778483,
+        "LabelHeight": 2.90803798,
         "LabelRotation": 0.0,
         "LabelUnplaced": false,
         "Family": "MS Shell Dlg 2",
@@ -183,44 +111,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          2747261.343158568,
-          1262696.3797342328
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "Layer": "vw_qgep_reach",
-        "FeatureID": 2633,
-        "LabelText": "CS 300 34.87m 113.3\u2030",
-        "LabelWidth": 33.61972222,
-        "LabelHeight": 3.44138889,
-        "LabelRotation": 0.0,
-        "LabelUnplaced": true,
-        "Family": "MS Shell Dlg 2",
-        "Size": 8.25,
-        "Italic": false,
-        "Bold": false,
-        "Underline": false,
-        "FontStyle": null,
-        "FontLetterSpacing": 0.0,
-        "FontWordSpacing": 0.0,
-        "MultiLineAlignment": "left",
-        "MultiLineHeight": 1.0,
-        "Color": "#660066",
-        "FontOpacity": 100.0,
-        "BufferDraw": true,
-        "BufferSize": 2.8346,
-        "BufferColor": "#ffffff",
-        "BufferOpacity": 100.0,
-        "qgep_obj_id": "ch13p7mzRE006753"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          2747318.710534012,
-          1262739.6057065227
+          2747261.336447396,
+          1262696.3816874651
         ]
       }
     }
