@@ -159,24 +159,24 @@ def qgep_export(selection=None, labels_file=None):
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
 
-    def textpos_common(row):
+    def textpos_common(row, t_type):
         """
         Returns common attributes for textpos
         """
-        t_id = (tid_maker.next_tid(),)
+        t_id = tid_maker.next_tid()
         return {
             "t_id": t_id,
-            "t_type": "TODO",
+            "t_type": t_type,
             "t_ili_tid": t_id,
             # --- TextPos ---
             "textpos": ST_MakePoint(*row["geometry"]["coordinates"]),
             "textori": row["properties"]["LabelRotation"],
-            "texthali": "TODO",
-            "textvali": "TODO",
+            "texthali": "Left",  # can be Left/Center/Right
+            "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
             # --- SIA405_TextPos ---
-            "plantyp": "TODO",
+            "plantyp": "Uebersichtsplan.UeP10",  # TODO, can be Leitungskataster,Werkplan,Uebersichtsplan.UeP10,Uebersichtsplan.UeP2,Uebersichtsplan.UeP5 (Uep10=1:10000, Uep 5=1:5000, UeP1=1:1000)
             "textinhalt": row["properties"]["LabelText"],
-            "bemerkung": "TODO",
+            "bemerkung": "",
         }
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
@@ -1043,7 +1043,7 @@ def qgep_export(selection=None, labels_file=None):
                     logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
                     continue
                 ili_label = ABWASSER.haltung_text(
-                    **textpos_common(label),
+                    **textpos_common(label, "haltung_text"),
                     haltungref=haltung.t_id,
                 )
 
@@ -1060,7 +1060,7 @@ def qgep_export(selection=None, labels_file=None):
                     )
                     continue
                 ili_label = ABWASSER.abwasserbauwerk_text(
-                    **textpos_common(label),
+                    **textpos_common(label, "abwasserbauwerk_text"),
                     abwasserbauwerkref=abwasserbauwerk.t_id,
                 )
 
