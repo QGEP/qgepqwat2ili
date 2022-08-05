@@ -174,7 +174,7 @@ def qgep_export(selection=None, labels_file=None):
             "texthali": "Left",  # can be Left/Center/Right
             "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
             # --- SIA405_TextPos ---
-            "plantyp": "Uebersichtsplan.UeP10",  # TODO, can be Leitungskataster,Werkplan,Uebersichtsplan.UeP10,Uebersichtsplan.UeP2,Uebersichtsplan.UeP5 (Uep10=1:10000, Uep 5=1:5000, UeP1=1:1000)
+            "plantyp": row["properties"]["scale"],
             "textinhalt": row["properties"]["LabelText"],
             "bemerkung": "",
         }

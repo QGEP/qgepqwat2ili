@@ -1,25 +1,43 @@
 import json
+import os
+import tempfile
+import uuid
+from functools import partial
 
+from PyQt5.QtCore import QCoreApplication
 from qgis import processing
 from qgis.core import (
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsProcessingParameterBoolean,
+    QgsProcessingParameterEnum,
     QgsProcessingParameterFileDestination,
     QgsProcessingParameterVectorLayer,
+    QgsWkbTypes,
 )
 
 from ....processing_provider.qgep_algorithm import QgepAlgorithm
 
 
 class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
-    """This runs the native extractlabels algorithm, but attaches obj_id to the results.
+    """This runs the native extractlabels algorithm for the given scales, and attaches obj_id and scale to the results.
 
     Otherwise, the output is difficult to use, because the FeatureID isn't stable (since it's the primary
     key of the reach and structure views is not an integer)"""
 
+    tr = partial(QCoreApplication.translate, "ExtractlabelsInterlisAlgorithm")
+    AVAILABLE_SCALES = [
+        # ili key, display name, scale value
+        ("Leitungskataster", tr("Leitungskataster"), 1000),  # TODO: check scale ?
+        ("Werkplan", tr("Werkplan"), 500),  # TODO: check scale ?
+        ("Uebersichtsplan.UeP10", tr("Uebersichtsplan 1:10000"), 10000),
+        ("Uebersichtsplan.UeP5", tr("Uebersichtsplan 1:5000"), 5000),
+        ("Uebersichtsplan.UeP2", tr("Uebersichtsplan 1:2000"), 2000),
+    ]
+
     OUTPUT = "OUTPUT"
     INPUT_RESTRICT_TO_SELECTION = "RESTRICT_TO_SELECTION"
+    INPUT_SCALES = "SCALES"
     INPUT_STRUCTURE_VIEW_LAYER = "STRUCTURE_VIEW_LAYER"
     INPUT_REACH_VIEW_LAYER = "REACH_VIEW_LAYER"
 
@@ -36,8 +54,6 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
                 self.OUTPUT,
                 description=self.tr("Output labels file"),
                 fileFilter="geojson (*.geojson)",
-                # TODO: remove defaut value
-                defaultValue=r"C:\Users\Olivier\Code\QGEP\qgepplugin\qgepplugin\qgepqwat2ili\my_export_labels.geojson",
             )
         )
 
@@ -49,9 +65,23 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
         )
 
         self.addParameter(
+            QgsProcessingParameterEnum(
+                self.INPUT_SCALES,
+                description=self.tr("Scales to export"),
+                allowMultiple=True,
+                options=[f"{self.tr(i[1])} [1:{i[2]}]" for i in self.AVAILABLE_SCALES],
+                # TODO: Currently, extract crashes QGIS with small scales (1:5000, 1:10000)
+                # At this point, couldn't find why (seems to work when calling extractlabels directly).
+                # For now, let's just untick those problematic scales. But this should be fixed
+                defaultValue=[i for i, s in enumerate(self.AVAILABLE_SCALES) if s[2] <= 2000],
+            )
+        )
+
+        self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.INPUT_STRUCTURE_VIEW_LAYER,
                 description=self.tr("Structure view layer"),
+                types=[QgsWkbTypes.PointGeometry],
             )
         )
 
@@ -59,6 +89,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             QgsProcessingParameterVectorLayer(
                 self.INPUT_REACH_VIEW_LAYER,
                 description=self.tr("Reach view layer"),
+                types=[QgsWkbTypes.LineGeometry],
             )
         )
 
@@ -68,7 +99,13 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
         restrict_to_selection = self.parameterAsBoolean(parameters, self.INPUT_RESTRICT_TO_SELECTION, context)
         structure_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_STRUCTURE_VIEW_LAYER, context)
         reach_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_REACH_VIEW_LAYER, context)
+        scales = [self.AVAILABLE_SCALES[i] for i in self.parameterAsEnums(parameters, self.INPUT_SCALES, context)]
 
+        # Clear the output file if it exists
+        if os.path.isfile(labels_file_path):
+            os.remove(labels_file_path)
+
+        # Compute the extent
         if restrict_to_selection:
             extent = structure_view_layer.boundingBoxOfSelected()
             extent.combineExtentWith(reach_view_layer.boundingBoxOfSelected())
@@ -76,47 +113,72 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             extent = structure_view_layer.extent()
             extent.combineExtentWith(reach_view_layer.extent())
 
-        # Export the labels file
-        feedback.pushInfo(f"saving labels to {labels_file_path}")
+        # Store a mapping from FeatureID to obj_id (used below)
+        reach_feats = reach_view_layer.getFeatures()
+        structure_feats = structure_view_layer.getFeatures()
+        rowid_to_obj_id = {
+            "vw_qgep_reach": {f.id(): f.attribute("obj_id") for f in reach_feats},
+            "vw_qgep_wastewater_structure": {f.id(): f.attribute("obj_id") for f in structure_feats},
+        }
+
+        annotated_paths = []
+
+        # Extract all labels at all scales
+        for scale_id, scale_display, scale_value in scales:
+
+            # Make an unique temporary name
+            unique = uuid.uuid4().hex
+            extract_path = os.path.join(tempfile.gettempdir(), f"labels-{scale_id}_{unique}.geojson")
+
+            # Extract the labels
+            feedback.pushInfo(f"Extracting labels for scale {scale_display} [1:{scale_value}]")
+            processing.run(
+                "native:extractlabels",
+                {
+                    "DPI": 96,  # TODO: check what this changes
+                    "EXTENT": extent,
+                    "INCLUDE_UNPLACED": True,
+                    "MAP_THEME": None,
+                    "OUTPUT": extract_path,
+                    "SCALE": scale_value,
+                },
+                # this is a child algotihm
+                is_child_algorithm=True,
+                context=context,
+                feedback=feedback,
+            )
+
+            # Annotate features with qgep_obj_id and scale here
+            with open(extract_path, "r") as extract_path_handle:
+                geojson = json.load(extract_path_handle)
+            for label in geojson["features"]:
+                lyr = label["properties"]["Layer"]
+                rowid = label["properties"]["FeatureID"]
+                label["properties"]["qgep_obj_id"] = rowid_to_obj_id[lyr][rowid]
+                label["properties"]["scale"] = scale_id
+
+            # Save
+            annotated_path = extract_path + ".annotated.geojson"
+            with open(annotated_path, "w") as annotated_path_handle:
+                json.dump(geojson, annotated_path_handle)
+
+            annotated_paths.append(annotated_path)
+
+        # time.sleep(60)
+
+        # Merge all scales to one geojson
+        feedback.pushInfo(f"Merging all labels ({annotated_paths}) to {labels_file_path}")
         processing.run(
-            "native:extractlabels",
+            "native:mergevectorlayers",
             {
-                "DPI": 96,
-                # TODO: use selection extent
-                "EXTENT": extent,
-                "INCLUDE_UNPLACED": True,
-                "MAP_THEME": None,
+                "LAYERS": annotated_paths,
                 "OUTPUT": labels_file_path,
-                # TODO: make scale customizable
-                "SCALE": 1000,
             },
             # this is a child algotihm
             is_child_algorithm=True,
             context=context,
             feedback=feedback,
         )
-
-        # Attach the obj_id here
-        # We must do that here through QGIS API, as otherwise rowid does not seem preserved...
-
-        with open(labels_file_path, "r") as labels_file_handle:
-            labels = json.load(labels_file_handle)
-
-        reach_feats = reach_view_layer.getFeatures()
-        structure_feats = structure_view_layer.getFeatures()
-
-        rowid_to_obj_id = {
-            "vw_qgep_reach": {f.id(): f.attribute("obj_id") for f in reach_feats},
-            "vw_qgep_wastewater_structure": {f.id(): f.attribute("obj_id") for f in structure_feats},
-        }
-
-        for label in labels["features"]:
-            lyr = label["properties"]["Layer"]
-            rowid = label["properties"]["FeatureID"]
-            label["properties"]["qgep_obj_id"] = rowid_to_obj_id[lyr][rowid]
-
-        with open(labels_file_path, "w") as labels_file_handle:
-            json.dump(labels, labels_file_handle, indent=2)
 
         feedback.setProgress(100)
 
