@@ -29,7 +29,7 @@ python -m qgepqwat2ili qgep export desktop/my_export.xtf --selection "ch13p7mzRE
 
 Full usage
 ```
-usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] {import,export} path
+usage: python -m qgepqwat2ili qgep [-h] [--selection SELECTION] [--labels_file LABELS_FILE] [--recreate_schema] [--skip_validation] [--pgservice PGSERVICE] [--log] {import,export} path
 
 ili2QGEP entrypoint
 
@@ -42,6 +42,9 @@ optional arguments:
   --selection SELECTION
                         if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)
                         (default: None)
+  --labels_file LABELS_FILE
+                        if provided, includes the label positions in the export (the file should be the results of the
+                        provided `qgep:extractlabels_interlis` QGIS algorithm as geojson) (default: None)
   --recreate_schema     drops schema and reruns ili2pg importschema (default: False)
   --skip_validation     skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)
                         (default: False)
