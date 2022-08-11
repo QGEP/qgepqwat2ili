@@ -287,6 +287,7 @@ def action_export(plugin, pgservice=None):
         )
 
     export_dialog.accepted.connect(action_do_export)
+    export_dialog.adjustSize()
     export_dialog.show()
 
 

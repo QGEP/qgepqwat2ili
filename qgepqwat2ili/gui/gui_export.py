@@ -40,6 +40,7 @@ class GuiExport(QDialog):
             item.setData(Qt.UserRole, i)
             self.labels_scale_list.addItem(item)
         self.labels_scale_list.selectAll()
+        self.labels_scale_list.setMinimumWidth(self.labels_scale_list.sizeHintForColumn(0) + 10)
 
     @property
     def selected_ids(self):
