@@ -134,7 +134,7 @@ class TestQGEPUseCases(unittest.TestCase):
             # node_b_id
             "ch13p7mzWN008122",
         ]
-        labels_file = os.path.join(__file__, "..", "labels.geojson")
+        labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
         main(
             [
                 "qgep",
