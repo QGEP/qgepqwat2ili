@@ -1027,6 +1027,16 @@ def qgep_export(selection=None, labels_file=None):
     if labels_file:
         logger.info(f"Exporting label positions from {labels_file}")
 
+        # Get t_id by obj_name to create the reference on the labels below
+        tid_for_obj_id = {
+            "haltung": {},
+            "abwasserbauwerk": {},
+        }
+        for row in abwasser_session.query(ABWASSER.haltung):
+            tid_for_obj_id["haltung"][row.obj_id] = row.t_id
+        for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
+            tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
+
         with open(labels_file, "r") as labels_file_handle:
             labels = json.load(labels_file_handle)
 
@@ -1035,33 +1045,23 @@ def qgep_export(selection=None, labels_file=None):
             obj_id = label["properties"]["qgep_obj_id"]
 
             if layer_name == "vw_qgep_reach":
-                haltung = (
-                    abwasser_session.query(ABWASSER.haltung).filter(ABWASSER.haltung.obj_id == obj_id).one_or_none()
-                )
-                logger.debug(f"Adding label for object {obj_id}")
-                if haltung is None:
+                if obj_id not in tid_for_obj_id["haltung"]:
                     logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
                     continue
                 ili_label = ABWASSER.haltung_text(
                     **textpos_common(label, "haltung_text"),
-                    haltungref=haltung.t_id,
+                    haltungref=tid_for_obj_id["haltung"][obj_id],
                 )
 
             elif layer_name == "vw_qgep_wastewater_structure":
-                abwasserbauwerk = (
-                    abwasser_session.query(ABWASSER.abwasserbauwerk)
-                    .filter(ABWASSER.abwasserbauwerk.obj_id == obj_id)
-                    .one_or_none()
-                )
-                logger.debug(f"Adding label for object {obj_id}")
-                if abwasserbauwerk is None:
+                if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
                     logger.warning(
                         f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
                     )
                     continue
                 ili_label = ABWASSER.abwasserbauwerk_text(
                     **textpos_common(label, "abwasserbauwerk_text"),
-                    abwasserbauwerkref=abwasserbauwerk.t_id,
+                    abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
                 )
 
             else:
