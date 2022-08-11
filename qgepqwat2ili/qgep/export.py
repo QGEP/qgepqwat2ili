@@ -82,6 +82,17 @@ def qgep_export(selection=None, labels_file=None):
             logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
         return val[0:max_length]
 
+    def modulo_angle(val):
+        """
+        Returns an angle between 0 and 359.9 (for Orientierung in Base_d-20181005.ili)
+        """
+        if val is None:
+            return None
+        val = val % 360.0
+        if val > 359.9:
+            val = 0
+        return val
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -170,7 +181,7 @@ def qgep_export(selection=None, labels_file=None):
             "t_ili_tid": t_id,
             # --- TextPos ---
             "textpos": ST_MakePoint(*row["geometry"]["coordinates"]),
-            "textori": row["properties"]["LabelRotation"],
+            "textori": modulo_angle(row["properties"]["LabelRotation"]),
             "texthali": "Left",  # can be Left/Center/Right
             "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
             # --- SIA405_TextPos ---
