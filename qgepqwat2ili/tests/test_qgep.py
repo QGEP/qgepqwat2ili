@@ -134,6 +134,7 @@ class TestQGEPUseCases(unittest.TestCase):
             # node_b_id
             "ch13p7mzWN008122",
         ]
+        labels_file = os.path.join(__file__, "..", "labels.geojson")
         main(
             [
                 "qgep",
@@ -142,12 +143,18 @@ class TestQGEPUseCases(unittest.TestCase):
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
+                "--labels_file",
+                labels_file,
             ]
         )
         # Perform various checks
         root = ET.parse(path)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEquals(
+            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+        )
 
 
 class TestRegressions(unittest.TestCase):
