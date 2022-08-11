@@ -238,8 +238,8 @@ def action_export(plugin, pgservice=None):
         qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
         progress_dialog.setValue(50)
 
-        # TODO: reenable
-        # tempdir.cleanup()
+        # Cleanup
+        tempdir.cleanup()
 
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file...")
