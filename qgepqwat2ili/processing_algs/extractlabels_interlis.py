@@ -70,10 +70,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
                 description=self.tr("Scales to export"),
                 allowMultiple=True,
                 options=[f"{self.tr(i[1])} [1:{i[2]}]" for i in self.AVAILABLE_SCALES],
-                # TODO: Currently, extract crashes QGIS with small scales (1:5000, 1:10000)
-                # because native:extractlabels crashes when saving an empty geojson.
-                # For now, let's just untick those problematic scales. But this should be fixed
-                defaultValue=[i for i, s in enumerate(self.AVAILABLE_SCALES) if s[2] <= 2000],
+                defaultValue=[i for i in range(len(self.AVAILABLE_SCALES))],
             )
         )
 
