@@ -176,7 +176,7 @@ def qgep_export(selection=None, labels_file=None):
             # --- SIA405_TextPos ---
             "plantyp": row["properties"]["scale"],
             "textinhalt": row["properties"]["LabelText"],
-            "bemerkung": "",
+            "bemerkung": None,
         }
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
