@@ -1,8 +1,11 @@
 import os
 
 from qgis.core import QgsProject
-from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QDialog, QListWidgetItem
 from qgis.PyQt.uic import loadUi
+
+from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgorithm
 
 
 class GuiExport(QDialog):
@@ -29,6 +32,15 @@ class GuiExport(QDialog):
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
         )
 
+        # Populate the labels list
+        self.labels_scale_list.clear()
+        for i, scale_conf in enumerate(ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES):
+            scale_key, scale_disp, scale_val = scale_conf
+            item = QListWidgetItem(f"{scale_disp} [1:{scale_val}]")
+            item.setData(Qt.UserRole, i)
+            self.labels_scale_list.addItem(item)
+        self.labels_scale_list.selectAll()
+
     @property
     def selected_ids(self):
         if self.limit_checkbox.isChecked():
@@ -46,3 +58,10 @@ class GuiExport(QDialog):
     @property
     def limit_to_selection(self):
         return self.limit_checkbox.isChecked()
+
+    @property
+    def selected_labels_scales_indices(self):
+        scales = []
+        for item in self.labels_scale_list.selectedItems():
+            scales.append(item.data(Qt.UserRole))
+        return scales

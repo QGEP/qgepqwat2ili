@@ -227,6 +227,7 @@ def action_export(plugin, pgservice=None):
                 "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
                 "STRUCTURE_VIEW_LAYER": structures_lyr,
                 "REACH_VIEW_LAYER": reaches_lyr,
+                "SCALES": export_dialog.selected_labels_scales_indices,
             },
         )
         progress_dialog.setValue(35)
