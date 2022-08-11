@@ -148,9 +148,17 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
                 feedback=feedback,
             )
 
-            # Annotate features with qgep_obj_id and scale here
+            # Load the extracted labels
             with open(extract_path, "r") as extract_path_handle:
                 geojson = json.load(extract_path_handle)
+
+            # Check that labels were generated
+            labels_count = len(geojson["features"])
+            feedback.pushInfo(f"{labels_count} labels generated")
+            if labels_count == 0:
+                continue
+
+            # Annotate features with qgep_obj_id and scale
             for label in geojson["features"]:
                 lyr = label["properties"]["Layer"]
                 rowid = label["properties"]["FeatureID"]
