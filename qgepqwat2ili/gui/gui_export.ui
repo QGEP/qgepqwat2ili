@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>381</width>
-    <height>280</height>
+    <height>104</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,60 +29,30 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Export labels for scales</string>
+     <item row="1" column="0" colspan="2">
+      <widget class="QGroupBox" name="labels_groupbox">
+       <property name="enabled">
+        <bool>true</bool>
        </property>
+       <property name="title">
+        <string>Export labels</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="labels_qgis_warning_label">
+          <property name="styleSheet">
+           <string notr="true">*{color: red; }</string>
+          </property>
+          <property name="text">
+           <string>This feature requires QGIS 3.26.2 or newer.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
-     </item>
-     <item row="1" column="1">
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="spacing">
-          <number>1</number>
-         </property>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QToolButton" name="labels_scale_deselect_button">
-           <property name="text">
-            <string>Deselect all</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="labels_scale_select_button">
-           <property name="text">
-            <string>Select all</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QListWidget" name="labels_scale_list">
-         <property name="selectionMode">
-          <enum>QAbstractItemView::MultiSelection</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </item>
     </layout>
    </item>
@@ -129,38 +99,6 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>labels_scale_deselect_button</sender>
-   <signal>clicked()</signal>
-   <receiver>labels_scale_list</receiver>
-   <slot>clearSelection()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>299</x>
-     <y>167</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>91</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>labels_scale_select_button</sender>
-   <signal>clicked()</signal>
-   <receiver>labels_scale_list</receiver>
-   <slot>selectAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>363</x>
-     <y>167</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>253</x>
-     <y>91</y>
     </hint>
    </hints>
   </connection>

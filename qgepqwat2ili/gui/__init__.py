@@ -200,37 +200,40 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(25)
 
-        tempdir = tempfile.TemporaryDirectory()
-        labels_file_path = os.path.join(tempdir.name, "labels.geojson")
-
         # Export the labels file
-        progress_dialog.setLabelText("Extracting labels...")
+        tempdir = tempfile.TemporaryDirectory()
+        labels_file_path = None
 
-        structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-        reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-        if len(structures_lyrs) == 0 or len(reaches_lyrs) == 0:
-            progress_dialog.close()
-            show_failure(
-                "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
-                "Make sure your QGEP project is open.",
-                None,
+        if len(export_dialog.selected_labels_scales_indices):
+            labels_file_path = os.path.join(tempdir.name, "labels.geojson")
+
+            progress_dialog.setLabelText("Extracting labels...")
+
+            structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
+            reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
+            if len(structures_lyrs) == 0 or len(reaches_lyrs) == 0:
+                progress_dialog.close()
+                show_failure(
+                    "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
+                    "Make sure your QGEP project is open.",
+                    None,
+                )
+                return
+            structures_lyr = structures_lyrs[0]
+            reaches_lyr = reaches_lyrs[0]
+
+            QApplication.processEvents()
+            processing.run(
+                "qgep:extractlabels_interlis",
+                {
+                    "OUTPUT": labels_file_path,
+                    "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
+                    "STRUCTURE_VIEW_LAYER": structures_lyr,
+                    "REACH_VIEW_LAYER": reaches_lyr,
+                    "SCALES": export_dialog.selected_labels_scales_indices,
+                },
             )
-            return
-        structures_lyr = structures_lyrs[0]
-        reaches_lyr = reaches_lyrs[0]
-
-        QApplication.processEvents()
-        processing.run(
-            "qgep:extractlabels_interlis",
-            {
-                "OUTPUT": labels_file_path,
-                "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
-                "STRUCTURE_VIEW_LAYER": structures_lyr,
-                "REACH_VIEW_LAYER": reaches_lyr,
-                "SCALES": export_dialog.selected_labels_scales_indices,
-            },
-        )
-        progress_dialog.setValue(35)
+            progress_dialog.setValue(35)
 
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")

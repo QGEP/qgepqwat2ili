@@ -1,8 +1,7 @@
 import os
 
-from qgis.core import QgsProject
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QDialog, QListWidgetItem
+from qgis.core import Qgis, QgsProject
+from qgis.PyQt.QtWidgets import QCheckBox, QDialog
 from qgis.PyQt.uic import loadUi
 
 from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgorithm
@@ -33,14 +32,15 @@ class GuiExport(QDialog):
         )
 
         # Populate the labels list
-        self.labels_scale_list.clear()
-        for i, scale_conf in enumerate(ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES):
-            scale_key, scale_disp, scale_val = scale_conf
-            item = QListWidgetItem(f"{scale_disp} [1:{scale_val}]")
-            item.setData(Qt.UserRole, i)
-            self.labels_scale_list.addItem(item)
-        self.labels_scale_list.selectAll()
-        self.labels_scale_list.setMinimumWidth(self.labels_scale_list.sizeHintForColumn(0) + 10)
+        qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
+        self.labels_groupbox.setEnabled(qgis_version_ok)
+        self.labels_qgis_warning_label.setVisible(not qgis_version_ok)
+        self.scale_checkboxes = []
+        for scale_key, scale_disp, scale_val in ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES:
+            checkbox = QCheckBox(f"{scale_disp} [1:{scale_val}]")
+            checkbox.setChecked(qgis_version_ok)
+            self.scale_checkboxes.append(checkbox)
+            self.labels_groupbox.layout().addWidget(checkbox)
 
     @property
     def selected_ids(self):
@@ -62,7 +62,11 @@ class GuiExport(QDialog):
 
     @property
     def selected_labels_scales_indices(self):
-        scales = []
-        for item in self.labels_scale_list.selectedItems():
-            scales.append(item.data(Qt.UserRole))
-        return scales
+        if self.labels_groupbox.isChecked():
+            scales = []
+            for i, checkbox in enumerate(self.scale_checkboxes):
+                if checkbox.isChecked():
+                    scales.append(i)
+            return scales
+        else:
+            return []
