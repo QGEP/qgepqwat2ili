@@ -16,7 +16,7 @@ from qgis.core import (
     QgsWkbTypes,
 )
 
-from ....processing_provider.qgep_algorithm import QgepAlgorithm
+from qgepplugin.processing_provider.qgep_algorithm import QgepAlgorithm
 
 
 class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
