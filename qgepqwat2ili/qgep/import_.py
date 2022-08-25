@@ -124,7 +124,7 @@ def qgep_import(precommit_callback=None):
         """
         return {
             "accessibility__REL": get_vl_instance(QGEP.wastewater_structure_accessibility, row.zugaenglichkeit),
-            # "contract_section": row.REPLACE_ME,  # TODO : not sure, is it akten or baulos ?
+            "contract_section": row.baulos,
             "detail_geometry_geometry": ST_Force3D(row.detailgeometrie),
             "financing__REL": get_vl_instance(QGEP.wastewater_structure_financing, row.finanzierung),
             # "fk_main_cover": row.REPLACE_ME,  # TODO : NOT MAPPED, but I think this is not standard SIA405 ?
@@ -135,7 +135,7 @@ def qgep_import(precommit_callback=None):
             "identifier": row.bezeichnung,
             "inspection_interval": row.inspektionsintervall,
             "location_name": row.standortname,
-            # "records": row.REPLACE_ME,  # TODO : not sure, is it akten or baulos ?
+            "records": row.akten,
             "remark": row.bemerkung,
             "renovation_necessity__REL": get_vl_instance(
                 QGEP.wastewater_structure_renovation_necessity, row.sanierungsbedarf
