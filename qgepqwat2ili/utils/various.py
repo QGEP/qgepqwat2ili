@@ -83,7 +83,7 @@ def setup_test_db(template="full"):
         logger.info("Test container not running, we create it")
 
         exec_(
-            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis:13-3.2"
+            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis"
         )
 
     # Wait for PG
@@ -175,7 +175,7 @@ def read_pgservice(service_name):
     elif os.environ.get("PGSYSCONFDIR"):
         PG_CONFIG_PATH = os.path.join(os.environ.get("PGSYSCONFDIR"), "pg_service.conf")
     else:
-        PG_CONFIG_PATH = os.path.expanduser("~/.pg_service.conf")
+        PG_CONFIG_PATH = " ~/.pg_service.conf"
 
     config = configparser.ConfigParser()
     if os.path.exists(PG_CONFIG_PATH):

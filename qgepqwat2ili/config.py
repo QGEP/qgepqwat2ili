@@ -9,7 +9,11 @@ PGDATABASE = os.getenv("PGDATABASE", None)
 PGUSER = os.getenv("PGUSER", None)
 PGPASS = os.getenv("PGPASS", None)
 JAVA = r"java"
-ILI2PG = os.path.join(BASE, "bin", "ili2pg-4.5.0-bindist", "ili2pg-4.5.0.jar")
+# 12.7.2022 Anpassung auf 4.61 damit auch VSA-DSS kompatibel siehe https://github.com/claeis/ili2db/issues/374
+#ILI2PG = os.path.join(BASE, "bin", "ili2pg-4.5.0-bindist", "ili2pg-4.5.0.jar")
+ILI2PG = os.path.join(BASE, "bin", "ili2pg-4.6.1-bindist", "ili2pg-4.6.1.jar")
+#ILI2PG = os.path.join(BASE, "bin", "ili2pg-4.8.0-bindist", "ili2pg-4.8.0.jar")
+
 ILIVALIDATOR = os.path.join(BASE, "bin", "ilivalidator-1.11.9", "ilivalidator-1.11.9.jar")
 ILI_FOLDER = os.path.join(BASE, "ili")
 DATA_FOLDER = os.path.join(BASE, "data")
@@ -19,6 +23,20 @@ QGEP_SCHEMA = "qgep_od"
 ABWASSER_SCHEMA = "pg2ili_abwasser"
 ABWASSER_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_KEK_2019_2_d_LV95-20210120.ili")
 ABWASSER_ILI_MODEL_NAME = "VSA_KEK_2019_LV95"
+
+# neu 12.7.2022 weitere Modelle ergänzt, alte config läuft weiterhin
+ABWASSER_KEK_SCHEMA = "pg2ili_kek"
+ABWASSER_KEK_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_KEK_2019_2_d_LV95-20210120.ili")
+ABWASSER_KEK_ILI_MODEL_NAME = "VSA_KEK_2019_LV95"
+
+ABWASSER_SIA405_SCHEMA = "pg2ili_sia405abwasser"
+ABWASSER__SIA405_ILI_MODEL = os.path.join(ILI_FOLDER, "SIA405_Abwasser_2015_2_d-20180417.ili")
+ABWASSER__SIA405_ILI_MODEL_NAME = "SIA405_ABWASSER_2015_LV95"
+
+ABWASSER_DSS_SCHEMA = "pg2ili_dss"
+ABWASSER_DSS_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_DSS_2015_2_d-20200330.ili")
+ABWASSER_DSS_ILI_MODEL_NAME = "DSS_2015_LV95"
+
 
 QWAT_DEFAULT_PGSERVICE = "qwat"
 QWAT_SCHEMA = "qwat_od"

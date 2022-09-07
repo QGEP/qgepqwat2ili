@@ -21,7 +21,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 class GuiImport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
+        # 22.7.2022
+        #loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_import_model_select.ui"), self)
 
         self.accepted.connect(self.commit_session)
         self.rejected.connect(self.rollback_session)

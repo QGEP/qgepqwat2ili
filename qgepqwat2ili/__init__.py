@@ -8,6 +8,14 @@ from .qgep.import_ import qgep_import
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
+
+# neu 27.6.2022 sb
+from .qgepkek.export import qgep_export as qgepkek_export
+from .qgepkek.import_ import qgep_import as qgepkek_import
+from .qgepkek.mapping import get_qgep_mapping as get_qgepkek_mapping
+from .qgepkek.model_abwasser import Base as BaseKek
+from .qgepkek.model_qgep import Base as BaseQgepKek
+
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
 from .qwat.mapping import get_qwat_mapping
@@ -56,6 +64,41 @@ def main(args):
         action="store_true",
         help="saves the log files next to the input/output file",
     )
+
+    # neu 27.6.2022 sb parser_qgepkek
+    parser_qgepkek = subparsers.add_parser(
+        "qgepkek",
+        help="import/export QGEP datamodel",
+        description="ili2QGEP entrypoint",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    # group = parser_qgep.add_mutually_exclusive_group(required=True)
+    parser_qgepkek.add_argument("direction", choices=["import", "export"])
+    parser_qgepkek.add_argument(
+        "--selection",
+        help="if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)",
+    )
+    parser_qgepkek.add_argument(
+        "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
+    )
+    parser_qgepkek.add_argument(
+        "--skip_validation",
+        action="store_true",
+        help="skips running ilivalidator on input/output xtf (required to import invalid files, invalid outputs are still generated)",
+    )
+    parser_qgepkek.add_argument("path", help="path to the input/output .xtf file")
+    parser_qgepkek.add_argument(
+        "--pgservice",
+        help="name of the pgservice to use to connect to the database",
+        default=config.QGEP_DEFAULT_PGSERVICE,
+    )
+    parser_qgepkek.add_argument(
+        "--log",
+        action="store_true",
+        help="saves the log files next to the input/output file",
+    )
+
+
 
     parser_qwat = subparsers.add_parser(
         "qwat",
@@ -111,7 +154,9 @@ def main(args):
         exit(1)
 
     # Set log path
-    log_path = args.path if args.parser in ["qgep", "qwat"] and args.log else None
+    # 27.6.2022 sb
+    #log_path = args.path if args.parser in ["qgep", "qwat"] and args.log else None
+    log_path = args.path if args.parser in ["qgep", "qgepkek", "qwat"] and args.log else None
 
     # Write root logger to file
     filename = make_log_path(log_path, "qgepqwat2ili")
@@ -153,6 +198,46 @@ def main(args):
             )
             utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
             qgep_import()
+
+#27.6.2022 sb
+    elif args.parser == "qqgepkek":
+        config.PGSERVICE = args.pgservice
+        #27.6.2022 angepasst
+        SCHEMA = config.ABWASSER_KEK_SCHEMA
+        ILI_MODEL = config.ABWASSER_KEK_ILI_MODEL
+        ILI_MODEL_NAME = config.ABWASSER_KEK_ILI_MODEL_NAME
+
+        if args.direction == "export":
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            # 27.6.2022 angepasst
+            qgepkek_export(selection=args.selection.split(",") if args.selection else None)
+            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
+                    exit(1)
+
+        elif args.direction == "import":
+            if args.selection:
+                print("Selection is only supported on export")
+                exit(1)
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
+                    exit(1)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+            #27.6.2022
+            qgepkek_import()
+
 
     elif args.parser == "qwat":
         config.PGSERVICE = args.pgservice

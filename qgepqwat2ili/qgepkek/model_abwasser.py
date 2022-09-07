@@ -2,14 +2,9 @@ from sqlalchemy.ext.automap import automap_base
 
 from .. import config, utils
 
-SCHEMA = config.ABWASSER_SCHEMA
-# 28.6.2022
-# geht nicht config['VSA_KEK_2019_LV95']['ABWASSER_SCHEMA']
-# SCHEMA = config.VSA_KEK_2019_LV95.ABWASSER_SCHEMA
-
-# 7.7.2022
-#SCHEMA = "VSA_KEK_2019_LV95"
-
+# 12.7.2022
+# SCHEMA = config.ABWASSER_SCHEMA
+SCHEMA = config.ABWASSER_KEK_SCHEMA
 
 Base = automap_base()
 
@@ -132,13 +127,13 @@ class schaden(sia405_baseclass):
     __table_args__ = {"schema": SCHEMA}
 
 
-class normschachtschaden(schaden):
-    __tablename__ = "normschachtschaden"
+class kanalschaden(schaden):
+    __tablename__ = "kanalschaden"
     __table_args__ = {"schema": SCHEMA}
 
 
-class kanalschaden(schaden):
-    __tablename__ = "kanalschaden"
+class normschachtschaden(schaden):
+    __tablename__ = "normschachtschaden"
     __table_args__ = {"schema": SCHEMA}
 
 
