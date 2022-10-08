@@ -269,35 +269,7 @@ def qgep_export(selection=None):
             "verstellbarkeit": get_vl(row.adjustability__REL),
         }
 
-    logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerk, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.re_maintenance_event_wastewater_structure)
-    for row in query:
-
-        # AVAILABLE FIELDS IN QGEP.maintenance_event_wastewater_structure
-        
-        # --- maintenance_event_wastewater_structure ---
-        # to do e.g. fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
-        # --- _bwrel_ ---
-        # to do add superclassrelations e.g. profile_geometry__BWREL_fk_pipe_profile, reach__BWREL_fk_pipe_profile
-        
-        # --- _rel_ ---
-        # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
-    
-        erhaltungsereignis_abwasserbauwerk = ABWASSER.erhaltungsereignis_abwasserbauwerk(
-            # FIELDS TO MAP TO ABWASSER.erhaltungsereignis_abwasserbauwerk
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "erhaltungsereignis_abwasserbauwerk"),
-            # --- erhaltungsereignis_abwasserbauwerk ---
-
-            abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            erhaltungsereignisref=get_tid(row.fk_maintenance_event__REL),
-        )
-        abwasser_session.add(erhaltungsereignis_abwasserbauwerk)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+# -- 25.9.2022 re_maintenance_event_wastewater_structure moved to end, as wastewater_structure and maintenance_event are not yet added
 
     logger.info("Exporting QGEP.mutation -> ABWASSER.mutation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.mutation)
@@ -3447,9 +3419,57 @@ def qgep_export(selection=None):
     logger.info("done")
     abwasser_session.flush()
 
-
-
+# -- extra commit
     abwasser_session.commit()
+    abwasser_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+
+    
+
+# --    logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerk, ABWASSER.metaattribute")
+# -- adapted 24.9.2022 to do adjust in MD code
+    logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerkassoc")
+    query = qgep_session.query(QGEP.re_maintenance_event_wastewater_structure)
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.maintenance_event_wastewater_structure
+        
+        # --- maintenance_event_wastewater_structure ---
+        # to do e.g. fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
+        # --- _bwrel_ ---
+        # to do add superclassrelations e.g. profile_geometry__BWREL_fk_pipe_profile, reach__BWREL_fk_pipe_profile
+        
+        # --- _rel_ ---
+        # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
+    
+# --        erhaltungsereignis_abwasserbauwerk = ABWASSER.erhaltungsereignis_abwasserbauwerk(
+# -- adapted 24.9.2022 to do adjust in MD code
+        erhaltungsereignis_abwasserbauwerk = ABWASSER.erhaltungsereignis_abwasserbauwerkassoc(
+            # FIELDS TO MAP TO ABWASSER.erhaltungsereignis_abwasserbauwerk
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+# --            **base_common(row, "erhaltungsereignis_abwasserbauwerk"),
+# -- adapted 24.9.2022 to do adjust in MD code
+# -- adapted2 24.9.2022 no base for erhaltungsereignis_abwasserbauwerkassoc
+# --            **base_common(row, "erhaltungsereignis_abwasserbauwerkassoc"),
+            # --- erhaltungsereignis_abwasserbauwerk ---
+
+            abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
+# --            erhaltungsereignisref=get_tid(row.fk_maintenance_event__REL),
+# -- adapted 24.9.2022 to do adjust in MD code
+            erhaltungsereignis_abwasserbauwerkassocref=get_tid(row.fk_maintenance_event__REL),
+            )
+            
+#        abwasser_session.add(erhaltungsereignis_abwasserbauwerk)
+        abwasser_session2.add(erhaltungsereignis_abwasserbauwerk)
+# -- 24.9.2022 adapted to do MD code - no metaattributes
+# --        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+# -- 25.9.22  abwasser_session.flush()
+    abwasser_session2.flush()
+
+# -- 25.9.22    abwasser_session.commit()
+    abwasser_session2.commit()
 
     qgep_session.close()
     abwasser_session.close()
