@@ -1,6 +1,6 @@
 import json
 
-from geoalchemy2.functions import ST_Force2D, ST_MakePoint
+from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -170,7 +170,7 @@ def qgep_export(selection=None, labels_file=None):
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
 
-    def textpos_common(row, t_type):
+    def textpos_common(row, t_type, geojson_crs_def):
         """
         Returns common attributes for textpos
         """
@@ -180,7 +180,15 @@ def qgep_export(selection=None, labels_file=None):
             "t_type": t_type,
             "t_ili_tid": t_id,
             # --- TextPos ---
-            "textpos": ST_MakePoint(*row["geometry"]["coordinates"]),
+            "textpos": ST_GeomFromGeoJSON(
+                json.dumps(
+                    {
+                        "type": "Point",
+                        "coordinates": row["geometry"]["coordinates"],
+                        "crs": geojson_crs_def,
+                    }
+                )
+            ),
             "textori": modulo_angle(row["properties"]["LabelRotation"]),
             "texthali": "Left",  # can be Left/Center/Right
             "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
@@ -1051,6 +1059,8 @@ def qgep_export(selection=None, labels_file=None):
         with open(labels_file, "r") as labels_file_handle:
             labels = json.load(labels_file_handle)
 
+        geojson_crs_def = labels["crs"]
+
         for label in labels["features"]:
             layer_name = label["properties"]["Layer"]
             obj_id = label["properties"]["qgep_obj_id"]
@@ -1060,7 +1070,7 @@ def qgep_export(selection=None, labels_file=None):
                     logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
                     continue
                 ili_label = ABWASSER.haltung_text(
-                    **textpos_common(label, "haltung_text"),
+                    **textpos_common(label, "haltung_text", geojson_crs_def),
                     haltungref=tid_for_obj_id["haltung"][obj_id],
                 )
 
@@ -1071,7 +1081,7 @@ def qgep_export(selection=None, labels_file=None):
                     )
                     continue
                 ili_label = ABWASSER.abwasserbauwerk_text(
-                    **textpos_common(label, "abwasserbauwerk_text"),
+                    **textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
                     abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
                 )
 
