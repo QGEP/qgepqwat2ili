@@ -82,7 +82,7 @@ def setup_test_db(template="full"):
     logger.info(f"SETTING UP QGEP/QWAT DATABASE [{docker_image}]...")
 
     r = exec_("docker inspect -f '{{.State.Running}}' qgepqwat", check=False)
-    running = (r == 0)
+    running = r == 0
     if running:
         r = exec_("docker inspect -f {{.Config.Image}} qgepqwat", output_content=True)
         if r != docker_image:
