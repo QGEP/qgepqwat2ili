@@ -2,7 +2,7 @@ import os
 import sys
 from collections import defaultdict
 
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsSettings
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtWidgets import QDialog, QHeaderView, QTreeWidgetItem
@@ -23,6 +23,7 @@ class GuiImport(QDialog):
         super().__init__(parent)
         loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
+        self.accepted.connect(lambda: self.save_defaults())
         self.accepted.connect(self.commit_session)
         self.rejected.connect(self.rollback_session)
 
@@ -32,6 +33,14 @@ class GuiImport(QDialog):
 
         # No required here, but this way we load before opening the dialog
         get_qgep_model()
+
+        s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+        self.logs_next_to_file = s == True or s == "true"
+        self.save_logs_next_to_file_checkbox.setChecked(self.logs_next_to_file)
+
+    def on_accepted(self):
+        self.logs_next_to_file = self.save_logs_next_to_file_checkbox.isChecked()
+        QgsSettings().setValue("qgep_plugin/logs_next_to_file", self.logs_next_to_file)
 
     def init_with_session(self, session: Session):
         """

@@ -1,6 +1,6 @@
 import os
 
-from qgis.core import QgsProject
+from qgis.core import QgsProject, QgsSettings
 from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUi
 
@@ -9,6 +9,8 @@ class GuiExport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         loadUi(os.path.join(os.path.dirname(__file__), "gui_export.ui"), self)
+
+        self.accepted.connect(self.on_accepted)
 
         # Execute the dialog
         # self.resize(iface.mainWindow().size() * 0.75)
@@ -28,6 +30,14 @@ class GuiExport(QDialog):
         self.limit_checkbox.setText(
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
         )
+
+        s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+        self.logs_next_to_file = s == True or s == "true"
+        self.save_logs_next_to_file_checkbox.setChecked(self.logs_next_to_file)
+
+    def on_accepted(self):
+        self.logs_next_to_file = self.save_logs_next_to_file_checkbox.isChecked()
+        QgsSettings().setValue("qgep_plugin/logs_next_to_file", self.logs_next_to_file)
 
     @property
     def selected_ids(self):
