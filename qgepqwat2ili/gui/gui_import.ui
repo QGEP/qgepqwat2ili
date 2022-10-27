@@ -192,13 +192,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="save_logs_next_to_file_checkbox">
-     <property name="text">
-      <string>Save logs next to input file</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

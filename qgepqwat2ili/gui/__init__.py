@@ -65,7 +65,9 @@ def action_import(plugin, pgservice=None):
     QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
     # Configure logging
-    if import_dialog.logs_next_to_file:
+    s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+    logs_next_to_file = s == True or s == "true"
+    if logs_next_to_file:
         base_log_path = file_name
     else:
         base_log_path = None
