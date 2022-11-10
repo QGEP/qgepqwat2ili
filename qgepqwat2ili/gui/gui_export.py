@@ -34,6 +34,11 @@ class GuiExport(QDialog):
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
         )
 
+        # Remember save next to file checkbox
+        s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+        self.logs_next_to_file = s == True or s == "true"
+        self.save_logs_next_to_file_checkbox.setChecked(self.logs_next_to_file)
+
         # Populate the labels list (restoring checked states of scaes)
         selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
         qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
@@ -47,6 +52,10 @@ class GuiExport(QDialog):
             self.labels_groupbox.layout().addWidget(checkbox)
 
     def on_finish(self):
+        # Remember save next to file checkbox
+        self.logs_next_to_file = self.save_logs_next_to_file_checkbox.isChecked()
+        QgsSettings().setValue("qgep_plugin/logs_next_to_file", self.logs_next_to_file)
+
         # Save checked state of scales
         if self.labels_groupbox.isChecked():
             selected_scales = []

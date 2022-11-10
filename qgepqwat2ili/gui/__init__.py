@@ -20,16 +20,9 @@ from ..utils.ili2db import (
     import_xtf_data,
     validate_xtf_data,
 )
-from ..utils.various import CmdException, logger, make_log_path
+from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
-
-# Always log to temp dir
-filename = make_log_path(None, "qgepqwat2ili")
-file_handler = logging.FileHandler(filename, mode="w", encoding="utf-8")
-file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
-logger.addHandler(file_handler)
 
 
 def _show_results(title, message, log_path, level):
@@ -73,6 +66,14 @@ def action_import(plugin, pgservice=None):
         return
     QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
+    # Configure logging
+    s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+    logs_next_to_file = s == True or s == "true"
+    if logs_next_to_file:
+        base_log_path = file_name
+    else:
+        base_log_path = None
+
     progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
     progress_dialog.setCancelButton(None)
     progress_dialog.setModal(True)
@@ -81,7 +82,7 @@ def action_import(plugin, pgservice=None):
     # Validating the input file
     progress_dialog.setLabelText("Validating the input file...")
     QApplication.processEvents()
-    log_path = make_log_path(None, "validate")
+    log_path = make_log_path(base_log_path, "ilivalidator")
     try:
         validate_xtf_data(
             file_name,
@@ -99,7 +100,7 @@ def action_import(plugin, pgservice=None):
     # Prepare the temporary ili2pg model
     progress_dialog.setLabelText("Creating ili schema...")
     QApplication.processEvents()
-    log_path = make_log_path(None, "create")
+    log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
     try:
         create_ili_schema(
             config.ABWASSER_SCHEMA,
@@ -120,7 +121,7 @@ def action_import(plugin, pgservice=None):
     # Export from ili2pg model to file
     progress_dialog.setLabelText("Importing XTF data...")
     QApplication.processEvents()
-    log_path = make_log_path(None, "import")
+    log_path = make_log_path(base_log_path, "ili2pg-import")
     try:
         import_xtf_data(
             config.ABWASSER_SCHEMA,
@@ -142,9 +143,14 @@ def action_import(plugin, pgservice=None):
     QApplication.processEvents()
     import_dialog = GuiImport(plugin.iface.mainWindow())
     progress_dialog.setValue(100)
-    qgep_import(
-        precommit_callback=import_dialog.init_with_session,
-    )
+
+    log_handler = logging.FileHandler(make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8")
+    log_handler.setLevel(logging.INFO)
+    log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
+    with LoggingHandlerContext(log_handler):
+        qgep_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
 
 
 def action_export(plugin, pgservice=None):
@@ -174,6 +180,12 @@ def action_export(plugin, pgservice=None):
             return
         QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
+        # Configure logging
+        if export_dialog.logs_next_to_file:
+            base_log_path = file_name
+        else:
+            base_log_path = None
+
         progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
         progress_dialog.setCancelButton(None)
         progress_dialog.setModal(True)
@@ -182,7 +194,7 @@ def action_export(plugin, pgservice=None):
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema...")
         QApplication.processEvents()
-        log_path = make_log_path(None, "create")
+        log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
         try:
             create_ili_schema(
                 config.ABWASSER_SCHEMA,
@@ -238,7 +250,12 @@ def action_export(plugin, pgservice=None):
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
-        qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+
+        log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
+        log_handler.setLevel(logging.INFO)
+        log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
+        with LoggingHandlerContext(log_handler):
+            qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
         progress_dialog.setValue(50)
 
         # Cleanup
@@ -247,7 +264,7 @@ def action_export(plugin, pgservice=None):
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file...")
         QApplication.processEvents()
-        log_path = make_log_path(None, "export")
+        log_path = make_log_path(base_log_path, "ili2pg-export")
         try:
             export_xtf_data(
                 config.ABWASSER_SCHEMA,
@@ -267,7 +284,7 @@ def action_export(plugin, pgservice=None):
 
         progress_dialog.setLabelText("Validating the output file...")
         QApplication.processEvents()
-        log_path = make_log_path(None, "validate")
+        log_path = make_log_path(base_log_path, "ilivalidator")
         try:
             validate_xtf_data(
                 file_name,
