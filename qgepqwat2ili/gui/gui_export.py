@@ -1,6 +1,7 @@
 import os
+from collections import OrderedDict
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsProject, QgsSettings
 from qgis.PyQt.QtWidgets import QCheckBox, QDialog
 from qgis.PyQt.uic import loadUi
 
@@ -11,6 +12,8 @@ class GuiExport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
         loadUi(os.path.join(os.path.dirname(__file__), "gui_export.ui"), self)
+
+        self.finished.connect(self.on_finish)
 
         # Execute the dialog
         # self.resize(iface.mainWindow().size() * 0.75)
@@ -31,16 +34,26 @@ class GuiExport(QDialog):
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
         )
 
-        # Populate the labels list
+        # Populate the labels list (restoring checked states of scaes)
+        selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
         qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
         self.labels_groupbox.setEnabled(qgis_version_ok)
         self.labels_qgis_warning_label.setVisible(not qgis_version_ok)
-        self.scale_checkboxes = []
+        self.scale_checkboxes = OrderedDict()
         for scale_key, scale_disp, scale_val in ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES:
             checkbox = QCheckBox(f"{scale_disp} [1:{scale_val}]")
-            checkbox.setChecked(qgis_version_ok)
-            self.scale_checkboxes.append(checkbox)
+            checkbox.setChecked(qgis_version_ok and scale_key in selected_scales)
+            self.scale_checkboxes[scale_key] = checkbox
             self.labels_groupbox.layout().addWidget(checkbox)
+
+    def on_finish(self):
+        # Save checked state of scales
+        if self.labels_groupbox.isChecked():
+            selected_scales = []
+            for key, checkbox in self.scale_checkboxes.items():
+                if checkbox.isChecked():
+                    selected_scales.append(key)
+            QgsSettings().setValue("qgep_plugin/last_selected_scales", ",".join(selected_scales))
 
     @property
     def selected_ids(self):
@@ -64,7 +77,7 @@ class GuiExport(QDialog):
     def selected_labels_scales_indices(self):
         if self.labels_groupbox.isChecked():
             scales = []
-            for i, checkbox in enumerate(self.scale_checkboxes):
+            for i, checkbox in enumerate(self.scale_checkboxes.values()):
                 if checkbox.isChecked():
                     scales.append(i)
             return scales
