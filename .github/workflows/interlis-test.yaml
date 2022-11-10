@@ -15,8 +15,12 @@ jobs:
     name: Interlis-tests
     runs-on: ubuntu-20.04
     strategy:
+        fail-fast: false
         matrix:
             suite: ["qgep", "qwat"]
+            postgis:
+              - postgis/postgis:13-3.2
+              - postgis/postgis:12-3.0
 
     steps:
       - uses: actions/checkout@v2
@@ -33,6 +37,7 @@ jobs:
         run: python -m unittest qgepqwat2ili.tests.test_$SUITE
         env:
             SUITE: ${{ matrix.suite }}
+            QGEPQWAT2ILI_TESTDB_IMAGE: ${{ matrix.postgis }}
             PGHOST: 127.0.0.1
             PGPORT: 5432
             PGDATABASE: qgep_prod
