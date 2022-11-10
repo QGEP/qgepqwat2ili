@@ -1,4 +1,6 @@
-from geoalchemy2.functions import ST_Force2D
+import json
+
+from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -8,7 +10,7 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None):
+def qgep_export(selection=None, labels_file=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
@@ -79,6 +81,17 @@ def qgep_export(selection=None):
         if len(val) > max_length:
             logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
         return val[0:max_length]
+
+    def modulo_angle(val):
+        """
+        Returns an angle between 0 and 359.9 (for Orientierung in Base_d-20181005.ili)
+        """
+        if val is None:
+            return None
+        val = val % 360.0
+        if val > 359.9:
+            val = 0
+        return val
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
@@ -155,6 +168,34 @@ def qgep_export(selection=None):
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
+        }
+
+    def textpos_common(row, t_type, geojson_crs_def):
+        """
+        Returns common attributes for textpos
+        """
+        t_id = tid_maker.next_tid()
+        return {
+            "t_id": t_id,
+            "t_type": t_type,
+            "t_ili_tid": t_id,
+            # --- TextPos ---
+            "textpos": ST_GeomFromGeoJSON(
+                json.dumps(
+                    {
+                        "type": "Point",
+                        "coordinates": row["geometry"]["coordinates"],
+                        "crs": geojson_crs_def,
+                    }
+                )
+            ),
+            "textori": modulo_angle(row["properties"]["LabelRotation"]),
+            "texthali": "Left",  # can be Left/Center/Right
+            "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
+            # --- SIA405_TextPos ---
+            "plantyp": row["properties"]["scale"],
+            "textinhalt": row["properties"]["LabelText"],
+            "bemerkung": None,
         }
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
@@ -999,6 +1040,61 @@ def qgep_export(selection=None):
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
+
+    # Labels
+    # Note: these are extracted from the optional labels file (not exported from the QGEP database)
+    if labels_file:
+        logger.info(f"Exporting label positions from {labels_file}")
+
+        # Get t_id by obj_name to create the reference on the labels below
+        tid_for_obj_id = {
+            "haltung": {},
+            "abwasserbauwerk": {},
+        }
+        for row in abwasser_session.query(ABWASSER.haltung):
+            tid_for_obj_id["haltung"][row.obj_id] = row.t_id
+        for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
+            tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
+
+        with open(labels_file, "r") as labels_file_handle:
+            labels = json.load(labels_file_handle)
+
+        geojson_crs_def = labels["crs"]
+
+        for label in labels["features"]:
+            layer_name = label["properties"]["Layer"]
+            obj_id = label["properties"]["qgep_obj_id"]
+
+            if layer_name == "vw_qgep_reach":
+                if obj_id not in tid_for_obj_id["haltung"]:
+                    logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
+                    continue
+                ili_label = ABWASSER.haltung_text(
+                    **textpos_common(label, "haltung_text", geojson_crs_def),
+                    haltungref=tid_for_obj_id["haltung"][obj_id],
+                )
+
+            elif layer_name == "vw_qgep_wastewater_structure":
+                if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
+                    logger.warning(
+                        f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
+                    )
+                    continue
+                ili_label = ABWASSER.abwasserbauwerk_text(
+                    **textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
+                    abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
+                )
+
+            else:
+                logger.warning(
+                    f"Unknown layer for label `{layer_name}`. Label will be ignored",
+                )
+                continue
+
+            abwasser_session.add(ili_label)
+            print(".", end="")
+        logger.info("done")
+        abwasser_session.flush()
 
     abwasser_session.commit()
 

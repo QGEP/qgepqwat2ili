@@ -153,6 +153,29 @@ class metaattribute(Base):
     __table_args__ = {"schema": SCHEMA}
 
 
+# TEXTS
+
+
+class textpos(baseclass):
+    __tablename__ = "textpos"
+    __table_args__ = {"schema": SCHEMA}
+
+
+class sia405_textpos(textpos):
+    __tablename__ = "sia405_textpos"
+    __table_args__ = {"schema": SCHEMA}
+
+
+class haltung_text(sia405_textpos):
+    __tablename__ = "haltung_text"
+    __table_args__ = {"schema": SCHEMA}
+
+
+class abwasserbauwerk_text(sia405_textpos):
+    __tablename__ = "abwasserbauwerk_text"
+    __table_args__ = {"schema": SCHEMA}
+
+
 _prepared = False
 
 

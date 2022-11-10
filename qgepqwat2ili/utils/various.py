@@ -43,7 +43,7 @@ class CmdException(BaseException):
     pass
 
 
-def exec_(command, check=True):
+def exec_(command, check=True, output_content=False):
     logger.info(f"EXECUTING: {command}")
     try:
         proc = subprocess.run(
@@ -57,8 +57,8 @@ def exec_(command, check=True):
         if check:
             logger.exception(e.output.decode("windows-1252" if os.name == "nt" else "utf-8"))
             raise CmdException(f"Command errored ! See logs for more info.")
-        return e.returncode
-    return proc.returncode
+        return e.output if output_content else e.returncode
+    return proc.stdout.decode().strip() if output_content else proc.returncode
 
 
 def setup_test_db(template="full"):
@@ -77,13 +77,23 @@ def setup_test_db(template="full"):
     def dexec_(cmd, check=True):
         return exec_(f"docker exec qgepqwat {cmd}", check)
 
-    logger.info("SETTING UP QGEP/QWAT DATABASE...")
-    r = exec_("docker inspect -f '{{.State.Running}}' qgepqwat", check=False)
-    if r != 0:
-        logger.info("Test container not running, we create it")
+    docker_image = os.getenv("QGEPQWAT2ILI_TESTDB_IMAGE", "postgis/postgis:13-3.2")
 
+    logger.info(f"SETTING UP QGEP/QWAT DATABASE [{docker_image}]...")
+
+    r = exec_("docker inspect -f '{{.State.Running}}' qgepqwat", check=False)
+    running = r == 0
+    if running:
+        r = exec_("docker inspect -f {{.Config.Image}} qgepqwat", output_content=True)
+        if r != docker_image:
+            logger.info(f"Test container running `{r}`, we expect `{docker_image}`, we kill it")
+            exec_("docker rm qgepqwat --force")
+            running = False
+
+    if not running:
+        logger.info("Test container not running, we create it")
         exec_(
-            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis:13-3.2"
+            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} {docker_image}"
         )
 
     # Wait for PG
