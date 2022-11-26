@@ -181,7 +181,7 @@ def action_export(plugin, pgservice=None):
         QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
         if file_name.endswith('.xtf'):
-            file_name = file_name[0:(len(file_name)-4)] + "_" + config.ABWASSER_ILI_MODEL_NAME + ".xtf"
+            file_name1 = file_name[0:(len(file_name)-4)] + "_" + config.ABWASSER_ILI_MODEL_NAME + ".xtf"
             
         # Configure logging
         if export_dialog.logs_next_to_file:
@@ -267,13 +267,13 @@ def action_export(plugin, pgservice=None):
         # Export from ili2pg model to file
         progress_dialog.setLabelText("Saving XTF file " + config.ABWASSER_ILI_MODEL_NAME + "...")
         QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ili2pg-export")
+        log_path = make_log_path(base_log_path, "ili2pg-export1")
         try:
             export_xtf_data(
                 config.ABWASSER_SCHEMA,
                 config.ABWASSER_ILI_MODEL_NAME,
                 '',  # new variable export_model_name 
-                file_name,
+                file_name1,
                 log_path,
             )
         except CmdException:
@@ -311,12 +311,12 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(75)
 
-        progress_dialog.setLabelText("Validating the output file" + config.ABWASSER_ILI_MODEL_NAME + "...")
+        progress_dialog.setLabelText("Validating the output file " + config.ABWASSER_ILI_MODEL_NAME + "...")
         QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ilivalidator")
+        log_path = make_log_path(base_log_path, "ilivalidator1")
         try:
             validate_xtf_data(
-                file_name,
+                file_name1,
                 log_path,
             )
         except CmdException:
@@ -329,7 +329,7 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(90)
 
-        progress_dialog.setLabelText("Validating the network output file" + config.ABWASSER_ILI_EXPORT_MODEL_NAME + "...")
+        progress_dialog.setLabelText("Validating the network output file " + config.ABWASSER_ILI_EXPORT_MODEL_NAME + "...")
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ilivalidator2")
         try:
