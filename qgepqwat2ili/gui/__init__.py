@@ -281,6 +281,30 @@ def action_export(plugin, pgservice=None):
                 log_path,
             )
             return
+        progress_dialog.setValue(70)
+
+        # Export only network data from ili2pg model to file
+        progress_dialog.setLabelText("Saving XTF Network file...")
+        QApplication.processEvents()
+        log_path = make_log_path(base_log_path, "ili2pg-export2")
+        if filename.i.endswith('.xtf'):
+            file_name2 = String_value[0:(len(filename)-4)] + "network.xtf"
+        try:
+            export_xtf_data(
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL_NAME,
+                config.ABWASSER_ILI_EXPORT_MODEL,  # new variable export_model_name 
+                file_name2,
+                log_path,
+            )
+        except CmdException:
+            progress_dialog.close()
+            show_failure(
+                "Could not export network data from the ili2pg schema",
+                "Open the logs for more details on the error.",
+                log_path,
+            )
+            return
         progress_dialog.setValue(75)
 
         progress_dialog.setLabelText("Validating the output file...")
@@ -299,11 +323,29 @@ def action_export(plugin, pgservice=None):
                 log_path,
             )
             return
+        progress_dialog.setValue(90)
+
+        progress_dialog.setLabelText("Validating the network output file...")
+        QApplication.processEvents()
+        log_path = make_log_path(base_log_path, "ilivalidator2")
+        try:
+            validate_xtf_data(
+                file_name2,
+                log_path,
+            )
+        except CmdException:
+            progress_dialog.close()
+            show_failure(
+                "Invalid file",
+                "The created file is not a valid XTF file.",
+                log_path,
+            )
+            return
         progress_dialog.setValue(100)
 
         show_success(
             "Sucess",
-            f"Data successfully exported to {file_name}",
+            f"Data successfully exported to {file_name} and {file_name2}",
             os.path.dirname(log_path),
         )
 
