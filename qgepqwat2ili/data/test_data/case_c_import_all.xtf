@@ -68,7 +68,7 @@
 				<Zugaenglichkeit>zugaenglich</Zugaenglichkeit>
 				<BetreiberRef REF="ch080qwzAV000007"/>
 				<EigentuemerRef REF="ch080qwzAR001075"/>
-				<Art>Vorklaerbecken</Art>
+				<!-- <Art>Vorklaerbecken</Art> -->
 			</SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Spezialbauwerk>
 
 
