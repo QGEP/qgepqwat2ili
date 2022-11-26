@@ -269,6 +269,7 @@ def action_export(plugin, pgservice=None):
             export_xtf_data(
                 config.ABWASSER_SCHEMA,
                 config.ABWASSER_ILI_MODEL_NAME,
+                '',  # new variable export_model_name 
                 file_name,
                 log_path,
             )

@@ -57,12 +57,21 @@ def import_xtf_data(schema, xtf_file, log_path):
     )
 
 
-def export_xtf_data(schema, model_name, xtf_file, log_path):
+def export_xtf_data(schema, model_name, export_model_name, xtf_file, log_path):
     logger.info("EXPORT ILIDB...")
     pgconf = get_pgconf()
-    exec_(
-        f'"{config.JAVA}" -jar "{config.ILI2PG}" --export --models {model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir "{config.ILI_FOLDER}" --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log "{log_path}" --trace "{xtf_file}"'
-    )
+    
+    if export_model_name == "SIA405_ABWASSER_2015_LV95":
+        logger.info("export_model_name is set: SIA405_ABWASSER_2015_LV95.")
+        exec_(
+            f'"{config.JAVA}" -jar "{config.ILI2PG}" --export --models {export_model_name} --exportModels {export_model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir "{config.ILI_FOLDER}" --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log "{log_path}" --trace "{xtf_file}"'
+        )
+    else:
+        logger.info("export_model_name not defined!")
+        exec_(
+            f'"{config.JAVA}" -jar "{config.ILI2PG}" --export --models {model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir "{config.ILI_FOLDER}" --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log "{log_path}" --trace "{xtf_file}"'
+        )
+       
 
 
 class TidMaker:
