@@ -12188,9 +12188,9 @@
 						<C2>1139645.000</C2>
 					</COORD>
 				</Lage>
-				<Sohlenkote>1910.500</Sohlenkote>
+				<Sohlenkote>1910.500</Sohlenkote>-->
 				<!-- <Hydr_GeometrieRef REF="ch080qwzHG001200"></Hydr_GeometrieRef> -->
-			</SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserknoten> -->
+			<!-- </SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserknoten> -->
 			<SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserknoten TID="ch080qwzAK001105">
 				<OBJ_ID>ch080qwzAK001105</OBJ_ID>
 				<Metaattribute>
