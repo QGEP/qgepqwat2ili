@@ -180,6 +180,9 @@ def action_export(plugin, pgservice=None):
             return
         QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
+        if file_name.endswith('.xtf'):
+            file_name = file_name[0:(len(file_name)-4)] + "_" + config.ABWASSER_ILI_MODEL_NAME + ".xtf"
+            
         # Configure logging
         if export_dialog.logs_next_to_file:
             base_log_path = file_name
@@ -262,7 +265,7 @@ def action_export(plugin, pgservice=None):
         tempdir.cleanup()
 
         # Export from ili2pg model to file
-        progress_dialog.setLabelText("Saving XTF file...")
+        progress_dialog.setLabelText("Saving XTF file " + config.ABWASSER_ILI_MODEL_NAME + "...")
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ili2pg-export")
         try:
@@ -284,16 +287,17 @@ def action_export(plugin, pgservice=None):
         progress_dialog.setValue(70)
 
         # Export only network data from ili2pg model to file
-        progress_dialog.setLabelText("Saving XTF Network file...")
+        progress_dialog.setLabelText("Saving XTF Network file " + config.ABWASSER_ILI_EXPORT_MODEL_NAME + "...")
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ili2pg-export2")
-        if filename.i.endswith('.xtf'):
-            file_name2 = String_value[0:(len(filename)-4)] + "network.xtf"
+        if file_name.endswith('.xtf'):
+            file_name2 = file_name[0:(len(file_name)-4)] + "_" + config.ABWASSER_ILI_EXPORT_MODEL_NAME + ".xtf"
+            
         try:
             export_xtf_data(
                 config.ABWASSER_SCHEMA,
                 config.ABWASSER_ILI_MODEL_NAME,
-                config.ABWASSER_ILI_EXPORT_MODEL,  # new variable export_model_name 
+                config.ABWASSER_ILI_EXPORT_MODEL_NAME,  # new variable export_model_name 
                 file_name2,
                 log_path,
             )
@@ -307,7 +311,7 @@ def action_export(plugin, pgservice=None):
             return
         progress_dialog.setValue(75)
 
-        progress_dialog.setLabelText("Validating the output file...")
+        progress_dialog.setLabelText("Validating the output file" + config.ABWASSER_ILI_MODEL_NAME + "...")
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ilivalidator")
         try:
@@ -319,13 +323,13 @@ def action_export(plugin, pgservice=None):
             progress_dialog.close()
             show_failure(
                 "Invalid file",
-                "The created file is not a valid XTF file.",
+                "The created file is not a valid " + config.ABWASSER_ILI_MODEL_NAME + " XTF file.",
                 log_path,
             )
             return
         progress_dialog.setValue(90)
 
-        progress_dialog.setLabelText("Validating the network output file...")
+        progress_dialog.setLabelText("Validating the network output file" + config.ABWASSER_ILI_EXPORT_MODEL_NAME + "...")
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ilivalidator2")
         try:
@@ -337,7 +341,7 @@ def action_export(plugin, pgservice=None):
             progress_dialog.close()
             show_failure(
                 "Invalid file",
-                "The created file is not a valid XTF file.",
+                "The created file is not a valid " + config.ABWASSER_ILI_EXPORT_MODEL_NAME + " XTF file.",
                 log_path,
             )
             return
