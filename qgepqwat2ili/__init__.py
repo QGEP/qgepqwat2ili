@@ -148,11 +148,11 @@ def main(args):
                     print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
                     exit(1)
              
-             # additional parameter export_model_name needed
-             # export also SIA405_ABWASSER_2015_LV95
-             utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
-            
-             if not args.skip_validation:
+            # additional parameter export_model_name needed
+            # export also SIA405_ABWASSER_2015_LV95
+            utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+             
+            if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
