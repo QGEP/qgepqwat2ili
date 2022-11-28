@@ -152,7 +152,7 @@ def main(args):
              # export also SIA405_ABWASSER_2015_LV95
              utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             
-            if not args.skip_validation:
+             if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
                 except utils.various.CmdException:
