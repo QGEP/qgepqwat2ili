@@ -255,7 +255,9 @@ def action_export(plugin, pgservice=None):
         log_handler.setLevel(logging.INFO)
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
         with LoggingHandlerContext(log_handler):
-            qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+            # 12.12.2022
+            #qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+            qgep_export(selection=export_dialog.selected_ids, selection2=export_dialog.selected_wws, labels_file=labels_file_path)
         progress_dialog.setValue(50)
 
         # Cleanup

@@ -10,12 +10,15 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None, labels_file=None):
+# 12.12.2022
+# def qgep_export(selection=None, labels_file=None):
+def qgep_export(selection=None, selection2=None, labels_file=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
     Args:
         selection:      if provided, limits the export to networkelements that are provided in the selection
+        selection2:      if provided, adds additional wastewater_nodes of selected wastewater_structures
     """
 
     QGEP = get_qgep_model()
@@ -31,6 +34,8 @@ def qgep_export(selection=None, labels_file=None):
     # Filtering
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
+    # 12.12.2022
+    wws_ids = selection2 if selection2 is not None else []
 
     def get_tid(relation):
         """
@@ -501,7 +506,11 @@ def qgep_export(selection=None, labels_file=None):
     logger.info("Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.wastewater_node)
     if filtered:
-        query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # 12.12.2022
+        # filtering on fk_wastewater_structure.in_(subset_ids) to get all wastewater_nodes
+        # query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids))
+        
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.wastewater_node
