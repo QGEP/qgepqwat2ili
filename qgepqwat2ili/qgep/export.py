@@ -469,6 +469,7 @@ def qgep_export(selection=None, selection2=None, labels_file=None):
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
             ),
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        logger.info("filtered query: " + str(query))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.reach_point
@@ -510,8 +511,20 @@ def qgep_export(selection=None, selection2=None, labels_file=None):
         # filtering on fk_wastewater_structure.in_(subset_ids) to get all wastewater_nodes
         # query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         # query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids))
-        query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids) or QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        
+        # https://docs.sqlalchemy.org/en/14/orm/tutorial.html#common-filter-operators
+        # from sqlalchemy import or_
+        # query.filter(or_(User.name == 'ed', User.name == 'wendy'))
+        #query = query.filter(or_(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids)),(QGEP.wastewater_networkelement.obj_id.in_(subset_ids)))
+        #query = query.filter(or_((QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids)),(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))))
+        query1 = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query2 = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids))
+        logger.info("filtered query1: " + str(query1))
+        logger.info("filtered query2: " + str(query2))
+        # q3 = q1.union(q2)
+        query = query1.union(query2)
+        logger.info("filter wastewater_node: wws_ids" + str(wws_ids))
+        logger.info("filter wastewater_node: subset_ids" + str(subset_ids))
+        logger.info("filtered query: " + str(query))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.wastewater_node
@@ -544,7 +557,11 @@ def qgep_export(selection=None, selection2=None, labels_file=None):
             sohlenkote=row.bottom_level,
         )
         abwasser_session.add(abwasserknoten)
+        logger.info("abwasser_session.add(abwasserknoten): " + str(abwasserknoten))
         create_metaattributes(row)
+        
+        logger.info("create_metaattributes(row): " + str(row))
+        
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
