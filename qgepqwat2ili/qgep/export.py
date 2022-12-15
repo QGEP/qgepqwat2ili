@@ -509,7 +509,8 @@ def qgep_export(selection=None, selection2=None, labels_file=None):
         # 12.12.2022
         # filtering on fk_wastewater_structure.in_(subset_ids) to get all wastewater_nodes
         # query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids))
+        # query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids))
+        query = query.filter(QGEP.wastewater_networkelement.fk_wastewater_structure.in_(wws_ids) or QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         
     for row in query:
 
