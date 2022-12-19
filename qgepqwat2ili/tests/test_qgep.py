@@ -86,36 +86,6 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qgep", "export", path, "--recreate_schema"])
 
-    @unittest.expectedFailure
-    def test_case_c_import_complete_xtf_to_qgep(self):
-        """
-        # C. import a whole interlis transfer file into QGEP
-        """
-
-        # Incomming XTF
-        # THIS INPUT FILE IS INVALID !
-        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_c_import_all.xtf")
-
-        # Prepare subset db (we import in an empty schema)
-        main(["setupdb", "empty"])
-
-        QGEP = get_qgep_model()
-
-        session = Session(utils.sqlalchemy.create_engine())
-        self.assertEqual(session.query(QGEP.channel).count(), 0)
-        self.assertEqual(session.query(QGEP.manhole).count(), 0)
-        session.close()
-
-        main(["qgep", "import", path, "--recreate_schema"])
-
-        # make sure all elements got imported
-        session = Session(utils.sqlalchemy.create_engine())
-        self.assertEqual(session.query(QGEP.channel).count(), 102)
-        self.assertEqual(session.query(QGEP.manhole).count(), 49)
-
-        # checking some properties  # TODO : add some more...
-        self.assertEqual(session.query(QGEP.manhole).get("ch080qwzNS000113").year_of_construction, 1950)
-        session.close()
 
     def test_case_d_import_complete_xtf_to_qgep(self):
         """
