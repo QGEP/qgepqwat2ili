@@ -148,6 +148,7 @@ class TestQGEPUseCases(unittest.TestCase):
             ]
         )
         # Perform various checks
+        logger.info("Perform various checks ...")
         root = ET.parse(path)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)

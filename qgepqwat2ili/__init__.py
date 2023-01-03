@@ -139,6 +139,7 @@ def main(args):
             qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
             # utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             # additional parameter export_model_name needed
+            # export VSA_KEK_2019_LV95 - ILI_EXPORT_MODEL_NAME stays empty ''
             utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, '', args.path, make_log_path(log_path, "iliexport"))
             
             if not args.skip_validation:
