@@ -159,8 +159,8 @@ class TestQGEPUseCases(unittest.TestCase):
         count = 0
         # Strips the newline character
         for line in Lines:
-            count += 1
-            #print("Line{}: {}".format(count, line.strip()))
+            count += 1
+            #print("Line{}: {}".format(count, line.strip()))
             logger.warning("Line{}: {}".format(count, line.strip()))
         
         root = ET.parse(path)
