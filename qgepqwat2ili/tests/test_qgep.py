@@ -148,12 +148,24 @@ class TestQGEPUseCases(unittest.TestCase):
             ]
         )
         # Perform various checks
-        logger.warning("Perform various checks ... VSA_KEK_2019_LV95 file")
-        resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
+        logger.warning("Perform various checks ... ")
+        # resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
-        logger.warning(resultpath)
-        #root = ET.parse(path)
-        root = ET.parse(resultpath)
+        logger.warning(path)
+        
+        
+        file1 = open(path, 'r')
+        Lines = file1.readlines()
+  
+        count = 0
+        # Strips the newline character
+        for line in Lines:
+        count += 1
+        #print("Line{}: {}".format(count, line.strip()))
+        logger.warning("Line{}: {}".format(count, line.strip()))
+        
+        root = ET.parse(path)
+        # root = ET.parse(resultpath)
         
 
         # correct self.assertEquals to assertEqual
