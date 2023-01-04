@@ -151,9 +151,10 @@ class TestQGEPUseCases(unittest.TestCase):
         logger.warning("Perform various checks ... VSA_KEK_2019_LV95 file")
         resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
+        logger.warning(resultpath)
         #root = ET.parse(path)
         root = ET.parse(resultpath)
-        logger.warning(resultpath)
+        
 
         # correct self.assertEquals to assertEqual
         # https://stackoverflow.com/questions/23040166/python-3-3-deprecationwarning-when-using-nose-tools-assert-equals
