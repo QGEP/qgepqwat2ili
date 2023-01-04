@@ -156,7 +156,6 @@ class TestQGEPUseCases(unittest.TestCase):
         
         file1 = open(path, 'r')
         Lines = file1.readlines()
-  
         count = 0
         # Strips the newline character
         for line in Lines:
@@ -167,7 +166,7 @@ class TestQGEPUseCases(unittest.TestCase):
         root = ET.parse(path)
         # root = ET.parse(resultpath)
         
-
+        
         # correct self.assertEquals to assertEqual
         # https://stackoverflow.com/questions/23040166/python-3-3-deprecationwarning-when-using-nose-tools-assert-equals
         
