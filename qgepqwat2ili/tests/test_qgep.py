@@ -149,7 +149,7 @@ class TestQGEPUseCases(unittest.TestCase):
         )
         # Perform various checks
         logger.warning("Perform various checks ... VSA_KEK_2019_LV95 file")
-        resultpath = os.path.join(tempfile.mkdtemp(), "export__VSA_KEK_2019_LV95.xtf")
+        resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
         #root = ET.parse(path)
         root = ET.parse(resultpath)
