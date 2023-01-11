@@ -61,6 +61,12 @@ def main(args):
         action="store_true",
         help="saves the log files next to the input/output file",
     )
+    # 11.1.2023 add new argument export_model_name
+    parser_qgep.add_argument(
+        "export_model_name",
+        action="store_true",
+        help="pass different export model name (e.g. SIA405_ABWASSER_2015_LV95) than modell name",
+    )
 
     parser_qwat = subparsers.add_parser(
         "qwat",
@@ -130,17 +136,25 @@ def main(args):
         SCHEMA = config.ABWASSER_SCHEMA
         ILI_MODEL = config.ABWASSER_ILI_MODEL
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
-        ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_EXPORT_MODEL_NAME
         
         if args.direction == "export":
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
             )
             qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
+            
             # utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+            
             # additional parameter export_model_name needed
-            # export VSA_KEK_2019_LV95 - ILI_EXPORT_MODEL_NAME stays empty ''
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, '', args.path, make_log_path(log_path, "iliexport"))
+            # export SIA405_ABWASSER_2015_LV95
+            #if args.export_model_name == "SIA405_ABWASSER_2015_LV95":
+            #    ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_EXPORT_MODEL_NAME
+            if args.export_model_name == config.ABWASSER_ILI_EXPORT_MODEL_NAME:
+                utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+            else:
+                # additional parameter export_model_name needed
+                # export VSA_KEK_2019_LV95 - ILI_EXPORT_MODEL_NAME stays empty ''
+                utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, '', args.path, make_log_path(log_path, "iliexport"))
             
             if not args.skip_validation:
                 try:
@@ -148,11 +162,9 @@ def main(args):
                 except utils.various.CmdException:
                     print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
                     exit(1)
-             
-            # additional parameter export_model_name needed
-            # export also SIA405_ABWASSER_2015_LV95
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
-             
+
+            
+              
             if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))

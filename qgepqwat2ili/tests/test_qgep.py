@@ -125,7 +125,8 @@ class TestQGEPUseCases(unittest.TestCase):
         # Prepare db
         main(["setupdb", "full"])
 
-        path = os.path.join(tempfile.mkdtemp(), "export.xtf")
+        # 1. Export VSA_KEK_2019_LV95
+        path = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         selection = [
             # reach_id
             "ch13p7mzRE001221",
@@ -140,6 +141,8 @@ class TestQGEPUseCases(unittest.TestCase):
                 "qgep",
                 "export",
                 path,
+                # 11.1.2023
+                '', # export_model_name - leave empty
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
@@ -147,8 +150,26 @@ class TestQGEPUseCases(unittest.TestCase):
                 labels_file,
             ]
         )
+        
+        # 11.1.2023
+        path2 = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
+        main(
+            [
+                "qgep",
+                "export",
+                path2,
+                # 11.1.2023
+                "SIA405_ABWASSER_2015_LV95", # export_model_name,
+                "--recreate_schema",
+                "--selection",
+                ",".join(selection),
+                "--labels_file",
+                labels_file,
+            ]
+        )
+        
         # Perform various checks
-        logger.warning("Perform various checks ... ")
+        logger.warning("Perform various checks VSA_KEK_2019_LV95 ... TO DO add checks for SIA405_ABWASSER_2015_LV95")
         # resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
         logger.warning(path)
