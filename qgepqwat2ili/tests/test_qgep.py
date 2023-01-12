@@ -168,6 +168,8 @@ class TestQGEPUseCases(unittest.TestCase):
             count += 1
             logger.warning("Line{}: {}".format(count, line.strip()))
         
+        file1.close()   
+        
         root = ET.parse(path)
         # root = ET.parse(resultpath)
         
@@ -216,6 +218,8 @@ class TestQGEPUseCases(unittest.TestCase):
         for line in Lines2:
             count += 1
             logger.warning("Line{}: {}".format(count, line.strip()))
+        
+        file2.close()   
         
         root2 = ET.parse(path2)
         
