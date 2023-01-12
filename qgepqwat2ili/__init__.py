@@ -153,6 +153,9 @@ def main(args):
             #if args.export_model_name == config.ABWASSER_ILI_EXPORT_MODEL_NAME:
             if args.export_model_name:
                 print("--export_model_name selected!")
+                # 12.1.2023
+                ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_EXPORT_MODEL_NAME
+                
                 utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             else:
                 # additional parameter export_model_name needed
