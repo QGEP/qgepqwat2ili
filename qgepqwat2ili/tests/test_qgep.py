@@ -152,27 +152,9 @@ class TestQGEPUseCases(unittest.TestCase):
             ]
         )
         
-        # 11.1.2023
-        path2 = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
-        main(
-            [
-                "qgep",
-                "export",
-                path2,
-                # 11.1.2023
-                #"SIA405_ABWASSER_2015_LV95", # export_model_name,
-                #12.1.2023 set as flag without value
-                "--export_model_name",
-                "--recreate_schema",
-                "--selection",
-                ",".join(selection),
-                "--labels_file",
-                labels_file,
-            ]
-        )
         
         # Perform various checks
-        logger.warning("Perform various checks VSA_KEK_2019_LV95 ... TO DO add checks for SIA405_ABWASSER_2015_LV95")
+        logger.warning("Perform various checks VSA_KEK_2019_LV95 ...)
         # resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
         logger.warning(path)
@@ -200,6 +182,54 @@ class TestQGEPUseCases(unittest.TestCase):
             len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
 
+
+        # 11.1.2023
+        path2 = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
+        main(
+            [
+                "qgep",
+                "export",
+                path2,
+                # 11.1.2023
+                #"SIA405_ABWASSER_2015_LV95", # export_model_name,
+                #12.1.2023 set as flag without value
+                "--export_model_name",
+                "--recreate_schema",
+                "--selection",
+                ",".join(selection),
+                "--labels_file",
+                labels_file,
+            ]
+        )
+        
+        # Perform various checks
+        logger.warning("Perform various checks SIA405_ABWASSER_2015_LV95 ...")
+        # resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
+        #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
+        logger.warning(path2)
+        
+        
+        file2 = open(path2, 'r')
+        Lines = file2.readlines()
+        count = 0
+        # Strips the newline character
+        for line in Lines:
+            count += 1
+            logger.warning("Line{}: {}".format(count, line.strip()))
+        
+        root = ET.parse(path2)
+        # root = ET.parse(resultpath)
+        
+        
+        # correct self.assertEquals to assertEqual
+        # https://stackoverflow.com/questions/23040166/python-3-3-deprecationwarning-when-using-nose-tools-assert-equals
+        
+        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEqual(
+            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+        )
 
 class TestRegressions(unittest.TestCase):
     def test_regression_001_self_referencing_organisation(self):
