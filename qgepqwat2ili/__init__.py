@@ -61,11 +61,11 @@ def main(args):
         action="store_true",
         help="saves the log files next to the input/output file",
     )
-    # 11.1.2023 add new argument export_model_name
+    # 11.1.2023 / 12.1.2023 add new argument --export_model_name
     parser_qgep.add_argument(
-        "export_model_name",
+        "--export_model_name",
         action="store_true",
-        help="pass different export model name (e.g. SIA405_ABWASSER_2015_LV95) than modell name",
+        help="use export model name (SIA405_ABWASSER_2015_LV95) instead of modelname for export",
     )
 
     parser_qwat = subparsers.add_parser(
@@ -149,7 +149,9 @@ def main(args):
             # export SIA405_ABWASSER_2015_LV95
             #if args.export_model_name == "SIA405_ABWASSER_2015_LV95":
             #    ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_EXPORT_MODEL_NAME
-            if args.export_model_name == config.ABWASSER_ILI_EXPORT_MODEL_NAME:
+            #12.1.2023
+            #if args.export_model_name == config.ABWASSER_ILI_EXPORT_MODEL_NAME:
+            if args.export_model_name:
                 utils.ili2db.export_xtf_data(SCHEMA, ILI_EXPORT_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
             else:
                 # additional parameter export_model_name needed
