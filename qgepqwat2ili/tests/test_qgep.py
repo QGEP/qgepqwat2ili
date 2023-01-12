@@ -230,7 +230,7 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
         self.assertEqual(len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
         self.assertEqual(
-            len(findall_in_xml_sia_abwasser_2015(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+            len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
 
 class TestRegressions(unittest.TestCase):
