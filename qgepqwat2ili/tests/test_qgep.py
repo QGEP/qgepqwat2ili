@@ -18,10 +18,13 @@ handler.setLevel(logging.WARNING)
 logger.addHandler(handler)
 
 
-def findall_in_xml(root, tag, basket="VSA_KEK_2019_LV95.KEK"):
+def findall_in_xml_kek_2019(root, tag, basket="VSA_KEK_2019_LV95.KEK"):
     ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
     return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
 
+def findall_in_xml_sia_abwasser_2015(root, tag, basket="SIA405_ABWASSER_2015_LV95.SIA405_Abwasser"):
+    ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
+    return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
 
 class TestQGEPUseCases(unittest.TestCase):
     def test_case_a_import_wincan_xtf(self):
@@ -177,11 +180,11 @@ class TestQGEPUseCases(unittest.TestCase):
         # correct self.assertEquals to assertEqual
         # https://stackoverflow.com/questions/23040166/python-3-3-deprecationwarning-when-using-nose-tools-assert-equals
         
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEqual(len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEqual(len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEqual(len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
         self.assertEqual(
-            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+            len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
 
 
@@ -223,11 +226,11 @@ class TestQGEPUseCases(unittest.TestCase):
         
         root2 = ET.parse(path2)
         
-        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
-        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
-        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEqual(len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEqual(len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEqual(len(findall_in_xml_sia_abwasser_2015(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
         self.assertEqual(
-            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+            len(findall_in_xml_sia_abwasser_2015(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
 
 class TestRegressions(unittest.TestCase):
