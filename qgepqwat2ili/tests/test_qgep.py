@@ -142,7 +142,8 @@ class TestQGEPUseCases(unittest.TestCase):
                 "export",
                 path,
                 # 11.1.2023
-                '', # export_model_name - leave empty
+                # '', # export_model_name - leave empty
+                #12.1.2023 do not set flag
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
@@ -159,7 +160,9 @@ class TestQGEPUseCases(unittest.TestCase):
                 "export",
                 path2,
                 # 11.1.2023
-                "SIA405_ABWASSER_2015_LV95", # export_model_name,
+                #"SIA405_ABWASSER_2015_LV95", # export_model_name,
+                #12.1.2023 set as flag without value
+                "--export_model_name"
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
