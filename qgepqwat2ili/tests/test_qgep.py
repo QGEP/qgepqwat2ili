@@ -154,7 +154,7 @@ class TestQGEPUseCases(unittest.TestCase):
         
         
         # Perform various checks
-        logger.warning("Perform various checks VSA_KEK_2019_LV95 ...)
+        logger.warning("Perform various checks VSA_KEK_2019_LV95 ...")
         # resultpath = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         #resultpath = os.path.join(tempfile.mkdtemp(), "export_SIA405_ABWASSER_2015_LV95.xtf")
         logger.warning(path)
@@ -210,23 +210,18 @@ class TestQGEPUseCases(unittest.TestCase):
         
         
         file2 = open(path2, 'r')
-        Lines = file2.readlines()
+        Lines2 = file2.readlines()
         count = 0
         # Strips the newline character
-        for line in Lines:
+        for line in Lines2:
             count += 1
             logger.warning("Line{}: {}".format(count, line.strip()))
         
-        root = ET.parse(path2)
-        # root = ET.parse(resultpath)
+        root2 = ET.parse(path2)
         
-        
-        # correct self.assertEquals to assertEqual
-        # https://stackoverflow.com/questions/23040166/python-3-3-deprecationwarning-when-using-nose-tools-assert-equals
-        
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
-        self.assertEqual(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEqual(len(findall_in_xml(root2, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
         self.assertEqual(
             len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
