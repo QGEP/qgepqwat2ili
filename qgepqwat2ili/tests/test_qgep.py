@@ -162,7 +162,7 @@ class TestQGEPUseCases(unittest.TestCase):
                 # 11.1.2023
                 #"SIA405_ABWASSER_2015_LV95", # export_model_name,
                 #12.1.2023 set as flag without value
-                "--export_model_name"
+                "--export_model_name",
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
