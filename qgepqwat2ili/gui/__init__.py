@@ -45,7 +45,7 @@ def show_success(title, message, log_path):
 import_dialog = None
 
 
-def action_import(plugin, pgservice=None):
+def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
     """
@@ -53,9 +53,6 @@ def action_import(plugin, pgservice=None):
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
@@ -153,16 +150,13 @@ def action_import(plugin, pgservice=None):
         )
 
 
-def action_export(plugin, pgservice=None):
+def action_export(plugin):
     """
     Is executed when the user clicks the exportAction tool
     """
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     export_dialog = GuiExport(plugin.iface.mainWindow())
 

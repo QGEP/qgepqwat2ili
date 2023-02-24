@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 import time
+from typing import List
 
 from .. import config
 
@@ -220,6 +221,41 @@ def get_pgconf():
         pgconf["password"] = config.PGPASS
 
     return collections.defaultdict(str, pgconf)
+
+
+def get_pgconf_as_psycopg2_dsn() -> List[str]:
+    """Returns the pgconf as a psycopg2 connection string"""
+
+    pgconf = get_pgconf()
+    parts = []
+    if pgconf["host"]:
+        parts.append(f"host={pgconf['host']}")
+    if pgconf["port"]:
+        parts.append(f"port={pgconf['port']}")
+    if pgconf["user"]:
+        parts.append(f"dbname={pgconf['dbname']}")
+    if pgconf["password"]:
+        parts.append(f"user={pgconf['user']}")
+    if pgconf["dbname"]:
+        parts.append(f"password={pgconf['password']}")
+    return " ".join(parts)
+
+
+def get_pgconf_as_ili_args() -> List[str]:
+    """Returns the pgconf as a list of ili2db arguments"""
+    pgconf = get_pgconf()
+    args = []
+    if pgconf["host"]:
+        args.extend(["--dbhost", '"' + pgconf["host"] + '"'])
+    if pgconf["port"]:
+        args.extend(["--dbport", '"' + pgconf["port"] + '"'])
+    if pgconf["user"]:
+        args.extend(["--dbusr", '"' + pgconf["user"] + '"'])
+    if pgconf["password"]:
+        args.extend(["--dbpwd", '"' + pgconf["password"] + '"'])
+    if pgconf["dbname"]:
+        args.extend(["--dbdatabase", '"' + pgconf["dbname"] + '"'])
+    return args
 
 
 def make_log_path(next_to_path, step_name):
