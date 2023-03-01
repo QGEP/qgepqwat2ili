@@ -11,6 +11,7 @@ from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QPus
 from qgis.utils import iface, plugins
 from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
 
+from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
 from ..qgep.export import qgep_export
 from ..qgep.import_ import qgep_import
@@ -215,9 +216,9 @@ def action_export(plugin):
 
             progress_dialog.setLabelText("Extracting labels...")
 
-            structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-            reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-            if len(structures_lyrs) == 0 or len(reaches_lyrs) == 0:
+            structures_lyr = QgepLayerManager.layer("vw_qgep_wastewater_structure")
+            reaches_lyr = QgepLayerManager.layer("vw_qgep_reach")
+            if not structures_lyr or not reaches_lyr:
                 progress_dialog.close()
                 show_failure(
                     "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
@@ -225,8 +226,6 @@ def action_export(plugin):
                     None,
                 )
                 return
-            structures_lyr = structures_lyrs[0]
-            reaches_lyr = reaches_lyrs[0]
 
             QApplication.processEvents()
             processing.run(

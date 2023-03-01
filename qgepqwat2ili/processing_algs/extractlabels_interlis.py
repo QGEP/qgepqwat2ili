@@ -18,6 +18,8 @@ from qgis.core import (
 
 from qgepplugin.processing_provider.qgep_algorithm import QgepAlgorithm
 
+from ....utils.qgeplayermanager import QgepLayerManager
+
 
 class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     """This runs the native extractlabels algorithm for the given scales, and attaches obj_id and scale to the results.
@@ -154,6 +156,14 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             feedback.pushInfo(f"{labels_count} labels generated")
             if labels_count == 0:
                 continue
+
+            # Transform layer name to layer id to support translated projects
+            lyr_name_to_key = {
+                QgepLayerManager.layer("vw_qgep_wastewater_structure").name(): "vw_qgep_wastewater_structure",
+                QgepLayerManager.layer("vw_qgep_reach").name(): "vw_qgep_reach",
+            }
+            for label in geojson["features"]:
+                label["properties"]["Layer"] = lyr_name_to_key[label["properties"]["Layer"]]
 
             # Annotate features with qgep_obj_id and scale
             for label in geojson["features"]:

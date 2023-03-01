@@ -1,10 +1,11 @@
 import os
 from collections import OrderedDict
 
-from qgis.core import Qgis, QgsProject, QgsSettings
+from qgis.core import Qgis, QgsSettings
 from qgis.PyQt.QtWidgets import QCheckBox, QDialog
 from qgis.PyQt.uic import loadUi
 
+from ....utils.qgeplayermanager import QgepLayerManager
 from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgorithm
 
 
@@ -18,17 +19,10 @@ class GuiExport(QDialog):
         # Execute the dialog
         # self.resize(iface.mainWindow().size() * 0.75)
 
-        structures_layers = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-        if structures_layers:
-            self.structures = structures_layers[0].selectedFeatures()
-        else:
-            self.structures = []
-
-        reaches_layers = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-        if reaches_layers:
-            self.reaches = reaches_layers[0].selectedFeatures()
-        else:
-            self.reaches = []
+        structures_layer = QgepLayerManager.layer("vw_qgep_wastewater_structure")
+        reaches_layer = QgepLayerManager.layer("vw_qgep_reach")
+        self.structures = structures_layer.selectedFeatures() if structures_layer else []
+        self.reaches = reaches_layer.selectedFeatures() if reaches_layer else []
 
         self.limit_checkbox.setText(
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
