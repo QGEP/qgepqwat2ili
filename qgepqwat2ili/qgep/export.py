@@ -1030,7 +1030,7 @@ def qgep_export(selection=None, labels_file=None):
             art=get_vl(row.kind__REL) or "andere",
             bemerkung=emptystr_to_null(row.remark),
             bezeichnung=null_to_emptystr(row.identifier),
-            datentraegerref=get_tid(row.data_media__REL),
+            datentraegerref=get_tid(row.fk_data_media__REL),
             klasse=get_vl(row.class__REL),
             objekt=null_to_emptystr(row.object),
             relativpfad=row.path_relative,
