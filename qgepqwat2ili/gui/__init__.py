@@ -1,14 +1,17 @@
 import logging
 import os
+import tempfile
 import webbrowser
 from types import SimpleNamespace
 
 from pkg_resources import parse_version
+from qgis import processing
 from qgis.core import Qgis, QgsProject, QgsSettings
 from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QPushButton
 from qgis.utils import iface, plugins
 from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
 
+from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
 from ..qgep.export import qgep_export
 from ..qgep.import_ import qgep_import
@@ -29,7 +32,7 @@ from ..utils.ili2db import (
     # neu 22.7.2022
     get_xtf_model,
 )
-from ..utils.various import CmdException, logger, make_log_path
+from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
@@ -42,6 +45,7 @@ file_handler = logging.FileHandler(filename, mode="w", encoding="utf-8")
 file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
 logger.addHandler(file_handler)
+
 
 
 def _show_results(title, message, log_path, level):
@@ -64,7 +68,7 @@ def show_success(title, message, log_path):
 import_dialog = None
 
 
-def action_import(plugin, pgservice=None):
+def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
     """
@@ -72,9 +76,6 @@ def action_import(plugin, pgservice=None):
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
@@ -85,6 +86,14 @@ def action_import(plugin, pgservice=None):
         return
     QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
+    # Configure logging
+    s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+    logs_next_to_file = s == True or s == "true"
+    if logs_next_to_file:
+        base_log_path = file_name
+    else:
+        base_log_path = None
+
     progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
     progress_dialog.setCancelButton(None)
     progress_dialog.setModal(True)
@@ -93,7 +102,7 @@ def action_import(plugin, pgservice=None):
     # Validating the input file
     progress_dialog.setLabelText("Validating the input file...")
     QApplication.processEvents()
-    log_path = make_log_path(None, "validate")
+    log_path = make_log_path(base_log_path, "ilivalidator")
     try:
         validate_xtf_data(
             file_name,
@@ -149,7 +158,7 @@ def action_import(plugin, pgservice=None):
 
     
     QApplication.processEvents()
-    log_path = make_log_path(None, "create")
+    log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
     try:
 
         # 22.7.2022 create_ili_schema depending of imodel
@@ -208,7 +217,7 @@ def action_import(plugin, pgservice=None):
     # time.sleep(6.5)
     
     QApplication.processEvents()
-    log_path = make_log_path(None, "import")
+    log_path = make_log_path(base_log_path, "ili2pg-import")
     try:
         #27.6.2022 to do dependant on Model Selection
         if imodel == "VSA_KEK_2019_LV95":
@@ -304,16 +313,23 @@ def action_import(plugin, pgservice=None):
     progress_dialog.setValue(100)
 
 
-def action_export(plugin, pgservice=None):
+    log_handler = logging.FileHandler(make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8")
+    log_handler.setLevel(logging.INFO)
+    log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
+    with LoggingHandlerContext(log_handler):
+        qgep_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
+
+
+
+def action_export(plugin):
     """
     Is executed when the user clicks the exportAction tool
     """
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     export_dialog = GuiExport(plugin.iface.mainWindow())
 
@@ -337,6 +353,12 @@ def action_export(plugin, pgservice=None):
             return
         QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
 
+        # Configure logging
+        if export_dialog.logs_next_to_file:
+            base_log_path = file_name
+        else:
+            base_log_path = None
+
         progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
         progress_dialog.setCancelButton(None)
         progress_dialog.setModal(True)
@@ -348,7 +370,7 @@ def action_export(plugin, pgservice=None):
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
         QApplication.processEvents()
-        log_path = make_log_path(None, "create")
+        log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
         try:
             # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
             if emodel == "VSA_KEK_2019_LV95_current":
@@ -404,9 +426,43 @@ def action_export(plugin, pgservice=None):
 
         progress_dialog.setValue(25)
 
+        # Export the labels file
+        tempdir = tempfile.TemporaryDirectory()
+        labels_file_path = None
+
+        if len(export_dialog.selected_labels_scales_indices):
+            labels_file_path = os.path.join(tempdir.name, "labels.geojson")
+
+            progress_dialog.setLabelText("Extracting labels...")
+
+            structures_lyr = QgepLayerManager.layer("vw_qgep_wastewater_structure")
+            reaches_lyr = QgepLayerManager.layer("vw_qgep_reach")
+            if not structures_lyr or not reaches_lyr:
+                progress_dialog.close()
+                show_failure(
+                    "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
+                    "Make sure your QGEP project is open.",
+                    None,
+                )
+                return
+
+            QApplication.processEvents()
+            processing.run(
+                "qgep:extractlabels_interlis",
+                {
+                    "OUTPUT": labels_file_path,
+                    "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
+                    "STRUCTURE_VIEW_LAYER": structures_lyr,
+                    "REACH_VIEW_LAYER": reaches_lyr,
+                    "SCALES": export_dialog.selected_labels_scales_indices,
+                },
+            )
+            progress_dialog.setValue(35)
+
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
+
         # 12.7.2022 depending model selection
         if emodel == "VSA_KEK_2019_LV95_current":
             qgep_export(selection=export_dialog.selected_ids)
@@ -417,13 +473,23 @@ def action_export(plugin, pgservice=None):
         elif emodel == "DSS_2015_LV95":
             qgepdss_export(selection=export_dialog.selected_ids)
 
+
+        log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
+        log_handler.setLevel(logging.INFO)
+        log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
+        with LoggingHandlerContext(log_handler):
+            qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+
         progress_dialog.setValue(50)
+
+        # Cleanup
+        tempdir.cleanup()
 
         # Export from ili2pg model to file
         # progress_dialog.setLabelText("Saving XTF file...")
         progress_dialog.setLabelText("Saving XTF file... " + emodel)
         QApplication.processEvents()
-        log_path = make_log_path(None, "export")
+        log_path = make_log_path(base_log_path, "ili2pg-export")
         try:
             #12.7.2022 to do dependant on Model Selection
             if emodel == "VSA_KEK_2019_LV95_current":
@@ -467,7 +533,7 @@ def action_export(plugin, pgservice=None):
 
         progress_dialog.setLabelText("Validating the output file...")
         QApplication.processEvents()
-        log_path = make_log_path(None, "validate")
+        log_path = make_log_path(base_log_path, "ilivalidator")
         try:
             validate_xtf_data(
                 file_name,
@@ -490,6 +556,7 @@ def action_export(plugin, pgservice=None):
         )
 
     export_dialog.accepted.connect(action_do_export)
+    export_dialog.adjustSize()
     export_dialog.show()
 
 

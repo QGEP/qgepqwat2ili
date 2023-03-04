@@ -173,15 +173,19 @@ class ExaminationEditor(Editor):
         wastewater_ne_to = aliased(QGEP.wastewater_networkelement)
         rp_from = aliased(QGEP.reach_point)
         rp_to = aliased(QGEP.reach_point)
+        wastewater_st_from = aliased(QGEP.wastewater_structure)
+        wastewater_st_to = aliased(QGEP.wastewater_structure)
 
         return (
             self.session.query(QGEP.wastewater_structure)
             .join(QGEP.reach)
             .join(rp_from, rp_from.obj_id == QGEP.reach.fk_reach_point_from)
             .join(wastewater_ne_from, wastewater_ne_from.obj_id == rp_from.fk_wastewater_networkelement)
+            .join(wastewater_st_from, wastewater_st_from.obj_id == wastewater_ne_from.fk_wastewater_structure)
             .join(rp_to, rp_to.obj_id == QGEP.reach.fk_reach_point_to)
             .join(wastewater_ne_to, wastewater_ne_to.obj_id == rp_to.fk_wastewater_networkelement)
-            .filter(wastewater_ne_from.identifier == from_id, wastewater_ne_to.identifier == to_id)
+            .join(wastewater_st_to, wastewater_st_to.obj_id == wastewater_ne_to.fk_wastewater_structure)
+            .filter(wastewater_st_from.identifier == from_id, wastewater_st_to.identifier == to_id)
         )
 
     def _get_suggested_structures_for_manhole(self, from_id):

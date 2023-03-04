@@ -4,17 +4,13 @@ import psycopg2
 from sqlalchemy.ext.automap import AutomapBase
 
 from .. import config
-from .various import exec_, get_pgconf, logger
+from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
 
-    pgconf = get_pgconf()
-
-    connection = psycopg2.connect(
-        f"host={pgconf['host']} port={pgconf['port']} dbname={pgconf['dbname']} user={pgconf['user']} password={pgconf['password']}"
-    )
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
@@ -36,13 +32,33 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
     connection.close()
 
     logger.info(f"ILIDB SCHEMAIMPORT INTO {schema}...")
-    pgconf = get_pgconf()
-    #exec_(
-    #    f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createGeomIdx --createFk --createFkIdx --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --log {log_path} --nameLang de {model}'
-    #)
-    # 13.7.2022 mit --trace / ohne --createFkIdx und --createGeomIdx
+
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --schemaimport --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --setupPgExt --createFk  --createTidCol --importTid --noSmartMapping --defaultSrsCode 2056 --trace --log {log_path} --nameLang de {model}'
+        " ".join(
+            [
+                f'"{config.JAVA}"',
+                "-jar",
+                f'"{config.ILI2PG}"',
+                "--schemaimport",
+                *get_pgconf_as_ili_args(),
+                "--dbschema",
+                f"{schema}",
+                "--setupPgExt",
+                "--createGeomIdx",
+                "--createFk",
+                "--createFkIdx",
+                "--createTidCol",
+                "--importTid",
+                "--noSmartMapping",
+                "--defaultSrsCode",
+                "2056",
+                "--log",
+                f'"{log_path}"',
+                "--nameLang",
+                "de",
+                f"{model}",
+            ]
+        )
     )
 
 
@@ -125,19 +141,66 @@ def get_xtf_model(xtf_file):
 def import_xtf_data(schema, xtf_file, log_path):
 #def import_xtf_data(schema, xtf_file, log_path, model_name):
     logger.info("IMPORTING XTF DATA...")
+
     #logger.info("IMPORTING XTF DATA..." + model_name)
-    pgconf = get_pgconf()
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --import --deleteData --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} {xtf_file}'
+        " ".join(
+            [
+                f'"{config.JAVA}"',
+                "-jar",
+                f'"{config.ILI2PG}"',
+                "--import",
+                "--deleteData",
+                *get_pgconf_as_ili_args(),
+                "--dbschema",
+                f'"{schema}"',
+                "--modeldir",
+                f'"{config.ILI_FOLDER}"',
+                "--disableValidation",
+                "--skipReferenceErrors",
+                "--createTidCol",
+                "--noSmartMapping",
+                "--defaultSrsCode",
+                "2056",
+                "--log",
+                f'"{log_path}"',
+                f'"{xtf_file}"',
+            ]
+        )
+
     )
 
 
 def export_xtf_data(schema, model_name, xtf_file, log_path):
     # logger.info("EXPORT ILIDB...")
     logger.info("EXPORT ILIDB..." + model_name)
-    pgconf = get_pgconf()
+
     exec_(
-        f'"{config.JAVA}" -jar {config.ILI2PG} --export --models {model_name} --dbhost {pgconf["host"]} --dbport {pgconf["port"]} --dbusr {pgconf["user"]} --dbpwd {pgconf["password"]} --dbdatabase {pgconf["dbname"]} --dbschema {schema} --modeldir {config.ILI_FOLDER} --disableValidation --skipReferenceErrors --createTidCol --noSmartMapping --defaultSrsCode 2056 --log {log_path} --trace {xtf_file}'
+        " ".join(
+            [
+                f'"{config.JAVA}"',
+                "-jar",
+                f'"{config.ILI2PG}"',
+                "--export",
+                "--models",
+                f"{model_name}",
+                *get_pgconf_as_ili_args(),
+                "--dbschema",
+                f"{schema}",
+                "--modeldir",
+                f'"{config.ILI_FOLDER}"',
+                "--disableValidation",
+                "--skipReferenceErrors",
+                "--createTidCol",
+                "--noSmartMapping",
+                "--defaultSrsCode",
+                "2056",
+                "--log",
+                f'"{log_path}"',
+                "--trace",
+                f'"{xtf_file}"',
+            ]
+        )
     )
 
 
@@ -163,3 +226,8 @@ class TidMaker:
         #     # just for debugging
         #     logger.info(f"created tid {tid} for {key}")
         return tid
+
+    def next_tid(self):
+        """Get an arbitrary unused tid"""
+        key = len(self._autoincrementer)
+        return self._autoincrementer[key]

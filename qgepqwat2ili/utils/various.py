@@ -6,6 +6,7 @@ import os
 import subprocess
 import tempfile
 import time
+from typing import List
 
 from .. import config
 
@@ -43,7 +44,7 @@ class CmdException(BaseException):
     pass
 
 
-def exec_(command, check=True):
+def exec_(command, check=True, output_content=False):
     logger.info(f"EXECUTING: {command}")
     try:
         proc = subprocess.run(
@@ -57,8 +58,8 @@ def exec_(command, check=True):
         if check:
             logger.exception(e.output.decode("windows-1252" if os.name == "nt" else "utf-8"))
             raise CmdException(f"Command errored ! See logs for more info.")
-        return e.returncode
-    return proc.returncode
+        return e.output if output_content else e.returncode
+    return proc.stdout.decode().strip() if output_content else proc.returncode
 
 
 def setup_test_db(template="full"):
@@ -77,13 +78,23 @@ def setup_test_db(template="full"):
     def dexec_(cmd, check=True):
         return exec_(f"docker exec qgepqwat {cmd}", check)
 
-    logger.info("SETTING UP QGEP/QWAT DATABASE...")
-    r = exec_("docker inspect -f '{{.State.Running}}' qgepqwat", check=False)
-    if r != 0:
-        logger.info("Test container not running, we create it")
+    docker_image = os.getenv("QGEPQWAT2ILI_TESTDB_IMAGE", "postgis/postgis:13-3.2")
 
+    logger.info(f"SETTING UP QGEP/QWAT DATABASE [{docker_image}]...")
+
+    r = exec_("docker inspect -f '{{.State.Running}}' qgepqwat", check=False)
+    running = r == 0
+    if running:
+        r = exec_("docker inspect -f {{.Config.Image}} qgepqwat", output_content=True)
+        if r != docker_image:
+            logger.info(f"Test container running `{r}`, we expect `{docker_image}`, we kill it")
+            exec_("docker rm qgepqwat --force")
+            running = False
+
+    if not running:
+        logger.info("Test container not running, we create it")
         exec_(
-            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} postgis/postgis"
+            f"docker run -d --rm -p 5432:5432 --name qgepqwat -e POSTGRES_PASSWORD={pgconf['password'] or 'postgres'} -e POSTGRES_DB={pgconf['dbname'] or 'qgep_prod'} {docker_image}"
         )
 
     # Wait for PG
@@ -212,12 +223,62 @@ def get_pgconf():
     return collections.defaultdict(str, pgconf)
 
 
+def get_pgconf_as_psycopg2_dsn() -> List[str]:
+    """Returns the pgconf as a psycopg2 connection string"""
+
+    pgconf = get_pgconf()
+    parts = []
+    if pgconf["host"]:
+        parts.append(f"host={pgconf['host']}")
+    if pgconf["port"]:
+        parts.append(f"port={pgconf['port']}")
+    if pgconf["user"]:
+        parts.append(f"dbname={pgconf['dbname']}")
+    if pgconf["password"]:
+        parts.append(f"user={pgconf['user']}")
+    if pgconf["dbname"]:
+        parts.append(f"password={pgconf['password']}")
+    return " ".join(parts)
+
+
+def get_pgconf_as_ili_args() -> List[str]:
+    """Returns the pgconf as a list of ili2db arguments"""
+    pgconf = get_pgconf()
+    args = []
+    if pgconf["host"]:
+        args.extend(["--dbhost", '"' + pgconf["host"] + '"'])
+    if pgconf["port"]:
+        args.extend(["--dbport", '"' + pgconf["port"] + '"'])
+    if pgconf["user"]:
+        args.extend(["--dbusr", '"' + pgconf["user"] + '"'])
+    if pgconf["password"]:
+        args.extend(["--dbpwd", '"' + pgconf["password"] + '"'])
+    if pgconf["dbname"]:
+        args.extend(["--dbdatabase", '"' + pgconf["dbname"] + '"'])
+    return args
+
+
 def make_log_path(next_to_path, step_name):
     """Returns a path for logging purposes. If next_to_path is None, it will be saved in the temp directory"""
-    now = f"{datetime.datetime.now():%Y%m%d%H%M%S}"
+    now = f"{datetime.datetime.now():%y%m%d%H%M%S}"
     if next_to_path:
         return f"{next_to_path}.{now}.{step_name}.log"
     else:
         temp_path = os.path.join(tempfile.gettempdir(), "qgepqwat2ili")
         os.makedirs(temp_path, exist_ok=True)
         return os.path.join(temp_path, f"{now}.{step_name}.log")
+
+
+class LoggingHandlerContext:
+    """Temporarily sets a log handler, then removes it"""
+
+    def __init__(self, handler):
+        self.handler = handler
+
+    def __enter__(self):
+        logger.addHandler(self.handler)
+
+    def __exit__(self, et, ev, tb):
+        logger.removeHandler(self.handler)
+        self.handler.close()
+        # implicit return of None => don't swallow exceptions

@@ -86,15 +86,15 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qgep", "export", path, "--recreate_schema"])
 
-    @unittest.expectedFailure
-    def test_case_c_import_complete_xtf_to_qgep(self):
+
+    def test_case_d_import_complete_xtf_to_qgep(self):
         """
-        # C. import a whole interlis transfer file into QGEP
+        # D. import a whole valid interlis transfer file into QGEP
         """
 
-        # Incomming XTF
-        # THIS INPUT FILE IS INVALID !
-        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_c_import_all.xtf")
+        # Incomming XTF case_c_import_all_without_errors.xtf
+        # THIS INPUT FILE IS VALID !
+        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_d_import_all_without_errors.xtf")
 
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])
@@ -116,7 +116,7 @@ class TestQGEPUseCases(unittest.TestCase):
         # checking some properties  # TODO : add some more...
         self.assertEqual(session.query(QGEP.manhole).get("ch080qwzNS000113").year_of_construction, 1950)
         session.close()
-
+        
     def test_case_e_export_selection(self):
         """
         # E. export a selection
@@ -134,6 +134,7 @@ class TestQGEPUseCases(unittest.TestCase):
             # node_b_id
             "ch13p7mzWN008122",
         ]
+        labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
         main(
             [
                 "qgep",
@@ -142,12 +143,18 @@ class TestQGEPUseCases(unittest.TestCase):
                 "--recreate_schema",
                 "--selection",
                 ",".join(selection),
+                "--labels_file",
+                labels_file,
             ]
         )
         # Perform various checks
         root = ET.parse(path)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
         self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
+        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
+        self.assertEquals(
+            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+        )
 
 
 class TestRegressions(unittest.TestCase):
