@@ -221,7 +221,7 @@ def qgep_export(selection=None, labels_file=None):
             **base_common(row, "organisation"),
             # --- organisation ---
             auid=row.uid,
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=row.identifier,
         )
         abwasser_session.add(organisation)
@@ -443,7 +443,7 @@ def qgep_export(selection=None, labels_file=None):
             # --- sia405_baseclass ---
             **base_common(row, "rohrprofil"),
             # --- rohrprofil ---
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=row.identifier,
             hoehenbreitenverhaeltnis=row.height_width_ratio,
             profiltyp=get_vl(row.profile_type__REL),
@@ -485,7 +485,7 @@ def qgep_export(selection=None, labels_file=None):
             # --- haltungspunkt ---
             abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             hoehengenauigkeit=get_vl(row.elevation_accuracy__REL),
             kote=row.level,
@@ -832,7 +832,7 @@ def qgep_export(selection=None, labels_file=None):
             astatus=get_vl(row.status__REL),
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             datengrundlage=row.base_data,
             dauer=row.duration,
@@ -983,7 +983,7 @@ def qgep_export(selection=None, labels_file=None):
             **base_common(row, "datentraeger"),
             # --- datentraeger ---
             art=get_vl(row.kind__REL),
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             pfad=row.path,
             standort=row.location,
@@ -1028,7 +1028,7 @@ def qgep_export(selection=None, labels_file=None):
             **base_common(row, "datei"),
             # --- datei ---
             art=get_vl(row.kind__REL) or "andere",
-            bemerkung=emptystr_to_null(row.remark),
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             datentraegerref=get_tid(row.data_media__REL),
             klasse=get_vl(row.class__REL),
