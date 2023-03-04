@@ -1,10 +1,11 @@
 import os
 from collections import OrderedDict
 
-from qgis.core import Qgis, QgsProject, QgsSettings
+from qgis.core import Qgis, QgsSettings
 from qgis.PyQt.QtWidgets import QCheckBox, QDialog
 from qgis.PyQt.uic import loadUi
 
+from ....utils.qgeplayermanager import QgepLayerManager
 from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgorithm
 
 
@@ -18,17 +19,10 @@ class GuiExport(QDialog):
         # Execute the dialog
         # self.resize(iface.mainWindow().size() * 0.75)
 
-        structures_layers = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-        if structures_layers:
-            self.structures = structures_layers[0].selectedFeatures()
-        else:
-            self.structures = []
-
-        reaches_layers = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-        if reaches_layers:
-            self.reaches = reaches_layers[0].selectedFeatures()
-        else:
-            self.reaches = []
+        structures_layer = QgepLayerManager.layer("vw_qgep_wastewater_structure")
+        reaches_layer = QgepLayerManager.layer("vw_qgep_reach")
+        self.structures = structures_layer.selectedFeatures() if structures_layer else []
+        self.reaches = reaches_layer.selectedFeatures() if reaches_layer else []
 
         self.limit_checkbox.setText(
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
@@ -36,8 +30,7 @@ class GuiExport(QDialog):
 
         # Remember save next to file checkbox
         s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
-        self.logs_next_to_file = s == True or s == "true"
-        self.save_logs_next_to_file_checkbox.setChecked(self.logs_next_to_file)
+        self.save_logs_next_to_file_checkbox.setChecked(s == True or s == "true")
 
         # Populate the labels list (restoring checked states of scaes)
         selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
@@ -53,7 +46,6 @@ class GuiExport(QDialog):
 
     def on_finish(self):
         # Remember save next to file checkbox
-        self.logs_next_to_file = self.save_logs_next_to_file_checkbox.isChecked()
         QgsSettings().setValue("qgep_plugin/logs_next_to_file", self.logs_next_to_file)
 
         # Save checked state of scales
@@ -63,6 +55,10 @@ class GuiExport(QDialog):
                 if checkbox.isChecked():
                     selected_scales.append(key)
             QgsSettings().setValue("qgep_plugin/last_selected_scales", ",".join(selected_scales))
+
+    @property
+    def logs_next_to_file(self):
+        return self.save_logs_next_to_file_checkbox.isChecked()
 
     @property
     def selected_ids(self):

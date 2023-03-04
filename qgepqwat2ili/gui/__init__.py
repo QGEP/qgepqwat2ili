@@ -11,6 +11,7 @@ from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QPus
 from qgis.utils import iface, plugins
 from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
 
+from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
 from ..qgep.export import qgep_export
 from ..qgep.import_ import qgep_import
@@ -45,7 +46,7 @@ def show_success(title, message, log_path):
 import_dialog = None
 
 
-def action_import(plugin, pgservice=None):
+def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
     """
@@ -53,9 +54,6 @@ def action_import(plugin, pgservice=None):
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
@@ -153,16 +151,13 @@ def action_import(plugin, pgservice=None):
         )
 
 
-def action_export(plugin, pgservice=None):
+def action_export(plugin):
     """
     Is executed when the user clicks the exportAction tool
     """
 
     if not configure_from_modelbaker(plugin.iface):
         return
-
-    if pgservice:
-        config.PGSERVICE = pgservice
 
     export_dialog = GuiExport(plugin.iface.mainWindow())
 
@@ -224,9 +219,9 @@ def action_export(plugin, pgservice=None):
 
             progress_dialog.setLabelText("Extracting labels...")
 
-            structures_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_wastewater_structure")
-            reaches_lyrs = QgsProject.instance().mapLayersByName("vw_qgep_reach")
-            if len(structures_lyrs) == 0 or len(reaches_lyrs) == 0:
+            structures_lyr = QgepLayerManager.layer("vw_qgep_wastewater_structure")
+            reaches_lyr = QgepLayerManager.layer("vw_qgep_reach")
+            if not structures_lyr or not reaches_lyr:
                 progress_dialog.close()
                 show_failure(
                     "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
@@ -234,8 +229,6 @@ def action_export(plugin, pgservice=None):
                     None,
                 )
                 return
-            structures_lyr = structures_lyrs[0]
-            reaches_lyr = reaches_lyrs[0]
 
             QApplication.processEvents()
             processing.run(
