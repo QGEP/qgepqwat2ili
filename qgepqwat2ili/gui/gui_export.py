@@ -11,7 +11,7 @@ from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgori
 from qgis.PyQt.QtCore import pyqtSlot
 
 #7.7.2022 
-exportmodell = "
+exportmodell = ""
 
 
 class GuiExport(QDialog):
