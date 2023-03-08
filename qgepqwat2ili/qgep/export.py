@@ -1018,9 +1018,6 @@ def qgep_export(selection=None, labels_file=None):
         # --- _rel_ ---
         # class__REL, fk_dataowner__REL, fk_provider__REL, kind__REL
 
-        # NOTE: QGEP misses a FK to data_media, so we inject it manually here
-        row.data_media__REL = qgep_session.query(QGEP.data_media).get(row.fk_data_media)
-
         datei = ABWASSER.datei(
             # FIELDS TO MAP TO ABWASSER.datei
             # --- baseclass ---
