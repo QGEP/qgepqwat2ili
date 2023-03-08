@@ -94,6 +94,14 @@ def qgep_import(precommit_callback=None):
 
         instance = qgep_session.query(QGEP.organisation).filter(QGEP.organisation.identifier == name).first()
 
+        # also look for non-flushed objects in the session
+        if not instance:
+            for obj in qgep_session:
+                if obj.__class__ is QGEP.organisation and obj.identifier == name:
+                    instance = obj
+                    break
+
+        # if still nothing, we create it
         if not instance:
             instance = create_or_update(QGEP.organisation, identifier=name)
             qgep_session.add(instance)
@@ -187,13 +195,18 @@ def qgep_import(precommit_callback=None):
         organisation = create_or_update(
             QGEP.organisation,
             **base_common(row),
-            # **metaattribute_common(metaattribute),  # TODO : currently this fails because organisations are not created yet
+            # **metaattribute_common(metaattribute),  # see below
             # --- organisation ---
             identifier=row.bezeichnung,
             remark=row.bemerkung,
             uid=row.auid,
         )
         qgep_session.add(organisation)
+
+        # we need to set metaattributes afterwards, to cater for the case were it's self-referencing
+        for k, v in metaattribute_common(metaattribute).items():
+            setattr(organisation, k, v)
+
         print(".", end="")
     logger.info("done")
 

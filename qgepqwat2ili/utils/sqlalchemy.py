@@ -43,6 +43,11 @@ def custom_generate_relationship(base, direction, return_fn, attrname, local_cls
     # disabling type checks on all relations, allowing to flush subclasses instead of abstract classes in relations
     # without requiring to configure polymorphism
     kw["enable_typechecks"] = False
+
+    # accept circular-dependencies (e.g. organisation.dataowner can be itself)
+    # see https://docs.sqlalchemy.org/en/20/orm/relationship_persistence.html#rows-that-point-to-themselves-mutually-dependent-rows)
+    kw["post_update"] = True
+
     return generate_relationship(base, direction, return_fn, attrname, local_cls, referred_cls, **kw)
 
 
