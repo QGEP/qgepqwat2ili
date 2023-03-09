@@ -8,6 +8,10 @@ import tempfile
 import time
 from typing import List
 
+import psycopg2
+from packaging import version
+from packaging.specifiers import SpecifierSet
+
 from .. import config
 
 
@@ -267,6 +271,26 @@ def make_log_path(next_to_path, step_name):
         temp_path = os.path.join(tempfile.gettempdir(), "qgepqwat2ili")
         os.makedirs(temp_path, exist_ok=True)
         return os.path.join(temp_path, f"{now}.{step_name}.log")
+
+
+def check_version(qualified_pum_info_table, version_specifier):
+    # get the current version
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+    cursor.execute(f'SELECT "version" FROM {qualified_pum_info_table};')
+    # we get the max version by iterating in python, since no easy/reliable way to get it in SQL
+    current_version = max([version.parse("0"), *[version.parse(v_str) for (v_str,) in cursor.fetchall()]])
+
+    # get the specified version
+    # see https://peps.python.org/pep-0440/#version-specifiers
+    supported_version_spec = SpecifierSet(version_specifier)
+
+    if not supported_version_spec.contains(current_version):
+        raise RuntimeError(
+            f"Version mismatch ! Your datamodel is in version {current_version} which is not supported (supported versions: {version_specifier})."
+        )
+    logger.info(f"Running a supported datamodel version: {current_version}")
 
 
 class LoggingHandlerContext:

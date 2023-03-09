@@ -15,13 +15,20 @@ from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
 from ..qgep.export import qgep_export
 from ..qgep.import_ import qgep_import
+from ..qgep.version import QGEP_PUM_TABLE, QGEP_SUPPORTED_VERSION
 from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
     import_xtf_data,
     validate_xtf_data,
 )
-from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
+from ..utils.various import (
+    CmdException,
+    LoggingHandlerContext,
+    check_version,
+    logger,
+    make_log_path,
+)
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
@@ -54,6 +61,9 @@ def action_import(plugin):
 
     if not configure_from_modelbaker(plugin.iface):
         return
+
+    # check version
+    check_version(QGEP_PUM_TABLE, QGEP_SUPPORTED_VERSION)
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
@@ -158,6 +168,9 @@ def action_export(plugin):
 
     if not configure_from_modelbaker(plugin.iface):
         return
+
+    # check version
+    check_version(QGEP_PUM_TABLE, QGEP_SUPPORTED_VERSION)
 
     export_dialog = GuiExport(plugin.iface.mainWindow())
 

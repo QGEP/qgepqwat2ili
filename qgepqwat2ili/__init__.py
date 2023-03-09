@@ -8,12 +8,14 @@ from .qgep.import_ import qgep_import
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
+from .qgep.version import QGEP_PUM_TABLE, QGEP_SUPPORTED_VERSION
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
 from .qwat.mapping import get_qwat_mapping
 from .qwat.model_qwat import Base as BaseQwat
 from .qwat.model_wasser import Base as BaseWasser
-from .utils.various import make_log_path
+from .qwat.version import QWAT_PUM_TABLE, QWAT_SUPPORTED_VERSION
+from .utils.various import check_version, make_log_path
 
 
 def main(args):
@@ -21,6 +23,7 @@ def main(args):
     parser = argparse.ArgumentParser(
         description="ili2QWAT / ili2QGEP entrypoint", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+    parser.add_argument("--skip_version_check", action="store_true", help="do not check the datamodel version")
 
     subparsers = parser.add_subparsers(title="subcommands", dest="parser")
     # subparsers.required = True
@@ -130,6 +133,10 @@ def main(args):
         SCHEMA = config.ABWASSER_SCHEMA
         ILI_MODEL = config.ABWASSER_ILI_MODEL
         ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
+
+        if not args.skip_version_check:
+            check_version(QGEP_PUM_TABLE, QGEP_SUPPORTED_VERSION)
+
         if args.direction == "export":
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
@@ -164,6 +171,11 @@ def main(args):
         SCHEMA = config.WASSER_SCHEMA
         ILI_MODEL = config.WASSER_ILI_MODEL
         ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
+
+        if not args.skip_version_check:
+            # note: there are two tables, info and upgrades, not sure which one is used
+            check_version(QWAT_PUM_TABLE, QWAT_SUPPORTED_VERSION)
+
         if args.direction == "export":
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
