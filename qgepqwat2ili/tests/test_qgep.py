@@ -18,7 +18,12 @@ handler.setLevel(logging.WARNING)
 logger.addHandler(handler)
 
 
-def findall_in_xml(root, tag, basket="VSA_KEK_2019_LV95.KEK"):
+def findall_in_xml_kek_2019(root, tag, basket="VSA_KEK_2019_LV95.KEK"):
+    ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
+    return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
+
+
+def findall_in_xml_sia_abwasser_2015(root, tag, basket="SIA405_ABWASSER_2015_LV95.SIA405_Abwasser"):
     ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
     return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
 
@@ -86,7 +91,6 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qgep", "export", path, "--recreate_schema"])
 
-
     def test_case_d_import_complete_xtf_to_qgep(self):
         """
         # D. import a whole valid interlis transfer file into QGEP
@@ -94,7 +98,9 @@ class TestQGEPUseCases(unittest.TestCase):
 
         # Incomming XTF case_c_import_all_without_errors.xtf
         # THIS INPUT FILE IS VALID !
-        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_d_import_all_without_errors.xtf")
+        path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "test_data", "case_d_import_all_without_errors.xtf"
+        )
 
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])
@@ -116,7 +122,7 @@ class TestQGEPUseCases(unittest.TestCase):
         # checking some properties  # TODO : add some more...
         self.assertEqual(session.query(QGEP.manhole).get("ch080qwzNS000113").year_of_construction, 1950)
         session.close()
-        
+
     def test_case_e_export_selection(self):
         """
         # E. export a selection
@@ -125,7 +131,8 @@ class TestQGEPUseCases(unittest.TestCase):
         # Prepare db
         main(["setupdb", "full"])
 
-        path = os.path.join(tempfile.mkdtemp(), "export.xtf")
+        # 1. Export VSA_KEK_2019_LV95
+        path = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
         selection = [
             # reach_id
             "ch13p7mzRE001221",
@@ -147,13 +154,73 @@ class TestQGEPUseCases(unittest.TestCase):
                 labels_file,
             ]
         )
+
         # Perform various checks
+        logger.warning("Perform various checks VSA_KEK_2019_LV95 ...")
+
         root = ET.parse(path)
-        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
-        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2)
-        self.assertEquals(len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3)
-        self.assertEquals(
-            len(findall_in_xml(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+
+        self.assertEqual(len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1)
+        self.assertEqual(
+            len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2
+        )
+        self.assertEqual(
+            len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3
+        )
+        self.assertEqual(
+            len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
+        )
+
+    def test_case_f_export_selection_sia405(self):
+        """
+        # F. export a selection
+        """
+
+        path = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
+        selection = [
+            # reach_id
+            "ch13p7mzRE001221",
+            # node_a_id
+            "ch13p7mzWN003445",
+            # node_b_id
+            "ch13p7mzWN008122",
+        ]
+        labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
+        main(
+            [
+                "qgep",
+                "export",
+                path,
+                "--export_sia405",
+                "--recreate_schema",
+                "--selection",
+                ",".join(selection),
+                "--labels_file",
+                labels_file,
+            ]
+        )
+
+        # Perform various checks
+        logger.warning("Perform various checks SIA405_ABWASSER_2015_LV95 ...")
+
+        root = ET.parse(path)
+
+        self.assertEqual(
+            len(findall_in_xml_sia_abwasser_2015(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Kanal")), 1
+        )
+        self.assertEqual(
+            len(findall_in_xml_sia_abwasser_2015(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Normschacht")), 2
+        )
+        self.assertEqual(
+            len(findall_in_xml_sia_abwasser_2015(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Haltung_Text")), 3
+        )
+        self.assertEqual(
+            len(
+                findall_in_xml_sia_abwasser_2015(
+                    root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text"
+                )
+            ),
+            6,
         )
 
 

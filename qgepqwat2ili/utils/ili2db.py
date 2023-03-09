@@ -97,8 +97,15 @@ def import_xtf_data(schema, xtf_file, log_path):
     )
 
 
-def export_xtf_data(schema, model_name, xtf_file, log_path):
+def export_xtf_data(schema, model_name, export_model_name, xtf_file, log_path):
     logger.info("EXPORT ILIDB...")
+
+    # if optional export_model_name is set, add it to the args
+    if export_model_name:
+        export_model_name_args = ["--exportModels", export_model_name]
+    else:
+        export_model_name_args = []
+
     exec_(
         " ".join(
             [
@@ -108,6 +115,7 @@ def export_xtf_data(schema, model_name, xtf_file, log_path):
                 "--export",
                 "--models",
                 f"{model_name}",
+                *export_model_name_args,
                 *get_pgconf_as_ili_args(),
                 "--dbschema",
                 f"{schema}",

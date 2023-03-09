@@ -61,6 +61,11 @@ def main(args):
         action="store_true",
         help="saves the log files next to the input/output file",
     )
+    parser_qgep.add_argument(
+        "--export_sia405",
+        action="store_true",
+        help="export the model SIA405_ABWASSER_2015_LV95 (instead of default VSA_KEK_2019_LV95)",
+    )
 
     parser_qwat = subparsers.add_parser(
         "qwat",
@@ -129,13 +134,23 @@ def main(args):
         config.PGSERVICE = args.pgservice
         SCHEMA = config.ABWASSER_SCHEMA
         ILI_MODEL = config.ABWASSER_ILI_MODEL
-        ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
+        if args.export_sia405:
+            ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+            ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+        else:
+            ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
+            ILI_EXPORT_MODEL_NAME = None
+
         if args.direction == "export":
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
             )
             qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+
+            utils.ili2db.export_xtf_data(
+                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+            )
+
             if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
@@ -164,12 +179,16 @@ def main(args):
         SCHEMA = config.WASSER_SCHEMA
         ILI_MODEL = config.WASSER_ILI_MODEL
         ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
+        ILI_EXPORT_MODEL_NAME = None
+
         if args.direction == "export":
             utils.ili2db.create_ili_schema(
                 SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
             )
             qwat_export(include_hydraulics=args.include_hydraulics)
-            utils.ili2db.export_xtf_data(SCHEMA, ILI_MODEL_NAME, args.path, make_log_path(log_path, "iliexport"))
+            utils.ili2db.export_xtf_data(
+                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+            )
             if not args.skip_validation:
                 try:
                     utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
