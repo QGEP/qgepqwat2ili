@@ -269,7 +269,7 @@ def action_export(plugin):
             export_xtf_data(
                 config.ABWASSER_SCHEMA,
                 config.ABWASSER_ILI_MODEL_NAME,
-                "",  # new variable export_model_name
+                None,
                 file_name1,
                 log_path,
             )
