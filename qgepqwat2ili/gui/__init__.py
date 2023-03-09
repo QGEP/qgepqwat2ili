@@ -257,96 +257,59 @@ def action_export(plugin):
         # Cleanup
         tempdir.cleanup()
 
-        # Build file names
-        file_name1 = f"{file_name_base}_{config.ABWASSER_ILI_MODEL_NAME}.xtf"
-        file_name2 = f"{file_name_base}_{config.ABWASSER_ILI_MODEL_NAME_SIA405}.xtf"
+        for model_name, export_model_name, progress in [
+            (config.ABWASSER_ILI_MODEL_NAME, None, 50),
+            (config.ABWASSER_ILI_MODEL_NAME_SIA405, config.ABWASSER_ILI_MODEL_NAME_SIA405, 70),
+        ]:
 
-        # Export from ili2pg model to file
-        progress_dialog.setLabelText("Saving XTF file " + config.ABWASSER_ILI_MODEL_NAME + "...")
-        QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ili2pg-export1")
-        try:
-            export_xtf_data(
-                config.ABWASSER_SCHEMA,
-                config.ABWASSER_ILI_MODEL_NAME,
-                None,
-                file_name1,
-                log_path,
-            )
-        except CmdException:
-            progress_dialog.close()
-            show_failure(
-                "Could not export the ili2pg schema",
-                "Open the logs for more details on the error.",
-                log_path,
-            )
-            return
-        progress_dialog.setValue(70)
+            export_file_name = f"{file_name_base}_{model_name}.xtf"
 
-        # Export only network data from ili2pg model to file
-        progress_dialog.setLabelText("Saving XTF Network file " + config.ABWASSER_ILI_MODEL_NAME_SIA405 + "...")
-        QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ili2pg-export2")
+            # Export from ili2pg model to file
+            progress_dialog.setLabelText(f"Saving XTF file [{model_name}]...")
+            QApplication.processEvents()
+            log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
+            try:
+                export_xtf_data(
+                    config.ABWASSER_SCHEMA,
+                    model_name,
+                    export_model_name,
+                    export_file_name,
+                    log_path,
+                )
+            except CmdException:
+                progress_dialog.close()
+                show_failure(
+                    "Could not export the ili2pg schema",
+                    "Open the logs for more details on the error.",
+                    log_path,
+                )
+                continue
+            progress_dialog.setValue(progress + 10)
 
-        try:
-            export_xtf_data(
-                config.ABWASSER_SCHEMA,
-                config.ABWASSER_ILI_MODEL_NAME,
-                config.ABWASSER_ILI_MODEL_NAME_SIA405,
-                file_name2,
-                log_path,
-            )
-        except CmdException:
-            progress_dialog.close()
-            show_failure(
-                "Could not export network data from the ili2pg schema",
-                "Open the logs for more details on the error.",
-                log_path,
-            )
-            return
-        progress_dialog.setValue(75)
+            progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
+            QApplication.processEvents()
+            log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
+            try:
+                validate_xtf_data(
+                    export_file_name,
+                    log_path,
+                )
+            except CmdException:
+                progress_dialog.close()
+                show_failure(
+                    "Invalid file",
+                    f"The created file is not a valid {model_name} XTF file.",
+                    log_path,
+                )
+                continue
 
-        progress_dialog.setLabelText("Validating the output file " + config.ABWASSER_ILI_MODEL_NAME + "...")
-        QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ilivalidator1")
-        try:
-            validate_xtf_data(
-                file_name1,
-                log_path,
-            )
-        except CmdException:
-            progress_dialog.close()
-            show_failure(
-                "Invalid file",
-                "The created file is not a valid " + config.ABWASSER_ILI_MODEL_NAME + " XTF file.",
-                log_path,
-            )
-            return
-        progress_dialog.setValue(90)
+            progress_dialog.setValue(progress + 20)
 
-        progress_dialog.setLabelText(
-            "Validating the network output file " + config.ABWASSER_ILI_EXPORT_MODEL_NAME + "..."
-        )
-        QApplication.processEvents()
-        log_path = make_log_path(base_log_path, "ilivalidator2")
-        try:
-            validate_xtf_data(
-                file_name2,
-                log_path,
-            )
-        except CmdException:
-            progress_dialog.close()
-            show_failure(
-                "Invalid file",
-                "The created file is not a valid " + config.ABWASSER_ILI_EXPORT_MODEL_NAME + " XTF file.",
-                log_path,
-            )
-            return
         progress_dialog.setValue(100)
 
         show_success(
             "Sucess",
-            f"Data successfully exported to {file_name} and {file_name2}",
+            f"Data successfully exported to {file_name_base}",
             os.path.dirname(log_path),
         )
 
