@@ -94,6 +94,14 @@ def qgep_import(precommit_callback=None):
 
         instance = qgep_session.query(QGEP.organisation).filter(QGEP.organisation.identifier == name).first()
 
+        # also look for non-flushed objects in the session
+        if not instance:
+            for obj in qgep_session:
+                if obj.__class__ is QGEP.organisation and obj.identifier == name:
+                    instance = obj
+                    break
+
+        # if still nothing, we create it
         if not instance:
             instance = create_or_update(QGEP.organisation, identifier=name)
             qgep_session.add(instance)
@@ -176,25 +184,28 @@ def qgep_import(precommit_callback=None):
         }
 
     logger.info("Importing ABWASSER.organisation, ABWASSER.metaattribute -> QGEP.organisation")
+    _imported_orgs = []
     for row, metaattribute in abwasser_session.query(ABWASSER.organisation, ABWASSER.metaattribute).join(
         ABWASSER.metaattribute
     ):
-        # TODO : this may create multiple copies of the same organisation in certain circumstances.
-        # Ideally we don't want to flush so we can review organisation creation like any other
-        # data before commiting.
-        # See corresponding test case : tests.TestRegressions.test_self_referencing_organisation
-
         organisation = create_or_update(
             QGEP.organisation,
             **base_common(row),
-            # **metaattribute_common(metaattribute),  # TODO : currently this fails because organisations are not created yet
+            # **metaattribute_common(metaattribute),  # see below
             # --- organisation ---
             identifier=row.bezeichnung,
             remark=row.bemerkung,
             uid=row.auid,
         )
         qgep_session.add(organisation)
+
+        _imported_orgs.append((organisation, metaattribute))
+
         print(".", end="")
+    # we need to set metaattributes afterwards, to cater for the case were it's self-referencing
+    for organisation, metaattribute in _imported_orgs:
+        for k, v in metaattribute_common(metaattribute).items():
+            setattr(organisation, k, v)
     logger.info("done")
 
     logger.info("Importing ABWASSER.kanal, ABWASSER.metaattribute -> QGEP.channel")

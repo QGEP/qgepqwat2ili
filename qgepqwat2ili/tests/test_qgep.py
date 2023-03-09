@@ -182,4 +182,7 @@ class TestRegressions(unittest.TestCase):
 
         session = Session(utils.sqlalchemy.create_engine())
         self.assertEqual(session.query(QGEP.organisation).count(), 1)
+        organisation = session.query(QGEP.organisation).first()
+        self.assertEqual(organisation, organisation.fk_dataowner__REL)
+        self.assertEqual(organisation, organisation.fk_provider__REL)
         session.close()
