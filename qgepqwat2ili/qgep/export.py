@@ -222,7 +222,7 @@ def qgep_export(selection=None, labels_file=None):
             # --- organisation ---
             auid=row.uid,
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
         )
         abwasser_session.add(organisation)
         create_metaattributes(row)
@@ -444,7 +444,7 @@ def qgep_export(selection=None, labels_file=None):
             **base_common(row, "rohrprofil"),
             # --- rohrprofil ---
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=row.identifier,
+            bezeichnung=null_to_emptystr(row.identifier),
             hoehenbreitenverhaeltnis=row.height_width_ratio,
             profiltyp=get_vl(row.profile_type__REL),
         )
