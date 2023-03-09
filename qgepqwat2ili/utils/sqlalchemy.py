@@ -46,7 +46,8 @@ def custom_generate_relationship(base, direction, return_fn, attrname, local_cls
 
     # accept circular-dependencies (e.g. organisation.dataowner can be itself)
     # see https://docs.sqlalchemy.org/en/20/orm/relationship_persistence.html#rows-that-point-to-themselves-mutually-dependent-rows)
-    kw["post_update"] = True
+    if attrname in ["fk_dataowner__REL", "fk_provider__REL"]:
+        kw["post_update"] = True
 
     return generate_relationship(base, direction, return_fn, attrname, local_cls, referred_cls, **kw)
 

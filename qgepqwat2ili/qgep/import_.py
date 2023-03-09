@@ -184,14 +184,10 @@ def qgep_import(precommit_callback=None):
         }
 
     logger.info("Importing ABWASSER.organisation, ABWASSER.metaattribute -> QGEP.organisation")
+    _imported_orgs = []
     for row, metaattribute in abwasser_session.query(ABWASSER.organisation, ABWASSER.metaattribute).join(
         ABWASSER.metaattribute
     ):
-        # TODO : this may create multiple copies of the same organisation in certain circumstances.
-        # Ideally we don't want to flush so we can review organisation creation like any other
-        # data before commiting.
-        # See corresponding test case : tests.TestRegressions.test_self_referencing_organisation
-
         organisation = create_or_update(
             QGEP.organisation,
             **base_common(row),
@@ -203,11 +199,13 @@ def qgep_import(precommit_callback=None):
         )
         qgep_session.add(organisation)
 
-        # we need to set metaattributes afterwards, to cater for the case were it's self-referencing
-        for k, v in metaattribute_common(metaattribute).items():
-            setattr(organisation, k, v)
+        _imported_orgs.append((organisation, metaattribute))
 
         print(".", end="")
+    # we need to set metaattributes afterwards, to cater for the case were it's self-referencing
+    for organisation, metaattribute in _imported_orgs:
+        for k, v in metaattribute_common(metaattribute).items():
+            setattr(organisation, k, v)
     logger.info("done")
 
     logger.info("Importing ABWASSER.kanal, ABWASSER.metaattribute -> QGEP.channel")
