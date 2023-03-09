@@ -51,6 +51,7 @@ optional arguments:
   --pgservice PGSERVICE
                         name of the pgservice to use to connect to the database (default: pg_qgep)
   --log                 saves a log file next to the input/output file (default: False)
+  --export_sia405       export the model SIA405_ABWASSER_2015_LV95 (instead of default VSA_KEK_2019_LV95) (default: False)
 ```
 
 ### Import/export QWAT
