@@ -316,6 +316,11 @@ def action_export(plugin):
 
     def action_do_export():
 
+        # neu 12.7.2022
+        emodel = export_dialog.comboBox_modelselection.currentText()
+
+        print (emodel)
+        
         default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
         file_name, _ = QFileDialog.getSaveFileName(
             None,
@@ -343,16 +348,44 @@ def action_export(plugin):
         progress_dialog.show()
 
         # Prepare the temporary ili2pg model
-        progress_dialog.setLabelText("Creating ili schema...")
+        # 12.7.2022
+        # progress_dialog.setLabelText("Creating ili schema...")
+        progress_dialog.setLabelText("Creating ili schema..." + emodel)
+
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
         try:
-            create_ili_schema(
-                config.ABWASSER_SCHEMA,
-                config.ABWASSER_ILI_MODEL,
-                log_path,
-                recreate_schema=True,
-            )
+            # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
+            if emodel == "VSA_KEK_2019_LV95_current":
+            # alte Konfiguration behalten
+                create_ili_schema(
+                    config.ABWASSER_SCHEMA,
+                    config.ABWASSER_ILI_MODEL,
+                    log_path,
+                    recreate_schema=True,
+                    )
+            elif emodel == "VSA_KEK_2019_LV95":
+                create_ili_schema(
+                    config.ABWASSER_KEK_SCHEMA,
+                    config.ABWASSER_KEK_ILI_MODEL,
+                    log_path,
+                    recreate_schema=True,
+                    )
+            elif emodel == "SIA405_ABWASSER_2015_LV95":
+                create_ili_schema(
+                    config.ABWASSER_SIA405_SCHEMA,
+                    config.ABWASSER__SIA405_ILI_MODEL,
+                    log_path,
+                    recreate_schema=True,
+                    )
+            elif emodel == "DSS_2015_LV95":
+                create_ili_schema(
+                    config.ABWASSER_DSS_SCHEMA,
+                    config.ABWASSER_DSS_ILI_MODEL,
+                    log_path,
+                    recreate_schema=True,
+                    )
+
         except CmdException:
             progress_dialog.close()
             show_failure(
@@ -361,8 +394,22 @@ def action_export(plugin):
                 log_path,
             )
             return
-        progress_dialog.setValue(25)
 
+#        progress_dialog.setValue(25)
+        progress_dialog.setValue(5)
+
+        # neu 12.7.2022
+        progress_dialog.setLabelText(emodel)
+        
+        print("GFG printed immediately.")
+        time.sleep(5.5)
+          
+        # delays the execution
+        # for 5.5 secs.
+        print("GFG printed after 5.5 secs.")
+
+        progress_dialog.setValue(25)
+        
         # Export the labels file
         tempdir = tempfile.TemporaryDirectory()
         labels_file_path = None
@@ -400,6 +447,16 @@ def action_export(plugin):
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
 
+       # 12.7.2022 depending model selection
+        if emodel == "VSA_KEK_2019_LV95_current":
+            qgep_export(selection=export_dialog.selected_ids)
+        elif emodel == "VSA_KEK_2019_LV95":
+            qgepkek_export(selection=export_dialog.selected_ids)
+        elif emodel == "SIA405_ABWASSER_2015_LV95":
+            qgepsia405_export(selection=export_dialog.selected_ids)
+        elif emodel == "DSS_2015_LV95":
+            qgepdss_export(selection=export_dialog.selected_ids)
+
         log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
         log_handler.setLevel(logging.INFO)
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
@@ -410,54 +467,105 @@ def action_export(plugin):
         # Cleanup
         tempdir.cleanup()
 
-        for model_name, export_model_name, progress in [
-            (config.ABWASSER_ILI_MODEL_NAME, None, 50),
-            (config.ABWASSER_ILI_MODEL_NAME_SIA405, config.ABWASSER_ILI_MODEL_NAME_SIA405, 70),
-        ]:
+        try:
+            #12.7.2022 to do dependant on Model Selection
+            if emodel == "VSA_KEK_2019_LV95":
+                for model_name, export_model_name, progress in [
+                    (config.ABWASSER_ILI_MODEL_NAME, None, 50),
+                    (config.ABWASSER_ILI_MODEL_NAME_SIA405, config.ABWASSER_ILI_MODEL_NAME_SIA405, 70),
+                ]:
 
-            export_file_name = f"{file_name_base}_{model_name}.xtf"
+                    export_file_name = f"{file_name_base}_{model_name}.xtf"
 
-            # Export from ili2pg model to file
-            progress_dialog.setLabelText(f"Saving XTF file [{model_name}]...")
-            QApplication.processEvents()
-            log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
-            try:
-                export_xtf_data(
-                    config.ABWASSER_SCHEMA,
-                    model_name,
-                    export_model_name,
-                    export_file_name,
-                    log_path,
-                )
-            except CmdException:
-                progress_dialog.close()
-                show_failure(
-                    "Could not export the ili2pg schema",
-                    "Open the logs for more details on the error.",
-                    log_path,
-                )
-                continue
-            progress_dialog.setValue(progress + 10)
+                    # Export from ili2pg model to file
+                    progress_dialog.setLabelText(f"Saving XTF file [{model_name}]...")
+                    QApplication.processEvents()
+                    log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
+                    try:
+                        export_xtf_data(
+                            config.ABWASSER_SCHEMA,
+                            model_name,
+                            export_model_name,
+                            export_file_name,
+                            log_path,
+                        )
+                    except CmdException:
+                        progress_dialog.close()
+                        show_failure(
+                            "Could not export the ili2pg schema",
+                            "Open the logs for more details on the error.",
+                            log_path,
+                        )
+                        continue
+                    progress_dialog.setValue(progress + 10)
 
-            progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
-            QApplication.processEvents()
-            log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
-            try:
-                validate_xtf_data(
-                    export_file_name,
-                    log_path,
-                )
-            except CmdException:
-                progress_dialog.close()
-                show_failure(
-                    "Invalid file",
-                    f"The created file is not a valid {model_name} XTF file.",
-                    log_path,
-                )
-                continue
+                    progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
+                    QApplication.processEvents()
+                    log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
+                    try:
+                        validate_xtf_data(
+                            export_file_name,
+                            log_path,
+                        )
+                    except CmdException:
+                        progress_dialog.close()
+                        show_failure(
+                            "Invalid file",
+                            f"The created file is not a valid {model_name} XTF file.",
+                            log_path,
+                        )
+                        continue
 
-            progress_dialog.setValue(progress + 20)
+                    progress_dialog.setValue(progress + 20)
 
+            elif emodel == "DSS_2015_LV95":
+                            for model_name, export_model_name, progress in [
+                    (config.ABWASSER_DSS_ILI_MODEL_NAME, None, 50),
+                ]:
+
+                    export_file_name = f"{file_name_base}_{model_name}.xtf"
+
+                    # Export from ili2pg model to file
+                    progress_dialog.setLabelText(f"Saving XTF file [{model_name}]...")
+                    QApplication.processEvents()
+                    log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
+                    try:
+                        export_xtf_data(
+                            config.ABWASSER_SCHEMA,
+                            model_name,
+                            export_model_name,
+                            export_file_name,
+                            log_path,
+                        )
+                    except CmdException:
+                        progress_dialog.close()
+                        show_failure(
+                            "Could not export the ili2pg schema",
+                            "Open the logs for more details on the error.",
+                            log_path,
+                        )
+                        continue
+                    progress_dialog.setValue(progress + 10)
+
+                    progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
+                    QApplication.processEvents()
+                    log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
+                    try:
+                        validate_xtf_data(
+                            export_file_name,
+                            log_path,
+                        )
+                    except CmdException:
+                        progress_dialog.close()
+                        show_failure(
+                            "Invalid file",
+                            f"The created file is not a valid {model_name} XTF file.",
+                            log_path,
+                        )
+                        continue
+
+                    progress_dialog.setValue(progress + 20)
+            
         progress_dialog.setValue(100)
 
         show_success(
