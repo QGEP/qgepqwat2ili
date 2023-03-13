@@ -67,7 +67,75 @@ def validate_xtf_data(xtf_file, log_path):
         f'"{config.JAVA}" -jar "{config.ILIVALIDATOR}" --modeldir "{config.ILI_FOLDER}" --log "{log_path}" "{xtf_file}"'
     )
 
+# 22.7.2022 sb [WIP]
+def get_xtf_model(xtf_file):
+    logger.info("GET XTF MODEL... ")
+    # logger.info("vorher" + imodel)
+# funktioniert nicht
+    # global imodel # define imodel as global variable for import model name
+    # impmodel = "" 
 
+    # open and read xtf / xml file line by line until <DATASECTION>
+    #<DATASECTION>
+    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+    # read string between < and . -> eg. VSA_KEK_2019_LV95
+    # impmodel 
+    from io import open
+    import re
+    
+    checkdatasection = -1
+    impmodel = "not found"
+    
+    with open(xtf_file, mode="r", encoding="utf-8") as f:
+        while True:
+            if checkdatasection == -1:
+                line = f.readline()
+                if not line:
+                    break
+                else:
+                    checkdatasection = line.find('<DATASECTION>')
+                    # logger.info("checkdatasection: " + str(checkdatasection))
+                    logger.info(str(checkdatasection))
+                    
+            else:
+                line2 = f.readline()
+                if not line:
+                    break
+                else:
+                    print(line)
+                    logger.info(str(checkdatasection))
+                    strmodel = str(line2)
+                    logger.info("MODEL definition found in xtf: " + strmodel)
+                    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+                    # read string between < and . -> eg. VSA_KEK_2019_LV95
+                    
+                    result = re.search('<(.*).',strmodel)
+                    result = str(result.group(1))
+                    result2 = result.split('.',1)
+                    result3 = str(result2[0])
+                    result4 = result3.strip('<')
+                    impmodel = str(result4)
+                    # 23.7.2022 neu als str
+                    #impmodel = str(result)
+                    # 23.7.2022 + impmodel geht nicht, check solution [WIP] TypeError: can only concatenate str (not "re.Match") to str
+                    logger.info("MODEL found: " + str(impmodel))
+                    break
+    
+    if impmodel == "not found":
+        # write that MODEL was not found
+        logger.info("MODEL was " + impmodel)
+        
+    # im Moment fix gesetzt
+    # 23.7.2022 import_dialog nicht bekannt so
+    # import_dialog.label_importmodelname.setText("VSA_KEK_2019_LV95")
+    #logger.info("import_dialog.label: " + import_dialog.label_importmodelname.currentText())
+    # impmodel = "VSA_KEK_2019_LV95"
+
+    # close xtf file to avoid conflicts
+    f.close()
+
+    # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
+    return impmodel
 def import_xtf_data(schema, xtf_file, log_path):
     logger.info("IMPORTING XTF DATA...")
     exec_(
