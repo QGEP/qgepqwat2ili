@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.18: http://docutils.sourceforge.net/" />
-<title>Anleitung zur Programmfamilie ili2db</title>
+<meta name="generator" content="Docutils 0.16: http://docutils.sourceforge.net/" />
+<title>ili2db-Anleitung</title>
 <style type="text/css">
 
 /*
@@ -360,18 +360,16 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="anleitung-zur-programmfamilie-ili2db">
-<h1 class="title">Anleitung zur Programmfamilie ili2db</h1>
+<div class="document" id="ili2db-anleitung">
+<h1 class="title">ili2db-Anleitung</h1>
 
 <div class="section" id="uberblick">
 <h1>Überblick</h1>
-<p>ilid2db ist eine in Java erstellte Programmfamilie, die zurzeit ili2pg,
-ili2fgdb, ili2gpkg, ili2ora, ili2mssql, ili2mysql und ili2h2gis umfasst.</p>
-<p>Damit kann eine
+<p>Ili2pg, ili2fgdb bzw. ili2gpkg ist ein in Java erstelltes Programm, das eine
 Interlis-Transferdatei (itf oder xtf) einem Interlis-Modell entsprechend
 (ili) mittels 1:1-Transfer in eine Datenbank (PostgreSQL/Postgis bzw.
-GeoPackage) gelesen werden oder aus der Datenbank mittels einem 1:1-Transfer
-eine solche Transferdatei erstellt werden. Folgende Funktionen sind möglich:</p>
+GeoPackage) schreibt oder aus der Datenbank mittels einem 1:1-Transfer
+eine solche Transferdatei erstellt. Folgende Funktionen sind möglich:</p>
 <ul class="simple">
 <li>erstellt das Datenbankschema aus einem Interlis Modell</li>
 <li>importiert Daten aus einer Transferdatei in die Datenbank</li>
@@ -381,7 +379,7 @@ eine solche Transferdatei erstellt werden. Folgende Funktionen sind möglich:</p
 <ul class="simple">
 <li>INTERLIS 1</li>
 <li>INTERLIS 2</li>
-<li>GML 3.2 <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a></li>
+<li>GML 3.2 <a class="footnote-reference" href="#id5" id="id1">[1]</a></li>
 </ul>
 <div class="section" id="schemaimport-in-die-datenbank">
 <h2>Schemaimport in die Datenbank</h2>
@@ -414,15 +412,6 @@ java -jar ili2gpkg.jar --import --dbfile mogis.gpkg path/to/data.xtf
 Transferdatei.</p>
 <p>Mit weiteren Optionen wird gesteuert, welche Daten aus der Datenbank exportiert
 werden.</p>
-<p>Genau einer der Parameter <tt class="docutils literal"><span class="pre">--models</span></tt>, <tt class="docutils literal"><span class="pre">--topics</span></tt>, <tt class="docutils literal"><span class="pre">--baskets</span></tt> oder <tt class="docutils literal"><span class="pre">--dataset</span></tt>
-muss zwingend verwendet werden, um die zu exportierenden DB-Records auszuwählen.</p>
-<p>Der Parameter <tt class="docutils literal"><span class="pre">--exportModels</span></tt> definiert das Export-Modell, indem die Daten
-exportiert werden (der Parameter ist also keine Alternative,
-sondern ein Zusatz für <tt class="docutils literal"><span class="pre">--models</span></tt>, <tt class="docutils literal"><span class="pre">--topics</span></tt>, <tt class="docutils literal"><span class="pre">--baskets</span></tt> oder <tt class="docutils literal"><span class="pre">--dataset</span></tt>).
-Als Export-Modelle sind Basis-Modelle (also z.B. Bundes-Modell
-statt Kantons-Modell) oder übersetzte Modelle (also z.B. DM_IT statt DM_DE) zulässig.
-Ohne die Option <tt class="docutils literal"><span class="pre">--exportModels</span></tt> werden die Daten so wie sie erfasst sind
-(bzw. importiert wurden), exportiert.</p>
 <p>Geometrien vom Typ Area und Surface werden bei Interlis 1 während dem
 Export in Linien umgewandelt.</p>
 <p>Beispiel:</p>
@@ -456,16 +445,15 @@ Error: ...import failed
 </div>
 <div class="section" id="fehlerhafte-daten">
 <h2>Fehlerhafte Daten</h2>
-<p>Um fehlerhaften Daten zu importieren (um sie danach (z.B. im GIS) zu flicken), muss mindestens die
+<p>Um fehlerhaften Daten zu importieren (um sie zu flicken), muss mindestens die
 Validierung ausgeschaltet werden (<tt class="docutils literal"><span class="pre">--disableValidation</span></tt>). Das DB Schema muss
-aber auch so angelegt werden, dass fehlerhafte Werte als Text importiert werden können (<tt class="docutils literal"><span class="pre">--sqlColsAsText</span></tt>)
-bzw. durch <tt class="docutils literal">NULL</tt> ersetzt werden können (<tt class="docutils literal"><span class="pre">--sqlEnableNull</span></tt>).
-Und die Programmlogik für den Datenimport muss die Fehler
+aber auch so angelegt werden, dass fehlerhafte Werte durch <tt class="docutils literal">NULL</tt> ersetzt werden
+können (<tt class="docutils literal"><span class="pre">--sqlEnableNull</span></tt>). Und die Programmlogik für den Datenimport muss die Fehler
 tolerieren (<tt class="docutils literal"><span class="pre">--skipReferenceErrors</span></tt> und <tt class="docutils literal"><span class="pre">--skipGeometryErrors</span></tt>), so dass
 z.B. eine Referenz auf ein nicht vorhandenes Objekt ignoriert wird.</p>
-<p>Um solche Daten zu importieren (um sie danach zu flicken):</p>
+<p>Um solche Daten zu importieren (um sie zu flicken):</p>
 <pre class="literal-block">
-java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --dbfile mogis.gpkg path/to/mo.ili
+java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --dbfile mogis.gpkg path/to/mo.ili
 java -jar ili2gpkg.jar --import --skipReferenceErrors --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
 </pre>
 <p>Bei ITF (Interlis 1): Fehlerhafte AREA Attribute können für
@@ -477,9 +465,9 @@ Dass diese Daten nicht gelesen werden können, hat also nicht in erster Linie
 mit der Validierung zu tun, sondern damit, dass aus den Linien+Punkten
 keine Polygone gebildet werden können. Die Polygonbildung muss also
 ausgeschaltet werden (<tt class="docutils literal"><span class="pre">--skipPolygonBuilding</span></tt>).</p>
-<p>Um solche Daten zu importieren (um sie danach zu flicken):</p>
+<p>Um solche Daten zu importieren (um sie zu flicken):</p>
 <pre class="literal-block">
-java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
 java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
 </pre>
 </div>
@@ -828,9 +816,7 @@ gibt einen spezifischen Hinweis auf PostGIS, GeoPackage oder FileGDB.</p>
 </tr>
 <tr><td>--export</td>
 <td colspan="2"><p class="first">Exportiert Daten aus der Datenbank in eine Transferdatei.</p>
-<p>Mit dem Parameter --models, --topics, --baskets oder --dataset wird definiert, welche Daten exportiert werden.
-Existieren zum gegeben Modell (--models) oder Topic (--topics) in der DB keine Daten, wird ohne Fehlermeldung eine leere Transferdatei erstellt.
-Wird eine Datensatz (--dataset) oder Basket (--baskets) bezeichnet, der in der DB nicht vorhanden ist, bricht der Export mit einem Fehler ab.</p>
+<p>Mit dem Parameter --models, --topics, --baskets oder --dataset wird definiert, welche Daten exportiert werden.</p>
 <p>Ob die Daten im Interlis 1-, Interlis 2- oder GML-Format geschrieben werden, ergibt sich aus der Dateinamenserweiterung der Ausgabedatei. Für eine Interlis 1-Transferdatei muss die Erweiterung .itf verwendet werden. Für eine GML-Transferdatei muss die Erweiterung .gml verwendet werden.</p>
 <p class="last">Die Optionen --topics und --baskets bedingen, dass das Datenbankschema mit der Option --createBasketCol erstellt wurde.</p>
 </td>
@@ -1051,9 +1037,6 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--sqlEnableNull</td>
 <td colspan="2">Erstellt keine NOT NULL Anweisungen bei Spalten die Interlis-Attribute abbilden. (siehe Kapitel Abbildungsregeln/Attribute)</td>
 </tr>
-<tr><td>--sqlExtRefCols</td>
-<td colspan="2">Erstellt Spalten die Interlis-Rollen oder Interlis-Referenz-Attribute abbilden als Textspalten, so dass der Referenzwert aus der Transferdatei in der Spalte aufgenommen werden kann und die referenzierten Objekte nicht vorliegen müssen. (siehe Kapitel Abbildungsregeln/Beziehungen)</td>
-</tr>
 <tr><td>--strokeArcs</td>
 <td colspan="2">Segmentiert Kreisbogen beim Datenimport. Der Radius geht somit verloren. Die Kreisbogen werden so segmentiert, dass die Abweichung der erzeugten Geraden kleiner als die Koordinatengenauigkeit der Stützpunkte ist.</td>
 </tr>
@@ -1084,12 +1067,6 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--importBid</td>
 <td colspan="2">Liest die Behälteridentifikation (BID aus der Transferdatei) in die Spalte T_Ili_Tid der Tabelle t_ili2db_basket.</td>
 </tr>
-<tr><td>--importFetchSize</td>
-<td colspan="2">Definiert den fetchsize für die Statements beim import.</td>
-</tr>
-<tr><td>--exportBatchSize</td>
-<td colspan="2">Definiert den batchSize für die Statements beim export.</td>
-</tr>
 <tr><td>--createBasketCol</td>
 <td colspan="2">Erstellt in jeder Tabelle eine zusätzlich Spalte T_basket um den Behälter identifizieren zu können. (siehe Kapitel Abbildungsregeln/Metadaten)</td>
 </tr>
@@ -1116,9 +1093,6 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 </tr>
 <tr><td>--createTypeConstraints</td>
 <td colspan="2">Erstellt für die t_type Spalte ein CHECK-Constraint in der Datenbank.</td>
-</tr>
-<tr><td>--sqlColsAsText</td>
-<td colspan="2">Bildet alle (einfachen/unstrukturierten) Interlis-Attribute als TEXT-Spalten ab, so dass fehlerhafte Daten importiert werden können.</td>
 </tr>
 <tr><td>--createImportTabs</td>
 <td colspan="2">Erstellt die t_ili2db_import Tabellen in der Datenbank.</td>
@@ -1246,7 +1220,7 @@ CREATE TABLE A (
 );
 </pre>
 </td>
-<td><p class="first">Mit der Option --createTypeDiscriminator erhält jede Tabelle (die eine Klasse oder Struktur repräsentiert, die keine Basisklasse hat) eine zusätzliche Spalte T_Type. Diese Spalte enthält den konkreten Klassenname (der SQL-Name des qualifizierten INTERLIS-Klassennamens <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a>) des Objektes jedes einzelnen Records.</p>
+<td><p class="first">Mit der Option --createTypeDiscriminator erhält jede Tabelle (die eine Klasse oder Struktur repräsentiert, die keine Basisklasse hat) eine zusätzliche Spalte T_Type. Diese Spalte enthält den konkreten Klassenname (der SQL-Name des qualifizierten INTERLIS-Klassennamens <a class="footnote-reference" href="#id6" id="id2">[2]</a>) des Objektes jedes einzelnen Records.</p>
 <p class="last">Tabellen für Klassen die eine Basisklasse haben, erhalten diese Spalte nicht.</p>
 </td>
 </tr>
@@ -1753,39 +1727,6 @@ CREATE TABLE a2b (
 <td>Wenn die maximale Kardinalität bei beiden Rollen grösser als 1 ist,
 wird eine Zwischentabelle erstellt.</td>
 </tr>
-<tr><td>3</td>
-<td><pre class="first last literal-block">
-CLASS A =
-END A;
-
-
-CLASS B =
-END B;
-
-
-
-ASSOCIATION a2b =
-  role_A (EXTERNAL)
-         -- {0..1} ClassA;
-  role_B -- {0..*} ClassB;
-END a2b;
-</pre>
-</td>
-<td><pre class="first last literal-block">
-CREATE TABLE A (
- T_Id integer PRIMARY KEY,
-);
-
-CREATE TABLE B (
- T_Id integer PRIMARY KEY,
- role_a varchar(255)
-);
-</pre>
-</td>
-<td>Wenn die Option --sqlExtRefCols benutzt wird,
-wird bei EXTERNAL statt der Fremdschlüsselspalte ein Text-Spalte erstellt, die den REF Wert
-aus der Transferdatei aufnimmt. So muss das refernzierte Objekt nicht importiert werden.</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -1849,7 +1790,7 @@ CREATE TABLE D (
 );
 </pre>
 </td>
-<td><p class="first">Für jedes Strukturattribut wird in der Tabelle der Struktur eine Spalte für den Fremdschlüssel erstellt. Der Name der Spalte ist der qualifizierte INTERLIS-Attributnamen <a class="footnote-reference" href="#footnote-3" id="footnote-reference-3">[3]</a>.</p>
+<td><p class="first">Für jedes Strukturattribut wird in der Tabelle der Struktur eine Spalte für den Fremdschlüssel erstellt. Der Name der Spalte ist der qualifizierte INTERLIS-Attributnamen <a class="footnote-reference" href="#id7" id="id3">[3]</a>.</p>
 <p class="last">Die Strukturtabelle enthält zusätzlich eine Spalte T_seq die die Reihenfolge der Strukturelement festlegt.</p>
 </td>
 </tr>
@@ -1884,7 +1825,7 @@ CREATE TABLE D (
 </td>
 <td><p class="first">Mit der Option --structWithGenericRef werden statt für jedes Strukturattribut eine Spalte nur drei Standardspalten T_ParentId, T_ParentType, T_ParentAttr angelegt. Diese drei Spalten bilden zusammen einen generischen Fremdschlüssel.</p>
 <p>T_ParentId ist die t_id des Objektes, das das Strukturelement enthält.</p>
-<p>T_ParentType ist die konkrete Klasse (der SQL-Name des qualifizierten INTERLIS-Klassennamens <a class="footnote-reference" href="#footnote-4" id="footnote-reference-4">[4]</a>) des Objektes, das das Strukturelement enthält.</p>
+<p>T_ParentType ist die konkrete Klasse (der SQL-Name des qualifizierten INTERLIS-Klassennamens <a class="footnote-reference" href="#id8" id="id4">[4]</a>) des Objektes, das das Strukturelement enthält.</p>
 <p class="last">T_ParentAttr ist der Strukturattributname (der SQL-Name des unqualifizierten INTERLIS-Attributnamens) in der Klasse des Objektes, das das Strukturelement enthält.</p>
 </td>
 </tr>
@@ -2588,30 +2529,30 @@ ergänzt: ‚0‘, ‚1‘, usw. bis er eindeutig ist.</p>
 <p>Die automatische Namensabbildung kann übersteuert werden, indem vor dem
 ersten Import entsprechende Einträge in der Tabelle t_ili2db_classname
 gemacht werden.</p>
-<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<table class="docutils footnote" frame="void" id="id5" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>GML 3.2; die verwendeten Kodierungsregeln entsprechen eCH-0118-1.0</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>GML 3.2; die verwendeten Kodierungsregeln entsprechen eCH-0118-1.0</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<table class="docutils footnote" frame="void" id="id6" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
 Übersetzung ist in der Tabelle T_ILI2DB_CLASSNAME hinterlegt.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="footnote-3" rules="none">
+<table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#footnote-reference-3">[3]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
 Übersetzung ist in der Tabelle T_ILI2DB_ATTRNAME hinterlegt.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="footnote-4" rules="none">
+<table class="docutils footnote" frame="void" id="id8" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#footnote-reference-4">[4]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
 Übersetzung ist in der Tabelle T_ILI2DB_CLASSNAME hinterlegt.</td></tr>
 </tbody>
 </table>
