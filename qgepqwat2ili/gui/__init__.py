@@ -15,16 +15,25 @@ from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
 from ..qgep.export import qgep_export
 from ..qgep.import_ import qgep_import
+
+# 12.7.2022 additional models
+from ..qgepdss.export import qgep_export as qgepdss_export
+from ..qgepdss.import_ import qgep_import as qgepdss_import
+
 from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
     import_xtf_data,
     validate_xtf_data,
+    # neu 22.7.2022
+    get_xtf_model,
 )
 from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
+# 12.7.2022 for testing import time
+import time
 
 def _show_results(title, message, log_path, level):
     widget = iface.messageBar().createMessage(title, message)
@@ -95,21 +104,89 @@ def action_import(plugin):
         )
         return
 
-    # Prepare the temporary ili2pg model
-    progress_dialog.setLabelText("Creating ili schema...")
-    QApplication.processEvents()
-    log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
+    # von unten hierherauf genommen, da sonst nicht ansprechbar
+    import_dialog = GuiImport(plugin.iface.mainWindow())
+    
+    # new 23.7.2022
+    global imodel 
+    imodel = "nothing"
+    
+    # 22.7.2022 xtf file checken and get model name as imodel
     try:
-        create_ili_schema(
-            config.ABWASSER_SCHEMA,
-            config.ABWASSER_ILI_MODEL,
-            log_path,
-            recreate_schema=True,
-        )
+        # neu 23.7.2022 imodel mit return aus get_xtf_model
+        imodel = get_xtf_model(file_name)
+        
     except CmdException:
         progress_dialog.close()
         show_failure(
-            "Could not create the ili2pg schema",
+            "Could not read modelname from xtf file",
+            "Open the logs for more details on the error.",
+            log_path,
+        )
+        return
+
+    # Prepare the temporary ili2pg model
+    # 12.7.2022 
+
+    #progress_dialog.setLabelText("Creating ili schema...")
+    # 23.7.2022 rausgenommen - da in ili2db gesetzt
+    # imodel = import_dialog.label_importmodelname.text()
+    tmplabeltext = "Creating ili schema..." + imodel
+    print(tmplabeltext)
+    # breakpoint()
+    progress_dialog.setLabelText(tmplabeltext)
+    
+    progress_dialog.setValue(5)
+
+    # delays the execution for 5.5 secs.
+    # time.sleep(5.5)
+
+    QApplication.processEvents()
+    log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
+    try:
+        # 22.7.2022 create_ili_schema depending of imodel
+        if imodel == "VSA_KEK_2019_LV95":
+            create_ili_schema(
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        elif imodel == "VSA_KEK_2019_LV95_neu":
+            create_ili_schema(
+                config.ABWASSER_KEK_SCHEMA,
+                config.ABWASSER_KEK_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        elif imodel == "SIA405_ABWASSER_2015_LV95":
+            create_ili_schema(
+                config.ABWASSER_SIA405_SCHEMA,
+                config.ABWASSER__SIA405_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        elif imodel == "DSS_2015_LV95":
+            create_ili_schema(
+                config.ABWASSER_DSS_SCHEMA,
+                config.ABWASSER_DSS_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        else: 
+            # print(imodel)
+            # breakpoint()
+            progress_dialog.close()
+            show_failure(
+                 "MODEL " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "Open the logs for more details on the error.",
+                 log_path,
+            )
+
+    except CmdException:
+        progress_dialog.close()
+        show_failure(
+            "Could not create the ili2pg schema" + imodel,
             "Open the logs for more details on the error.",
             log_path,
         )
@@ -118,14 +195,58 @@ def action_import(plugin):
 
     # Export from ili2pg model to file
     progress_dialog.setLabelText("Importing XTF data...")
+
+    time.sleep(6.5)
+
     QApplication.processEvents()
     log_path = make_log_path(base_log_path, "ili2pg-import")
     try:
-        import_xtf_data(
-            config.ABWASSER_SCHEMA,
-            file_name,
-            log_path,
-        )
+#        import_xtf_data(
+#            config.ABWASSER_SCHEMA,
+#            file_name,
+#            log_path,
+#        )
+        #27.6.2022 to do dependant on Model Selection
+        if imodel == "VSA_KEK_2019_LV95":
+            import_xtf_data(
+                config.ABWASSER_SCHEMA,
+                file_name,
+                log_path,
+                #imodel,
+                #"VSA_KEK_2019_LV95",
+            )
+        elif imodel == "VSA_KEK_2019_LV95_neu":
+            import_xtf_data(
+                config.ABWASSER_KEK_SCHEMA,
+                file_name,
+                log_path,
+                # imodel,
+                #"VSA_KEK_2019_LV95",
+            )
+        elif imodel == "SIA405_ABWASSER_2015_LV95":
+            import_xtf_data(
+                config.ABWASSER_SIA405_SCHEMA,
+                file_name,
+                log_path,
+                #imodel,
+            )
+        elif imodel == "DSS_2015_LV95":
+            import_xtf_data(
+                config.ABWASSER_DSS_SCHEMA,
+                file_name,
+                log_path,
+                #imodel,
+            )
+        else: 
+            # print(imodel)
+            # breakpoint()
+            progress_dialog.close()
+            show_failure(
+                 "Import xtf in MODEL " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "Open the logs for more details on the error.",
+                 log_path,
+            )
+
     except CmdException:
         progress_dialog.close()
         show_failure(
@@ -139,7 +260,39 @@ def action_import(plugin):
     # Export to the temporary ili2pg model
     progress_dialog.setLabelText("Converting to QGEP...")
     QApplication.processEvents()
-    import_dialog = GuiImport(plugin.iface.mainWindow())
+
+    # 22.7.2022 nach oben verschoben
+    # import_dialog = GuiImport(plugin.iface.mainWindow())
+    # 25.7.2022 new 80 instead of 100 (to show that still something is happening
+    #progress_dialog.setValue(100)
+    progress_dialog.setValue(80)
+
+    # 23.7.2022 additional models
+    if imodel == "VSA_KEK_2019_LV95":
+        qgep_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
+    elif imodel == "VSA_KEK_2019_LV95_neu":
+        qgepkek_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
+    elif imodel == "SIA405_ABWASSER_2015_LV95":
+        qgepsia405_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
+    elif imodel == "DSS_2015_LV95":
+        qgepdss_import(
+            precommit_callback=import_dialog.init_with_session,
+        )
+    else:
+            progress_dialog.close()
+            show_failure(
+                 "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "Open the logs for more details on the error.",
+                 log_path,
+            )
+
+    # 24.7.2022
     progress_dialog.setValue(100)
 
     log_handler = logging.FileHandler(make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8")

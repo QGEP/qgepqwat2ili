@@ -9,6 +9,8 @@ from ....utils.qgeplayermanager import QgepLayerManager
 from ..processing_algs.extractlabels_interlis import ExtractlabelsInterlisAlgorithm
 
 #7.7.2022 
+from qgis.PyQt.QtCore import pyqtSlot
+
 exportmodell = ""
 
 class GuiExport(QDialog):
