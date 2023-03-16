@@ -38,6 +38,23 @@ class GuiExport(QDialog):
             f"Limit to selection ({len(self.structures)} structures and {len(self.reaches)} reaches)"
         )
 
+        # Remember save next to file checkbox
+        s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
+        self.save_logs_next_to_file_checkbox.setChecked(s == True or s == "true")
+
+        # Populate the labels list (restoring checked states of scaes)
+        selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
+        qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
+        self.labels_groupbox.setEnabled(qgis_version_ok)
+        self.labels_qgis_warning_label.setVisible(not qgis_version_ok)
+        self.scale_checkboxes = OrderedDict()
+        for scale_key, scale_disp, scale_val in ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES:
+            checkbox = QCheckBox(f"{scale_disp} [1:{scale_val}]")
+            checkbox.setChecked(qgis_version_ok and scale_key in selected_scales)
+            self.scale_checkboxes[scale_key] = checkbox
+            self.labels_groupbox.layout().addWidget(checkbox)
+
+
         # neu 16.5.2022 populating QcomboBox
         
         # neu 28.6.2022 https://www.pythonguis.com/docs/qcombobox/
@@ -103,22 +120,6 @@ class GuiExport(QDialog):
         # self.labelmodelshortcut.setText = id_us
  #       self.labelmodelshortcut.setText = "hallo"
 
-
-        # Remember save next to file checkbox
-        s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
-        self.save_logs_next_to_file_checkbox.setChecked(s == True or s == "true")
-
-        # Populate the labels list (restoring checked states of scaes)
-        selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
-        qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
-        self.labels_groupbox.setEnabled(qgis_version_ok)
-        self.labels_qgis_warning_label.setVisible(not qgis_version_ok)
-        self.scale_checkboxes = OrderedDict()
-        for scale_key, scale_disp, scale_val in ExtractlabelsInterlisAlgorithm.AVAILABLE_SCALES:
-            checkbox = QCheckBox(f"{scale_disp} [1:{scale_val}]")
-            checkbox.setChecked(qgis_version_ok and scale_key in selected_scales)
-            self.scale_checkboxes[scale_key] = checkbox
-            self.labels_groupbox.layout().addWidget(checkbox)
 
     def on_finish(self):
         # Remember save next to file checkbox
