@@ -19,7 +19,9 @@ class GuiExport(QDialog):
         
         # test mit export model gui 13.3.2023
 #        loadUi(os.path.join(os.path.dirname(__file__), "gui_export.ui"), self)
-        loadUi(os.path.join(os.path.dirname(__file__), "gui_export_model_select.ui"), self)
+        # 16.3.2023
+        #loadUi(os.path.join(os.path.dirname(__file__), "gui_export_model_select.ui"), self)
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_export3.ui"), self)
 
         #7.7.2022 / neu in class
         exportmodellclassguiexport = ""
