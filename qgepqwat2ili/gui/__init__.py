@@ -461,7 +461,12 @@ def action_export(plugin):
         log_handler.setLevel(logging.INFO)
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
         with LoggingHandlerContext(log_handler):
-            qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+#18.3.2023
+            if emodel == "VSA_KEK_2019_LV95_current":
+                qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+            elif emodel == "DSS_2015_LV95":
+                qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+
         progress_dialog.setValue(50)
 
         # Cleanup
