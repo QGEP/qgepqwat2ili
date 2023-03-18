@@ -101,12 +101,12 @@ def qgep_export(selection=None, labels_file=None):
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
             # 5.9.2022 via get_tid statt getattr
-            # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
-            # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
 
-            # v3 obj_id statt name
-            datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
+            # v3 obj_id statt name / auskommentiert 18.3.2023
+            #datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
+            #datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
 
 
             # sonst "betreiberref": get_tid(row.fk_operator__REL),

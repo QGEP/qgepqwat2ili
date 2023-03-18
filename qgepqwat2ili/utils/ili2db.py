@@ -136,6 +136,7 @@ def get_xtf_model(xtf_file):
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
+
 def import_xtf_data(schema, xtf_file, log_path):
     logger.info("IMPORTING XTF DATA...")
     exec_(
