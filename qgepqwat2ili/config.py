@@ -20,13 +20,22 @@ DATA_FOLDER = os.path.join(BASE, "data")
 
 QGEP_DEFAULT_PGSERVICE = "pg_qgep"
 QGEP_SCHEMA = "qgep_od"
+# to do rename to ABWASSER_KEK_SCHEMA = "pg2ili_kek"
 ABWASSER_SCHEMA = "pg2ili_abwasser"
+
 ABWASSER_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_KEK_2019_2_d_LV95-20210120.ili")
 ABWASSER_ILI_MODEL_NAME = "VSA_KEK_2019_LV95"
 ABWASSER_ILI_MODEL_NAME_SIA405 = "SIA405_ABWASSER_2015_LV95"
 ABWASSER_ILI_EXPORT_MODEL = os.path.join(ILI_FOLDER, "SIA405_Abwasser_2015_2_d-20180417.ili")
 
+
+
 # neu 12.7.2022 weitere Modelle ergänzt                                  
+# to add for only SIA405 Abwasser
+ABWASSER_SIA405_SCHEMA = "pg2ili_sia405abwasser"
+# copy from ABWASSER_ILI_MODEL_NAME_SIA405 as has to be the same
+ABWASSER_SIA405_ILI_MODEL_NAME = ABWASSER_ILI_MODEL_NAME_SIA405
+
 ABWASSER_DSS_SCHEMA = "pg2ili_dss"
 ABWASSER_DSS_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_DSS_2015_2_d-20200330.ili")
 ABWASSER_DSS_ILI_MODEL_NAME = "DSS_2015_LV95"                                                                                  

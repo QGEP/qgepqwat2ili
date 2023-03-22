@@ -152,13 +152,6 @@ def action_import(plugin):
                 log_path,
                 recreate_schema=True,
                 )
-        elif imodel == "VSA_KEK_2019_LV95_neu":
-            create_ili_schema(
-                config.ABWASSER_KEK_SCHEMA,
-                config.ABWASSER_KEK_ILI_MODEL,
-                log_path,
-                recreate_schema=True,
-                )
         elif imodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
                 config.ABWASSER_SIA405_SCHEMA,
@@ -213,14 +206,6 @@ def action_import(plugin):
                 file_name,
                 log_path,
                 #imodel,
-                #"VSA_KEK_2019_LV95",
-            )
-        elif imodel == "VSA_KEK_2019_LV95_neu":
-            import_xtf_data(
-                config.ABWASSER_KEK_SCHEMA,
-                file_name,
-                log_path,
-                # imodel,
                 #"VSA_KEK_2019_LV95",
             )
         elif imodel == "SIA405_ABWASSER_2015_LV95":
@@ -356,7 +341,7 @@ def action_export(plugin):
         log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
         try:
             # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
-            if emodel == "VSA_KEK_2019_LV95_current":
+            if emodel == "VSA_KEK_2019_LV95":
             # alte Konfiguration behalten
                 create_ili_schema(
                     config.ABWASSER_SCHEMA,
@@ -364,17 +349,10 @@ def action_export(plugin):
                     log_path,
                     recreate_schema=True,
                     )
-            elif emodel == "VSA_KEK_2019_LV95":
-                create_ili_schema(
-                    config.ABWASSER_KEK_SCHEMA,
-                    config.ABWASSER_KEK_ILI_MODEL,
-                    log_path,
-                    recreate_schema=True,
-                    )
             elif emodel == "SIA405_ABWASSER_2015_LV95":
                 create_ili_schema(
                     config.ABWASSER_SIA405_SCHEMA,
-                    config.ABWASSER__SIA405_ILI_MODEL,
+                    config.ABWASSER_SIA405_ILI_MODEL,
                     log_path,
                     recreate_schema=True,
                     )
@@ -463,13 +441,26 @@ def action_export(plugin):
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
         with LoggingHandlerContext(log_handler):
 #18.3.2023
-            if emodel == "VSA_KEK_2019_LV95_current":
-                qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
-            elif emodel == "DSS_2015_LV95":
-                qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+# 22.3.2023 added try
+            try:
+                if emodel == "VSA_KEK_2019_LV95":
+                    qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
+                # 22.3.2023
+                elif emodel == "SIA405_ABWASSER_2015_LV95":
+                    qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                elif emodel == "DSS_2015_LV95":
+                    qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
 
-# to do - what happens if emodel has other value?
-
+    # to do - what happens if emodel has other value?
+            except CmdException:
+                progress_dialog.close()
+                show_failure(
+                    "Could not export data for model " + emodel,
+                    "Model not yet supported on export!",
+                    log_path,
+                )
+            return
+ 
         progress_dialog.setValue(50)
 
         # Cleanup
