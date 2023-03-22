@@ -447,15 +447,16 @@ def action_export(plugin):
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
 
+# 22.3.2023 - doppelt - schon unten
        # 12.7.2022 depending model selection
-        if emodel == "VSA_KEK_2019_LV95_current":
-            qgep_export(selection=export_dialog.selected_ids)
-        elif emodel == "VSA_KEK_2019_LV95":
-            qgepkek_export(selection=export_dialog.selected_ids)
-        elif emodel == "SIA405_ABWASSER_2015_LV95":
-            qgepsia405_export(selection=export_dialog.selected_ids)
-        elif emodel == "DSS_2015_LV95":
-            qgepdss_export(selection=export_dialog.selected_ids)
+#        if emodel == "VSA_KEK_2019_LV95_current":
+#            qgep_export(selection=export_dialog.selected_ids)
+#        elif emodel == "VSA_KEK_2019_LV95":
+#            qgepkek_export(selection=export_dialog.selected_ids)
+#        elif emodel == "SIA405_ABWASSER_2015_LV95":
+#            qgepsia405_export(selection=export_dialog.selected_ids)
+#        elif emodel == "DSS_2015_LV95":
+#            qgepdss_export(selection=export_dialog.selected_ids)
 
         log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
         log_handler.setLevel(logging.INFO)
@@ -466,6 +467,8 @@ def action_export(plugin):
                 qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
             elif emodel == "DSS_2015_LV95":
                 qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+
+# to do - what happens if emodel has other value?
 
         progress_dialog.setValue(50)
 
