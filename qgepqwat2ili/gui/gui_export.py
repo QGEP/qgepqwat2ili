@@ -66,9 +66,11 @@ class GuiExport(QDialog):
         self.comboBox_modelselection.clear()
         self.comboBox_modelselection.addItem("DSS_2015_LV95", "qgepdss")
         self.comboBox_modelselection.addItem("SIA405_ABWASSER_2015_LV95", "qgepsia405")
-        self.comboBox_modelselection.addItem("VSA_KEK_2019_LV95", "qgepkek" )
-        self.comboBox_modelselection.addItem("VSA_KEK_2019_LV95_current", "qgep" )
-
+        # self.comboBox_modelselection.addItem("VSA_KEK_2019_LV95", "qgepkek" )
+# 22.3.2023 adapted        #self.comboBox_modelselection.addItem("VSA_KEK_2019_LV95_current", "qgep" )
+        self.comboBox_modelselection.addItem("VSA_KEK_2019_LV95", "qgep" )
+        self.comboBox_modelselection.addItem("non_existing_model", "qgep" )
+        
         # neu 27.5.2022
         self.comboBox_modelselection.currentIndexChanged.connect(self.modelChanged)
   

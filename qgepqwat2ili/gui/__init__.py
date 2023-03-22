@@ -179,7 +179,7 @@ def action_import(plugin):
     except CmdException:
         progress_dialog.close()
         show_failure(
-            "Could not create the ili2pg schema" + imodel,
+            "Could not create the ili2pg schema" + emodel,
             "Open the logs for more details on the error.",
             log_path,
         )
@@ -441,8 +441,8 @@ def action_export(plugin):
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
         with LoggingHandlerContext(log_handler):
 #18.3.2023
-# 22.3.2023 added try
-            try:
+# 22.3.2023 added try - seems not to work
+#            try:
                 if emodel == "VSA_KEK_2019_LV95":
                     qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
                 # 22.3.2023
@@ -452,16 +452,16 @@ def action_export(plugin):
                     qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
 
     # to do - what happens if emodel has other value?
-            except CmdException:
-                progress_dialog.close()
-                show_failure(
-                    "Could not export data for model " + emodel,
-                    "Model not yet supported on export!",
-                    log_path,
-                )
-            return
+#            except CmdException:
+#                progress_dialog.close()
+#                show_failure(
+#                    "Could not export data for model " + emodel,
+#                    "Model not yet supported on export!",
+#                    log_path,
+ #               )
+ #           return
  
-        progress_dialog.setValue(50)
+        progress_dialog.setValue(51)
 
         # Cleanup
         tempdir.cleanup()
