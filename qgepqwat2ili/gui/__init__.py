@@ -530,7 +530,7 @@ def action_export(plugin):
                 log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
                 try:
                     export_xtf_data(
-                        config.ABWASSER_SCHEMA,
+                        config.ABWASSER_DSS_SCHEMA,
                         model_name,
                         export_model_name,
                         export_file_name,
