@@ -9,7 +9,7 @@ from qgis import processing
 from qgis.core import Qgis, QgsProject, QgsSettings
 from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QProgressDialog, QPushButton
 from qgis.utils import iface, plugins
-from QgisModelBaker.libili2db import globals, ili2dbconfig, ili2dbutils
+from QgisModelBaker.libs.modelbaker.iliwrapper import globals, ili2dbconfig, ili2dbutils
 
 from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config

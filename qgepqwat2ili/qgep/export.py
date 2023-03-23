@@ -104,6 +104,7 @@ def qgep_export(selection=None, labels_file=None):
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=get_tid(row),
             t_seq=0,
+            t_basket=0,
         )
         abwasser_session.add(metaattribute)
 
@@ -116,6 +117,7 @@ def qgep_export(selection=None, labels_file=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
+            "t_basket": 0,
         }
 
     def wastewater_structure_common(row):

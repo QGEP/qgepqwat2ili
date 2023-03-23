@@ -47,6 +47,7 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
                 "--createFk",
                 "--createFkIdx",
                 "--createTidCol",
+                "--createBasketCol",
                 "--importTid",
                 "--noSmartMapping",
                 "--defaultSrsCode",
