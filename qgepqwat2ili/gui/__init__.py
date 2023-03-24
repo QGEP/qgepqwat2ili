@@ -513,8 +513,8 @@ def action_export(plugin):
                         f"The created file is not a valid {model_name} XTF file.",
                         log_path,
                     )
-                    #continue
-                    return
+                    continue
+
                 progress_dialog.setValue(progress + 20)
 
         elif emodel == "DSS_2015_LV95":
@@ -577,8 +577,8 @@ def action_export(plugin):
                         f"The created file is not a valid {model_name} XTF file.",
                         log_path,
                     )
-                    #continue
-                    return
+                    continue
+
                 progress_dialog.setValue(progress + 20)
         else:
            progress_dialog.close()
