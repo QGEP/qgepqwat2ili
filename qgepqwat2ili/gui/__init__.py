@@ -513,8 +513,8 @@ def action_export(plugin):
                         f"The created file is not a valid {model_name} XTF file.",
                         log_path,
                     )
-                    continue
-
+                    #continue
+                    return
                 progress_dialog.setValue(progress + 20)
 
         elif emodel == "DSS_2015_LV95":
@@ -543,7 +543,8 @@ def action_export(plugin):
                         "Open the logs for more details on the error.",
                         log_path,
                     )
-                    continue
+                    #continue
+                    return
                 progress_dialog.setValue(progress + 10)
 
                 progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
