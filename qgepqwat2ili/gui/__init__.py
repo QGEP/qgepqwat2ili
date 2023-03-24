@@ -536,6 +536,13 @@ def action_export(plugin):
                         export_file_name,
                         log_path,
                     )
+                    
+                    #24.3.2023 moved up here
+                    show_success(
+                        "Sucess",
+                        f"Data successfully exported to {file_name_base}",
+                        os.path.dirname(log_path),
+                    )
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
@@ -543,8 +550,8 @@ def action_export(plugin):
                         "Open the logs for more details on the error.",
                         log_path,
                     )
-                    #continue
-                    return
+                    continue
+
                 progress_dialog.setValue(progress + 10)
 
                 progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
@@ -555,6 +562,14 @@ def action_export(plugin):
                         export_file_name,
                         log_path,
                     )
+                    
+                    #24.3.2023 moved up here
+                    show_success(
+                        "Sucess",
+                        f"Data successfully exported to {file_name_base}",
+                        os.path.dirname(log_path),
+                    )
+                    
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
@@ -562,8 +577,8 @@ def action_export(plugin):
                         f"The created file is not a valid {model_name} XTF file.",
                         log_path,
                     )
-                    continue
-
+                    #continue
+                    return
                 progress_dialog.setValue(progress + 20)
         else:
            progress_dialog.close()
@@ -576,11 +591,11 @@ def action_export(plugin):
             
         progress_dialog.setValue(100)
 
-        show_success(
-            "Sucess",
-            f"Data successfully exported to {file_name_base}",
-            os.path.dirname(log_path),
-        )
+        # show_success(
+            # "Sucess",
+            # f"Data successfully exported to {file_name_base}",
+            # os.path.dirname(log_path),
+        # )
 
     export_dialog.accepted.connect(action_do_export)
     export_dialog.adjustSize()
