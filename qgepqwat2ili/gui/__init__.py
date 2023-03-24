@@ -506,6 +506,13 @@ def action_export(plugin):
                         export_file_name,
                         log_path,
                     )
+                    
+                    #24.3.2023 moved up here
+                    show_success(
+                        "Sucess",
+                        f"Data successfully exported to {file_name_base}",
+                        os.path.dirname(log_path),
+                    )
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
@@ -536,13 +543,6 @@ def action_export(plugin):
                         export_file_name,
                         log_path,
                     )
-                    
-                    #24.3.2023 moved up here
-                    show_success(
-                        "Sucess",
-                        f"Data successfully exported to {file_name_base}",
-                        os.path.dirname(log_path),
-                    )
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
@@ -554,7 +554,7 @@ def action_export(plugin):
 
                 progress_dialog.setValue(progress + 10)
 
-                progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
+                progress_dialog.setLabelText(f"Validating the GEP output file [{model_name}]...")
                 QApplication.processEvents()
                 log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
                 try:
