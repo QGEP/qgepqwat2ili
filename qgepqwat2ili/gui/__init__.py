@@ -299,11 +299,11 @@ def action_import(plugin):
             precommit_callback=import_dialog.init_with_session,
         )
         else:
-        progress_dialog.close()
-        show_failure(
-             "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
-             "Open the logs for more details on the error.",
-             log_path,
+            progress_dialog.close()
+            show_failure(
+                 "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "Open the logs for more details on the error.",
+                 log_path,
         )
 
 
