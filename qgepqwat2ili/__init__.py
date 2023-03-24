@@ -66,6 +66,12 @@ def main(args):
         action="store_true",
         help="export the model SIA405_ABWASSER_2015_LV95 (instead of default VSA_KEK_2019_LV95)",
     )
+    # 24.3.2023
+    parser_qgep.add_argument(
+        "--export_dss",
+        action="store_true",
+        help="export the model DSS_2015_LV95 (instead of default VSA_KEK_2019_LV95)",
+    )
 
     parser_qwat = subparsers.add_parser(
         "qwat",
@@ -137,6 +143,10 @@ def main(args):
         if args.export_sia405:
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
             ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+        # 24.3.2023 added dss export
+        elif args.export_dss:
+            ILI_MODEL_NAME = config.ABWASSER_DSS_ILI_MODEL_NAME
+            ILI_EXPORT_MODEL_NAME = None
         else:
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
             ILI_EXPORT_MODEL_NAME = None
