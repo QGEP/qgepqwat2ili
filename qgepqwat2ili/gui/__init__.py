@@ -510,14 +510,15 @@ def action_export(plugin):
                     #24.3.2023 moved up here
                     show_success(
                         "Sucess",
-                        f"Data successfully exported to {file_name_base}",
+                        #f"Data successfully exported to {file_name_base}",
+                        f"Data successfully exported to {export_file_name}",
                         os.path.dirname(log_path),
                     )
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
                         "Invalid file",
-                        f"The created file is not a valid {model_name} XTF file.",
+                        f"The created file is not a valid {model_name} XTF file. Open the logs for more details on the error.",
                         log_path,
                     )
                     continue
@@ -574,7 +575,7 @@ def action_export(plugin):
                     progress_dialog.close()
                     show_failure(
                         "Invalid file",
-                        f"The created file is not a valid {model_name} XTF file.",
+                        f"The created file is not a valid {model_name} XTF file. Open the logs for more details on the error.",
                         log_path,
                     )
                     continue
