@@ -67,7 +67,7 @@ def validate_xtf_data(xtf_file, log_path):
         f'"{config.JAVA}" -jar "{config.ILIVALIDATOR}" --modeldir "{config.ILI_FOLDER}" --log "{log_path}" "{xtf_file}"'
     )
 
-# 22.7.2022 sb [WIP]
+# 22.7.2022 sb 
 def get_xtf_model(xtf_file):
     logger.info("GET XTF MODEL... ")
     # logger.info("vorher" + imodel)
@@ -123,7 +123,7 @@ def get_xtf_model(xtf_file):
     
     if impmodel == "not found":
         # write that MODEL was not found
-        logger.info("MODEL was " + impmodel)
+        logger.info("MODEL was " + impmodel + " was not found!")
         
     # im Moment fix gesetzt
     # 23.7.2022 import_dialog nicht bekannt so
