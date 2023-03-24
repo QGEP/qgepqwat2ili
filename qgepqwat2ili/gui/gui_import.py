@@ -32,7 +32,7 @@ class GuiImport(QDialog):
 
         # No required here, but this way we load before opening the dialog
         # 24.3.2023 Problem with additional models, as we don't know yet which model will be imported - move to import_.py qgep_import
-        #get_qgep_model()
+        get_qgep_model()
 
     def init_with_session(self, session: Session):
         """
