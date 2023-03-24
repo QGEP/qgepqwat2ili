@@ -171,7 +171,7 @@ def action_import(plugin):
             # breakpoint()
             progress_dialog.close()
             show_failure(
-                 "MODEL " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "MODEL " + imodel + " schema creation failed: Not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
                  "Open the logs for more details on the error.",
                  log_path,
             )
@@ -179,7 +179,7 @@ def action_import(plugin):
     except CmdException:
         progress_dialog.close()
         show_failure(
-            "Could not create the ili2pg schema" + emodel,
+            "Could not create the ili2pg schema" + imodel,
             "Open the logs for more details on the error.",
             log_path,
         )
@@ -257,10 +257,10 @@ def action_import(plugin):
         qgep_import(
             precommit_callback=import_dialog.init_with_session,
         )
-    elif imodel == "VSA_KEK_2019_LV95_neu":
-        qgepkek_import(
-            precommit_callback=import_dialog.init_with_session,
-        )
+    # elif imodel == "VSA_KEK_2019_LV95_neu":
+        # qgepkek_import(
+            # precommit_callback=import_dialog.init_with_session,
+        # )
     elif imodel == "SIA405_ABWASSER_2015_LV95":
         qgepsia405_import(
             precommit_callback=import_dialog.init_with_session,
