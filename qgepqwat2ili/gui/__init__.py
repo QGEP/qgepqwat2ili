@@ -155,7 +155,7 @@ def action_import(plugin):
         elif imodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
                 config.ABWASSER_SIA405_SCHEMA,
-                config.ABWASSER__SIA405_ILI_MODEL,
+                config.ABWASSER_SIA405_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
                 )
