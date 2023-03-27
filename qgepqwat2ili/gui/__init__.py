@@ -358,6 +358,8 @@ def action_export(plugin):
                     recreate_schema=True,
                     )
 
+            #to do 27.3.2023 else instead of except? discuss with OD
+
         except CmdException:
             progress_dialog.close()
             show_failure(
