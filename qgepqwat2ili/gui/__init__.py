@@ -252,30 +252,6 @@ def action_import(plugin):
     #progress_dialog.setValue(100)
     progress_dialog.setValue(80)
 
-    # 23.7.2022 additional models
-    if imodel == "VSA_KEK_2019_LV95":
-        qgep_import(
-            precommit_callback=import_dialog.init_with_session,
-        )
-    # elif imodel == "VSA_KEK_2019_LV95_neu":
-        # qgepkek_import(
-            # precommit_callback=import_dialog.init_with_session,
-        # )
-    elif imodel == "SIA405_ABWASSER_2015_LV95":
-        qgepsia405_import(
-            precommit_callback=import_dialog.init_with_session,
-        )
-    elif imodel == "DSS_2015_LV95":
-        qgepdss_import(
-            precommit_callback=import_dialog.init_with_session,
-        )
-    else:
-            progress_dialog.close()
-            show_failure(
-                 "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
-                 "Open the logs for more details on the error.",
-                 log_path,
-            )
 
     # 24.7.2022
     progress_dialog.setValue(100)
@@ -284,29 +260,29 @@ def action_import(plugin):
     log_handler.setLevel(logging.INFO)
     log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
     with LoggingHandlerContext(log_handler):
-        qgep_import(
-        precommit_callback=import_dialog.init_with_session,
-        )
-# # 24.3.2023 added model dependency
-        # if imodel == "VSA_KEK_2019_LV95":
-            # qgep_import(
-                # precommit_callback=import_dialog.init_with_session,
-            # )
-        # elif imodel == "SIA405_ABWASSER_2015_LV95":
-            # qgepsia405_import(
-            # precommit_callback=import_dialog.init_with_session,
-        # )
-        # elif imodel == "DSS_2015_LV95":
-            # qgepdss_import(
-            # precommit_callback=import_dialog.init_with_session,
-        # )
-        # else:
-            # progress_dialog.close()
-            # show_failure(
-                 # "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
-                 # "Open the logs for more details on the error.",
-                 # log_path,
-        # )
+#        qgep_import(
+#        precommit_callback=import_dialog.init_with_session,
+#        )
+# 24.3.2023 added model dependency
+        if imodel == "VSA_KEK_2019_LV95":
+            qgep_import(
+            precommit_callback=import_dialog.init_with_session,
+            )
+        elif imodel == "SIA405_ABWASSER_2015_LV95":
+            qgepsia405_import(
+            precommit_callback=import_dialog.init_with_session,
+            )
+        elif imodel == "DSS_2015_LV95":
+            qgepdss_import(
+            precommit_callback=import_dialog.init_with_session,
+            )
+        else:
+            progress_dialog.close()
+            show_failure(
+                 "Import xtf in qgep with " + imodel + " not yet supported for INTERLIS import - no configuration available in config.py / _init_.py",
+                 "Open the logs for more details on the error.",
+                 log_path,
+            )
 
 
 def action_export(plugin):
@@ -353,8 +329,6 @@ def action_export(plugin):
         progress_dialog.show()
 
         # Prepare the temporary ili2pg model
-        # 12.7.2022
-        # progress_dialog.setLabelText("Creating ili schema...")
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
         QApplication.processEvents()
@@ -444,17 +418,6 @@ def action_export(plugin):
         # Export to the temporary ili2pg model
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
-
-# 22.3.2023 - doppelt - schon unten
-       # 12.7.2022 depending model selection
-#        if emodel == "VSA_KEK_2019_LV95_current":
-#            qgep_export(selection=export_dialog.selected_ids)
-#        elif emodel == "VSA_KEK_2019_LV95":
-#            qgepkek_export(selection=export_dialog.selected_ids)
-#        elif emodel == "SIA405_ABWASSER_2015_LV95":
-#            qgepsia405_export(selection=export_dialog.selected_ids)
-#        elif emodel == "DSS_2015_LV95":
-#            qgepdss_export(selection=export_dialog.selected_ids)
 
         log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
         log_handler.setLevel(logging.INFO)
