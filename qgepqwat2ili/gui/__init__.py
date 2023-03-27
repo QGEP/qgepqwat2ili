@@ -433,16 +433,14 @@ def action_export(plugin):
                     qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 elif emodel == "DSS_2015_LV95":
                     qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
-
-    # to do - what happens if emodel has other value?
-#            except CmdException:
-#                progress_dialog.close()
-#                show_failure(
-#                    "Could not export data for model " + emodel,
-#                    "Model not yet supported on export!",
-#                    log_path,
- #               )
- #           return
+                else:
+                    progress_dialog.close()
+                    show_failure(
+                         "Could not export data for model " + emodel,
+                         "Model not yet supported on export!",
+                         log_path,
+                    )
+                    return
  
         progress_dialog.setValue(51)
 
