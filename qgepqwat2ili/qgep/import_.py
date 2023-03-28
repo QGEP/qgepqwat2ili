@@ -106,6 +106,8 @@ def qgep_import(precommit_callback=None):
             instance = create_or_update(QGEP.organisation, identifier=name)
             qgep_session.add(instance)
 
+            logger.info("New organisation created: " + name)
+            
         return instance
 
     def metaattribute_common(metaattribute):
