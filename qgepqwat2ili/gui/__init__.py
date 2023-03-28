@@ -21,7 +21,7 @@ from ..qgepdss.export import qgep_export as qgepdss_export
 from ..qgepdss.import_ import qgep_import as qgepdss_import
 
 # 28.3.2023 additional import for sia405, export to be discussed further
-# from ..qgepsia405.export import qgep_export as qgepdss_export
+from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
 
 from ..utils.ili2db import (
@@ -337,41 +337,52 @@ def action_export(plugin):
 
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
-        try:
-            # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
-            if emodel == "VSA_KEK_2019_LV95":
-            # alte Konfiguration behalten
-                create_ili_schema(
-                    config.ABWASSER_SCHEMA,
-                    config.ABWASSER_ILI_MODEL,
-                    log_path,
-                    recreate_schema=True,
-                    )
-            elif emodel == "SIA405_ABWASSER_2015_LV95":
-                create_ili_schema(
-                    config.ABWASSER_SIA405_SCHEMA,
-                    config.ABWASSER_SIA405_ILI_MODEL,
-                    log_path,
-                    recreate_schema=True,
-                    )
-            elif emodel == "DSS_2015_LV95":
-                create_ili_schema(
-                    config.ABWASSER_DSS_SCHEMA,
-                    config.ABWASSER_DSS_ILI_MODEL,
-                    log_path,
-                    recreate_schema=True,
-                    )
+# 28.3.2023 replaced by else        try:
 
-            #to do 27.3.2023 else instead of except? discuss with OD
+        # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
+        if emodel == "VSA_KEK_2019_LV95":
+        # alte Konfiguration behalten
+            create_ili_schema(
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        elif emodel == "SIA405_ABWASSER_2015_LV95":
+            create_ili_schema(
+                config.ABWASSER_SIA405_SCHEMA,
+                config.ABWASSER_SIA405_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
+        elif emodel == "DSS_2015_LV95":
+            create_ili_schema(
+                config.ABWASSER_DSS_SCHEMA,
+                config.ABWASSER_DSS_ILI_MODEL,
+                log_path,
+                recreate_schema=True,
+                )
 
-        except CmdException:
+        #to do 27.3.2023 else instead of except? discuss with OD
+        else:
             progress_dialog.close()
             show_failure(
-                "Could not create the ili2pg schema",
-                "Open the logs for more details on the error.",
-                log_path,
+                "Could not create the ili2pg schema - selected model not supported",
+                emodel,
+                None,
             )
             return
+
+
+# 28.3.2023 replaced by else            
+        # except CmdException:
+            # progress_dialog.close()
+            # show_failure(
+                # "Could not create the ili2pg schema",
+                # "Open the logs for more details on the error.",
+                # log_path,
+            # )
+            # return
 
 #        progress_dialog.setValue(25)
         progress_dialog.setValue(5)
@@ -434,9 +445,9 @@ def action_export(plugin):
 #            try:
                 if emodel == "VSA_KEK_2019_LV95":
                     qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
-                # 22.3.2023
+                # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
                 elif emodel == "SIA405_ABWASSER_2015_LV95":
-                    qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                    qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 elif emodel == "DSS_2015_LV95":
                     qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 else:
