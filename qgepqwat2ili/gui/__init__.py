@@ -20,6 +20,10 @@ from ..qgep.import_ import qgep_import
 from ..qgepdss.export import qgep_export as qgepdss_export
 from ..qgepdss.import_ import qgep_import as qgepdss_import
 
+# 28.3.2023 additional import for sia405, export to be discussed further
+# from ..qgepdss.export import qgep_export as qgepdss_export
+from ..qgepdss.import_ import qgep_import as qgepsia405_import
+
 from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
