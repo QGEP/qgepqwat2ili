@@ -39,8 +39,29 @@ def qgep_import(precommit_callback=None):
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
+
+    # 29.3.2023 Add additional DEREFERABLE constraints
+    # ALTER TABLE qgep_od.overflow ADD CONSTRAINT rel_overflow_overflow_to FOREIGN KEY (fk_overflow_to) REFERENCES qgep_od.wastewater_node(obj_id) ON UPDATE CASCADE ON DELETE set null;
+
+    qgep_session.execute("ALTER TABLE qgep_od.overflow ALTER CONSTRAINT rel_overflow_overflow_to DEFERRABLE;")
+    logger.info("ALTER TABLE qgep_od.overflow ALTER CONSTRAINT rel_overflow_overflow_to DEFERRABLE;")
+    
+    qgep_session.execute("ALTER TABLE qgep_od.throttle_shut_off_unit ALTER CONSTRAINT rel_throttle_shut_off_unit_wastewater_node DEFERRABLE;")
+    logger.info("ALTER TABLE qgep_od.throttle_shut_off_unit ALTER CONSTRAINT rel_throttle_shut_off_unit_wastewater_node DEFERRABLE;")
+    
+    qgep_session.execute("ALTER TABLE qgep_od.tank_emptying ALTER CONSTRAINT rel_tank_emptying_overflow DEFERRABLE;")
+    logger.info("ALTER TABLE qgep_od.tank_emptying ALTER CONSTRAINT rel_tank_emptying_overflow DEFERRABLE;")
+
+    qgep_session.execute("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
+    logger.info("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
+
+    qgep_session.execute("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
+    logger.info("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
+
     # Allow to insert rows with cyclic dependencies at once
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
+
+
 
     def get_vl_instance(vl_table, value):
         """
