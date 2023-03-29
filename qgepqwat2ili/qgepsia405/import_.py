@@ -924,171 +924,172 @@ def qgep_import(precommit_callback=None):
     # VSA_KEK classes
     ########################################
 
-    logger.info("Importing ABWASSER.untersuchung, ABWASSER.metaattribute -> QGEP.examination")
-    for row, metaattribute in abwasser_session.query(ABWASSER.untersuchung, ABWASSER.metaattribute).join(
-        ABWASSER.metaattribute
-    ):
+    # logger.info("Importing ABWASSER.untersuchung, ABWASSER.metaattribute -> QGEP.examination")
+    # for row, metaattribute in abwasser_session.query(ABWASSER.untersuchung, ABWASSER.metaattribute).join(
+        # ABWASSER.metaattribute
+    # ):
 
-        logger.warning(
-            "QGEP examination.active_zone has no equivalent in the interlis model. This field will be null."
-        )
-        examination = create_or_update(
-            QGEP.examination,
-            **base_common(row),
-            **metaattribute_common(metaattribute),
-            # --- maintenance_event ---
-            # active_zone=row.REPLACE_ME,  # TODO : found no matching field for this in interlis, confirm this is ok
-            base_data=row.datengrundlage,
-            cost=row.kosten,
-            data_details=row.detaildaten,
-            duration=row.dauer,
-            fk_operating_company=row.ausfuehrende_firmaref__REL.obj_id if row.ausfuehrende_firmaref__REL else None,
-            identifier=row.bezeichnung,
-            kind__REL=get_vl_instance(QGEP.maintenance_event_kind, row.art),
-            operator=row.ausfuehrender,
-            reason=row.grund,
-            remark=row.bemerkung,
-            result=row.ergebnis,
-            status__REL=get_vl_instance(QGEP.maintenance_event_status, row.astatus),
-            time_point=row.zeitpunkt,
-            # --- examination ---
-            equipment=row.geraet,
-            fk_reach_point=row.haltungspunktref__REL.obj_id if row.haltungspunktref__REL else None,
-            from_point_identifier=row.vonpunktbezeichnung,
-            inspected_length=row.inspizierte_laenge,
-            recording_type__REL=get_vl_instance(QGEP.examination_recording_type, row.erfassungsart),
-            to_point_identifier=row.bispunktbezeichnung,
-            vehicle=row.fahrzeug,
-            videonumber=row.videonummer,
-            weather__REL=get_vl_instance(QGEP.examination_weather, row.witterung),
-        )
-        qgep_session.add(examination)
+        # logger.warning(
+            # "QGEP examination.active_zone has no equivalent in the interlis model. This field will be null."
+        # )
+        # examination = create_or_update(
+            # QGEP.examination,
+            # **base_common(row),
+            # **metaattribute_common(metaattribute),
+            # # --- maintenance_event ---
+            # # active_zone=row.REPLACE_ME,  # TODO : found no matching field for this in interlis, confirm this is ok
+            # base_data=row.datengrundlage,
+            # cost=row.kosten,
+            # data_details=row.detaildaten,
+            # duration=row.dauer,
+            # fk_operating_company=row.ausfuehrende_firmaref__REL.obj_id if row.ausfuehrende_firmaref__REL else None,
+            # identifier=row.bezeichnung,
+            # kind__REL=get_vl_instance(QGEP.maintenance_event_kind, row.art),
+            # operator=row.ausfuehrender,
+            # reason=row.grund,
+            # remark=row.bemerkung,
+            # result=row.ergebnis,
+            # status__REL=get_vl_instance(QGEP.maintenance_event_status, row.astatus),
+            # time_point=row.zeitpunkt,
+            # # --- examination ---
+            # equipment=row.geraet,
+            # fk_reach_point=row.haltungspunktref__REL.obj_id if row.haltungspunktref__REL else None,
+            # from_point_identifier=row.vonpunktbezeichnung,
+            # inspected_length=row.inspizierte_laenge,
+            # recording_type__REL=get_vl_instance(QGEP.examination_recording_type, row.erfassungsart),
+            # to_point_identifier=row.bispunktbezeichnung,
+            # vehicle=row.fahrzeug,
+            # videonumber=row.videonummer,
+            # weather__REL=get_vl_instance(QGEP.examination_weather, row.witterung),
+        # )
+        # qgep_session.add(examination)
 
-        # In QGEP, relation between maintenance_event and wastewater_structure is done with
-        # an association table instead of a foreign key on maintenance_event.
-        # NOTE : this may change in future versions of VSA_KEK
-        if row.abwasserbauwerkref:
-            # TODO : for now, this will not work unless the related wastewaterstructures are part of the import,
-            # as ili2pg imports dangling references as NULL.
-            # The day ili2pg works, we probably need to double-check whether the referenced wastewater structure exists prior
-            # to creating this association.
-            # Soft matching based on from/to_point_identifier will be done in the GUI data checking process.
-            exam_to_wastewater_structure = create_or_update(
-                QGEP.re_maintenance_event_wastewater_structure,
-                fk_wastewater_structure=row.abwasserbauwerkref,
-                fk_maintenance_event=row.obj_id,
-            )
-            qgep_session.add(exam_to_wastewater_structure)
+        # # In QGEP, relation between maintenance_event and wastewater_structure is done with
+        # # an association table instead of a foreign key on maintenance_event.
+        # # NOTE : this may change in future versions of VSA_KEK
+        # if row.abwasserbauwerkref:
+            # # TODO : for now, this will not work unless the related wastewaterstructures are part of the import,
+            # # as ili2pg imports dangling references as NULL.
+            # # The day ili2pg works, we probably need to double-check whether the referenced wastewater structure exists prior
+            # # to creating this association.
+            # # Soft matching based on from/to_point_identifier will be done in the GUI data checking process.
+            # exam_to_wastewater_structure = create_or_update(
+                # QGEP.re_maintenance_event_wastewater_structure,
+                # fk_wastewater_structure=row.abwasserbauwerkref,
+                # fk_maintenance_event=row.obj_id,
+            # )
+            # qgep_session.add(exam_to_wastewater_structure)
 
-        print(".", end="")
-    logger.info("done")
+        # print(".", end="")
+    # logger.info("done")
 
-    logger.info("Importing ABWASSER.normschachtschaden, ABWASSER.metaattribute -> QGEP.damage_manhole")
-    for row, metaattribute in abwasser_session.query(ABWASSER.normschachtschaden, ABWASSER.metaattribute).join(
-        ABWASSER.metaattribute
-    ):
-        # Note : in QGEP, some attributes are on the base damage class,
-        # while they are on the normschachtschaden/kanalschaden subclasses
-        # in the ili2pg mode.
-        # Concerned attributes : distanz, quantifizierung1, quantifizierung2, schadenlageanfang, schadenlageende
+    # logger.info("Importing ABWASSER.normschachtschaden, ABWASSER.metaattribute -> QGEP.damage_manhole")
+    # for row, metaattribute in abwasser_session.query(ABWASSER.normschachtschaden, ABWASSER.metaattribute).join(
+        # ABWASSER.metaattribute
+    # ):
+        # # Note : in QGEP, some attributes are on the base damage class,
+        # # while they are on the normschachtschaden/kanalschaden subclasses
+        # # in the ili2pg mode.
+        # # Concerned attributes : distanz, quantifizierung1, quantifizierung2, schadenlageanfang, schadenlageende
 
-        damage_manhole = create_or_update(
-            QGEP.damage_manhole,
-            **base_common(row),
-            **metaattribute_common(metaattribute),
-            # --- damage ---
-            comments=row.anmerkung,
-            connection__REL=get_vl_instance(QGEP.damage_connection, row.verbindung),
-            damage_begin=row.schadenlageanfang,
-            damage_end=row.schadenlageende,
-            damage_reach=row.streckenschaden,
-            distance=row.distanz,
-            fk_examination=row.untersuchungref__REL.obj_id if row.untersuchungref__REL else None,
-            quantification1=row.quantifizierung1,
-            quantification2=row.quantifizierung2,
-            single_damage_class__REL=get_vl_instance(QGEP.damage_single_damage_class, row.einzelschadenklasse),
-            video_counter=row.videozaehlerstand,
-            view_parameters=row.ansichtsparameter,
-            # --- damage_manhole ---
-            manhole_damage_code__REL=get_vl_instance(QGEP.damage_manhole_manhole_damage_code, row.schachtschadencode),
-            manhole_shaft_area__REL=get_vl_instance(QGEP.damage_manhole_manhole_shaft_area, row.schachtbereich),
-        )
-        qgep_session.add(damage_manhole)
-        print(".", end="")
-    logger.info("done")
+        # damage_manhole = create_or_update(
+            # QGEP.damage_manhole,
+            # **base_common(row),
+            # **metaattribute_common(metaattribute),
+            # # --- damage ---
+            # comments=row.anmerkung,
+            # connection__REL=get_vl_instance(QGEP.damage_connection, row.verbindung),
+            # damage_begin=row.schadenlageanfang,
+            # damage_end=row.schadenlageende,
+            # damage_reach=row.streckenschaden,
+            # distance=row.distanz,
+            # fk_examination=row.untersuchungref__REL.obj_id if row.untersuchungref__REL else None,
+            # quantification1=row.quantifizierung1,
+            # quantification2=row.quantifizierung2,
+            # single_damage_class__REL=get_vl_instance(QGEP.damage_single_damage_class, row.einzelschadenklasse),
+            # video_counter=row.videozaehlerstand,
+            # view_parameters=row.ansichtsparameter,
+            # # --- damage_manhole ---
+            # manhole_damage_code__REL=get_vl_instance(QGEP.damage_manhole_manhole_damage_code, row.schachtschadencode),
+            # manhole_shaft_area__REL=get_vl_instance(QGEP.damage_manhole_manhole_shaft_area, row.schachtbereich),
+        # )
+        # qgep_session.add(damage_manhole)
+        # print(".", end="")
+    # logger.info("done")
 
-    logger.info("Importing ABWASSER.kanalschaden, ABWASSER.metaattribute -> QGEP.damage_channel")
-    for row, metaattribute in abwasser_session.query(ABWASSER.kanalschaden, ABWASSER.metaattribute).join(
-        ABWASSER.metaattribute
-    ):
-        # Note : in QGEP, some attributes are on the base damage class,
-        # while they are on the normschachtschaden/kanalschaden subclasses
-        # in the ili2pg mode.
-        # Concerned attributes : distanz, quantifizierung1, quantifizierung2, schadenlageanfang, schadenlageende
-        damage_channel = create_or_update(
-            QGEP.damage_channel,
-            **base_common(row),
-            **metaattribute_common(metaattribute),
-            # --- damage ---
-            comments=row.anmerkung,
-            connection__REL=get_vl_instance(QGEP.damage_connection, row.verbindung),
-            damage_begin=row.schadenlageanfang,
-            damage_end=row.schadenlageende,
-            damage_reach=row.streckenschaden,
-            distance=row.distanz,
-            fk_examination=row.untersuchungref__REL.obj_id if row.untersuchungref__REL else None,
-            quantification1=row.quantifizierung1,
-            quantification2=row.quantifizierung2,
-            single_damage_class__REL=get_vl_instance(QGEP.damage_single_damage_class, row.einzelschadenklasse),
-            video_counter=row.videozaehlerstand,
-            view_parameters=row.ansichtsparameter,
-            # --- damage_channel ---
-            channel_damage_code__REL=get_vl_instance(QGEP.damage_channel_channel_damage_code, row.kanalschadencode),
-        )
-        qgep_session.add(damage_channel)
-        print(".", end="")
-    logger.info("done")
+    # logger.info("Importing ABWASSER.kanalschaden, ABWASSER.metaattribute -> QGEP.damage_channel")
+    # for row, metaattribute in abwasser_session.query(ABWASSER.kanalschaden, ABWASSER.metaattribute).join(
+        # ABWASSER.metaattribute
+    # ):
+        # # Note : in QGEP, some attributes are on the base damage class,
+        # # while they are on the normschachtschaden/kanalschaden subclasses
+        # # in the ili2pg mode.
+        # # Concerned attributes : distanz, quantifizierung1, quantifizierung2, schadenlageanfang, schadenlageende
+        # damage_channel = create_or_update(
+            # QGEP.damage_channel,
+            # **base_common(row),
+            # **metaattribute_common(metaattribute),
+            # # --- damage ---
+            # comments=row.anmerkung,
+            # connection__REL=get_vl_instance(QGEP.damage_connection, row.verbindung),
+            # damage_begin=row.schadenlageanfang,
+            # damage_end=row.schadenlageende,
+            # damage_reach=row.streckenschaden,
+            # distance=row.distanz,
+            # fk_examination=row.untersuchungref__REL.obj_id if row.untersuchungref__REL else None,
+            # quantification1=row.quantifizierung1,
+            # quantification2=row.quantifizierung2,
+            # single_damage_class__REL=get_vl_instance(QGEP.damage_single_damage_class, row.einzelschadenklasse),
+            # video_counter=row.videozaehlerstand,
+            # view_parameters=row.ansichtsparameter,
+            # # --- damage_channel ---
+            # channel_damage_code__REL=get_vl_instance(QGEP.damage_channel_channel_damage_code, row.kanalschadencode),
+        # )
+        # qgep_session.add(damage_channel)
+        # print(".", end="")
+    # logger.info("done")
 
-    logger.info("Importing ABWASSER.datentraeger, ABWASSER.metaattribute -> QGEP.data_media")
-    for row, metaattribute in abwasser_session.query(ABWASSER.datentraeger, ABWASSER.metaattribute).join(
-        ABWASSER.metaattribute
-    ):
-        data_media = create_or_update(
-            QGEP.data_media,
-            **base_common(row),
-            **metaattribute_common(metaattribute),
-            # --- data_media ---
-            identifier=row.bezeichnung,
-            kind__REL=get_vl_instance(QGEP.data_media_kind, row.art),
-            location=row.standort,
-            path=row.pfad,
-            remark=row.bemerkung,
-        )
-        qgep_session.add(data_media)
-        print(".", end="")
-    logger.info("done")
+    # logger.info("Importing ABWASSER.datentraeger, ABWASSER.metaattribute -> QGEP.data_media")
+    # for row, metaattribute in abwasser_session.query(ABWASSER.datentraeger, ABWASSER.metaattribute).join(
+        # ABWASSER.metaattribute
+    # ):
+        # data_media = create_or_update(
+            # QGEP.data_media,
+            # **base_common(row),
+            # **metaattribute_common(metaattribute),
+            # # --- data_media ---
+            # identifier=row.bezeichnung,
+            # kind__REL=get_vl_instance(QGEP.data_media_kind, row.art),
+            # location=row.standort,
+            # path=row.pfad,
+            # remark=row.bemerkung,
+        # )
+        # qgep_session.add(data_media)
+        # print(".", end="")
+    # logger.info("done")
 
-    logger.info("Importing ABWASSER.datei, ABWASSER.metaattribute -> QGEP.file")
-    for row, metaattribute in abwasser_session.query(ABWASSER.datei, ABWASSER.metaattribute).join(
-        ABWASSER.metaattribute
-    ):
-        file = create_or_update(
-            QGEP.file,
-            **base_common(row),
-            **metaattribute_common(metaattribute),
-            # --- file ---
-            class__REL=get_vl_instance(QGEP.file_class, row.klasse),
-            fk_data_media=row.datentraegerref__REL.obj_id,
-            identifier=row.bezeichnung,
-            kind__REL=get_vl_instance(QGEP.file_kind, row.art),
-            object=row.objekt,
-            path_relative=row.relativpfad,
-            remark=row.bemerkung,
-        )
-        qgep_session.add(file)
-        print(".", end="")
-    logger.info("done")
+    # logger.info("Importing ABWASSER.datei, ABWASSER.metaattribute -> QGEP.file")
+    # for row, metaattribute in abwasser_session.query(ABWASSER.datei, ABWASSER.metaattribute).join(
+        # ABWASSER.metaattribute
+    # ):
+        # file = create_or_update(
+            # QGEP.file,
+            # **base_common(row),
+            # **metaattribute_common(metaattribute),
+            # # --- file ---
+            # class__REL=get_vl_instance(QGEP.file_class, row.klasse),
+            # fk_data_media=row.datentraegerref__REL.obj_id,
+            # identifier=row.bezeichnung,
+            # kind__REL=get_vl_instance(QGEP.file_kind, row.art),
+            # object=row.objekt,
+            # path_relative=row.relativpfad,
+            # remark=row.bemerkung,
+        # )
+        # qgep_session.add(file)
+        # print(".", end="")
+    # logger.info("done")
 
+ 
     # Recreate the triggers
     # qgep_session.execute('SELECT qgep_sys.create_symbology_triggers();')
 
