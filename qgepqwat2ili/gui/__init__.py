@@ -444,11 +444,14 @@ def action_export(plugin):
 # 22.3.2023 added try - seems not to work
 #            try:
                 if emodel == "VSA_KEK_2019_LV95":
+                    logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
                     qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
                 # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
                 elif emodel == "SIA405_ABWASSER_2015_LV95":
+                    logger.info("Start Exporting SIA405_ABWASSER_2015_LV95 - qgepsia405_export")
                     qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 elif emodel == "DSS_2015_LV95":
+                    logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
                     qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 else:
                     progress_dialog.close()
