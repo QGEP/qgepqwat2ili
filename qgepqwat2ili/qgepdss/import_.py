@@ -3765,14 +3765,18 @@ def qgep_import(precommit_callback=None):
     # Calling the precommit callback if provided, allowing to filter before final import
     if precommit_callback:
         precommit_callback(qgep_session)
+        logger.info("precommit_callback(qgep_session)")
     else:
         qgep_session.commit()
         qgep_session.close()
     abwasser_session.close()
-
+    logger.info("abwasser_session closed")
+    
     # TODO : put this in an "finally" block (or context handler) to make sure it's executed
     # even if there's an exception
     post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+    logger.info("re-enabling symbology triggers")
     post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
+    logger.info("symbology triggers successfully created!")
     post_session.commit()
     post_session.close()
