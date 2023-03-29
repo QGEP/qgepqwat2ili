@@ -358,21 +358,6 @@ def qgep_import(precommit_callback=None):
             "subsidies": row.subventionen,
         }
 
-    logger.info("Importing ABWASSER.erhaltungsereignis_abwasserbauwerkassoc -> QGEP.re_maintenance_event_wastewater_structure")
-    for row in abwasser_session.query(ABWASSER.erhaltungsereignis_abwasserbauwerkassoc
-    ):
-        re_maintenance_event_wastewater_structure = create_or_update(
-            QGEP.re_maintenance_event_wastewater_structure,
-            #**base_common(row),
-            #**metaattribute_common(metaattribute),
-            # --- maintenance_event_wastewater_structure ---
-            fk_maintenance_event=get_pk(row.erhaltungsereignis_abwasserbauwerkassocref__REL),
-            fk_wastewater_structure=get_pk(row.abwasserbauwerkref__REL),
-        )
-        qgep_session.add(re_maintenance_event_wastewater_structure)
-        print(".", end="")
-    logger.info("done")
-
     logger.info("Importing ABWASSER.mutation, ABWASSER.metaattribute -> QGEP.mutation")
     for row, metaattribute in abwasser_session.query(ABWASSER.mutation, ABWASSER.metaattribute).join(
         ABWASSER.metaattribute
@@ -3758,6 +3743,20 @@ def qgep_import(precommit_callback=None):
         print(".", end="")
     logger.info("done")
 
+    logger.info("Importing ABWASSER.erhaltungsereignis_abwasserbauwerkassoc -> QGEP.re_maintenance_event_wastewater_structure")
+    for row in abwasser_session.query(ABWASSER.erhaltungsereignis_abwasserbauwerkassoc
+    ):
+        re_maintenance_event_wastewater_structure = create_or_update(
+            QGEP.re_maintenance_event_wastewater_structure,
+            #**base_common(row),
+            #**metaattribute_common(metaattribute),
+            # --- maintenance_event_wastewater_structure ---
+            fk_maintenance_event=get_pk(row.erhaltungsereignis_abwasserbauwerkassocref__REL),
+            fk_wastewater_structure=get_pk(row.abwasserbauwerkref__REL),
+        )
+        qgep_session.add(re_maintenance_event_wastewater_structure)
+        print(".", end="")
+    logger.info("done")
 
 
     # Recreate the triggers
