@@ -55,8 +55,8 @@ def qgep_import(precommit_callback=None):
     qgep_session.execute("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
     logger.info("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
 
-    qgep_session.execute("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
-    logger.info("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
+    # qgep_session.execute("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
+    # logger.info("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
 
     # Allow to insert rows with cyclic dependencies at once
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
