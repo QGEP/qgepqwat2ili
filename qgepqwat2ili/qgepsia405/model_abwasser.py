@@ -2,7 +2,8 @@ from sqlalchemy.ext.automap import automap_base
 
 from .. import config, utils
 
-SCHEMA = config.ABWASSER_SCHEMA
+#SCHEMA = config.ABWASSER_SCHEMA
+SCHEMA = config.ABWASSER_SIA405_SCHEMA
 
 Base = automap_base()
 
@@ -110,39 +111,39 @@ class bankett(bauwerksteil):
 # VSA_KEK
 
 
-class erhaltungsereignis(sia405_baseclass):
-    __tablename__ = "erhaltungsereignis"
-    __table_args__ = {"schema": SCHEMA}
+# class erhaltungsereignis(sia405_baseclass):
+    # __tablename__ = "erhaltungsereignis"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class untersuchung(erhaltungsereignis):
-    __tablename__ = "untersuchung"
-    __table_args__ = {"schema": SCHEMA}
+# class untersuchung(erhaltungsereignis):
+    # __tablename__ = "untersuchung"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class schaden(sia405_baseclass):
-    __tablename__ = "schaden"
-    __table_args__ = {"schema": SCHEMA}
+# class schaden(sia405_baseclass):
+    # __tablename__ = "schaden"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class normschachtschaden(schaden):
-    __tablename__ = "normschachtschaden"
-    __table_args__ = {"schema": SCHEMA}
+# class normschachtschaden(schaden):
+    # __tablename__ = "normschachtschaden"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class kanalschaden(schaden):
-    __tablename__ = "kanalschaden"
-    __table_args__ = {"schema": SCHEMA}
+# class kanalschaden(schaden):
+    # __tablename__ = "kanalschaden"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class datentraeger(sia405_baseclass):
-    __tablename__ = "datentraeger"
-    __table_args__ = {"schema": SCHEMA}
+# class datentraeger(sia405_baseclass):
+    # __tablename__ = "datentraeger"
+    # __table_args__ = {"schema": SCHEMA}
 
 
-class datei(sia405_baseclass):
-    __tablename__ = "datei"
-    __table_args__ = {"schema": SCHEMA}
+# class datei(sia405_baseclass):
+    # __tablename__ = "datei"
+    # __table_args__ = {"schema": SCHEMA}
 
 
 # STRUCTS
