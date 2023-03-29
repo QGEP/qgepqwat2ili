@@ -794,249 +794,254 @@ def qgep_export(selection=None, labels_file=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.examination)
-    if filtered:
-        query = (
-            query.join(QGEP.re_maintenance_event_wastewater_structure)
-            .join(QGEP.wastewater_structure)
-            .join(QGEP.wastewater_networkelement)
-            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        )
 
-    for row in query:
+#VSA -KEK commented out
 
-        # AVAILABLE FIELDS IN QGEP.examination
+    # logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
+    # query = qgep_session.query(QGEP.examination)
+    # if filtered:
+        # query = (
+            # query.join(QGEP.re_maintenance_event_wastewater_structure)
+            # .join(QGEP.wastewater_structure)
+            # .join(QGEP.wastewater_networkelement)
+            # .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
 
-        # --- maintenance_event ---
-        # --- examination ---
-        # equipment, fk_reach_point, from_point_identifier, inspected_length, obj_id, recording_type, to_point_identifier, vehicle, videonumber, weather
+    # for row in query:
 
-        # --- _bwrel_ ---
-        # damage__BWREL_fk_examination, re_maintenance_event_wastewater_structure__BWREL_fk_maintenance_event
+        # # AVAILABLE FIELDS IN QGEP.examination
 
-        # --- _rel_ ---
-        # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
-        logger.warning(
-            f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
-        )
+        # # --- maintenance_event ---
+        # # --- examination ---
+        # # equipment, fk_reach_point, from_point_identifier, inspected_length, obj_id, recording_type, to_point_identifier, vehicle, videonumber, weather
 
-        untersuchung = ABWASSER.untersuchung(
-            # FIELDS TO MAP TO ABWASSER.untersuchung
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "untersuchung"),
-            # --- erhaltungsereignis ---
-            # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
-            art=get_vl(row.kind__REL),
-            astatus=get_vl(row.status__REL),
-            ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
-            ausfuehrender=row.operator,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            datengrundlage=row.base_data,
-            dauer=row.duration,
-            detaildaten=row.data_details,
-            ergebnis=row.result,
-            grund=row.reason,
-            kosten=row.cost,
-            zeitpunkt=row.time_point,
-            # --- untersuchung ---
-            bispunktbezeichnung=row.to_point_identifier,
-            erfassungsart=get_vl(row.recording_type__REL),
-            fahrzeug=row.vehicle,
-            geraet=row.equipment,
-            haltungspunktref=get_tid(row.fk_reach_point__REL),
-            inspizierte_laenge=row.inspected_length,
-            videonummer=row.videonumber,
-            vonpunktbezeichnung=row.from_point_identifier,
-            witterung=get_vl(row.weather__REL),
-        )
-        abwasser_session.add(untersuchung)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        # # --- _bwrel_ ---
+        # # damage__BWREL_fk_examination, re_maintenance_event_wastewater_structure__BWREL_fk_maintenance_event
 
-    logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.damage_manhole)
-    if filtered:
-        query = (
-            query.join(QGEP.examination)
-            .join(QGEP.re_maintenance_event_wastewater_structure)
-            .join(QGEP.wastewater_structure)
-            .join(QGEP.wastewater_networkelement)
-            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        )
-    for row in query:
+        # # --- _rel_ ---
+        # # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
+        # logger.warning(
+            # f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
+        # )
 
-        # AVAILABLE FIELDS IN QGEP.damage_manhole
+        # untersuchung = ABWASSER.untersuchung(
+            # # FIELDS TO MAP TO ABWASSER.untersuchung
+            # # --- baseclass ---
+            # # --- sia405_baseclass ---
+            # **base_common(row, "untersuchung"),
+            # # --- erhaltungsereignis ---
+            # # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
+            # art=get_vl(row.kind__REL),
+            # astatus=get_vl(row.status__REL),
+            # ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
+            # ausfuehrender=row.operator,
+            # bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            # bezeichnung=null_to_emptystr(row.identifier),
+            # datengrundlage=row.base_data,
+            # dauer=row.duration,
+            # detaildaten=row.data_details,
+            # ergebnis=row.result,
+            # grund=row.reason,
+            # kosten=row.cost,
+            # zeitpunkt=row.time_point,
+            # # --- untersuchung ---
+            # bispunktbezeichnung=row.to_point_identifier,
+            # erfassungsart=get_vl(row.recording_type__REL),
+            # fahrzeug=row.vehicle,
+            # geraet=row.equipment,
+            # haltungspunktref=get_tid(row.fk_reach_point__REL),
+            # inspizierte_laenge=row.inspected_length,
+            # videonummer=row.videonumber,
+            # vonpunktbezeichnung=row.from_point_identifier,
+            # witterung=get_vl(row.weather__REL),
+        # )
+        # abwasser_session.add(untersuchung)
+        # create_metaattributes(row)
+        # print(".", end="")
+    # logger.info("done")
+    # abwasser_session.flush()
 
-        # --- damage ---
+    # logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
+    # query = qgep_session.query(QGEP.damage_manhole)
+    # if filtered:
+        # query = (
+            # query.join(QGEP.examination)
+            # .join(QGEP.re_maintenance_event_wastewater_structure)
+            # .join(QGEP.wastewater_structure)
+            # .join(QGEP.wastewater_networkelement)
+            # .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+    # for row in query:
 
-        # --- damage_manhole ---
-        # manhole_damage_code, manhole_shaft_area, obj_id
+        # # AVAILABLE FIELDS IN QGEP.damage_manhole
 
-        # --- _bwrel_ ---
-        # damage_channel_channel_damage_code__BWREL_obj_id
+        # # --- damage ---
 
-        # --- _rel_ ---
-        # connection__REL, fk_dataowner__REL, fk_examination__REL, fk_provider__REL, manhole_damage_code__REL, manhole_shaft_area__REL, single_damage_class__REL
+        # # --- damage_manhole ---
+        # # manhole_damage_code, manhole_shaft_area, obj_id
 
-        normschachtschaden = ABWASSER.normschachtschaden(
-            # FIELDS TO MAP TO ABWASSER.normschachtschaden
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "normschachtschaden"),
-            # --- schaden ---
-            anmerkung=row.comments,
-            ansichtsparameter=row.view_parameters,
-            einzelschadenklasse=get_vl(row.single_damage_class__REL),
-            streckenschaden=row.damage_reach,
-            untersuchungref=get_tid(row.fk_examination__REL),
-            verbindung=get_vl(row.connection__REL),
-            videozaehlerstand=row.video_counter,
-            # --- normschachtschaden ---
-            distanz=row.distance,
-            quantifizierung1=row.quantification1,
-            quantifizierung2=row.quantification2,
-            schachtbereich=get_vl(row.manhole_shaft_area__REL),
-            schachtschadencode=get_vl(row.manhole_damage_code__REL),
-            schadenlageanfang=row.damage_begin,
-            schadenlageende=row.damage_end,
-        )
-        abwasser_session.add(normschachtschaden)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        # # --- _bwrel_ ---
+        # # damage_channel_channel_damage_code__BWREL_obj_id
 
-    logger.info("Exporting QGEP.damage_channel -> ABWASSER.kanalschaden, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.damage_channel)
-    if filtered:
-        query = (
-            query.join(QGEP.examination)
-            .join(QGEP.re_maintenance_event_wastewater_structure)
-            .join(QGEP.wastewater_structure)
-            .join(QGEP.wastewater_networkelement)
-            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        )
-    for row in query:
+        # # --- _rel_ ---
+        # # connection__REL, fk_dataowner__REL, fk_examination__REL, fk_provider__REL, manhole_damage_code__REL, manhole_shaft_area__REL, single_damage_class__REL
 
-        # AVAILABLE FIELDS IN QGEP.damage_channel
+        # normschachtschaden = ABWASSER.normschachtschaden(
+            # # FIELDS TO MAP TO ABWASSER.normschachtschaden
+            # # --- baseclass ---
+            # # --- sia405_baseclass ---
+            # **base_common(row, "normschachtschaden"),
+            # # --- schaden ---
+            # anmerkung=row.comments,
+            # ansichtsparameter=row.view_parameters,
+            # einzelschadenklasse=get_vl(row.single_damage_class__REL),
+            # streckenschaden=row.damage_reach,
+            # untersuchungref=get_tid(row.fk_examination__REL),
+            # verbindung=get_vl(row.connection__REL),
+            # videozaehlerstand=row.video_counter,
+            # # --- normschachtschaden ---
+            # distanz=row.distance,
+            # quantifizierung1=row.quantification1,
+            # quantifizierung2=row.quantification2,
+            # schachtbereich=get_vl(row.manhole_shaft_area__REL),
+            # schachtschadencode=get_vl(row.manhole_damage_code__REL),
+            # schadenlageanfang=row.damage_begin,
+            # schadenlageende=row.damage_end,
+        # )
+        # abwasser_session.add(normschachtschaden)
+        # create_metaattributes(row)
+        # print(".", end="")
+    # logger.info("done")
+    # abwasser_session.flush()
 
-        # --- damage ---
-        # comments, connection, damage_begin, damage_end, damage_reach, distance, fk_dataowner, fk_examination, fk_provider, last_modification, quantification1, quantification2, single_damage_class, video_counter, view_parameters
+    # logger.info("Exporting QGEP.damage_channel -> ABWASSER.kanalschaden, ABWASSER.metaattribute")
+    # query = qgep_session.query(QGEP.damage_channel)
+    # if filtered:
+        # query = (
+            # query.join(QGEP.examination)
+            # .join(QGEP.re_maintenance_event_wastewater_structure)
+            # .join(QGEP.wastewater_structure)
+            # .join(QGEP.wastewater_networkelement)
+            # .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+    # for row in query:
 
-        # --- damage_channel ---
-        # , obj_id
+        # # AVAILABLE FIELDS IN QGEP.damage_channel
 
-        # --- _bwrel_ ---
-        # damage_channel_channel_damage_code__BWREL_obj_id
+        # # --- damage ---
+        # # comments, connection, damage_begin, damage_end, damage_reach, distance, fk_dataowner, fk_examination, fk_provider, last_modification, quantification1, quantification2, single_damage_class, video_counter, view_parameters
 
-        # --- _rel_ ---
-        # channel_damage_code__REL, connection__REL, fk_dataowner__REL, fk_examination__REL, fk_provider__REL, single_damage_class__REL
+        # # --- damage_channel ---
+        # # , obj_id
 
-        kanalschaden = ABWASSER.kanalschaden(
-            # FIELDS TO MAP TO ABWASSER.kanalschaden
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "kanalschaden"),
-            # --- schaden ---
-            anmerkung=row.comments,
-            ansichtsparameter=row.view_parameters,
-            einzelschadenklasse=get_vl(row.single_damage_class__REL),
-            streckenschaden=row.damage_reach,
-            untersuchungref=get_tid(row.fk_examination__REL),
-            verbindung=get_vl(row.connection__REL),
-            videozaehlerstand=row.video_counter,
-            # --- kanalschaden ---
-            distanz=row.distance,
-            kanalschadencode=get_vl(row.channel_damage_code__REL),
-            quantifizierung1=row.quantification1,
-            quantifizierung2=row.quantification2,
-            schadenlageanfang=row.damage_begin,
-            schadenlageende=row.damage_end,
-        )
-        abwasser_session.add(kanalschaden)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        # # --- _bwrel_ ---
+        # # damage_channel_channel_damage_code__BWREL_obj_id
 
-    logger.info("Exporting QGEP.data_media -> ABWASSER.datentraeger, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.data_media)
-    for row in query:
+        # # --- _rel_ ---
+        # # channel_damage_code__REL, connection__REL, fk_dataowner__REL, fk_examination__REL, fk_provider__REL, single_damage_class__REL
 
-        # AVAILABLE FIELDS IN QGEP.data_media
+        # kanalschaden = ABWASSER.kanalschaden(
+            # # FIELDS TO MAP TO ABWASSER.kanalschaden
+            # # --- baseclass ---
+            # # --- sia405_baseclass ---
+            # **base_common(row, "kanalschaden"),
+            # # --- schaden ---
+            # anmerkung=row.comments,
+            # ansichtsparameter=row.view_parameters,
+            # einzelschadenklasse=get_vl(row.single_damage_class__REL),
+            # streckenschaden=row.damage_reach,
+            # untersuchungref=get_tid(row.fk_examination__REL),
+            # verbindung=get_vl(row.connection__REL),
+            # videozaehlerstand=row.video_counter,
+            # # --- kanalschaden ---
+            # distanz=row.distance,
+            # kanalschadencode=get_vl(row.channel_damage_code__REL),
+            # quantifizierung1=row.quantification1,
+            # quantifizierung2=row.quantification2,
+            # schadenlageanfang=row.damage_begin,
+            # schadenlageende=row.damage_end,
+        # )
+        # abwasser_session.add(kanalschaden)
+        # create_metaattributes(row)
+        # print(".", end="")
+    # logger.info("done")
+    # abwasser_session.flush()
 
-        # --- data_media ---
-        # fk_dataowner, fk_provider, identifier, kind, last_modification, location, obj_id, path, remark
+    # logger.info("Exporting QGEP.data_media -> ABWASSER.datentraeger, ABWASSER.metaattribute")
+    # query = qgep_session.query(QGEP.data_media)
+    # for row in query:
 
-        # --- _rel_ ---
-        # fk_dataowner__REL, fk_provider__REL, kind__REL
+        # # AVAILABLE FIELDS IN QGEP.data_media
 
-        datentraeger = ABWASSER.datentraeger(
-            # FIELDS TO MAP TO ABWASSER.datentraeger
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "datentraeger"),
-            # --- datentraeger ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            pfad=row.path,
-            standort=row.location,
-        )
-        abwasser_session.add(datentraeger)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        # # --- data_media ---
+        # # fk_dataowner, fk_provider, identifier, kind, last_modification, location, obj_id, path, remark
 
-    logger.info("Exporting QGEP.file -> ABWASSER.datei, ABWASSER.metaattribute")
-    query = qgep_session.query(QGEP.file)
-    if filtered:
-        query = (
-            query.outerjoin(QGEP.damage, QGEP.file.object == QGEP.damage.obj_id)
-            .join(
-                QGEP.examination,
-                or_(QGEP.file.object == QGEP.damage.obj_id, QGEP.file.object == QGEP.examination.obj_id),
-            )
-            .join(QGEP.re_maintenance_event_wastewater_structure)
-            .join(QGEP.wastewater_structure)
-            .join(QGEP.wastewater_networkelement)
-            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
-        )
-    for row in query:
+        # # --- _rel_ ---
+        # # fk_dataowner__REL, fk_provider__REL, kind__REL
 
-        # AVAILABLE FIELDS IN QGEP.file
+        # datentraeger = ABWASSER.datentraeger(
+            # # FIELDS TO MAP TO ABWASSER.datentraeger
+            # # --- baseclass ---
+            # # --- sia405_baseclass ---
+            # **base_common(row, "datentraeger"),
+            # # --- datentraeger ---
+            # art=get_vl(row.kind__REL),
+            # bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            # bezeichnung=null_to_emptystr(row.identifier),
+            # pfad=row.path,
+            # standort=row.location,
+        # )
+        # abwasser_session.add(datentraeger)
+        # create_metaattributes(row)
+        # print(".", end="")
+    # logger.info("done")
+    # abwasser_session.flush()
 
-        # --- file ---
-        # class, fk_data_media, fk_dataowner, fk_provider, identifier, kind, last_modification, obj_id, object, path_relative, remark
+    # logger.info("Exporting QGEP.file -> ABWASSER.datei, ABWASSER.metaattribute")
+    # query = qgep_session.query(QGEP.file)
+    # if filtered:
+        # query = (
+            # query.outerjoin(QGEP.damage, QGEP.file.object == QGEP.damage.obj_id)
+            # .join(
+                # QGEP.examination,
+                # or_(QGEP.file.object == QGEP.damage.obj_id, QGEP.file.object == QGEP.examination.obj_id),
+            # )
+            # .join(QGEP.re_maintenance_event_wastewater_structure)
+            # .join(QGEP.wastewater_structure)
+            # .join(QGEP.wastewater_networkelement)
+            # .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+    # for row in query:
 
-        # --- _rel_ ---
-        # class__REL, fk_dataowner__REL, fk_provider__REL, kind__REL
+        # # AVAILABLE FIELDS IN QGEP.file
 
-        datei = ABWASSER.datei(
-            # FIELDS TO MAP TO ABWASSER.datei
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **base_common(row, "datei"),
-            # --- datei ---
-            art=get_vl(row.kind__REL) or "andere",
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            datentraegerref=get_tid(row.fk_data_media__REL),
-            klasse=get_vl(row.class__REL),
-            objekt=null_to_emptystr(row.object),
-            relativpfad=row.path_relative,
-        )
-        abwasser_session.add(datei)
-        create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        # # --- file ---
+        # # class, fk_data_media, fk_dataowner, fk_provider, identifier, kind, last_modification, obj_id, object, path_relative, remark
+
+        # # --- _rel_ ---
+        # # class__REL, fk_dataowner__REL, fk_provider__REL, kind__REL
+
+        # datei = ABWASSER.datei(
+            # # FIELDS TO MAP TO ABWASSER.datei
+            # # --- baseclass ---
+            # # --- sia405_baseclass ---
+            # **base_common(row, "datei"),
+            # # --- datei ---
+            # art=get_vl(row.kind__REL) or "andere",
+            # bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            # bezeichnung=null_to_emptystr(row.identifier),
+            # datentraegerref=get_tid(row.fk_data_media__REL),
+            # klasse=get_vl(row.class__REL),
+            # objekt=null_to_emptystr(row.object),
+            # relativpfad=row.path_relative,
+        # )
+        # abwasser_session.add(datei)
+        # create_metaattributes(row)
+        # print(".", end="")
+    # logger.info("done")
+    # abwasser_session.flush()
+
+
 
     # Labels
     # Note: these are extracted from the optional labels file (not exported from the QGEP database)

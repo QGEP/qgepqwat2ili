@@ -492,7 +492,7 @@ def action_export(plugin):
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
-                        "Could not export the ili2pg schema",
+                        "Could not export the ili2pg schema " + config.ABWASSER_SCHEMA,
                         "Open the logs for more details on the error.",
                         log_path,
                     )
@@ -548,7 +548,7 @@ def action_export(plugin):
                 except CmdException:
                     progress_dialog.close()
                     show_failure(
-                        "Could not export the ili2pg schema",
+                        "Could not export the ili2pg schema " + config.ABWASSER_DSS_SCHEMA,
                         "Open the logs for more details on the error.",
                         log_path,
                     )
@@ -582,6 +582,67 @@ def action_export(plugin):
                     continue
 
                 progress_dialog.setValue(progress + 20)
+
+# 29.3.2023 SIA405_ABWASSER_2015_LV95
+        elif emodel == "SIA405_ABWASSER_2015_LV95":
+            for model_name, export_model_name, progress in [
+                # (config.ABWASSER_DSS_ILI_MODEL_NAME, None, 50),
+                (config.ABWASSER_SIA405_ILI_MODEL_NAME, None, 50),
+            ]:
+
+                export_file_name = f"{file_name_base}_{model_name}.xtf"
+
+                # Export from ili2pg model to file
+                progress_dialog.setLabelText(f"Saving XTF file [{model_name}]...")
+                QApplication.processEvents()
+                log_path = make_log_path(base_log_path, f"ili2pg-export-{model_name}")
+                try:
+                    export_xtf_data(
+                        # config.ABWASSER_DSS_SCHEMA,
+                        config.ABWASSER_SIA405_SCHEMA,
+                        model_name,
+                        export_model_name,
+                        export_file_name,
+                        log_path,
+                    )
+                except CmdException:
+                    progress_dialog.close()
+                    show_failure(
+                        "Could not export the ili2pg schema " + config.ABWASSER_SIA405_SCHEMA,
+                        "Open the logs for more details on the error.",
+                        log_path,
+                    )
+                    continue
+
+                progress_dialog.setValue(progress + 10)
+
+                progress_dialog.setLabelText(f"Validating the GEP output file [{model_name}]...")
+                QApplication.processEvents()
+                log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
+                try:
+                    validate_xtf_data(
+                        export_file_name,
+                        log_path,
+                    )
+                    
+                    #24.3.2023 moved up here
+                    show_success(
+                        "Sucess",
+                        f"Data successfully exported to {file_name_base}",
+                        os.path.dirname(log_path),
+                    )
+                    
+                except CmdException:
+                    progress_dialog.close()
+                    show_failure(
+                        "Invalid file",
+                        f"The created file is not a valid {model_name} XTF file. Open the logs for more details on the error.",
+                        log_path,
+                    )
+                    continue
+
+                progress_dialog.setValue(progress + 20)
+
         else:
            progress_dialog.close()
            show_failure(
