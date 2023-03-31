@@ -31,6 +31,8 @@ from ..utils.ili2db import (
     validate_xtf_data,
     # neu 22.7.2022
     get_xtf_model,
+    # neu 31.3.2023
+    check_organisation_subclass_data,
 )
 from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
@@ -114,6 +116,7 @@ def action_import(plugin):
     # new 23.7.2022
     global imodel 
     imodel = "nothing"
+
     
     # 22.7.2022 xtf file checken and get model name as imodel
     try:
@@ -305,7 +308,8 @@ def action_export(plugin):
         emodel = export_dialog.comboBox_modelselection.currentText()
 
         print (emodel)
-        
+
+        # Prepare file dialog 
         default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
         file_name, _ = QFileDialog.getSaveFileName(
             None,
@@ -332,11 +336,37 @@ def action_export(plugin):
         progress_dialog.setModal(True)
         progress_dialog.show()
 
+        
+        # 31.3.2023 Integrity checks before starting export
+        if emodel == "DSS_2015_LV95":
+            progress_dialog.setLabelText("Integrity checks for export...")
+            check_organisation = False
+            check_organisation = check_organisation_subclass_data()
+            if check_organisation:
+                print("OK: Integrity checks organisation")
+                show_success(
+                        "Sucess",
+                        f"OK: Integrity checks organisation",
+                        None,
+                    )
+            else:
+                progress_dialog.close()
+                print("OK: Integrity checks organisation")
+                show_failure(
+                    "ERROR: number of subclass elements of structure parts NOT CORRECT in schmea qgep_od",
+                    f"Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
+                    None,
+                )
+                return
+
+        # to do identifier check
+
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
         QApplication.processEvents()
         log_path = make_log_path(base_log_path, "ili2pg-schemaimport")
+
 # 28.3.2023 replaced by else        try:
 
         # 28.6.2022 https://pythontect.com/python-configparser-tutorial/
@@ -372,8 +402,7 @@ def action_export(plugin):
                 None,
             )
             return
-
-
+        
 # 28.3.2023 replaced by else            
         # except CmdException:
             # progress_dialog.close()

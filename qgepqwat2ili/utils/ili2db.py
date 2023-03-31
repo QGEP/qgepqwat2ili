@@ -6,6 +6,41 @@ from sqlalchemy.ext.automap import AutomapBase
 from .. import config
 from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
 
+# Checking if subclass entries of organisation are set and match number of organisatin entries
+def check_organisation_subclass_data():
+
+    logger.info("INTEGRITY CHECK organisations...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+    
+    cursor.execute(f"SELECT obj_id FROM qgep_od.organisation;")
+    if cursor.rowcount > 0:
+        organisation_count = cursor.rowcount
+        logger.info(f"Number of organisation datasets: {organisation_count}")
+        for subclass in [
+            ('administrative_office'),
+            ('waste_water_association'),
+            ('municipality'),
+            ('canton'),
+            ('cooperative'),
+            ('private'),
+            ('waste_water_treatment_plant'),
+        ]:
+            cursor.execute(f"SELECT obj_id FROM qgep_od.{subclass};")
+            logger.info(f"Number of {subclass} datasets: {cursor.rowcount}")
+            organisation_count = organisation_count - cursor.rowcount
+
+        if organisation_count == 0:
+            organisation_subclass_check=True
+            logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
+        else:
+            organisation_subclass_check=False
+            logger.info(f"ERROR: number of subclass elements of structure parts NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
+
+    return organisation_subclass_check
+
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
