@@ -100,23 +100,14 @@ def qgep_export(selection=None, labels_file=None):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
-            # 5.9.2022 via get_tid statt getattr
-            datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
 
-            # v3 obj_id statt name / auskommentiert 18.3.2023
-            #datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            #datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
+            # 31.3.2023 obj_id instead of name
+            # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
 
 
-            # sonst "betreiberref": get_tid(row.fk_operator__REL),
-            # 5.9.2022 v2 get_tid_row
-            # datenherr=get_tid(row.fk_dataowner__REL),
-            # datenlieferant=get_tid(row.fk_provider__REL),
-            
-            # 5.9.2022 verworfen - gibt falsche t_id werte
-            #datenherr=get_tid(row),
-            #datenlieferant=get_tid(row),
+            datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
+            datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
 
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
