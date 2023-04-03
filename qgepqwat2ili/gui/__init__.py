@@ -306,9 +306,12 @@ def action_export(plugin):
 
         # neu 12.7.2022
         emodel = export_dialog.comboBox_modelselection.currentText()
-
         print (emodel)
 
+        # neu 3.4.2023 added float()
+        eorientation = float(export_dialog.comboBox_orientation.currentText())
+        print (eorientation)
+        
         # Prepare file dialog 
         default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
         file_name, _ = QFileDialog.getSaveFileName(
@@ -474,7 +477,9 @@ def action_export(plugin):
 #            try:
                 if emodel == "VSA_KEK_2019_LV95":
                     logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
-                    qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
+                    #qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
+                    # 3.4.2023 neu mit eorientation
+                    qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation) 
                 # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
                 elif emodel == "SIA405_ABWASSER_2015_LV95":
                     logger.info("Start Exporting SIA405_ABWASSER_2015_LV95 - qgepsia405_export")

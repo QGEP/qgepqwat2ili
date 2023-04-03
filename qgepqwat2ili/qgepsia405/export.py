@@ -10,7 +10,8 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None, labels_file=None):
+# def qgep_export(selection=None, labels_file=None):
+def qgep_export(selection=None, labels_file=None, orientation=None):
     """
     Export data from the QGEP model into the ili2pg model.
 
@@ -88,6 +89,10 @@ def qgep_export(selection=None, labels_file=None):
         """
         if val is None:
             return None
+        # 3.4.2023 add orientation
+        logger.info("modulo_angle: {orientation}")
+        val = val + orientation
+
         val = val % 360.0
         if val > 359.9:
             val = 0

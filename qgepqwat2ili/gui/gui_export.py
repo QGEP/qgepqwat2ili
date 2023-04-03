@@ -81,16 +81,23 @@ class GuiExport(QDialog):
         #28.6.2022 https://www.pythonguis.com/docs/qcombobox/
         self.comboBox_modelselection.activated.connect(self.current_model)
         
-        # neu 3.4.2023 populating QcomboBox
+        # neu 3.4.2023 populating QcomboBox Orientation
         
         # neu 28.6.2022 https://www.pythonguis.com/docs/qcombobox/
         # Keep a reference to combobox on self, so we can access it in our methods.
         #self.comboBox_orientation = QComboBox()
         
         self.comboBox_orientation.clear()
-        self.comboBox_orientation.addItem("+90°", 90)
-        self.comboBox_orientation.addItem("0°°", 0)
-        self.comboBox_orientation.addItem("-90°", -90)
+        self.comboBox_orientation.addItem("90.0", "+90°")
+        self.comboBox_orientation.addItem("0.0", "0°")
+        self.comboBox_orientation.addItem("-90.0", "-90°")
+        
+        self.comboBox_orientation.currentIndexChanged.connect(self.orientationChanged)
+  
+        self.comboBox_orientation.activated.connect(self.handleActivated2)
+        
+        #28.6.2022 https://www.pythonguis.com/docs/qcombobox/
+        self.comboBox_orientation.activated.connect(self.current_orientation)
 
     # neu 27.5.2022
     @pyqtSlot()
@@ -106,6 +113,21 @@ class GuiExport(QDialog):
         elif self.comboBox_modelselection.itemData(self.comboBox_modelselection.currentIndex()) == 'VSA_KEK_2019_LV95':
             self.labelmodelshortcut.setText("qgepkek")
             print ("Model qgepkek")
+            
+    # neu 3.4.2023
+    @pyqtSlot()
+    # def orientationChanged(self, index): 
+    def orientationChanged(self):  
+        #self.comboBox_orientation.currentIndexChanged.connect(self.showId)
+        if self.comboBox_orientation.itemData(self.comboBox_orientation.currentIndex()) == '+90':
+            self.label_orientation.setText("90.0")
+            print ("Orientation +90")
+        elif self.comboBox_orientation.itemData(self.comboBox_orientation.currentIndex()) == '0':
+            self.label_orientation.setText("0.0")
+            print ("Orientation 0")
+        elif self.comboBox_orientation.itemData(self.comboBox_orientation.currentIndex()) == '-90':
+            self.label_orientation.setText("-90.0")
+            print ("Orientation -90")
         
     #neu 28.6.2022 https://www.pythonguis.com/docs/qcombobox/
     def current_model(self, _): # We receive the index, but don't use it.
@@ -119,7 +141,7 @@ class GuiExport(QDialog):
         
     #neu 3.4.2023 https://www.pythonguis.com/docs/qcombobox/
     def current_orientation(self, _): # We receive the index, but don't use it.
-        cmodel = self.comboBox_modelselection.currentText()
+        corientation = self.comboBox_orientation.currentText()
         print("Current orientation", corientation)
         self.label_orientation.setText(corientation + "**")
         
@@ -131,14 +153,19 @@ class GuiExport(QDialog):
     def handleActivated(self, index):
         print(self.comboBox_modelselection.itemText(index))
         print(self.comboBox_modelselection.itemData(index))
+        
+        #neu 27.6.2022 sb 
+    def handleActivated2(self, index):
+        print(self.comboBox_orientation.itemText(index))
+        print(self.comboBox_orientation.itemData(index))
 
-    # neu 7.7.2022 - analog wie in qgepdatamodeldialog.py Zeile 218
+# neu 7.7.2022 - analog wie in qgepdatamodeldialog.py Zeile 218
     @property
     def selected_model(self):
         exportmodell = self.releaseVersionComboBox.currentText()
         print("Exportmodell = " + exportmodell)
         return self.releaseVersionComboBox.currentText()
-
+       
  #   def showId(self):
  #       id_us = self.comboBox_modelselection.itemData(self.comboBox_modelselection.currentIndex())
 #        print('VAL ',id_us)

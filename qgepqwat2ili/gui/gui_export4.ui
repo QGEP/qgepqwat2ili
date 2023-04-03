@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>531</width>
-    <height>307</height>
+    <height>357</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -87,6 +87,9 @@
        </property>
       </widget>
      </item>
+     <item row="7" column="0">
+      <widget class="QComboBox" name="comboBox_orientation"/>
+     </item>
     </layout>
    </item>
    <item>
@@ -95,7 +98,17 @@
       <bool>false</bool>
      </property>
      <property name="text">
-      <string>TextLabel</string>
+      <string>label_2</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_orientation">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>label_orientation</string>
      </property>
     </widget>
    </item>
