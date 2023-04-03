@@ -21,8 +21,9 @@ class GuiExport(QDialog):
 #        loadUi(os.path.join(os.path.dirname(__file__), "gui_export.ui"), self)
         # 16.3.2023
         #loadUi(os.path.join(os.path.dirname(__file__), "gui_export_model_select.ui"), self)
-        loadUi(os.path.join(os.path.dirname(__file__), "gui_export3.ui"), self)
-
+        # loadUi(os.path.join(os.path.dirname(__file__), "gui_export3.ui"), self)
+        # 3.4.2023 add orientation label option
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_export4.ui"), self)
         #7.7.2022 / neu in class
         exportmodellclassguiexport = ""
         
@@ -44,7 +45,7 @@ class GuiExport(QDialog):
         s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
         self.save_logs_next_to_file_checkbox.setChecked(s == True or s == "true")
 
-        # Populate the labels list (restoring checked states of scaes)
+        # Populate the labels list (restoring checked states of scales)
         selected_scales = QgsSettings().value("qgep_plugin/last_selected_scales", "").split(",")
         qgis_version_ok = Qgis.QGIS_VERSION_INT >= 32602
         self.labels_groupbox.setEnabled(qgis_version_ok)
@@ -79,6 +80,17 @@ class GuiExport(QDialog):
         
         #28.6.2022 https://www.pythonguis.com/docs/qcombobox/
         self.comboBox_modelselection.activated.connect(self.current_model)
+        
+        # neu 3.4.2023 populating QcomboBox
+        
+        # neu 28.6.2022 https://www.pythonguis.com/docs/qcombobox/
+        # Keep a reference to combobox on self, so we can access it in our methods.
+        #self.comboBox_orientation = QComboBox()
+        
+        self.comboBox_orientation.clear()
+        self.comboBox_orientation.addItem("+90°", 90)
+        self.comboBox_orientation.addItem("0°°", 0)
+        self.comboBox_orientation.addItem("-90°", -90)
 
     # neu 27.5.2022
     @pyqtSlot()
@@ -104,6 +116,16 @@ class GuiExport(QDialog):
         # 29.08.2022 hide
         # self.label_2.show
         #self.label_2.setVisible(false);
+        
+    #neu 3.4.2023 https://www.pythonguis.com/docs/qcombobox/
+    def current_orientation(self, _): # We receive the index, but don't use it.
+        cmodel = self.comboBox_modelselection.currentText()
+        print("Current orientation", corientation)
+        self.label_orientation.setText(corientation + "**")
+        
+        # 29.08.2022 hide
+        # self.label_orientation.show
+        #self.label_orientation.setVisible(false);
 
     #neu 27.6.2022 sb 
     def handleActivated(self, index):
