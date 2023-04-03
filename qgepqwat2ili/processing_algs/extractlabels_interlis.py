@@ -92,7 +92,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             )
         )
 
-       self.addParameter(
+        self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.INPUT_CATCHMENT_AREA_VIEW_LAYER,
                 description=self.tr("Catchment_area view layer"),
