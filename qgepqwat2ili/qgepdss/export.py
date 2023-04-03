@@ -3467,6 +3467,64 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
+
+    # Labels
+    # Note: these are extracted from the optional labels file (not exported from the QGEP database)
+    if labels_file:
+        logger.info(f"Exporting label positions from {labels_file}")
+
+        # Get t_id by obj_name to create the reference on the labels below
+        tid_for_obj_id = {
+            "haltung": {},
+            "abwasserbauwerk": {},
+        }
+        for row in abwasser_session.query(ABWASSER.haltung):
+            tid_for_obj_id["haltung"][row.obj_id] = row.t_id
+        for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
+            tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
+
+        with open(labels_file, "r") as labels_file_handle:
+            labels = json.load(labels_file_handle)
+
+        geojson_crs_def = labels["crs"]
+
+        for label in labels["features"]:
+            layer_name = label["properties"]["Layer"]
+            obj_id = label["properties"]["qgep_obj_id"]
+
+            if layer_name == "vw_qgep_reach":
+                if obj_id not in tid_for_obj_id["haltung"]:
+                    logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
+                    continue
+                ili_label = ABWASSER.haltung_text(
+                    **textpos_common(label, "haltung_text", geojson_crs_def),
+                    haltungref=tid_for_obj_id["haltung"][obj_id],
+                )
+
+            elif layer_name == "vw_qgep_wastewater_structure":
+                if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
+                    logger.warning(
+                        f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
+                    )
+                    continue
+                ili_label = ABWASSER.abwasserbauwerk_text(
+                    **textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
+                    abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
+                )
+
+            else:
+                logger.warning(
+                    f"Unknown layer for label `{layer_name}`. Label will be ignored",
+                )
+                continue
+
+            abwasser_session.add(ili_label)
+            print(".", end="")
+        logger.info("done")
+        abwasser_session.flush()
+
+
+
 # -- extra commit
     abwasser_session.commit()
     
