@@ -445,7 +445,7 @@ def action_export(plugin):
             #4.4.2023 add catchment_area 
             catchment_area_lyr = QgepLayerManager.layer("catchment_area")
             #if not structures_lyr or not reaches_lyr:
-            if not structures_lyr or not reaches_lyr ornot catchment_area_lyr:
+            if not structures_lyr or not reaches_lyr or not catchment_area_lyr:
                 progress_dialog.close()
                 show_failure(
                     "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach and/or catchment_area layers.",
@@ -462,6 +462,7 @@ def action_export(plugin):
                     "RESTRICT_TO_SELECTION": export_dialog.limit_to_selection,
                     "STRUCTURE_VIEW_LAYER": structures_lyr,
                     "REACH_VIEW_LAYER": reaches_lyr,
+                    "CATCHMENT_AREA_VIEW_LAYER": catchment_area_lyr,
                     "SCALES": export_dialog.selected_labels_scales_indices,
                 },
             )
