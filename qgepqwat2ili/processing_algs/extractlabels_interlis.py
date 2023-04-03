@@ -100,6 +100,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             )
         )
 
+
     def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
 
         labels_file_path = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
