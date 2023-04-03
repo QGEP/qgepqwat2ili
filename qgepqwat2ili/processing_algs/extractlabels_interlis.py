@@ -42,7 +42,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     INPUT_SCALES = "SCALES"
     INPUT_STRUCTURE_VIEW_LAYER = "STRUCTURE_VIEW_LAYER"
     INPUT_REACH_VIEW_LAYER = "REACH_VIEW_LAYER"
-    INPUT_CATCHMENT_AREA_VIEW_LAYER "CATCHMENT_AREA_VIEW_LAYER"
+    INPUT_CATCHMENT_AREA_VIEW_LAYER = "CATCHMENT_AREA_VIEW_LAYER"
 
     def name(self):
         return "extractlabels_interlis"
