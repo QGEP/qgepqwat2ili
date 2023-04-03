@@ -3477,11 +3477,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         tid_for_obj_id = {
             "haltung": {},
             "abwasserbauwerk": {},
+            "einzugsgebiet": {},
         }
         for row in abwasser_session.query(ABWASSER.haltung):
             tid_for_obj_id["haltung"][row.obj_id] = row.t_id
         for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
             tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
+        for row in abwasser_session.query(ABWASSER.einzugsgebiet):
+            tid_for_obj_id["einzugsgebiet"][row.obj_id] = row.t_id
 
         with open(labels_file, "r") as labels_file_handle:
             labels = json.load(labels_file_handle)
@@ -3512,6 +3515,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                     abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
                 )
 
+            elif layer_name == "catchment_area":
+                if obj_id not in tid_for_obj_id["einzugsgebiet"]:
+                    logger.warning(
+                        f"Label for einzugsgebiet `{obj_id}` exists, but that object is not part of the export"
+                    )
+                    continue
+                ili_label = ABWASSER.einzugsgebiet_text(
+                    **textpos_common(label, "einzugsgebiet_text", geojson_crs_def),
+                    einzugsgebietref=tid_for_obj_id["einzugsgebiet"][obj_id],
+                )
+                
             else:
                 logger.warning(
                     f"Unknown layer for label `{layer_name}`. Label will be ignored",

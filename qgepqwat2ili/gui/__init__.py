@@ -442,10 +442,13 @@ def action_export(plugin):
 
             structures_lyr = QgepLayerManager.layer("vw_qgep_wastewater_structure")
             reaches_lyr = QgepLayerManager.layer("vw_qgep_reach")
-            if not structures_lyr or not reaches_lyr:
+            #4.4.2023 add catchment_area 
+            catchment_area_lyr = QgepLayerManager.layer("catchment_area")
+            #if not structures_lyr or not reaches_lyr:
+            if not structures_lyr or not reaches_lyr ornot catchment_area_lyr:
                 progress_dialog.close()
                 show_failure(
-                    "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach layers.",
+                    "Could not find the vw_qgep_wastewater_structure and/or the vw_qgep_reach and/or catchment_area layers.",
                     "Make sure your QGEP project is open.",
                     None,
                 )
@@ -483,10 +486,14 @@ def action_export(plugin):
                 # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
                 elif emodel == "SIA405_ABWASSER_2015_LV95":
                     logger.info("Start Exporting SIA405_ABWASSER_2015_LV95 - qgepsia405_export")
-                    qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                    #qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                    # 3.4.2023 neu mit eorientation
+                    qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation)
                 elif emodel == "DSS_2015_LV95":
                     logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
-                    qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                    #qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
+                    # 3.4.2023 neu mit eorientation
+                    qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation)
                 else:
                     progress_dialog.close()
                     show_failure(
