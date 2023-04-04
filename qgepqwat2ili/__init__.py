@@ -190,6 +190,9 @@ def main(args):
                 if args.selection:
                     print("Selection is only supported on export")
                     exit(1)
+                if args.labels_orientation:
+                    print("Labels_orientation is only supported on export")
+                    exit(1)
                 if not args.skip_validation:
                     try:
                         utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
