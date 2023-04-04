@@ -4,6 +4,9 @@ from logging import INFO, FileHandler, Formatter
 
 from . import config, utils
 from .qgep.export import qgep_export
+# 4.4.2023
+from .qgepsia405.export import qgep_export as qgepsia405_export
+from .qgepdss.export import qgep_export as qgepdss_export
 from .qgep.import_ import qgep_import
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
@@ -163,8 +166,15 @@ def main(args):
                 utils.ili2db.create_ili_schema(
                     SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
-                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
-
+                if args.export_sia405:
+                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                elif args.export_dss:
+                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                else:
+                    #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
+                    # 4.4.2023 with labels_orientation
+                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                
                 utils.ili2db.export_xtf_data(
                     SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
                 )
