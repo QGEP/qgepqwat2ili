@@ -171,163 +171,163 @@ def main(args):
         #set args.selection to "0.0"
         args.labels_orientation = "0.0"
     
-    if args.labels_orientation in orientation_list :
-        if args.parser == "qgep":
-            config.PGSERVICE = args.pgservice
-            SCHEMA = config.ABWASSER_SCHEMA
-            ILI_MODEL = config.ABWASSER_ILI_MODEL
-            if args.export_sia405:
-                ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
-                ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
-            # 24.3.2023 added dss export
-            elif args.export_dss:
-                ILI_MODEL_NAME = config.ABWASSER_DSS_ILI_MODEL_NAME
-                ILI_EXPORT_MODEL_NAME = None
-            else:
-                ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
-                ILI_EXPORT_MODEL_NAME = None
-
-            if args.direction == "export":
-                utils.ili2db.create_ili_schema(
-                    SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                )
-                #add model dependency
-                if args.export_sia405:
-                    # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                    # check if args.labels_selection is set is added above already
-                    qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
-                elif args.export_dss:
-                    #qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
-                else:
-                    #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
-                    # 4.4.2023 with labels_orientation
-                    #qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
-                
-                utils.ili2db.export_xtf_data(
-                    SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
-                )
-
-                if not args.skip_validation:
-                    try:
-                        utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
-                    except utils.various.CmdException:
-                        print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
-                        exit(1)
-
-            elif args.direction == "import":
-                if args.selection:
-                    print("Selection is only supported on export")
-                    exit(1)
-                if args.labels_orientation:
-                    print("Labels_orientation is only supported on export")
-                    exit(1)
-                if not args.skip_validation:
-                    try:
-                        utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
-                    except utils.various.CmdException:
-                        print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
-                        exit(1)
-                
-                #add model dependency, as in __init_.py
-                impmodel = "nothing"
-                impmodel = utils.ili2db.get_xtf_model(args.path)
-                if impmodel == "VSA_KEK_2019_LV95":
-                    utils.ili2db.create_ili_schema(
-                        SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                    )
-                    utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                    qgep_import()
-                elif imodel == "SIA405_ABWASSER_2015_LV95":
-                    utils.ili2db.create_ili_schema(
-                        ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                    )
-                    utils.ili2db.import_xtf_data(
-                        ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                    qgepsia405_import()
-
-                elif imodel == "DSS_2015_LV95":
-                    utils.ili2db.create_ili_schema(
-                        ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                    )
-                    utils.ili2db.import_xtf_data(
-                        ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                    qgepdss_import()
-
-                else:
-                    print("MODEL " + impmodel + " schema creation failed: Not yet supported for INTERLIS import - no configuration available in config.py / _init_.py")
-
-
-
-        elif args.parser == "qwat":
-            config.PGSERVICE = args.pgservice
-            SCHEMA = config.WASSER_SCHEMA
-            ILI_MODEL = config.WASSER_ILI_MODEL
-            ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
+    #if args.labels_orientation in orientation_list :
+    if args.parser == "qgep":
+        config.PGSERVICE = args.pgservice
+        SCHEMA = config.ABWASSER_SCHEMA
+        ILI_MODEL = config.ABWASSER_ILI_MODEL
+        if args.export_sia405:
+            ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+            ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+        # 24.3.2023 added dss export
+        elif args.export_dss:
+            ILI_MODEL_NAME = config.ABWASSER_DSS_ILI_MODEL_NAME
+            ILI_EXPORT_MODEL_NAME = None
+        else:
+            ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
             ILI_EXPORT_MODEL_NAME = None
 
-            if args.direction == "export":
-                utils.ili2db.create_ili_schema(
-                    SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                )
-                qwat_export(include_hydraulics=args.include_hydraulics)
-                utils.ili2db.export_xtf_data(
-                    SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
-                )
-                if not args.skip_validation:
-                    try:
-                        utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
-                    except utils.various.CmdException:
-                        print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
-                        exit(1)
+        if args.direction == "export":
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            #add model dependency
+            if args.export_sia405:
+                # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                # check if args.labels_selection is set is added above already
+                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
+            elif args.export_dss:
+                #qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
+            else:
+                #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
+                # 4.4.2023 with labels_orientation
+                #qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
+            
+            utils.ili2db.export_xtf_data(
+                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+            )
 
-            elif args.direction == "import":
-                if args.include_hydraulics:
-                    print("--include_hydraulics is only supported on export")
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
                     exit(1)
-                if not args.skip_validation:
-                    try:
-                        utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
-                    except utils.various.CmdException:
-                        print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
-                        exit(1)
+
+        elif args.direction == "import":
+            if args.selection:
+                print("Selection is only supported on export")
+                exit(1)
+            if args.labels_orientation:
+                print("Labels_orientation is only supported on export")
+                exit(1)
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
+                    exit(1)
+            
+            #add model dependency, as in __init_.py
+            impmodel = "nothing"
+            impmodel = utils.ili2db.get_xtf_model(args.path)
+            if impmodel == "VSA_KEK_2019_LV95":
                 utils.ili2db.create_ili_schema(
                     SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
                 utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                qwat_import()
+                qgep_import()
+            elif imodel == "SIA405_ABWASSER_2015_LV95":
+                utils.ili2db.create_ili_schema(
+                    ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+                )
+                utils.ili2db.import_xtf_data(
+                    ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                qgepsia405_import()
 
-        elif args.parser == "tpl":
-            config.PGSERVICE = args.pgservice
-
-            if args.model == "qgep":
-                if config.PGSERVICE is None:
-                    config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
-                #to do add model dependency
-                utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
-                QGEPMAPPING = get_qgep_mapping()
-                utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
-
-            elif args.model == "qwat":
-                if config.PGSERVICE is None:
-                    config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
-                utils.ili2db.create_ili_schema(config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True)
-                QWATMAPPING = get_qwat_mapping()
-                utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
+            elif imodel == "DSS_2015_LV95":
+                utils.ili2db.create_ili_schema(
+                    ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+                )
+                utils.ili2db.import_xtf_data(
+                    ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                qgepdss_import()
 
             else:
-                print("Unknown model")
-                exit(1)
+                print("MODEL " + impmodel + " schema creation failed: Not yet supported for INTERLIS import - no configuration available in config.py / _init_.py")
 
-        elif args.parser == "setupdb":
-            utils.various.setup_test_db(args.type)
+
+
+    elif args.parser == "qwat":
+        config.PGSERVICE = args.pgservice
+        SCHEMA = config.WASSER_SCHEMA
+        ILI_MODEL = config.WASSER_ILI_MODEL
+        ILI_MODEL_NAME = config.WASSER_ILI_MODEL_NAME
+        ILI_EXPORT_MODEL_NAME = None
+
+        if args.direction == "export":
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            qwat_export(include_hydraulics=args.include_hydraulics)
+            utils.ili2db.export_xtf_data(
+                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+            )
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
+                    exit(1)
+
+        elif args.direction == "import":
+            if args.include_hydraulics:
+                print("--include_hydraulics is only supported on export")
+                exit(1)
+            if not args.skip_validation:
+                try:
+                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                except utils.various.CmdException:
+                    print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
+                    exit(1)
+            utils.ili2db.create_ili_schema(
+                SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+            )
+            utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+            qwat_import()
+
+    elif args.parser == "tpl":
+        config.PGSERVICE = args.pgservice
+
+        if args.model == "qgep":
+            if config.PGSERVICE is None:
+                config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
+            #to do add model dependency
+            utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
+            QGEPMAPPING = get_qgep_mapping()
+            utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
+
+        elif args.model == "qwat":
+            if config.PGSERVICE is None:
+                config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
+            utils.ili2db.create_ili_schema(config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True)
+            QWATMAPPING = get_qwat_mapping()
+            utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
 
         else:
-            print("Unknown operation")
+            print("Unknown model")
             exit(1)
+
+    elif args.parser == "setupdb":
+        utils.various.setup_test_db(args.type)
+
     else:
-            # to do maybe read message from orientation_list
-            print("No valid value for labels_orientation: [0.0, 90.0, -90.0]")
-            exit(1)
+        print("Unknown operation")
+        exit(1)
+    # else:
+            # # to do maybe read message from orientation_list
+            # print("No valid value for labels_orientation: [0.0, 90.0, -90.0]")
+            # exit(1)
     print("Operation completed sucessfully !")
