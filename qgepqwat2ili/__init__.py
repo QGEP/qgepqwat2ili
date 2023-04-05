@@ -44,6 +44,12 @@ def main(args):
         "--selection",
         help="if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)",
     )
+   
+    # TODO: this only makes sense for export
+    parser_qgep.add_argument(
+        "--labels_file",
+        help="if provided, includes the label positions in the export (the file should be the results of the provided `qgep:extractlabels_interlis` QGIS algorithm as geojson)",
+    )
 
     #4.4.2023 / 5.4.2023 replaced with choices
     #parser_qgep.add_argument(
@@ -53,12 +59,10 @@ def main(args):
     #parser_tpl.add_argument("model", choices=["qgep", "qwat"])
     # back to argument to make it optional
     #parser_qgep.add_argument("labels_orientation", choices=["90.0", "0.0","-90.0"])
-    parser_qgep.add_argument("--labels_orientation", choices=["90.0", "0.0","-90.0"])
-    
-    # TODO: this only makes sense for export
     parser_qgep.add_argument(
-        "--labels_file",
-        help="if provided, includes the label positions in the export (the file should be the results of the provided `qgep:extractlabels_interlis` QGIS algorithm as geojson)",
+        "--labels_orientation",
+        choices=["90.0", "0.0","-90.0"],
+        help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0] degree)",
     )
 
     parser_qgep.add_argument(

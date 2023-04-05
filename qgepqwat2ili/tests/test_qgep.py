@@ -295,7 +295,7 @@ class TestQGEPUseCases(unittest.TestCase):
                 "--labels_file",
                 labels_file,
                 "--labels_orientation",
-                labels_file,
+                labels_orientation,
             ]
         )
 
