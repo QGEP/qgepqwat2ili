@@ -119,57 +119,92 @@ def get_xtf_model(xtf_file):
     from io import open
     import re
     
-    checkdatasection = -1
+    model_list = []
+    
+    #checkdatasection = -1
+    checkmodelssection = -1
     impmodel = "not found"
     
     with open(xtf_file, mode="r", encoding="utf-8") as f:
         while True:
-            if checkdatasection == -1:
+            #if checkdatasection == -1:
+            if checkmodelssection == -1:
+            
                 line = f.readline()
                 if not line:
                     break
                 else:
-                    checkdatasection = line.find('<DATASECTION>')
-                    # logger.info("checkdatasection: " + str(checkdatasection))
-                    logger.info(str(checkdatasection))
-                    print("checkdatasection (ili2db): " + str(checkdatasection))
+                    #checkdatasection = line.find('<DATASECTION>')
+                    #logger.info(str(checkdatasection))
+                    #print("checkdatasection (ili2db): " + str(checkdatasection))
+                    checkmodelssection = line.find('<MODELS>')
+                    logger.info(str(checkmodelssection))
+                    print("checkmodelssection (ili2db): " + str(checkmodelssection))
             else:
                 line2 = f.readline()
                 if not line2:
                     break
                 else:
-                    logger.info(str(checkdatasection))
-                    print("checkdatasection (ili2db): " + str(checkdatasection))
-                    strmodel = str(line2)
-                    print("strmodel (ili2db): " + strmodel)
-                    logger.info("MODEL definition found in xtf: " + strmodel)
+                    # logger.info(str(checkdatasection))
+                    # print("checkdatasection (ili2db): " + str(checkdatasection))
+                    logger.info(str(checkmodelssection))
+                    print("checkmodelssection (ili2db): " + str(checkmodelssection))
+                    strmodel = str(line2.strip())
+                    if strmodel.find("</MODELS>") > -1:
+                        if strmodel.find("<MODEL ") > -1:
+                            print("strmodel (ili2db): " + strmodel)
+                            logger.info("MODELS definition found in xtf: " + strmodel)
                     #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
                     # read string between < and . -> eg. VSA_KEK_2019_LV95
                     
-                    result = re.search('<(.*).',strmodel)
-                    result = str(result.group(1))
-                    result2 = result.split('.',1)
-                    result3 = str(result2[0])
-                    result4 = result3.strip('<')
-                    impmodel = str(result4)
-                    # 23.7.2022 neu als str
-                    #impmodel = str(result)
-                    # 23.7.2022 + impmodel geht nicht, check solution [WIP] TypeError: can only concatenate str (not "re.Match") to str
-                    logger.info("MODEL found: " + str(impmodel))
-                    break
+                    # result = re.search('<(.*).',strmodel)
+                    # result = str(result.group(1))
+                    # result2 = result.split('.',1)
+                    # result3 = str(result2[0])
+                    # result4 = result3.strip('<')
+                    # impmodel = str(result4)
+
+                            char1 = '='
+                            char2 = 'VERSION='
+                            result = mystr[mystr.find(char1)+1 : mystr.find(char2)]
+                    # result = re.search('<(.*).',strmodel)
+                    # result = str(result.group(1))
+                    # result2 = result.split('.',1)
+                    # result3 = str(result2[0])
+                    # result4 = result3.strip('<')
+                    # impmodel = str(result4)
+                    
+                        logger.info("MODEL found: " + str(result))
+                        print("MODEL found: " + str(result))
+                        model_list.extend(result)
+                    else:
+                        print("</MODEL> found - stop checking!")
+                        break
     
-    if impmodel == "not found":
+    if len(model_list) > 0:
+    # if impmodel == "not found":
+        # # write that MODEL was not found
+        # logger.info("MODEL was " + impmodel + " was not found!")
+    # else:
+        if "VSA_KEK_2019_LV95" in model_list:
+            impmodel = "VSA_KEK_2019_LV95"
+        elif "SIA405_ABWASSER_2015_LV95" in model_list:
+            impmodel = "SIA405_ABWASSER_2015_LV95"
+        elif "DSS_2015_LV95" in model_list:
+            impmodel = "DSS_2015_LV95"
+        elif "SIA405_WASSER_LV95" in model_list:
+            impmodel = "SIA405_WASSER_LV95"
+        else:
+
+    else:
         # write that MODEL was not found
-        logger.info("MODEL was " + impmodel + " was not found!")
-        
-    # im Moment fix gesetzt
-    # 23.7.2022 import_dialog nicht bekannt so
-    # import_dialog.label_importmodelname.setText("VSA_KEK_2019_LV95")
-    #logger.info("import_dialog.label: " + import_dialog.label_importmodelname.currentText())
-    # impmodel = "VSA_KEK_2019_LV95"
+        logger.info("MODEL information was " + impmodel + "!")
 
     # close xtf file to avoid conflicts
     f.close()
+
+    logger.info("MODEL found: " + str(impmodel))
+    print(""MODEL found: " + str(impmodel))
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
