@@ -140,12 +140,15 @@ def get_xtf_model(xtf_file):
                     checkmodelssection = line.find('<MODELS>')
                     logger.info(str(checkmodelssection))
                     print("checkmodelssection (ili2db): " + str(checkmodelssection))
+                    logger.info(str(line))
+                    print(line)
             else:
                 line2 = f.readline()
                 if not line2:
                     break
                 else:
                     logger.info(str(line2))
+                    print(line2)
                     # logger.info(str(checkdatasection))
                     # print("checkdatasection (ili2db): " + str(checkdatasection))
                     logger.info("checkmodelssection2 " + str(checkmodelssection))
@@ -154,11 +157,16 @@ def get_xtf_model(xtf_file):
                     strmodel = str(line2)
                     strmodel = strmodel.strip()
                     print("strmodel (ili2db): " + strmodel)
+                    print(f"strmodel (ili2db): {strmodel}")
                     logger.info("strmodel: " + strmodel)
                     a = strmodel.find("</MODELS>")
-                    logger.info("strmodel.find: " + str(a))
+                    logger.info("strmodel.find a </MODELS>: " + str(a))
+                    print("strmodel.find a </MODELS>: " + str(a))
                     if strmodel.find("</MODELS>") > -1:
-                        if strmodel.find("<MODEL ") > -1:
+                        b = strmodel.find("<MODEL>")
+                        logger.info("strmodel.find b <MODEL: " + str(b))
+                        print("strmodel.find b <MODEL: " + str(b))
+                        if strmodel.find("<MODEL") > -1:
                             print("strmodel (ili2db): " + strmodel)
                             logger.info("MODELS definition found in xtf: " + strmodel)
                     #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
