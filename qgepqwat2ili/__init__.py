@@ -51,7 +51,9 @@ def main(args):
     #    help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0] degree)",
     #)
     #parser_tpl.add_argument("model", choices=["qgep", "qwat"])
-    parser_qgep.add_argument("labels_orientation", choices=["90.0", "0.0","-90.0"])
+    # back to argument to make it optional
+    #parser_qgep.add_argument("labels_orientation", choices=["90.0", "0.0","-90.0"])
+    parser_qgep.add_argument("--labels_orientation", choices=["90.0", "0.0","-90.0"])
     
     # TODO: this only makes sense for export
     parser_qgep.add_argument(
