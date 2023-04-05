@@ -260,6 +260,7 @@ def main(args):
                 )
                 utils.ili2db.import_xtf_data(
                     ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                print ("qgepsia405_import: " + ABWASSER_SIA405_SCHEMA + "/" + ABWASSER_SIA405_ILI_MODEL)
                 qgepsia405_import()
 
             elif impmodel == "DSS_2015_LV95":
@@ -270,6 +271,7 @@ def main(args):
                 )
                 utils.ili2db.import_xtf_data(
                     ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                print ("qgepdss_import: " + ABWASSER_DSS_SCHEMA + "/" + ABWASSER_DSS_ILI_MODEL)
                 qgepdss_import()
 
             else:
