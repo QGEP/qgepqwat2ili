@@ -135,7 +135,7 @@ def get_xtf_model(xtf_file):
                     
             else:
                 line2 = f.readline()
-                if not line:
+                if not line2:
                     break
                 else:
                     logger.info(str(checkdatasection))
