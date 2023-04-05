@@ -148,6 +148,7 @@ def get_xtf_model(xtf_file):
                     break
                 else:
                     logger.info(str(line2))
+                    logger.info("line2: ", str(line2))
                     print(line2)
                     # logger.info(str(checkdatasection))
                     # print("checkdatasection (ili2db): " + str(checkdatasection))
