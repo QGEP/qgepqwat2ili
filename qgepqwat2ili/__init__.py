@@ -250,6 +250,7 @@ def main(args):
                     SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
                 utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                print ("qgep_import: " + SCHEMA + "/" + ILI_MODEL)
                 qgep_import()
             elif impmodel == "SIA405_ABWASSER_2015_LV95":
                 ABWASSER_SIA405_SCHEMA = config.ABWASSER_SIA405_SCHEMA
