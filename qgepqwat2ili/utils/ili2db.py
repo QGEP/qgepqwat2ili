@@ -105,6 +105,7 @@ def validate_xtf_data(xtf_file, log_path):
 # 22.7.2022 sb 
 def get_xtf_model(xtf_file):
     logger.info("GET XTF MODEL... ")
+    print("xtf_file: " + xtf_file)
     # logger.info("vorher" + imodel)
 # funktioniert nicht
     # global imodel # define imodel as global variable for import model name
