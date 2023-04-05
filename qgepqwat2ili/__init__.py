@@ -165,7 +165,11 @@ def main(args):
     #    args.labels_orientation = "0.0"
     # if args.labels_orientation in orientation_list or args.labels_orientation is None :
     # check if args.selection exists, if not set to "0.0"
-    if args.selection else args.selection = "0.0"
+    if args.selection:
+        print ("args.selection {args.selection}")
+    else:
+        #set args.selection to "0.0"
+        args.selection = "0.0"
     
     if args.labels_orientation in orientation_list :
         if args.parser == "qgep":
