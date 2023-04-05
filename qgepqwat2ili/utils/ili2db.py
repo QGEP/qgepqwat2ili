@@ -173,10 +173,12 @@ def get_xtf_model(xtf_file):
                     # result3 = str(result2[0])
                     # result4 = result3.strip('<')
                     # impmodel = str(result4)
-                        result = result.strip
-                        logger.info("MODEL found: " + str(result))
-                        print("MODEL found: " + str(result) + "*")
-                        model_list.extend(result)
+                            result = result.strip
+                            logger.info("MODEL found: " + str(result))
+                            print("MODEL found: " + str(result) + "*")
+                            model_list.extend(result)
+                        else:
+                            print("goto next line")
                     else:
                         print("</MODEL> found - stop checking!")
                         break
