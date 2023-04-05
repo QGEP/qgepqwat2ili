@@ -203,17 +203,18 @@ def main(args):
             )
             #add model dependency
             if args.export_sia405:
-                # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                # check if args.labels_selection is set is added above already
-                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
+                # SIA405_ABWASSER_2015_LV95
+                qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
             elif args.export_dss:
-                #qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                # DSS_2015_LV95 expor5t
                 qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
             else:
+                # VSA_KEK_2019_LV95 export
+ 
                 #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
                 # 4.4.2023 with labels_orientation
-                #qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
+                #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
             
             utils.ili2db.export_xtf_data(
                 SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
