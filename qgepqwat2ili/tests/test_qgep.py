@@ -8,6 +8,9 @@ import xml.etree.ElementTree as ET
 
 from qgepqwat2ili import main, utils
 from qgepqwat2ili.qgep.model_qgep import get_qgep_model
+# to check with additional models if adaption is needed
+# from qgepqwat2ili.qgep.model_qgep import get_qgep_model_sia405
+# from qgepqwat2ili.qgep.model_qgep import get_qgep_model_dss
 from sqlalchemy.orm import Session
 
 # Display logging in unittest output
@@ -28,12 +31,18 @@ def findall_in_xml_sia_abwasser_2015(root, tag, basket="SIA405_ABWASSER_2015_LV9
     return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
 
 
+def findall_in_xml_dss_2015(root, tag, basket="DSS_2015_LV95.Siedlungsentwaesserung"):
+    ns = {"ili": "http://www.interlis.ch/INTERLIS2.3"}
+    return root.findall(f"ili:DATASECTION/ili:{basket}/ili:{tag}", ns)
+
+
 class TestQGEPUseCases(unittest.TestCase):
+    # test VSA_KEK_2019_LV95 import
     def test_case_a_import_wincan_xtf(self):
         """
         # A. import Wincan-generated xtf data into QGEP
 
-        We recieve data from a TV inspection company as a Wincan exported .xtf file. We want this data loaded into QGEP.
+        We recieve data from a TV inspection company as a valid VSA_KEK_2019_LV95*.xtf exported file. We want this TV inspection data loaded into QGEP. It fits the demodata of the network.
         """
 
         path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "case_a_import_from_wincan.xtf")
@@ -80,9 +89,10 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(session.query(QGEP.organisation).count(), 18)
         session.close()
 
+    # test for VSA_KEK_2019_LV95 export
     def test_case_b_export_complete_qgep_to_xtf(self):
         """
-        # B. export the whole QGEP model to interlis
+        # B. export the whole QGEP model to INTERLIS
         """
 
         # Prepare db
@@ -91,9 +101,10 @@ class TestQGEPUseCases(unittest.TestCase):
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
         main(["qgep", "export", path, "--recreate_schema"])
 
+    # test for SIA405_ABWASSER_2015_LV95 import
     def test_case_d_import_complete_xtf_to_qgep(self):
         """
-        # D. import a whole valid interlis transfer file into QGEP
+        # D. import a whole valid INTERLIS transfer file into QGEP
         """
 
         # Incomming XTF case_c_import_all_without_errors.xtf
@@ -105,6 +116,7 @@ class TestQGEPUseCases(unittest.TestCase):
         # Prepare subset db (we import in an empty schema)
         main(["setupdb", "empty"])
 
+# to check if with additional models adaption is needed get_qgep_model_sia405
         QGEP = get_qgep_model()
 
         session = Session(utils.sqlalchemy.create_engine())
@@ -123,6 +135,8 @@ class TestQGEPUseCases(unittest.TestCase):
         self.assertEqual(session.query(QGEP.manhole).get("ch080qwzNS000113").year_of_construction, 1950)
         session.close()
 
+
+    # test for VSA_KEK_2019_LV95 export with selection and labels
     def test_case_e_export_selection(self):
         """
         # E. export a selection
@@ -171,6 +185,8 @@ class TestQGEPUseCases(unittest.TestCase):
             len(findall_in_xml_kek_2019(root, "SIA405_ABWASSER_2015_LV95.SIA405_Abwasser.Abwasserbauwerk_Text")), 6
         )
 
+
+    # test for SIA405_ABWASSER_2015_LV95 export with selection and labels
     def test_case_f_export_selection_sia405(self):
         """
         # F. export a selection
@@ -222,6 +238,51 @@ class TestQGEPUseCases(unittest.TestCase):
             ),
             6,
         )
+
+    # test for complete VSA-DSS 2015 export, orientation not set, should be 0
+    def test_case_g_export_dss_complete_qgep_to_xtf(self):
+        """
+        # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
+        """
+
+        # Prepare db
+        main(["setupdb", "full"])
+
+        path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95.xtf")
+        # main(["qgep", "export", path, "--recreate_schema"])
+        main(
+            [
+                "qgep",
+                "export",
+                path,
+                "--export_dss",
+                "--recreate_schema",
+            ]
+        )
+
+    # test for orientation, set to 90
+    def test_case_h_export_dss_complete_orientation_90_qgep_to_xtf(self):
+        """
+        # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
+        """
+
+        # Prepare db
+        main(["setupdb", "full"])
+
+        path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95_90.xtf")
+        # main(["qgep", "export", path, "--recreate_schema"])
+        main(
+            [
+                "qgep",
+                "export",
+                path,
+                "--export_dss",
+                "--labels_orientation '90.0'"
+                "--recreate_schema",
+            ]
+        )
+
+  # to do add test for VSA-DSS 2015 and selection
 
 
 class TestRegressions(unittest.TestCase):
