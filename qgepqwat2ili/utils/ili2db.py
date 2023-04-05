@@ -138,9 +138,9 @@ def get_xtf_model(xtf_file):
                 if not line:
                     break
                 else:
-                    print(line)
                     logger.info(str(checkdatasection))
                     strmodel = str(line2)
+                    print("strmodel (ili2db): " + strmodel)
                     logger.info("MODEL definition found in xtf: " + strmodel)
                     #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
                     # read string between < and . -> eg. VSA_KEK_2019_LV95
