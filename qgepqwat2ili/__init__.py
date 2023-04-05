@@ -62,7 +62,7 @@ def main(args):
     parser_qgep.add_argument(
         "--labels_orientation",
         choices=["90.0", "0.0","-90.0"],
-        help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0] degree)",
+        #help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0] degree)",
     )
 
     parser_qgep.add_argument(
