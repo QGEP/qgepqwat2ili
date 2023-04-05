@@ -33,6 +33,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
+    # Orientation
+    oriented = orientation is not None
+    if oriented:
+        labelorientation = orientation
+    else:
+        labelorientation = 0
+
     def get_tid(relation):
         """
         Makes a tid for a relation
@@ -89,15 +96,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if val is None:
             return None
-        # 3.4.2023 add orientation and set to 0 if none
-        if orientation is None:
-            orientation = 0
-        logger.info("modulo_angle: {orientation}")
-        val = val + orientation
 
+        # 5.4.2023 add orientation 
+        val = val + labelorientation
+        
         val = val % 360.0
         if val > 359.9:
             val = 0
+
+        logger.info(f"modulo_angle - added orientation: {labelorientation}")
+        print("modulo_angle - added orientation: ", str(labelorientation))
+
         return val
 
     def create_metaattributes(row):
