@@ -161,9 +161,12 @@ def main(args):
     
     # to do maybe move orientation_list to CONFIG ?
     orientation_list = [0.0, 90.0, -90.0]
-    if args.labels_orientation is None:
-        args.labels_orientation = "0.0"
+    #if args.labels_orientation is None:
+    #    args.labels_orientation = "0.0"
     # if args.labels_orientation in orientation_list or args.labels_orientation is None :
+    # check if args.selection exists, if not set to "0.0"
+    if args.selection else args.selection = "0.0"
+    
     if args.labels_orientation in orientation_list :
         if args.parser == "qgep":
             config.PGSERVICE = args.pgservice
