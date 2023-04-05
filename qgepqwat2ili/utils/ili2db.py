@@ -163,7 +163,7 @@ def get_xtf_model(xtf_file):
                     # result3 = str(result2[0])
                     # result4 = result3.strip('<')
                     # impmodel = str(result4)
-
+                            # Search MODELNAME in MODEL entry:     # <MODEL NAME="VSA_KEK_2019_LV95" VERSION="20.01.2021" URI="http://www.vsa.ch/models" />
                             char1 = '='
                             char2 = 'VERSION='
                             result = mystr[mystr.find(char1)+1 : mystr.find(char2)]
@@ -195,7 +195,7 @@ def get_xtf_model(xtf_file):
         elif "SIA405_WASSER_LV95" in model_list:
             impmodel = "SIA405_WASSER_LV95"
         else:
-
+            logger.info("None of the supported models was found!")
     else:
         # write that MODEL was not found
         logger.info("MODEL information was " + impmodel + "!")
@@ -204,7 +204,7 @@ def get_xtf_model(xtf_file):
     f.close()
 
     logger.info("MODEL found: " + str(impmodel))
-    print(""MODEL found: " + str(impmodel))
+    print("MODEL found: ",str(impmodel))
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
