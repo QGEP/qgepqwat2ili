@@ -145,11 +145,18 @@ def get_xtf_model(xtf_file):
                 if not line2:
                     break
                 else:
+                    logger.info(str(line2))
                     # logger.info(str(checkdatasection))
                     # print("checkdatasection (ili2db): " + str(checkdatasection))
-                    logger.info(str(checkmodelssection))
-                    print("checkmodelssection (ili2db): " + str(checkmodelssection))
-                    strmodel = str(line2.strip())
+                    logger.info("checkmodelssection2 " + str(checkmodelssection))
+                    print("checkmodelssection2 (ili2db): " + str(checkmodelssection))
+                    #strmodel = str(line2.strip())
+                    strmodel = str(line2)
+                    strmodel = strmodel.strip()
+                    print("strmodel (ili2db): " + strmodel)
+                    logger.info("strmodel: " + strmodel)
+                    a = strmodel.find("</MODELS>")
+                    logger.info("strmodel.find: " + str(a))
                     if strmodel.find("</MODELS>") > -1:
                         if strmodel.find("<MODEL ") > -1:
                             print("strmodel (ili2db): " + strmodel)
@@ -181,6 +188,7 @@ def get_xtf_model(xtf_file):
                             print("goto next line")
                     else:
                         print("</MODEL> found - stop checking!")
+                        logger.info("</MODEL> found - stop checking!")
                         break
     
     if len(model_list) > 0:
