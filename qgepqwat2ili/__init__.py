@@ -191,7 +191,7 @@ def main(args):
             ILI_EXPORT_MODEL_NAME = None
             #ABWASSER_DSS_SCHEMA = config.ABWASSER_DSS_SCHEMA
             #ABWASSER_DSS_ILI_MODEL = config.ABWASSER_DSS_ILI_MODEL
-        else
+        else:
             SCHEMA = config.ABWASSER_SCHEMA
             ILI_MODEL = config.ABWASSER_ILI_MODEL
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
