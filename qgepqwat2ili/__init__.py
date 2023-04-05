@@ -8,6 +8,10 @@ from .qgep.export import qgep_export
 from .qgepsia405.export import qgep_export as qgepsia405_export
 from .qgepdss.export import qgep_export as qgepdss_export
 from .qgep.import_ import qgep_import
+# 5.4.2023
+from .qgep.import_ import qgep_import as qgepsia405_import
+from .qgep.import_ import qgep_import as qgepdss_import
+
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
@@ -199,11 +203,32 @@ def main(args):
                     except utils.various.CmdException:
                         print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
                         exit(1)
-                utils.ili2db.create_ili_schema(
-                    SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                )
-                utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                qgep_import()
+                
+                #add model dependency, as in __init_.py
+                impmodel = "nothing"
+                impmodel = utils.ili2db.get_xtf_model(args.path)
+                if impmodel == "VSA_KEK_2019_LV95":
+                    utils.ili2db.create_ili_schema(
+                        SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+                    )
+                    utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    qgep_import()
+                elif imodel == "SIA405_ABWASSER_2015_LV95":
+                    utils.ili2db.create_ili_schema(
+                        ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+                    utils.ili2db.import_xtf_data(ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    qgepsia405_import()
+                    )
+                elif imodel == "DSS_2015_LV95":
+                    utils.ili2db.create_ili_schema(
+                        ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
+                    utils.ili2db.import_xtf_data(ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    qgepdss_import()
+                    )
+                else:
+                    print("MODEL " + impmodel + " schema creation failed: Not yet supported for INTERLIS import - no configuration available in config.py / _init_.py")
+
+
 
         elif args.parser == "qwat":
             config.PGSERVICE = args.pgservice
@@ -249,6 +274,7 @@ def main(args):
             if args.model == "qgep":
                 if config.PGSERVICE is None:
                     config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
+                #to do add model dependency
                 utils.ili2db.create_ili_schema(config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True)
                 QGEPMAPPING = get_qgep_mapping()
                 utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
