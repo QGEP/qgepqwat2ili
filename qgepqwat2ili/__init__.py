@@ -239,7 +239,7 @@ def main(args):
                 )
                 utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
                 qgep_import()
-            elif imodel == "SIA405_ABWASSER_2015_LV95":
+            elif impmodel == "SIA405_ABWASSER_2015_LV95":
                 utils.ili2db.create_ili_schema(
                     ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
@@ -247,7 +247,7 @@ def main(args):
                     ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
                 qgepsia405_import()
 
-            elif imodel == "DSS_2015_LV95":
+            elif impmodel == "DSS_2015_LV95":
                 utils.ili2db.create_ili_schema(
                     ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
