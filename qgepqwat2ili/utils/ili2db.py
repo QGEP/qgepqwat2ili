@@ -132,13 +132,14 @@ def get_xtf_model(xtf_file):
                     checkdatasection = line.find('<DATASECTION>')
                     # logger.info("checkdatasection: " + str(checkdatasection))
                     logger.info(str(checkdatasection))
-                    
+                    print("checkdatasection (ili2db): " + str(checkdatasection))
             else:
                 line2 = f.readline()
                 if not line2:
                     break
                 else:
                     logger.info(str(checkdatasection))
+                    print("checkdatasection (ili2db): " + str(checkdatasection))
                     strmodel = str(line2)
                     print("strmodel (ili2db): " + strmodel)
                     logger.info("MODEL definition found in xtf: " + strmodel)
