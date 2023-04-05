@@ -174,16 +174,26 @@ def main(args):
     #if args.labels_orientation in orientation_list :
     if args.parser == "qgep":
         config.PGSERVICE = args.pgservice
-        SCHEMA = config.ABWASSER_SCHEMA
-        ILI_MODEL = config.ABWASSER_ILI_MODEL
+        #SCHEMA = config.ABWASSER_SCHEMA
+        #ILI_MODEL = config.ABWASSER_ILI_MODEL
         if args.export_sia405:
+            SCHEMA = config.ABWASSER_SIA405_SCHEMA
+            ILI_MODEL = config.ABWASSER_SIA405_ILI_MODEL
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
             ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME_SIA405
+            #ABWASSER_SIA405_SCHEMA = config.ABWASSER_SIA405_SCHEMA
+            #ABWASSER_SIA405_ILI_MODEL = config.ABWASSER_SIA405_ILI_MODEL
         # 24.3.2023 added dss export
         elif args.export_dss:
-            ILI_MODEL_NAME = config.ABWASSER_DSS_ILI_MODEL_NAME
+            SCHEMA = config.ABWASSER_DSS_SCHEMA
+            ILI_MODEL = config.ABWASSER_SIA405_ILI_MODEL
+            ILI_MODEL_NAME = config.ABWASSER_DSS_ILI_MODEL
             ILI_EXPORT_MODEL_NAME = None
-        else:
+            #ABWASSER_DSS_SCHEMA = config.ABWASSER_DSS_SCHEMA
+            #ABWASSER_DSS_ILI_MODEL = config.ABWASSER_DSS_ILI_MODEL
+        else
+            SCHEMA = config.ABWASSER_SCHEMA
+            ILI_MODEL = config.ABWASSER_ILI_MODEL
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
             ILI_EXPORT_MODEL_NAME = None
 
@@ -234,12 +244,16 @@ def main(args):
             impmodel = "nothing"
             impmodel = utils.ili2db.get_xtf_model(args.path)
             if impmodel == "VSA_KEK_2019_LV95":
+                SCHEMA = config.ABWASSER_SCHEMA
+                ILI_MODEL = config.ABWASSER_ILI_MODEL
                 utils.ili2db.create_ili_schema(
                     SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
                 utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
                 qgep_import()
             elif impmodel == "SIA405_ABWASSER_2015_LV95":
+                ABWASSER_SIA405_SCHEMA = config.ABWASSER_SIA405_SCHEMA
+                ABWASSER_SIA405_ILI_MODEL = config.ABWASSER_SIA405_ILI_MODEL
                 utils.ili2db.create_ili_schema(
                     ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
@@ -248,6 +262,8 @@ def main(args):
                 qgepsia405_import()
 
             elif impmodel == "DSS_2015_LV95":
+                ABWASSER_DSS_SCHEMA = config.ABWASSER_DSS_SCHEMA
+                ABWASSER_DSS_ILI_MODEL = config.ABWASSER_DSS_ILI_MODEL
                 utils.ili2db.create_ili_schema(
                     ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )

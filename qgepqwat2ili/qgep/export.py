@@ -89,7 +89,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
         # 3.4.2023 add orientation and set to 0 if none
-        if val is None:
+        if orientation is None:
             orientation = 0
         logger.info("modulo_angle: {orientation}")
         val = val + orientation
