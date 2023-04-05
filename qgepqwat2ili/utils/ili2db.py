@@ -166,7 +166,7 @@ def get_xtf_model(xtf_file):
                             # Search MODELNAME in MODEL entry:     # <MODEL NAME="VSA_KEK_2019_LV95" VERSION="20.01.2021" URI="http://www.vsa.ch/models" />
                             char1 = '='
                             char2 = 'VERSION='
-                            result = mystr[mystr.find(char1)+1 : mystr.find(char2)]
+                            result = strmodel[strmodel.find(char1)+1 : strmodel.find(char2)]
                     # result = re.search('<(.*).',strmodel)
                     # result = str(result.group(1))
                     # result2 = result.split('.',1)
@@ -176,7 +176,7 @@ def get_xtf_model(xtf_file):
                             result = result.strip
                             logger.info("MODEL found: " + str(result))
                             print("MODEL found: " + str(result) + "*")
-                            model_list.extend(result)
+                            model_list.append(result)
                         else:
                             print("goto next line")
                     else:
