@@ -44,16 +44,21 @@ def main(args):
         "--selection",
         help="if provided, limits the export to networkelements that are provided in the selection (comma separated list of ids)",
     )
+
+    #4.4.2023 / 5.4.2023 replaced with choices
+    #parser_qgep.add_argument(
+    #    "--labels_orientation",
+    #    help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0] degree)",
+    #)
+    #parser_tpl.add_argument("model", choices=["qgep", "qwat"])
+    parser_qgep.add_argument("labels_orientation", choices=["90.0", "0.0","-90.0"])
+    
     # TODO: this only makes sense for export
     parser_qgep.add_argument(
         "--labels_file",
         help="if provided, includes the label positions in the export (the file should be the results of the provided `qgep:extractlabels_interlis` QGIS algorithm as geojson)",
     )
-    #4.4.2023
-    parser_qgep.add_argument(
-        "--labels_orientation",
-        help="parameter to adjust orientation of label text to fit other default values for north direction. If provided, turns the orientation by the given value [90, -90, 0 degree])",
-    )
+
     parser_qgep.add_argument(
         "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
     )
@@ -150,7 +155,10 @@ def main(args):
     
     # to do maybe move orientation_list to CONFIG ?
     orientation_list = [0.0, 90.0, -90.0]
-    if args.labels_orientation in orientation_list or args.labels_orientation is None :
+    if args.labels_orientation is None:
+        args.labels_orientation = "0.0"
+    # if args.labels_orientation in orientation_list or args.labels_orientation is None :
+    if args.labels_orientation in orientation_list :
         if args.parser == "qgep":
             config.PGSERVICE = args.pgservice
             SCHEMA = config.ABWASSER_SCHEMA
@@ -172,13 +180,17 @@ def main(args):
                 )
                 #add model dependency
                 if args.export_sia405:
-                    qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    # check if args.labels_selection is set is added above already
+                    qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
                 elif args.export_dss:
-                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    #qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
                 else:
                     #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
                     # 4.4.2023 with labels_orientation
-                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    #qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
+                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation)
                 
                 utils.ili2db.export_xtf_data(
                     SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
@@ -302,7 +314,7 @@ def main(args):
             print("Unknown operation")
             exit(1)
     else:
-            # to do read from orientation_list
+            # to do maybe read message from orientation_list
             print("No valid value for labels_orientation: [0.0, 90.0, -90.0]")
             exit(1)
     print("Operation completed sucessfully !")
