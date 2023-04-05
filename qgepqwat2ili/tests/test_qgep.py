@@ -162,8 +162,6 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
-                #add labels_orientation
-                "0.0",
                 path,
                 "--recreate_schema",
                 "--selection",
@@ -210,8 +208,6 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
-                #add labels_orientation
-                "0.0",
                 path,
                 "--export_sia405",
                 "--recreate_schema",
@@ -245,7 +241,7 @@ class TestQGEPUseCases(unittest.TestCase):
             6,
         )
 
-    # test for complete VSA-DSS 2015 export, orientation set to 0.0
+    # test for complete VSA-DSS 2015 export, labels_orientation not set, should be optional
     def test_case_g_export_dss_complete_qgep_to_xtf(self):
         """
         # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
@@ -260,8 +256,6 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
-                #add labels_orientation
-                "0.0",
                 path,
                 "--export_dss",
                 "--recreate_schema",
@@ -279,16 +273,29 @@ class TestQGEPUseCases(unittest.TestCase):
 
         path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95_90.xtf")
         # main(["qgep", "export", path, "--recreate_schema"])
+        selection = [
+            # reach_id
+            "ch13p7mzRE001221",
+            # node_a_id
+            "ch13p7mzWN003445",
+            # node_b_id
+            "ch13p7mzWN008122",
+        ]
+        labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
+        labels_orientation = "90.0"
         main(
             [
                 "qgep",
                 "export",
-                #add labels_orientation
-                "90.0",
                 path,
-                "--export_dss",
-                "--labels_orientation '90.0'"
+                "--export_sia405",
                 "--recreate_schema",
+                "--selection",
+                ",".join(selection),
+                "--labels_file",
+                labels_file,
+                "--labels_orientation",
+                labels_file,
             ]
         )
 
