@@ -148,7 +148,7 @@ def main(args):
     file_handler.setFormatter(Formatter("%(levelname)-8s %(message)s"))
     utils.various.logger.addHandler(file_handler)
     
-    # to do evtl. in CONFIG verschieben?
+    # to do maybe move orientation_list to CONFIG ?
     orientation_list = [0.0, 90.0, -90.0]
     if args.labels_orientation in orientation_list or args.labels_orientation is None :
         if args.parser == "qgep":
@@ -170,14 +170,15 @@ def main(args):
                 utils.ili2db.create_ili_schema(
                     SCHEMA, ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
+                #add model dependency
                 if args.export_sia405:
-                qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                    qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
                 elif args.export_dss:
-                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                    qgepdss_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
                 else:
                     #qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
                     # 4.4.2023 with labels_orientation
-                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation else 0)
+                    qgepsia405_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
                 
                 utils.ili2db.export_xtf_data(
                     SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
@@ -216,15 +217,19 @@ def main(args):
                 elif imodel == "SIA405_ABWASSER_2015_LV95":
                     utils.ili2db.create_ili_schema(
                         ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                    utils.ili2db.import_xtf_data(ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                    qgepsia405_import()
                     )
+                    utils.ili2db.import_xtf_data(
+                        ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    qgepsia405_import()
+
                 elif imodel == "DSS_2015_LV95":
                     utils.ili2db.create_ili_schema(
                         ABWASSER_DSS_SCHEMA, ABWASSER_DSS_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
-                    utils.ili2db.import_xtf_data(ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                    qgepdss_import()
                     )
+                    utils.ili2db.import_xtf_data(
+                        ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    qgepdss_import()
+
                 else:
                     print("MODEL " + impmodel + " schema creation failed: Not yet supported for INTERLIS import - no configuration available in config.py / _init_.py")
 
