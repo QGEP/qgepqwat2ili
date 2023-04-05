@@ -9,8 +9,8 @@ from .qgepsia405.export import qgep_export as qgepsia405_export
 from .qgepdss.export import qgep_export as qgepdss_export
 from .qgep.import_ import qgep_import
 # 5.4.2023
-from .qgep.import_ import qgep_import as qgepsia405_import
-from .qgep.import_ import qgep_import as qgepdss_import
+from .qgepsia405.import_ import qgep_import as qgepsia405_import
+from .qgepdss.import_ import qgep_import as qgepdss_import
 
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
@@ -259,7 +259,8 @@ def main(args):
                     ABWASSER_SIA405_SCHEMA, ABWASSER_SIA405_ILI_MODEL, make_log_path(log_path, "ilicreate"), recreate_schema=args.recreate_schema
                 )
                 utils.ili2db.import_xtf_data(
-                    ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                    ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport")
+                )
                 print ("qgepsia405_import: " + ABWASSER_SIA405_SCHEMA + "/" + ABWASSER_SIA405_ILI_MODEL)
                 qgepsia405_import()
 

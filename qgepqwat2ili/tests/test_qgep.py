@@ -99,9 +99,8 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        #add labels_orientation
-        # main(["qgep", "export", path, "--recreate_schema"])
-        main(["qgep", "export", "0.0", path, "--recreate_schema"])
+        main(["qgep", "export", path, "--recreate_schema"])
+
 
     # test for SIA405_ABWASSER_2015_LV95 import
     def test_case_d_import_complete_xtf_to_qgep(self):
