@@ -2,9 +2,7 @@
 <TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
   <HEADERSECTION VERSION="2.3" SENDER="VSA">
     <MODELS>
-      <!-- <MODEL NAME="VSA_KEK" VERSION="25.04.2008" URI="http://www.vsa.ch/models"></MODEL> -->
       <MODEL NAME="VSA_KEK_2019_LV95" VERSION="20.01.2021" URI="http://www.vsa.ch/models" />
-
       <MODEL NAME="SIA405_ABWASSER_2015_LV95" VERSION="17.04.2018" URI="http://www.sia.ch/405" />
       <MODEL NAME="SIA405_Base_LV95" VERSION="05.10.2018" URI="http://www.interlis.ch/models" />
       <MODEL NAME="Base_LV95" VERSION="05.10.2018" URI="http://www.interlis.ch/models" />
