@@ -99,7 +99,9 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export.xtf")
-        main(["qgep", "export", path, "--recreate_schema"])
+        #add labels_orientation
+        # main(["qgep", "export", path, "--recreate_schema"])
+        main(["qgep", "export", "0.0", path, "--recreate_schema"])
 
     # test for SIA405_ABWASSER_2015_LV95 import
     def test_case_d_import_complete_xtf_to_qgep(self):
@@ -160,6 +162,8 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
+                #add labels_orientation
+                "0.0",
                 path,
                 "--recreate_schema",
                 "--selection",
@@ -206,6 +210,8 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
+                #add labels_orientation
+                "0.0",
                 path,
                 "--export_sia405",
                 "--recreate_schema",
@@ -239,7 +245,7 @@ class TestQGEPUseCases(unittest.TestCase):
             6,
         )
 
-    # test for complete VSA-DSS 2015 export, orientation not set, should be 0
+    # test for complete VSA-DSS 2015 export, orientation set to 0.0
     def test_case_g_export_dss_complete_qgep_to_xtf(self):
         """
         # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
@@ -254,6 +260,8 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
+                #add labels_orientation
+                "0.0",
                 path,
                 "--export_dss",
                 "--recreate_schema",
@@ -275,6 +283,8 @@ class TestQGEPUseCases(unittest.TestCase):
             [
                 "qgep",
                 "export",
+                #add labels_orientation
+                "90.0",
                 path,
                 "--export_dss",
                 "--labels_orientation '90.0'"
