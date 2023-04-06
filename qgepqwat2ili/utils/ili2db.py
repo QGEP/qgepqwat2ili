@@ -160,10 +160,13 @@ def get_xtf_model(xtf_file):
                     print("strmodel (ili2db): " + strmodel)
                     print(f"strmodel (ili2db): {strmodel}")
                     logger.info("strmodel: " + strmodel)
+                    logger.info("strmodel: ", strmodel)
+                    logger.info(f"strmodel: {strmodel}")
                     a = strmodel.find("</MODELS>")
                     logger.info("strmodel.find a </MODELS>: " + str(a))
                     print("strmodel.find a </MODELS>: " + str(a))
-                    if strmodel.find("</MODELS>") > -1:
+                    #if strmodel.find("</MODELS>") > -1:
+                    if a == -1:
                         b = strmodel.find("<MODEL>")
                         logger.info("strmodel.find b <MODEL: " + str(b))
                         print("strmodel.find b <MODEL: " + str(b))
@@ -196,9 +199,12 @@ def get_xtf_model(xtf_file):
                         else:
                             print("goto next line")
                     else:
-                        print("</MODEL> found - stop checking!")
+                        print("<\/MODEL> found - stop checking!")
                         logger.info("</MODEL> found - stop checking!")
                         break
+    print(model_list)
+    logger.info("model_list:")
+    logger.info(str(model_list))
     
     if len(model_list) > 0:
     # if impmodel == "not found":
