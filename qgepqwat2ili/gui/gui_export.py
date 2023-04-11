@@ -99,6 +99,11 @@ class GuiExport(QDialog):
         #28.6.2022 https://www.pythonguis.com/docs/qcombobox/
         self.comboBox_orientation.activated.connect(self.current_orientation)
 
+        if self.labels_groupbox.isChecked():
+            self.comboBox_orientation.setEnabled(True)
+        else:
+            self.comboBox_orientation.setEnabled(False)
+
     # neu 27.5.2022
     @pyqtSlot()
     # def modelChanged(self, index): 
