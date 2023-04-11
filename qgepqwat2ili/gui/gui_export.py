@@ -104,6 +104,9 @@ class GuiExport(QDialog):
         else:
             self.comboBox_orientation.setEnabled(False)
 
+        self.label_2.setVisible(False)
+        self.label_orientation.setVisible(False)
+        
     # neu 27.5.2022
     @pyqtSlot()
     # def modelChanged(self, index): 
@@ -143,6 +146,7 @@ class GuiExport(QDialog):
         # 29.08.2022 hide
         # self.label_2.show
         #self.label_2.setVisible(false);
+        self.label_2.setVisible(True)
         
     #neu 3.4.2023 https://www.pythonguis.com/docs/qcombobox/
     def current_orientation(self, _): # We receive the index, but don't use it.
@@ -152,7 +156,7 @@ class GuiExport(QDialog):
         
         # 29.08.2022 hide
         # self.label_orientation.show
-        #self.label_orientation.setVisible(false);
+        self.label_orientation.setVisible(True)
 
     #neu 27.6.2022 sb 
     def handleActivated(self, index):
