@@ -30,7 +30,8 @@ from ..utils.ili2db import (
     import_xtf_data,
     validate_xtf_data,
     # neu 22.7.2022
-    get_xtf_model,
+    #get_xtf_model,
+    get_xtf_model2,
     # neu 31.3.2023
     check_organisation_subclass_data,
 )
@@ -121,7 +122,8 @@ def action_import(plugin):
     # 22.7.2022 xtf file checken and get model name as imodel
     try:
         # neu 23.7.2022 imodel mit return aus get_xtf_model
-        imodel = get_xtf_model(file_name)
+        # new version imodel = get_xtf_model(file_name)
+        imodel = get_xtf_model2(file_name)
         
     except CmdException:
         progress_dialog.close()

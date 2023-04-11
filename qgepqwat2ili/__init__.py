@@ -243,7 +243,9 @@ def main(args):
             
             #add model dependency, as in __init_.py
             impmodel = "nothing"
-            impmodel = utils.ili2db.get_xtf_model(args.path)
+            #impmodel = utils.ili2db.get_xtf_model(args.path)
+            impmodel = utils.ili2db.get_xtf_model2(args.path)
+            
             if impmodel == "VSA_KEK_2019_LV95":
                 SCHEMA = config.ABWASSER_SCHEMA
                 ILI_MODEL = config.ABWASSER_ILI_MODEL

@@ -1,6 +1,9 @@
 import collections
 
 import psycopg2
+# 11.4.2023
+import xml.etree.ElementTree as ET
+
 from sqlalchemy.ext.automap import AutomapBase
 
 from .. import config
@@ -168,8 +171,8 @@ def get_xtf_model(xtf_file):
                     #if strmodel.find("</MODELS>") > -1:
                     if a == -1:
                         b = strmodel.find("<MODEL>")
-                        logger.info("strmodel.find b <MODEL: " + str(b))
-                        print("strmodel.find b <MODEL: " + str(b))
+                        logger.info("strmodel.find b \<MODEL: " + str(b))
+                        print("strmodel.find b \<MODEL: " + str(b))
                         if strmodel.find("<MODEL") > -1:
                             print("strmodel (ili2db): " + strmodel)
                             logger.info("MODELS definition found in xtf: " + strmodel)
@@ -237,6 +240,81 @@ def get_xtf_model(xtf_file):
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
+
+def get_xtf_model2(xtf_file):
+    logger.info("GET XTF MODEL xml version... ")
+    print("xtf_file: " + xtf_file)
+    # logger.info("vorher" + imodel)
+# funktioniert nicht
+    # global imodel # define imodel as global variable for import model name
+    # impmodel = "" 
+
+    # open and read xtf / xml file line by line until <DATASECTION>
+    #<DATASECTION>
+    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+    # read string between < and . -> eg. VSA_KEK_2019_LV95
+    # impmodel 
+    from io import open
+    
+    model_list = []
+    
+    #checkdatasection = -1
+    checkmodelssection = -1
+    impmodel = "not found"
+
+    # from xml file
+    tree = ET.parse(xtf_file)
+    rootinterlis = tree.getroot()
+    print("rootinterlis.findall:", rootinterlis.findall("."))
+    logger.info("rootinterlis.findall:", rootinterlis.findall("."))
+    
+    i = 0
+    model_found = False
+
+    while i < 15:
+        try:
+            j = i
+            i = i + 1
+            model_list.append(rootinterlis[0][0][j].get('NAME'))
+            model_found = True
+        #except utils.various.CmdException:
+        except:
+            if model_found:
+                logger.info(f"{i-1} times MODEL information was found!")
+                break
+            else: 
+                logger.info("No MODEL information was found!")
+                break
+            
+    print(model_list)
+    logger.info("model_list:")
+    logger.info(str(model_list))
+    
+    if len(model_list) > 0:
+    # if impmodel == "not found":
+        # # write that MODEL was not found
+        # logger.info("MODEL was " + impmodel + " was not found!")
+    # else:
+        if "VSA_KEK_2019_LV95" in model_list:
+            impmodel = "VSA_KEK_2019_LV95"
+        elif "SIA405_ABWASSER_2015_LV95" in model_list:
+            impmodel = "SIA405_ABWASSER_2015_LV95"
+        elif "DSS_2015_LV95" in model_list:
+            impmodel = "DSS_2015_LV95"
+        elif "SIA405_WASSER_LV95" in model_list:
+            impmodel = "SIA405_WASSER_LV95"
+        else:
+            logger.info("None of the supported models was found!")
+    else:
+        # write that MODEL was not found
+        logger.info("MODEL information was " + impmodel + "!")
+
+    logger.info("MODEL found: " + str(impmodel))
+    print("MODEL found: ",str(impmodel))
+
+    # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
+    return impmodel
+
 
 def import_xtf_data(schema, xtf_file, log_path):
     logger.info("IMPORTING XTF DATA...")
