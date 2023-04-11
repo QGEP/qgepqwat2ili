@@ -31,7 +31,8 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     AVAILABLE_SCALES = [
         # ili key, display name, scale value
         ("Leitungskataster", tr("Leitungskataster"), 1000),  # TODO: check scale ?
-        ("Werkplan", tr("Werkplan"), 500),  # TODO: check scale ?
+        #("Werkplan", tr("Werkplan"), 500),  # TODO: check scale ?
+        ("Werkplan", tr("Werkplan"), 250),  # adjusted scale from 500 to 250
         ("Uebersichtsplan.UeP10", tr("Uebersichtsplan 1:10000"), 10000),
         ("Uebersichtsplan.UeP5", tr("Uebersichtsplan 1:5000"), 5000),
         ("Uebersichtsplan.UeP2", tr("Uebersichtsplan 1:2000"), 2000),
