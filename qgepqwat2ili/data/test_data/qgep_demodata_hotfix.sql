@@ -56,3 +56,13 @@ UPDATE qgep_od.organisation
 SET fk_dataowner = 'ch13p7mzOG000016',
     fk_provider = 'ch13p7mzOG000016'
 ;
+
+-- set fk_owner to ch13p7mzOG000013 Gemeinde - to do distinguish PAA, SAA more in detail and differentiate the municipalities
+UPDATE qgep_od.wastewater_structure
+SET fk_owner = 'ch13p7mzOG000013' 
+WHERE fk_owner is NULL;
+
+-- set fk_operator to ch13p7mzOG000015 Verband
+UPDATE qgep_od.wastewater_structure
+SET fk_operator = 'ch13p7mzOG000015' 
+WHERE fk_operator is NULL;
