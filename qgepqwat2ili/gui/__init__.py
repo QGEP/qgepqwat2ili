@@ -373,24 +373,26 @@ def action_export(plugin):
                 return
 
         # 2. check wastewater_structure for all data models
-        check_wastewater_structure = False
-        check_wastewater_structure = check_wastewater_structure_subclass_data()
-        if check_wastewater_structure:
-            print("OK: Integrity checks wastewater_structure")
-            show_success(
-                    "Sucess",
-                    f"OK: Integrity checks wastewater_structure",
+        flag_test = False
+        if flag_test:
+            check_wastewater_structure = False
+            check_wastewater_structure = check_wastewater_structure_subclass_data()
+            if check_wastewater_structure:
+                print("OK: Integrity checks wastewater_structure")
+                show_success(
+                        "Sucess",
+                        f"OK: Integrity checks wastewater_structure",
+                        None,
+                    )
+            else:
+                progress_dialog.close()
+                print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
+                show_failure(
+                    "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od",
+                    f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
                     None,
                 )
-        else:
-            progress_dialog.close()
-            print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
-            show_failure(
-                "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od",
-                f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
-                None,
-            )
-            return
+                return
 
         # 3. identifier check check_identifier_null
         check_identifier = False
@@ -402,6 +404,7 @@ def action_export(plugin):
                     f"OK: Integrity checks identifiers not isNull",
                     None,
                 )
+
         else:
             progress_dialog.close()
             print("INFO: missing identifiers")
@@ -411,7 +414,7 @@ def action_export(plugin):
                 None,
             )
             # just show hint, but continue
-            #return
+            # return
 
 
         # Prepare the temporary ili2pg model

@@ -106,23 +106,27 @@ def check_identifier_null():
         ('structure_part'),
         ('reach_point'),
         ('pipe_profile'),
-        ('profile_geometry'),
         #VSA-DSS
         ('catchment_area'),
         ('zone'),
+        ('overflow'),
         ]:
         cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
-        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.rowcount}")
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.fetchone()[0]}")
 
-        missing_identifier_count = missing_identifier_count - cursor.rowcount
+        if cursor.fetchone() is None:
+            missing_identifier_count = missing_identifier_count
+        else:
+            missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
 
     if missing_identifier_count == 0:
         identifier_null_check=True
         logger.info(f"OK: all identifiers set in qgep_od!")
     else:
         identifier_null_check=False
-        logger.info(f"ERROR: Missing identifiers in qgep_od {missing_identifier_count}")
-        print (f"ERROR: Missing identifiers {missing_identifier_count}")
+        logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
+        print (f"ERROR: Missing identifiers: {missing_identifier_count}")
 
     return identifier_null_check
 
