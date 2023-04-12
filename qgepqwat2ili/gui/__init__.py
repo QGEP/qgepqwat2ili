@@ -36,6 +36,7 @@ from ..utils.ili2db import (
     check_organisation_subclass_data,
     # neu 12.4.2023
     check_wastewater_structure_subclass_data,
+    check_identifier_null,
 )
 from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
@@ -56,9 +57,12 @@ def _show_results(title, message, log_path, level):
 def show_failure(title, message, log_path):
     return _show_results(title, message, log_path, Qgis.Warning)
 
-
+def show_hint(title, message, log_path):
+    return _show_results(title, message, log_path, Qgis.Info)
+    
 def show_success(title, message, log_path):
     return _show_results(title, message, log_path, Qgis.Success)
+
 
 
 import_dialog = None
@@ -346,7 +350,7 @@ def action_export(plugin):
         # 31.3.2023 Integrity checks before starting export
         progress_dialog.setLabelText("Integrity checks for export...")
 
-        # check organisation only for VSA-DSS export
+        # 1. check organisation only for VSA-DSS export
         if emodel == "DSS_2015_LV95":
 
             check_organisation = False
@@ -368,7 +372,7 @@ def action_export(plugin):
                 )
                 return
 
-        # check wastewater_structure for all data models
+        # 2. check wastewater_structure for all data models
         check_wastewater_structure = False
         check_wastewater_structure = check_wastewater_structure_subclass_data()
         if check_wastewater_structure:
@@ -388,7 +392,7 @@ def action_export(plugin):
             )
             return
 
-        # to do identifier check check_identifier_null
+        # 3. identifier check check_identifier_null
         check_identifier = False
         check_identifier = check_identifier_null()
         if check_identifier:
@@ -400,9 +404,9 @@ def action_export(plugin):
                 )
         else:
             progress_dialog.close()
-            print("WARNING: missing identifiers")
-            show_failure(
-                "WARNING: missing identifiers in schema qgep_od",
+            print("INFO: missing identifiers")
+            show_hint(
+                "INFO: Missing identifiers in schema qgep_od",
                 f"Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
                 None,
             )

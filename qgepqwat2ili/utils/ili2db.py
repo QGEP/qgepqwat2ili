@@ -95,13 +95,22 @@ def check_identifier_null():
     
     missing_identifier_count = 0
     for notsubclass in [
-        ('manhole'),
-        ('channel'),
-        ('special_structure'),
-        ('infiltration_installation'),
-        ('discharge_point'),
-        ('wwtp_structure'),
-    ]:
+        #VSA-KEK
+        ('file'),
+        ('data_media'),
+        ('maintenance_event'),
+        #SIA405 Abwasser
+        ('organisation'),
+        ('wastewater_structure'),
+        ('wastewater_networkelement'),
+        ('structure_part'),
+        ('reach_point'),
+        ('pipe_profile'),
+        ('profile_geometry'),
+        #VSA-DSS
+        ('catchment_area'),
+        ('zone'),
+        ]:
         cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
         logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.rowcount}")
 
