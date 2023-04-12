@@ -410,7 +410,8 @@ def action_export(plugin):
                 f"Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
                 None,
             )
-            return
+            # just show hint, but continue
+            #return
 
 
         # Prepare the temporary ili2pg model
