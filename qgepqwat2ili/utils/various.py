@@ -132,7 +132,7 @@ def setup_test_db(template="full"):
 
         # Creating the template DB with empty structure
         dexec_("psql -f qgep_1.6.0_structure_with_value_lists.sql qgep_prod postgres")
-        dexec_("psql -f qwat_v1.4.0_structure_only qgep_prod postgres")
+        dexec_("psql -f qwat_v1.4.0_structure_only.sql qgep_prod postgres")
         dexec_("psql -f qwat_v1.4.0_value_list_data_only.sql qgep_prod postgres")
         dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
 
