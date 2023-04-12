@@ -34,6 +34,8 @@ from ..utils.ili2db import (
     get_xtf_model2,
     # neu 31.3.2023
     check_organisation_subclass_data,
+    # neu 12.4.2023
+    check_wastewater_structure_subclass_data,
 )
 from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
@@ -341,10 +343,12 @@ def action_export(plugin):
         progress_dialog.setModal(True)
         progress_dialog.show()
 
-        
         # 31.3.2023 Integrity checks before starting export
+        progress_dialog.setLabelText("Integrity checks for export...")
+
+        # check organisation only for VSA-DSS export
         if emodel == "DSS_2015_LV95":
-            progress_dialog.setLabelText("Integrity checks for export...")
+
             check_organisation = False
             check_organisation = check_organisation_subclass_data()
             if check_organisation:
@@ -356,15 +360,54 @@ def action_export(plugin):
                     )
             else:
                 progress_dialog.close()
-                print("OK: Integrity checks organisation")
+                print("number of subclass elements of organisation NOT CORRECT")
                 show_failure(
-                    "ERROR: number of subclass elements of structure parts NOT CORRECT in schmea qgep_od",
+                    "ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od",
                     f"Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
                     None,
                 )
                 return
 
-        # to do identifier check
+        # check wastewater_structure for all data models
+        check_wastewater_structure = False
+        check_wastewater_structure = check_wastewater_structure_subclass_data()
+        if check_wastewater_structure:
+            print("OK: Integrity checks wastewater_structure")
+            show_success(
+                    "Sucess",
+                    f"OK: Integrity checks wastewater_structure",
+                    None,
+                )
+        else:
+            progress_dialog.close()
+            print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
+            show_failure(
+                "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od",
+                f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
+                None,
+            )
+            return
+
+        # to do identifier check check_identifier_null
+        check_identifier = False
+        check_identifier = check_identifier_null()
+        if check_identifier:
+            print("OK: Integrity checks identifiers not isNull")
+            show_success(
+                    "Sucess",
+                    f"OK: Integrity checks identifiers not isNull",
+                    None,
+                )
+        else:
+            progress_dialog.close()
+            print("WARNING: missing identifiers")
+            show_failure(
+                "WARNING: missing identifiers in schema qgep_od",
+                f"Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
+                None,
+            )
+            return
+
 
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)

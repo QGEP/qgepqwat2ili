@@ -9,10 +9,11 @@ from sqlalchemy.ext.automap import AutomapBase
 from .. import config
 from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
 
-# Checking if subclass entries of organisation are set and match number of organisatin entries
+# Checking if subclass entries of organisation are set and match number of organisation entries
 def check_organisation_subclass_data():
 
-    logger.info("INTEGRITY CHECK organisations...")
+    logger.info("INTEGRITY CHECK organisations subclass data...")
+    print("INTEGRITY CHECK organisations subclass data...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -40,9 +41,81 @@ def check_organisation_subclass_data():
             logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
         else:
             organisation_subclass_check=False
-            logger.info(f"ERROR: number of subclass elements of structure parts NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
+            logger.info(f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
+            print (f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
 
     return organisation_subclass_check
+
+# Checking if subclass entries of wastewater_structure are set and match number of wastewater_structure entries
+def check_wastewater_structure_subclass_data():
+
+    logger.info("INTEGRITY CHECK wastewater_structures subclass data...")
+    print("INTEGRITY CHECK wastewater_structures subclass data...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+    
+    cursor.execute(f"SELECT obj_id FROM qgep_od.wastewater_structure;")
+    if cursor.rowcount > 0:
+        wastewater_structure_count = cursor.rowcount
+        logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
+        for subclass in [
+            ('manhole'),
+            ('channel'),
+            ('special_structure'),
+            ('infiltration_installation'),
+            ('discharge_point'),
+            ('wwtp_structure'),
+        ]:
+            cursor.execute(f"SELECT obj_id FROM qgep_od.{subclass};")
+            logger.info(f"Number of {subclass} datasets: {cursor.rowcount}")
+            wastewater_structure_count = wastewater_structure_count - cursor.rowcount
+
+        if wastewater_structure_count == 0:
+            wastewater_structure_subclass_check=True
+            logger.info(f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!")
+        else:
+            wastewater_structure_subclass_check=False
+            logger.info(f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)")
+            print (f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)")
+
+    return wastewater_structure_subclass_check
+
+
+# Checking if attribute identifier is Null
+def check_identifier_null():
+
+    logger.info("INTEGRITY CHECK missing idientifiers...")
+    print("INTEGRITY CHECK missing idientifiers...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+    
+    missing_identifier_count = 0
+    for notsubclass in [
+        ('manhole'),
+        ('channel'),
+        ('special_structure'),
+        ('infiltration_installation'),
+        ('discharge_point'),
+        ('wwtp_structure'),
+    ]:
+        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
+        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.rowcount}")
+
+        missing_identifier_count = missing_identifier_count - cursor.rowcount
+
+    if missing_identifier_count == 0:
+        identifier_null_check=True
+        logger.info(f"OK: all identifiers set in qgep_od!")
+    else:
+        identifier_null_check=False
+        logger.info(f"ERROR: Missing identifiers in qgep_od {missing_identifier_count}")
+        print (f"ERROR: Missing identifiers {missing_identifier_count}")
+
+    return identifier_null_check
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
