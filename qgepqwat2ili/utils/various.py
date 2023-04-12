@@ -117,23 +117,23 @@ def setup_test_db(template="full"):
 
         # Getting data
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.5.6-1/qgep_1.5.6-1_structure_and_demo_data.backup"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.6.0/qgep_1.6.0_structure_and_demo_data.backup"
         )
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.5.6-1/qgep_1.5.6-1_structure_with_value_lists.sql"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.6.0/qgep_1.6.0_structure_with_value_lists.sql"
         )
         dexec_(
-            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_data_and_structure_sample.backup"
+            "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_data_and_structure_sample.backup"
         )
-        dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_structure_only.sql")
+        dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_structure_only.sql")
         dexec_(
-            "wget https://github.com/qwat/qwat-data-model/releases/download/1.3.6/qwat_v1.3.6_value_list_data_only.sql"
+            "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_value_list_data_only.sql"
         )
 
         # Creating the template DB with empty structure
-        dexec_("psql -f qgep_1.5.6-1_structure_with_value_lists.sql qgep_prod postgres")
-        dexec_("psql -f qwat_v1.3.6_structure_only.sql qgep_prod postgres")
-        dexec_("psql -f qwat_v1.3.6_value_list_data_only.sql qgep_prod postgres")
+        dexec_("psql -f qgep_1.6.0_structure_with_value_lists.sql qgep_prod postgres")
+        dexec_("psql -f qwat_v1.4.0_structure_only qgep_prod postgres")
+        dexec_("psql -f qwat_v1.4.0_value_list_data_only.sql qgep_prod postgres")
         dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
 
         # Creating the template DB with full data
@@ -143,11 +143,11 @@ def setup_test_db(template="full"):
         dexec_("dropdb -U postgres qgep_prod --if-exists")
         dexec_("createdb -U postgres qgep_prod")
         dexec_(
-            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.5.6-1_structure_and_demo_data.backup"
+            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.6.0_structure_and_demo_data.backup"
         )
         dexec_(
-            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.3.6_data_and_structure_sample.backup"
-        )
+            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.4.0_data_and_structure_sample.backup"
+            )
         dexec_("createdb -U postgres --template=qgep_prod tpl_full")
 
         # Hotfix qgep invalid demo data
