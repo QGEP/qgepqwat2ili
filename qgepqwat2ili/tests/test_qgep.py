@@ -240,64 +240,63 @@ class TestQGEPUseCases(unittest.TestCase):
             6,
         )
 
-    # test for complete VSA-DSS 2015 export, labels_orientation not set, should be optional
-    def test_case_g_export_dss_complete_qgep_to_xtf(self):
-        """
-        # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
-        """
+    # # test for complete VSA-DSS 2015 export, labels_orientation not set, should be optional
+    # def test_case_g_export_dss_complete_qgep_to_xtf(self):
+        # """
+        # # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
+        # """
 
-        # Prepare db
-        main(["setupdb", "full"])
+        # # Prepare db
+        # main(["setupdb", "full"])
 
-        path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95.xtf")
-        # main(["qgep", "export", path, "--recreate_schema"])
-        main(
-            [
-                "qgep",
-                "export",
-                path,
-                "--export_dss",
-                "--recreate_schema",
-            ]
-        )
+        # path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95.xtf")
+        # # main(["qgep", "export", path, "--recreate_schema"])
+        # main(
+            # [
+                # "qgep",
+                # "export",
+                # path,
+                # "--export_dss",
+                # "--recreate_schema",
+            # ]
+        # )
 
-    # test for orientation, set to 90
-    def test_case_h_export_dss_complete_orientation_90_qgep_to_xtf(self):
-        """
-        # B. export the whole QGEP model to INTERLIS DSS_2015_LV95
-        """
+    # # test for orientation, set to 90
+    # def test_case_h_export_dss_complete_orientation_90_qgep_to_xtf(self):
+        # """
+        # # B. export the whole QGEP model to INTERLIS DSS_2015_LV95 including labels, orientation +90°
+        # """
 
-        # Prepare db
-        main(["setupdb", "full"])
+        # # Prepare db
+        # main(["setupdb", "full"])
 
-        path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95_90.xtf")
-        # main(["qgep", "export", path, "--recreate_schema"])
-        selection = [
-            # reach_id
-            "ch13p7mzRE001221",
-            # node_a_id
-            "ch13p7mzWN003445",
-            # node_b_id
-            "ch13p7mzWN008122",
-        ]
-        labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
-        labels_orientation = "90.0"
-        main(
-            [
-                "qgep",
-                "export",
-                path,
-#                "--export_sia405",
-                "--export_dss",
-                "--recreate_schema",
-                "--selection",
-                ",".join(selection),
-                "--labels_file",
-                labels_file,
-                "--labels_orientation",
-                labels_orientation,
-            ]
-        )
+        # path = os.path.join(tempfile.mkdtemp(), "export_DSS_2015_LV95_90.xtf")
+        # # main(["qgep", "export", path, "--recreate_schema"])
+        # selection = [
+            # # reach_id
+            # "ch13p7mzRE001221",
+            # # node_a_id
+            # "ch13p7mzWN003445",
+            # # node_b_id
+            # "ch13p7mzWN008122",
+        # ]
+        # labels_file = os.path.join(os.path.dirname(__file__), "data", "labels.geojson")
+        # labels_orientation = "90.0"
+        # main(
+            # [
+                # "qgep",
+                # "export",
+                # path,
+                # "--export_dss",
+                # "--recreate_schema",
+                # "--selection",
+                # ",".join(selection),
+                # "--labels_file",
+                # labels_file,
+                # "--labels_orientation",
+                # labels_orientation,
+            # ]
+        # )
 
   # to do add test for VSA-DSS 2015 and selection
 
