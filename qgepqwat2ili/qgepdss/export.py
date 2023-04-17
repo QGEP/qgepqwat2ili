@@ -201,14 +201,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "zugaenglichkeit": get_vl(row.accessibility__REL),
         }
 
-    def maintenance_event_common(row):
-        """
-        Returns common attributes for maintenance_event
-        """
-        return {
-            "ausfuehrende_firmaref": get_tid(row.fk_operating_company__REL),
-            "massnahmeref": get_tid(row.fk_measure__REL),
-        }
+# only become superclas in VSA-DSS 2020
+    # def maintenance_event_common(row):
+        # """
+        # Returns common attributes for maintenance_event
+        # """
+        # return {
+            # "ausfuehrende_firmaref": get_tid(row.fk_operating_company__REL),
+            # "massnahmeref": get_tid(row.fk_measure__REL),
+        # }
 
     def zone_common(row):
         """
@@ -3474,6 +3475,50 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         )
         abwasser_session.add(ezg_parameter_mouse1)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
+
+# neu 17.4.2022 class maintenance_event as class, is not superclass in VSA-DSS 2015
+    logger.info("Exporting QGEP.maintenance_event -> ABWASSER.maintenance_event, ABWASSER.metaattribute")
+    query = qgep_session.query(QGEP.maintenance_event)
+    
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.maintenance_event
+        
+        # --- maintenance_event ---
+        # to do e.g. fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
+        # --- _bwrel_ ---
+        
+        # --- _rel_ ---
+        # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
+    
+        erhaltungsereignis = ABWASSER.erhaltungsereignis(
+            # FIELDS TO MAP TO ABWASSER.erhaltungsereignis
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "erhaltungsereignis"),
+           # --- erhaltungsereignis ---
+            # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
+            art=get_vl(row.kind__REL),
+            astatus=get_vl(row.status__REL),
+            ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
+            ausfuehrender=row.operator,
+            bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            bezeichnung=null_to_emptystr(row.identifier),
+            datengrundlage=row.base_data,
+            dauer=row.duration,
+            detaildaten=row.data_details,
+            ergebnis=row.result,
+            grund=row.reason,
+            kosten=row.cost,
+            # will be added in VSA-DSS 2020
+            # massnahmeref: get_tid(row.fk_measure__REL),
+            zeitpunkt=row.time_point,
+        )
+        abwasser_session.add(erhaltungsereignis)
         create_metaattributes(row)
         print(".", end="")
     logger.info("done")
