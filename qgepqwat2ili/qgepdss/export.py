@@ -3507,10 +3507,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            datengrundlage=row.base_data,
+            # model difference qgep and vsa-dss 2015
+            #bezeichnung=null_to_emptystr(row.identifier),
+            bezeichnung=truncate(null_to_emptystr(row.identifier), 20)
+            # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 TEXT*50
+            #datengrundlage=row.base_data,
+            datengrundlage=truncate(row.base_data, 50)
             dauer=row.duration,
             detaildaten=row.data_details,
+            # model difference qgep TEXT*255 and vsa-dss 2015 TEXT*50, no truncate needed anymore for 2020
+            # ergebnis=row.result,
             ergebnis=row.result,
             grund=row.reason,
             kosten=row.cost,
