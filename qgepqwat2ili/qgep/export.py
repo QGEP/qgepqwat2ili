@@ -860,7 +860,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 / vsa-kek 2019 / 2020 TEXT*50
             #datengrundlage=row.base_data,
-            datengrundlage=truncate(row.base_data, 50)
+            datengrundlage=truncate(row.base_data, 50),
             dauer=row.duration,
             detaildaten=row.data_details,
             ergebnis=row.result,
@@ -878,6 +878,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             vonpunktbezeichnung=row.from_point_identifier,
             witterung=get_vl(row.weather__REL),
         )
+        if len(row.base_data) > 50:
+                logger.info("Truncated maintenance_event.base_data to 50 characters to fit VSA-DSS 2015")
         abwasser_session.add(untersuchung)
         create_metaattributes(row)
         print(".", end="")
@@ -1058,10 +1060,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
             #objekt=null_to_emptystr(row.object),
             objekt=truncate(null_to_emptystr(row.object), 16)
-            if len(row.object) > 16:
-                logger.info("Truncated file.object to 16 characters to fit VSA-KEK 2019")
             relativpfad=row.path_relative,
         )
+        if len(row.object) > 16:
+                logger.info("Truncated file.object to 16 characters to fit VSA-KEK 2019")
         abwasser_session.add(datei)
         create_metaattributes(row)
         print(".", end="")

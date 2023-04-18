@@ -3509,27 +3509,28 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             # model difference qgep and vsa-dss 2015
             #bezeichnung=null_to_emptystr(row.identifier),
-            bezeichnung=truncate(null_to_emptystr(row.identifier), 20)
-            if len(row.identifier) > 20:
-                logger.info("Truncated maintenance_event.identifier to 20 characters to fit VSA-DSS 2015")
+            bezeichnung=truncate(null_to_emptystr(row.identifier), 20),
+
             # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 TEXT*50
             #datengrundlage=row.base_data,
-            datengrundlage=truncate(row.base_data, 50)
-            if len(row.base_data) > 50:
-                logger.info("Truncated maintenance_event.base_data to 50 characters to fit VSA-DSS 2015")
+            datengrundlage=truncate(row.base_data, 50),
             dauer=row.duration,
             detaildaten=row.data_details,
             # model difference qgep TEXT*255 and vsa-dss 2015 TEXT*50, no truncate needed anymore for 2020
             # ergebnis=row.result,
-            ergebnis=truncate(row.result, 50)
-            if len(row.base_data) > 50:
-                logger.info("Truncated maintenance_event.result to 50 characters to fit VSA-DSS 2015")
+            ergebnis=truncate(row.result, 50),
             grund=row.reason,
             kosten=row.cost,
             # will be added in VSA-DSS 2020
             # massnahmeref: get_tid(row.fk_measure__REL),
             zeitpunkt=row.time_point,
         )
+        if len(row.identifier) > 20:
+                logger.info("Truncated maintenance_event.identifier to 20 characters to fit VSA-DSS 2015")
+        if len(row.base_data) > 50:
+                logger.info("Truncated maintenance_event.base_data to 50 characters to fit VSA-DSS 2015")
+        if len(row.result) > 50:
+                logger.info("Truncated maintenance_event.result to 50 characters to fit VSA-DSS 2015")
         abwasser_session.add(erhaltungsereignis)
         create_metaattributes(row)
         print(".", end="")
