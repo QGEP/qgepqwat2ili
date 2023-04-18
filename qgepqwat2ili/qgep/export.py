@@ -1055,7 +1055,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             datentraegerref=get_tid(row.fk_data_media__REL),
             klasse=get_vl(row.class__REL),
-            objekt=null_to_emptystr(row.object),
+            # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
+            #objekt=null_to_emptystr(row.object),
+            objekt=truncate(null_to_emptystr(row.object), 16)
             relativpfad=row.path_relative,
         )
         abwasser_session.add(datei)
