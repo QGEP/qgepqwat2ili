@@ -858,7 +858,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             ausfuehrender=row.operator,
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
-            datengrundlage=row.base_data,
+            # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 / vsa-kek 2019 / 2020 TEXT*50
+            #datengrundlage=row.base_data,
+            datengrundlage=truncate(row.base_data, 50)
             dauer=row.duration,
             detaildaten=row.data_details,
             ergebnis=row.result,
