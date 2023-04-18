@@ -1059,7 +1059,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             klasse=get_vl(row.class__REL),
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
             #objekt=null_to_emptystr(row.object),
-            objekt=truncate(null_to_emptystr(row.object), 16)
+            objekt=truncate(null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
         if len(row.object) > 16:
