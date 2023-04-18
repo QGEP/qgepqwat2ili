@@ -1058,6 +1058,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
             #objekt=null_to_emptystr(row.object),
             objekt=truncate(null_to_emptystr(row.object), 16)
+            if len(row.object) > 16:
+                logger.info("Truncated file.object to 16 characters to fit VSA-KEK 2019")
             relativpfad=row.path_relative,
         )
         abwasser_session.add(datei)
