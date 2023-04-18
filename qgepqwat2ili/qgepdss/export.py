@@ -3525,12 +3525,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # massnahmeref: get_tid(row.fk_measure__REL),
             zeitpunkt=row.time_point,
         )
-        if len(row.identifier) > 20:
-                logger.info("Truncated maintenance_event.identifier to 20 characters to fit VSA-DSS 2015")
-        if len(row.base_data) > 50:
-                logger.info("Truncated maintenance_event.base_data to 50 characters to fit VSA-DSS 2015")
-        if len(row.result) > 50:
-                logger.info("Truncated maintenance_event.result to 50 characters to fit VSA-DSS 2015")
         abwasser_session.add(erhaltungsereignis)
         create_metaattributes(row)
         print(".", end="")

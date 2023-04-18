@@ -878,8 +878,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             vonpunktbezeichnung=row.from_point_identifier,
             witterung=get_vl(row.weather__REL),
         )
-        if len(row.base_data) > 50:
-                logger.info("Truncated maintenance_event.base_data to 50 characters to fit VSA-DSS 2015")
         abwasser_session.add(untersuchung)
         create_metaattributes(row)
         print(".", end="")
@@ -1062,8 +1060,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             objekt=truncate(null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
-        if len(row.object) > 16:
-                logger.info("Truncated file.object to 16 characters to fit VSA-KEK 2019")
         abwasser_session.add(datei)
         create_metaattributes(row)
         print(".", end="")
