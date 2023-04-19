@@ -3743,6 +3743,40 @@ def qgep_import(precommit_callback=None):
         print(".", end="")
     logger.info("done")
 
+#neu 19.4.2023
+    logger.info("Importing ABWASSER.erhaltungsereignis, ABWASSER.metaattribute -> QGEP.maintenance_event")
+    for row, metaattribute in abwasser_session.query(ABWASSER.erhaltungsereignis, ABWASSER.metaattribute).join(
+        ABWASSER.metaattribute
+    ):
+
+        logger.warning(
+            "QGEP maintenance_event.active_zone has no equivalent in the interlis model. This field will be null."
+        )
+        maintenance_event = create_or_update(
+            QGEP.maintenance_event,
+            **base_common(row),
+            **metaattribute_common(metaattribute),
+            # --- maintenance_event ---
+            # active_zone=row.REPLACE_ME,  # TODO : found no matching field for this in interlis, confirm this is ok
+            base_data=row.datengrundlage,
+            cost=row.kosten,
+            data_details=row.detaildaten,
+            duration=row.dauer,
+            fk_operating_company=row.ausfuehrende_firmaref__REL.obj_id if row.ausfuehrende_firmaref__REL else None,
+            identifier=row.bezeichnung,
+            kind__REL=get_vl_instance(QGEP.maintenance_event_kind, row.art),
+            operator=row.ausfuehrender,
+            reason=row.grund,
+            remark=row.bemerkung,
+            result=row.ergebnis,
+            status__REL=get_vl_instance(QGEP.maintenance_event_status, row.astatus),
+            time_point=row.zeitpunkt,
+        )
+        qgep_session.add(maintenance_event)
+        print(".", end="")
+    logger.info("done")
+
+
     logger.info("Importing ABWASSER.erhaltungsereignis_abwasserbauwerkassoc -> QGEP.re_maintenance_event_wastewater_structure")
     for row in abwasser_session.query(ABWASSER.erhaltungsereignis_abwasserbauwerkassoc
     ):
