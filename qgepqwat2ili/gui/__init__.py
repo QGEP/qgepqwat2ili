@@ -42,6 +42,9 @@ from ..utils.various import CmdException, LoggingHandlerContext, logger, make_lo
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
+# 19.4.2023
+from .gui_import_config import GuiImportConfig
+
 # 12.7.2022 for testing import time
 import time
 
@@ -67,15 +70,37 @@ def show_success(title, message, log_path):
 
 import_dialog = None
 
+# 19.4.2023 
+#import_dialog_config = None
+
 
 def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
     """
-    global import_dialog  # avoid garbage collection
-
     if not configure_from_modelbaker(plugin.iface):
         return
+
+    flagskipvalidation_import = False
+    
+# to try later - does not work like this
+# #    global import_dialog_config  # avoid garbage collection
+    # import_dialog_config = GuiImportConfig(plugin.iface.mainWindow())
+
+    # # 19.4.2023 add option for additional import configuration
+    # def action_do_import_config():
+        # print("Open import dialog config")
+        # if import_dialog_config.skipvalidation_import:
+            # flagskipvalidation_import = import_dialog_config.skipvalidation_import
+    # # end action_do_import_config
+
+    # import_dialog_config.accepted.connect(action_do_import_config)
+    # import_dialog_config.adjustSize()
+    # import_dialog_config.show()
+
+
+
+    global import_dialog  # avoid garbage collection
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
     file_name, _ = QFileDialog.getOpenFileName(
@@ -99,23 +124,28 @@ def action_import(plugin):
     progress_dialog.setModal(True)
     progress_dialog.show()
 
-    # Validating the input file
-    progress_dialog.setLabelText("Validating the input file...")
-    QApplication.processEvents()
-    log_path = make_log_path(base_log_path, "ilivalidator")
-    try:
-        validate_xtf_data(
-            file_name,
-            log_path,
-        )
-    except CmdException:
-        progress_dialog.close()
-        show_failure(
-            "Invalid file",
-            "The input file is not a valid XTF file. Open the logs for more details on the error.",
-            log_path,
-        )
-        return
+    # Check if validating is selected
+    if flagskipvalidation_import:
+        print("Validation will be skipped!")
+        progress_dialog.setLabelText("No validation of input file...")
+    else:
+        # Validating the input file
+        progress_dialog.setLabelText("Validating the input file...")
+        QApplication.processEvents()
+        log_path = make_log_path(base_log_path, "ilivalidator")
+        try:
+            validate_xtf_data(
+                file_name,
+                log_path,
+            )
+        except CmdException:
+            progress_dialog.close()
+            show_failure(
+                "Invalid file",
+                "The input file is not a valid XTF file. Open the logs for more details on the error.",
+                log_path,
+            )
+            return
 
     # von unten hierherauf genommen, da sonst nicht ansprechbar
     import_dialog = GuiImport(plugin.iface.mainWindow())
@@ -255,7 +285,7 @@ def action_import(plugin):
             log_path,
         )
         return
-    progress_dialog.setValue(66)
+
 
     # Export to the temporary ili2pg model
     progress_dialog.setLabelText("Converting to QGEP...")
@@ -265,11 +295,9 @@ def action_import(plugin):
     # import_dialog = GuiImport(plugin.iface.mainWindow())
     # 25.7.2022 new 80 instead of 100 (to show that still something is happening
     #progress_dialog.setValue(100)
-    progress_dialog.setValue(80)
+    progress_dialog.setValue(66)
 
 
-    # 24.7.2022
-    progress_dialog.setValue(100)
 
     log_handler = logging.FileHandler(make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8")
     log_handler.setLevel(logging.INFO)
@@ -278,6 +306,8 @@ def action_import(plugin):
 #        qgep_import(
 #        precommit_callback=import_dialog.init_with_session,
 #        )
+
+        progress_dialog.setLabelText("Loading import wizard - please be patient...")
 # 24.3.2023 added model dependency
         if imodel == "VSA_KEK_2019_LV95":
             qgep_import(
@@ -298,6 +328,14 @@ def action_import(plugin):
                  "Open the logs for more details on the error.",
                  log_path,
             )
+
+    progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
+    
+    time.sleep(2)
+    # to add option to run main_cover.sql manually
+    
+    # 24.7.2022 / moved to end
+    progress_dialog.setValue(100)
 
 
 def action_export(plugin):
