@@ -59,7 +59,7 @@
   </layout>
  </widget>
  <resources/>
- <connections>
+<connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
@@ -67,12 +67,12 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>259</x>
-     <y>216</y>
+     <x>248</x>
+     <y>254</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
-     <y>227</y>
+     <y>274</y>
     </hint>
    </hints>
   </connection>
@@ -83,12 +83,12 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>327</x>
-     <y>216</y>
+     <x>316</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
-     <y>227</y>
+     <y>274</y>
     </hint>
    </hints>
   </connection>

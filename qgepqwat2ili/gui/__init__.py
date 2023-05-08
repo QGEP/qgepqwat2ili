@@ -42,11 +42,15 @@ from ..utils.various import CmdException, LoggingHandlerContext, logger, make_lo
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
-# 19.4.2023
-from .gui_import_config import GuiImportConfig
+# 19.4.2023 / 25.4.2023 ohne Bindestrich / neu aus gui_import - Gui
+from .gui_importc import GuiImportc
 
 # 12.7.2022 for testing import time
 import time
+
+
+from qgis.PyQt.QtWidgets import QDialog
+
 
 def _show_results(title, message, log_path, level):
     widget = iface.messageBar().createMessage(title, message)
@@ -70,10 +74,49 @@ def show_success(title, message, log_path):
 
 import_dialog = None
 
+
+flagskipvalidation_import = False
+
 # 19.4.2023 
-#import_dialog_config = None
+#importc_dialog = None
 
 
+def action_importc(plugin):
+
+    flagskipvalidation_import = False
+    print("set flagskipvalidation_import")
+
+# to try later - does not work like this
+#    global import_dialog_config  # avoid garbage collection
+    
+    iface.messageBar().pushMessage("Info", "action import", level=Qgis.Info)
+    
+    #import_dialog_config = GuiImportconfig(plugin.iface.mainWindow())
+    importc_dialog = GuiImportc(plugin.iface.mainWindow())
+
+    # # 19.4.2023 add option for additional import configuration
+    #def action_do_importconfig():
+    def action_do_importc():
+        print("Open import dialog config")
+        if importc_dialog.skipvalidation_import:
+            flagskipvalidation_import = importc_dialog.skipvalidation_import
+
+        progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
+        progress_dialog.setCancelButton(None)
+        progress_dialog.setModal(True)
+        progress_dialog.show()
+        progress_dialog.setLabelText("waiting...")
+        # delays the execution for 5.5 secs.
+        time.sleep(5.5)
+        progress_dialog.close
+        # end action_do_importc
+
+    importc_dialog.accepted.connect(action_do_importc)
+    importc_dialog.adjustSize()
+    importc_dialog.show()
+
+    
+#def action_import(plugin):
 def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
@@ -81,25 +124,31 @@ def action_import(plugin):
     if not configure_from_modelbaker(plugin.iface):
         return
 
-    flagskipvalidation_import = False
-    
 # to try later - does not work like this
-# #    global import_dialog_config  # avoid garbage collection
-    # import_dialog_config = GuiImportConfig(plugin.iface.mainWindow())
-
-    # # 19.4.2023 add option for additional import configuration
-    # def action_do_import_config():
+    # global importc_dialog  # avoid garbage collection
+    
+    # def action_do_importc():
         # print("Open import dialog config")
-        # if import_dialog_config.skipvalidation_import:
-            # flagskipvalidation_import = import_dialog_config.skipvalidation_import
-    # # end action_do_import_config
+        # if importc_dialog.skipvalidation_import:
+            # flagskipvalidation_import = importc_dialog.skipvalidation_import
 
-    # import_dialog_config.accepted.connect(action_do_import_config)
-    # import_dialog_config.adjustSize()
-    # import_dialog_config.show()
+        # progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
+        # progress_dialog.setCancelButton(None)
+        # progress_dialog.setModal(True)
+        # progress_dialog.show()
+        # progress_dialog.setLabelText("waiting...")
+        # # delays the execution for 5.5 secs.
+        # time.sleep(5.5)
+        # progress_dialog.close
+        # # end action_do_importc
 
+    # importc_dialog = GuiImportc(plugin.iface.mainWindow())
+    # importc_dialog.accepted.connect(action_do_importc)
+    # importc_dialog.adjustSize()
+    # importc_dialog.show()
 
-
+    #breakpoint()
+    
     global import_dialog  # avoid garbage collection
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
@@ -234,7 +283,7 @@ def action_import(plugin):
     # Export from ili2pg model to file
     progress_dialog.setLabelText("Importing XTF data...")
 
-    time.sleep(6.5)
+    #time.sleep(6.5)
 
     QApplication.processEvents()
     log_path = make_log_path(base_log_path, "ili2pg-import")
@@ -513,12 +562,12 @@ def action_export(plugin):
         # neu 12.7.2022
         progress_dialog.setLabelText(emodel)
         
-        print("GFG printed immediately.")
-        time.sleep(5.5)
+        #print("GFG printed immediately.")
+        #time.sleep(5.5)
           
         # delays the execution
         # for 5.5 secs.
-        print("GFG printed after 5.5 secs.")
+        #print("GFG printed after 5.5 secs.")
 
         progress_dialog.setValue(25)
         
@@ -716,7 +765,7 @@ def action_export(plugin):
 
                 progress_dialog.setValue(progress + 20)
 
-# 29.3.2023 SIA405_ABWASSER_2015_LV95
+        # 29.3.2023 SIA405_ABWASSER_2015_LV95
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             for model_name, export_model_name, progress in [
                 # (config.ABWASSER_DSS_ILI_MODEL_NAME, None, 50),

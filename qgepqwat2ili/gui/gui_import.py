@@ -14,24 +14,113 @@ from sqlalchemy.orm import Session
 from ..qgep.model_qgep import get_qgep_model
 from .editors.base import Editor
 
+# neu 27.4.2023
+import time
+import logging
+from qgis.PyQt.QtCore import pyqtSlot
+
 # Required for loadUi to find the custom widget
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+# neu 27.4.2023
+class GuiImportc(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+        print("GuiImportconfig init")
+        iface.messageBar().pushMessage("GuiImportconfig", level=Qgis.Info)
+
+        datei = os.path.join(os.path.dirname(__file__), "gui_importc.ui")
+
+        iface.messageBar().pushMessage("Info Datei", str(datei), level=Qgis.Info)
+
+        iface.messageBar().pushMessage("Info self", str(self), level=Qgis.Info)
+        iface.messageBar().pushMessage("Info parent", str(parent), level=Qgis.Info)
+        logging.info(str(datei))
+        logging.info(str(self))
+        logging.info(str(parent))
+        # delays the execution for 5.5 secs.
+        time.sleep(5.5)
+
+        #breakpoint()
+
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_importc.ui"), self)
+        
+        #breakpoint()
+        
+        #Test ob file ok
+        #loadUi(os.path.join(os.path.dirname(__file__), "untitled.ui"), self)
+
+        #self.finished.connect(self.on_finish)
+        print("GuiImportconfig init2")
+        
+        # header = self.treeWidget.header()
+        # header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        # header.setSectionResizeMode(0, QHeaderView.Stretch)
+        
+        # Execute the dialog
+        # self.resize(iface.mainWindow().size() * 0.75)
+
+        # Remember save skipvalidation_import_checkbox - to do maybe later
+        # s = QgsSettings().value("qgep_plugin/skipvalidation_import", False)
+        # self.skipvalidation_import_checkbox.setChecked(s == True or s == "true")
+
+        # Remember save skipimport_wizard_checkbox - to do maybe later
+        # s = QgsSettings().value("qgep_plugin/skipimport_wizard", False)
+        # self.skipimport_wizard_checkbox.setChecked(s == True or s == "true")
+        
+        # Execute the dialog
+        #self.resize(iface.mainWindow().size() * 0.75)
+        #self.show()
+
+    def init_without_session(self):
+        """
+        Shows the configuration dialog
+        """
+
+        # Execute the dialog
+        self.resize(iface.mainWindow().size() * 0.75)
+        self.show()
+
+
+    # 27.4.2023
+    @pyqtSlot()
+    def on_finish(self):
+        # Remember skipvalidation_import checkbox
+        #QgsSettings().setValue("qgep_plugin/skipvalidation_import", self.skipvalidation_import)
+
+        # Remember skipimport_wizard checkbox
+        #QgsSettings().setValue("qgep_plugin/skipimport_wizard", self.skipimport_wizard)
+        print("finished")
+
+    @property
+    def skipvalidation_import(self):
+        return self.skipvalidation_import.isChecked()
+
+    @property
+    def skipimport_wizard(self):
+        return self.skipimport_wizard_checkbox.isChecked()
 
 
 class GuiImport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
+        
+        a = True
+        if a:
+            loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
-        self.accepted.connect(self.commit_session)
-        self.rejected.connect(self.rollback_session)
+        
+            self.accepted.connect(self.commit_session)
+            self.rejected.connect(self.rollback_session)
 
-        header = self.treeWidget.header()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header = self.treeWidget.header()
+            header.setSectionResizeMode(QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
 
-        # No required here, but this way we load before opening the dialog
-        get_qgep_model()
+            # No required here, but this way we load before opening the dialog
+            get_qgep_model()
+        else:
+            loadUi(os.path.join(os.path.dirname(__file__), "gui_importc.ui"), self)
 
     def init_with_session(self, session: Session):
         """
