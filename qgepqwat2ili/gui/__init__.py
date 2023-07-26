@@ -77,25 +77,26 @@ import_dialog = None
 
 flagskipvalidation_import = False
 
-# 19.4.2023 
-#importc_dialog = None
+# 19.4.2023 / 26.7.2023 wieder gesetzt
+importc_dialog = None
 
 
 def action_importc(plugin):
 
+    #neu 26.7.2023 analog action_import
+    global importc_dialog  # avoid garbage collection
+
     flagskipvalidation_import = False
     print("set flagskipvalidation_import")
 
-# to try later - does not work like this
-#    global import_dialog_config  # avoid garbage collection
     
     iface.messageBar().pushMessage("Info", "action import", level=Qgis.Info)
-    
-    #import_dialog_config = GuiImportconfig(plugin.iface.mainWindow())
-    importc_dialog = GuiImportc(plugin.iface.mainWindow())
 
+    importc_dialog = GuiImportc(plugin.iface.mainWindow())
+    
+    
+    
     # # 19.4.2023 add option for additional import configuration
-    #def action_do_importconfig():
     def action_do_importc():
         print("Open import dialog config")
         if importc_dialog.skipvalidation_import:
@@ -124,31 +125,6 @@ def action_import(plugin):
     if not configure_from_modelbaker(plugin.iface):
         return
 
-# to try later - does not work like this
-    # global importc_dialog  # avoid garbage collection
-    
-    # def action_do_importc():
-        # print("Open import dialog config")
-        # if importc_dialog.skipvalidation_import:
-            # flagskipvalidation_import = importc_dialog.skipvalidation_import
-
-        # progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
-        # progress_dialog.setCancelButton(None)
-        # progress_dialog.setModal(True)
-        # progress_dialog.show()
-        # progress_dialog.setLabelText("waiting...")
-        # # delays the execution for 5.5 secs.
-        # time.sleep(5.5)
-        # progress_dialog.close
-        # # end action_do_importc
-
-    # importc_dialog = GuiImportc(plugin.iface.mainWindow())
-    # importc_dialog.accepted.connect(action_do_importc)
-    # importc_dialog.adjustSize()
-    # importc_dialog.show()
-
-    #breakpoint()
-    
     global import_dialog  # avoid garbage collection
 
     default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
