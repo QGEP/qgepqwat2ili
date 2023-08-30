@@ -213,7 +213,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             ),
             "textori": modulo_angle(row["properties"]["LabelRotation"]),
             "texthali": "Left",  # can be Left/Center/Right
-            "textvali": "Top",  # can be Top,Cap,Half,Base,Bottom
+            "textvali": "Bottom",  # can be Top,Cap,Half,Base,Bottom
             # --- SIA405_TextPos ---
             "plantyp": row["properties"]["scale"],
             "textinhalt": row["properties"]["LabelText"],
