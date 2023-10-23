@@ -74,6 +74,17 @@ class GuiExport(QDialog):
         else:
             return None
 
+    # neu 12.12.2022
+    @property
+    def selected_wws(self):
+        if self.limit_checkbox.isChecked():
+            ids = []
+            for struct in self.structures:
+                ids.append(str(struct["obj_id"]))
+            return ids
+        else:
+            return None
+
     @property
     def limit_to_selection(self):
         return self.limit_checkbox.isChecked()
