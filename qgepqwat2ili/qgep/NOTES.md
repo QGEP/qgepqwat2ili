@@ -4,6 +4,8 @@
 
 - `qgep_od.file.fk_data_media` doesn't have a FK constraint to `qgep_od.data_media.obj_id`
 
+-> QGEP datamodel was corrected 
+
 ## SIA405_Abwasser
 
 - `Deckel.Fabrikat` looks like a typo, shouldn't it be `Deckel.Fabrikant` ? (comment is `Name der Herstellerfirma`)
@@ -14,6 +16,8 @@
 
 - In SIA405, some common fields from the concrete `normschachtschaden` and `kanalschaden` could be moved to the abstract `schaden` class (e.g. `distanz`, `quantifizierung1`, `quantifizierung2`...). This would match QGEP's implementation where it's like this already.
 
+-> no, they do not have the same data type. QGEP is adjusted to fit INTERLIS model
+
 - `qgep_od.maintenance_event.active_zone` has no equivalent in the interlis model.
 
-- `reach.elevation_determination` has no equivalent in the interlis model
+- `reach.elevation_determination` has no equivalent in the interlis model -> only in 3D version that is not supported.

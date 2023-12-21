@@ -14,24 +14,36 @@ from sqlalchemy.orm import Session
 from ..qgep.model_qgep import get_qgep_model
 from .editors.base import Editor
 
+# neu 27.4.2023
+import time
+import logging
+from qgis.PyQt.QtCore import pyqtSlot
+
 # Required for loadUi to find the custom widget
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
 
 
 class GuiImport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
+        
+        a = True
+        if a:
+            loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
-        self.accepted.connect(self.commit_session)
-        self.rejected.connect(self.rollback_session)
+        
+            self.accepted.connect(self.commit_session)
+            self.rejected.connect(self.rollback_session)
 
-        header = self.treeWidget.header()
-        header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
+            header = self.treeWidget.header()
+            header.setSectionResizeMode(QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(0, QHeaderView.Stretch)
 
-        # No required here, but this way we load before opening the dialog
-        get_qgep_model()
+            # Not required here, but this way we load before opening the dialog
+            get_qgep_model()
+        else:
+            loadUi(os.path.join(os.path.dirname(__file__), "gui_importc.ui"), self)
 
     def init_with_session(self, session: Session):
         """
