@@ -562,7 +562,7 @@ def qgep_import(precommit_callback=None):
             ),  # TODO : this fails for now, but probably only because we flush too soon
             identifier=row.bezeichnung,
             level=row.kote,
-            outlet_shape__REL=get_vl_instance(QGEP.reach_point_outlet_shape, row.hoehengenauigkeit),
+            outlet_shape__REL=get_vl_instance(QGEP.reach_point_outlet_shape, row.auslaufform),
             position_of_connection=row.lage_anschluss,
             remark=row.bemerkung,
             situation_geometry=ST_Force3D(row.lage),
