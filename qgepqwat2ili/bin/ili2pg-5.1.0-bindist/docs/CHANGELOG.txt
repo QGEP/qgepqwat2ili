@@ -11,8 +11,113 @@ ideas/open issues/questions
 - einfache Liste mit den neu erzeugten Vertexpunkte (aufgrund der Overlap-Bereinigung)
 - Schalter für das "disablen" der Overlaps-Bereinigung. Bei vorhandenen gueltigen Overlaps erfolgen: a) Import mit NULL als Polygon, ohne Fehlermeldung, b) Import mit NULL als Polygon, mit Warning, c) kein Import, Fehlermeldung
 
-LATEST
+ili2db 5.1.0 (2023-12-06)
 ---------------------------
+- JSON-Mapping of Bag of Structure (#477)
+- Unique constraints are not generated (#493)
+- ILI2.4: Resolve generic domain from context or transfer (#472)
+- ILI2.4: Eindeutigkeitsbedingungen auf den einzelnen Transfer (#518)
+- ili2pg: if dbhost is not provided, ili2pg ignores dbport (#494)
+- ili2c-5.4.0
+- iox-ili-1.22.0
+ 
+ili2db 5.0.1 (2023-09-25)
+---------------------------
+- ili2c-5.3.3
+
+ili2db 5.0.0 (2023-09-09)
+---------------------------
+- ili2pg: fix support of SCRAM authentification in PostgreSQL (#448)
+- ili2gpkg: Update sqlite lib (Apple M1) (#421)
+- remove ToXtfRecordConverter.isMsAccess (#303)
+- remove option --structWithGenericRef (#497)
+- JRE 1.8
+- org.postgresql:postgresql:42.6.0
+- org.xerial:sqlite-jdbc:3.43.0.0
+
+ili2db 4.11.1 (2023-08-22)
+---------------------------
+- ili2gpkg: new option --gpkgMultiGeomPerTable to create multi geom col tables (#511)
+- Failed to query extended many-to-many associations (smart2) (#521)
+- ehisqlgen-1.16.0
+
+ili2db 4.11.0 (2023-04-24)
+---------------------------
+- fix references with mixed case INTERLIS.UUIDOID (#507)
+- fix issues with duplicate coordinates (#510)
+- fix validate fails if external connection is used (#514)
+- fix delete empty dataset (#513)
+- fix additionalModel in the --validConfig on validation not found (#509)
+- Provide metaConfig info in the database (#508)
+- ili2h2gis: fix bigint schema import
+- iox-ili-1.21.18
+
+ili2db 4.10.1 (2023-02-28)
+---------------------------
+- fix Bug --delete Flag im mehrsprachigen DMAV01 Modell (#504)
+- iox-ili-1.21.17
+
+ili2db 4.10.0 (2022-12-30)
+------------------------------
+- ili24: LIST/BAG mit primitiven Typen (nicht nur mit Strukturen) (#471) 
+- support --option NULL (#500)
+- implement --metaConfig (#392)
+- support ilidata:basketId as import file argument (#480)
+- create mandatory reference check with --coalesceCatalogueRef (#481)
+- iox-ili-1.21.15
+- ili2c-5.3.2
+
+ili2db 4.9.1 (2022-11-02)
+------------------------------
+- remove Swing reference from Main (#496) 
+- fix error when using --update function (#450)
+- iox-ili-1.21.13
+- ili2c-5.3.0
+
+ili2db 4.9.0 (2022-08-24)
+------------------------------
+- new option --verbose
+- new option --logtime
+- new meta info about ili attr type ch.ehi.ili2db.typeKind (#469)
+- fix bigint import (#464)
+- fix enum itfCode on ili-import (#478) 
+- support ALL OF enum-domain (#476)
+- new option --createMandatoryChecks to create DB constraint for Reference attributes (#475)
+- fix JRE 1.6 compatibility
+- iox-ili-1.21.12
+- ili2c-5.2.8
+- ehisqlgen-1.15.0
+
+ili2db 4.8.0 (2022-04-29)
+------------------------------
+- API: added Ili2db.getDatasets()
+- API: make AbstractMain.getDbUrlConverter() public
+- rename option --importBatchSize to set JDBC batchSize (#458)
+- rename option --exportFetchSize to set JDBC fetchSize (#458)
+- use batchSize to INSERT/UPDATE xtf/itf-data (#458) 
+- new option --disableBoundaryRecoding to fix imported geometry (#437)
+- save --nameLanguage to t_ili2db_settings
+- use translated enum model element name for dispName in enum tables (#460)
+- export: fix ALL OF missing translations of values German to French (#439) 
+- iox-ili-1.21.10
+- ili2c-5.2.6
+
+ili2db 4.7.0 (2021-12-28)
+------------------------------
+- create metainfo about possible classes in a topic (#216)
+- create metainfo about BID domain (#440)
+- set length of description field in ENUM tables to 'unlimited' (#429)
+- import polygons from XTF as boundary lines (#269)
+- check that --createBasketCol is used (if required) (#130)
+- add used TransferDescription to Settings as ch.ehi.ili2db.model
+- API: add getCustomMappingStrategy() 
+- ili24: implement MULTISURFACE/MULTIAREA (#410)
+- ili24: implement MULTIPOLYLINE (#409)
+- ili2gpkg: create spatial index (#391) 
+- mysql:mysql-connector-java:5.1.49
+- iox-ili-1.21.9
+- ehisqlgen-1.14.1
+- ili2c-5.2.5
 
 ili2db 4.6.1 (2021-11-10)
 ------------------------------
