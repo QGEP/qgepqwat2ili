@@ -3561,6 +3561,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             layer_name = label["properties"]["Layer"]
             obj_id = label["properties"]["qgep_obj_id"]
 
+            print(f"label[properties]: {label['properties']}")
+
+            if not label["properties"]["LabelText"]:
+                logger.warning(
+                    f"Label of object '{obj_id}' from layer '{layer_name}' is empty and will not be exported"
+                )
+                continue
+
             if layer_name == "vw_qgep_reach":
                 if obj_id not in tid_for_obj_id["haltung"]:
                     logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
