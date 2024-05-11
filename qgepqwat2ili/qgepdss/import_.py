@@ -3826,11 +3826,11 @@ def qgep_import(precommit_callback=None):
     post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     
     # logger.info("Update wastewater structure fk_main_cover")
-    # cursor.execute("SELECT tww_app.wastewater_structure_update_fk_main_cover('', True);")
+    # cursor.execute("SELECT tww_od.wastewater_structure_update_fk_main_cover('', True);")
 
     # logger.info("Update wastewater structure fk_main_wastewater_node")
     # cursor.execute(
-            # "SELECT tww_app.wastewater_structure_update_fk_main_wastewater_node('', True);"
+            # "SELECT tww_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
         # )
 
     logger.info("Refresh materialized views")
