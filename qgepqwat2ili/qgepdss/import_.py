@@ -3819,3 +3819,22 @@ def qgep_import(precommit_callback=None):
     logger.info("symbology triggers successfully created!")
     post_session.commit()
     post_session.close()
+
+    #11.5.2024 add post_session2 - to do add queries for main_cover and main_node as in TEKSI, add to symbology functions? or extra create sql?
+    # see teksi ww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/datamodel/app/symbology_functions.sql#L290
+    
+    post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+    
+    # logger.info("Update wastewater structure fk_main_cover")
+    # cursor.execute("SELECT tww_app.wastewater_structure_update_fk_main_cover('', True);")
+
+    # logger.info("Update wastewater structure fk_main_wastewater_node")
+    # cursor.execute(
+            # "SELECT tww_app.wastewater_structure_update_fk_main_wastewater_node('', True);"
+        # )
+
+    logger.info("Refresh materialized views")
+    cursor.execute("SELECT qgep_network.refresh_network_simple();")
+
+    post_session2.commit()
+    post_session2.close()
