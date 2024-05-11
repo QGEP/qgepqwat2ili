@@ -213,7 +213,12 @@ class GuiImport(QDialog):
         # TODO : rollback to pre-commit state, allowing user to try to fix issues
         # probably a matter of creating a savepoint before saving with
         # session.begin_nested() and one additionnal self.session.commit()
+        
+        # 11.5.2024 try to add info in message bar
+        iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Warning)
+        
         self.session.commit()
+
         self.session.close()
         iface.messageBar().pushMessage("Sucess", "Data successfully imported", level=Qgis.Success)
 

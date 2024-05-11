@@ -1096,7 +1096,12 @@ def qgep_import(precommit_callback=None):
     # Calling the precommit callback if provided, allowing to filter before final import
     if precommit_callback:
         precommit_callback(qgep_session)
+        logger.info("precommit_callback(qgep_session)")
+        # 11.5.2024 improve user feedback
+        logger.info("Comitting qgep_session - please be patient ...")
     else:
+        # 11.5.2024 improve user feedback
+        logger.info("Comitting qgep_session - please be patient ...")
         qgep_session.commit()
         qgep_session.close()
     abwasser_session.close()
