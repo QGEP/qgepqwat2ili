@@ -78,7 +78,6 @@ def qgep_import(precommit_callback=None):
                 logger.warning(
                     f'Could not find value `{value}` in value list "{vl_table.__table__.schema}.{vl_table.__name__}". Setting to None instead.'
                 )
-            )
             return None
         return row
 
@@ -3809,10 +3808,11 @@ def qgep_import(precommit_callback=None):
         logger.info("Comitting qgep_session - please be patient ...")
     else:
         # 11.5.2024 improve user feedback
-        logger.info("Comitting qgep_session - please be patient ...")
+        logger.info("Comitting qgep_session - please be patient (else) ...")
         qgep_session.commit()
         logger.info("qgep_session sucessfully committed")
         qgep_session.close()
+
     abwasser_session.close()
     logger.info("abwasser_session closed")
     
@@ -3832,15 +3832,15 @@ def qgep_import(precommit_callback=None):
     post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     
     logger.info("Update wastewater structure fk_main_cover")
-    cursor.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
+    post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
 
     logger.info("Update wastewater structure fk_main_wastewater_node")
-    cursor.execute(
+    post_session2.execute(
             "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
     )
 
     logger.info("Refresh materialized views")
-    cursor.execute("SELECT qgep_network.refresh_network_simple();")
+    post_session2.execute("SELECT qgep_network.refresh_network_simple();")
 
     post_session2.commit()
     post_session2.close()
