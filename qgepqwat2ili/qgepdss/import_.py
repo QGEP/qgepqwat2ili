@@ -29,6 +29,7 @@ def qgep_import(precommit_callback=None):
 
     # We also drop symbology triggers as they badly affect performance. This must be done in a separate session as it
     # would deadlock other sessions.
+    logger.info("drop symbology triggers")
     pre_session.execute("SELECT qgep_sys.drop_symbology_triggers();")
     pre_session.commit()
     pre_session.close()
@@ -59,6 +60,7 @@ def qgep_import(precommit_callback=None):
     # logger.info("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
 
     # Allow to insert rows with cyclic dependencies at once
+    logger.info("SET CONSTRAINTS ALL DEFERRED;")
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
 
 
@@ -3820,18 +3822,19 @@ def qgep_import(precommit_callback=None):
     post_session.commit()
     post_session.close()
 
-    #11.5.2024 add post_session2 - to do add queries for main_cover and main_node as in TEKSI, add to symbology functions? or extra create sql?
+    #11.5.2024 add post_session2 - to do add queries for main_cover and main_node as in TEKSI, add to symbology functions
     # see teksi ww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/datamodel/app/symbology_functions.sql#L290
+    # needs also delta_1.6.3_functions_update_fk_main_cover_main_wastewater_node.sql
     
     post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     
-    # logger.info("Update wastewater structure fk_main_cover")
-    # cursor.execute("SELECT tww_od.wastewater_structure_update_fk_main_cover('', True);")
+    logger.info("Update wastewater structure fk_main_cover")
+    cursor.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
 
-    # logger.info("Update wastewater structure fk_main_wastewater_node")
-    # cursor.execute(
-            # "SELECT tww_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
-        # )
+    logger.info("Update wastewater structure fk_main_wastewater_node")
+    cursor.execute(
+            "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
+    )
 
     logger.info("Refresh materialized views")
     cursor.execute("SELECT qgep_network.refresh_network_simple();")

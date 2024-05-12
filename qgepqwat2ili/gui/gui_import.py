@@ -216,7 +216,7 @@ class GuiImport(QDialog):
         
         # 11.5.2024 try to add info in message bar
         iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Warning)
-        
+        time.sleep(5)
         self.session.commit()
 
         self.session.close()
