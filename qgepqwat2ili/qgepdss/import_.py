@@ -73,8 +73,11 @@ def qgep_import(precommit_callback=None):
         # TODO : return "other" (or other applicable value) rather than None, or even throwing an exception, would probably be better
         row = qgep_session.query(vl_table).filter(vl_table.value_de == value).first()
         if row is None:
-            logger.warning(
-                f'Could not find value `{value}` in value list "{vl_table.__table__.schema}.{vl_table.__name__}". Setting to None instead.'
+            # 12.5.2024 write logger.warning only if value is not None
+            if value != None:
+                logger.warning(
+                    f'Could not find value `{value}` in value list "{vl_table.__table__.schema}.{vl_table.__name__}". Setting to None instead.'
+                )
             )
             return None
         return row
