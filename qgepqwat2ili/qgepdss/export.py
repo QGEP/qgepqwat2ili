@@ -2082,6 +2082,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.profile_geometry -> ABWASSER.rohrprofil_geometrie, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.profile_geometry)
+    if filtered:
+        query = query.join(
+            QGEP.reach,
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.profile_geometry
