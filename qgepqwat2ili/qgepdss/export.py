@@ -1911,6 +1911,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hydr_geometry -> ABWASSER.hydr_geometrie, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hydr_geometry)
+    if filtered:
+        query = query.join(QGEP.wastewater_node).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geometry
@@ -2122,6 +2124,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hydr_geom_relation -> ABWASSER.hydr_geomrelation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hydr_geom_relation)
+    if filtered:
+        query = query.join(QGEP.hydr_geometry, QGEP.wastewater_node).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geom_relation
