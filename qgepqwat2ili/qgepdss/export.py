@@ -2572,6 +2572,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.building -> ABWASSER.gebaeude, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.building)
+    if filtered:
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.building
         
@@ -2610,6 +2614,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.reservoir -> ABWASSER.reservoir, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.reservoir)
+    if filtered:
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.reservoir
         
@@ -2646,6 +2654,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.individual_surface -> ABWASSER.einzelflaeche, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.individual_surface)
+    if filtered:
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.individual_surface
         
@@ -2684,6 +2696,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.fountain -> ABWASSER.brunnen, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.fountain)
+    if filtered:
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.fountain
         
