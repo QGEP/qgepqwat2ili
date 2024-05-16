@@ -3433,6 +3433,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.param_ca_general -> ABWASSER.ezg_parameter_allg, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.param_ca_general)
+    if filtered:
+        query = query.join(QGEP.catchment_area).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_general
         
@@ -3472,6 +3476,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.param_ca_mouse1 -> ABWASSER.ezg_parameter_mouse1, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.param_ca_mouse1)
+    if filtered:
+        query = query.join(QGEP.catchment_area).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_mouse1
         
