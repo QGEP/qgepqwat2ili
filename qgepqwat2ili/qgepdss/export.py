@@ -1951,7 +1951,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             QGEP.reach,
             or_(
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from,
-                QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
+           #     QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
             ),
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
