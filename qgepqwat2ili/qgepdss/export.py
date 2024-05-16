@@ -2841,6 +2841,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.catchment_area -> ABWASSER.einzugsgebiet, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.catchment_area)
+    if filtered:
+        query = query.join(
+            or_(
+                QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_rw_planned,
+                QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_rw_current,
+                QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_ww_planned,
+                QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_ww_current,
+            ),
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.catchment_area
