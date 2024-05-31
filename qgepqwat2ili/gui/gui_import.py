@@ -19,7 +19,7 @@ import time
 import logging
 from qgis.PyQt.QtCore import pyqtSlot
 
-# 31.5.2024 pfad angepasst, nue in gui_import.py statt _init_
+# 31.5.2024 pfad angepasst, neu in gui_import.py statt _init_.py
 from ..postimport import qgep_postimport
 
 # Required for loadUi to find the custom widget
@@ -230,6 +230,7 @@ class GuiImport(QDialog):
         # 31.5.2024 add post session - in postimport.py machen stattdessen
         # init qgep_postimport
         iface.messageBar().pushMessage("Info", "Start postimport", level=Qgis.Info)
+        
         qgep_postimport()
         
         iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
