@@ -27,7 +27,7 @@ class DeduplicatedLogger(logging.Logger):
         this_message = (level, msg)
         if self._last_message is None or self._last_message != this_message:
             if self._repeated > 0:
-                super()._log(self._last_message[0], f"[repeted {self._repeated} times]", args, exc_info, extra)
+                super()._log(self._last_message[0], f"[repeated {self._repeated} times]", args, exc_info, extra)
 
             super()._log(level, msg, args, exc_info, extra)
             self._repeated = 0
