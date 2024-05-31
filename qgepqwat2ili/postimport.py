@@ -45,8 +45,7 @@ def qgep_postimport():
     post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
 
     logger.info("Update wastewater structure fk_main_wastewater_node")
-    post_session2.execute(
-            # "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
+    post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
     )
 
     logger.info("Refresh materialized views")
