@@ -230,7 +230,7 @@ class GuiImport(QDialog):
         # 31.5.2024 add post session - in postimport.py machen stattdessen
         # init qgep_postimport
         iface.messageBar().pushMessage("Info", "Start postimport", level=Qgis.Info)
-        qgep_postimport
+        qgep_postimport()
         
         iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
 
