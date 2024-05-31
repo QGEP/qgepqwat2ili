@@ -24,9 +24,6 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
 
-# 31.5.2024 pfad angepasst - verschoben in gui_import.py
-# from ..postimport import qgep_postimport
-
 from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
