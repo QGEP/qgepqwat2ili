@@ -1098,7 +1098,7 @@ def qgep_import(precommit_callback=None):
         precommit_callback(qgep_session)
         logger.info("precommit_callback(qgep_session)")
         # 11.5.2024 improve user feedback
-        logger.info("Comitting qgep_session - please be patient ...")
+        logger.info("Comitting qgep_session (precommit_callback) - please be patient ...")
     else:
         # 11.5.2024 improve user feedback
         logger.info("Comitting qgep_session - please be patient ...")
@@ -1106,9 +1106,12 @@ def qgep_import(precommit_callback=None):
         qgep_session.close()
     abwasser_session.close()
 
+# 31.5.2024 seems to be at wrong place here - needs to be added to gui/gui_import.py - else it is executed too early.
+
     # TODO : put this in an "finally" block (or context handler) to make sure it's executed
     # even if there's an exception
-    post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
-    post_session.commit()
-    post_session.close()
+ 
+    # post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+    # post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
+    # post_session.commit()
+    # post_session.close()
