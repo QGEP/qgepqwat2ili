@@ -3815,32 +3815,37 @@ def qgep_import(precommit_callback=None):
 
     abwasser_session.close()
     logger.info("abwasser_session closed")
+
+# 31.5.2024 seems to be at wrong place here - needs to be added to gui/gui_import.py - else it is executed too early.
     
     # TODO : put this in an "finally" block (or context handler) to make sure it's executed
     # even if there's an exception
-    post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    logger.info("re-enabling symbology triggers")
-    post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
-    logger.info("symbology triggers successfully created!")
-    post_session.commit()
-    post_session.close()
+
+#31.5.2024 commented out and moved to postimport.py
+    # post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+    # logger.info("re-enabling symbology triggers")
+    # post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
+    # logger.info("symbology triggers successfully created!")
+    # post_session.commit()
+    # post_session.close()
 
     #11.5.2024 add post_session2 - to do add queries for main_cover and main_node as in TEKSI, add to symbology functions
     # see teksi ww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/datamodel/app/symbology_functions.sql#L290
     # needs also delta_1.6.3_functions_update_fk_main_cover_main_wastewater_node.sql
     
-    post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
+#31.5.2024 commented out and moved to postimport.py
+    # post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     
-    logger.info("Update wastewater structure fk_main_cover")
-    post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
+    # logger.info("Update wastewater structure fk_main_cover")
+    # post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
 
-    logger.info("Update wastewater structure fk_main_wastewater_node")
-    post_session2.execute(
-            "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
-    )
+    # logger.info("Update wastewater structure fk_main_wastewater_node")
+    # post_session2.execute(
+            # "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
+    # )
 
-    logger.info("Refresh materialized views")
-    post_session2.execute("SELECT qgep_network.refresh_network_simple();")
+    # logger.info("Refresh materialized views")
+    # post_session2.execute("SELECT qgep_network.refresh_network_simple();")
 
-    post_session2.commit()
-    post_session2.close()
+    # post_session2.commit()
+    # post_session2.close()

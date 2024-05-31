@@ -19,6 +19,9 @@ import time
 import logging
 from qgis.PyQt.QtCore import pyqtSlot
 
+# 31.5.2024 pfad angepasst, nue in gui_import.py statt _init_
+from ..postimport import qgep_postimport
+
 # Required for loadUi to find the custom widget
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -218,10 +221,18 @@ class GuiImport(QDialog):
         iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Warning)
         time.sleep(5)
         iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - still working ...", level=Qgis.Warning)
+
         self.session.commit()
 
         self.session.close()
         iface.messageBar().pushMessage("Sucess", "Data successfully imported", level=Qgis.Success)
+        
+        # 31.5.2024 add post session - in postimport.py machen stattdessen
+        # init qgep_postimport
+        iface.messageBar().pushMessage("Info", "Start postimport", level=Qgis.Info)
+        qgep_postimport
+        
+        iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
 
     def rollback_session(self):
         self.session.rollback()

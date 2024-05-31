@@ -24,6 +24,9 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
 
+# 31.5.2024 pfad angepasst - verschoben in gui_import.py
+# from ..postimport import qgep_postimport
+
 from ..utils.ili2db import (
     create_ili_schema,
     export_xtf_data,
@@ -44,6 +47,8 @@ from .gui_import import GuiImport
 
 # 19.4.2023 / 25.4.2023 ohne Bindestrich / neu aus gui_import - Gui
 from .gui_importc import GuiImportc
+
+
 
 # 12.7.2022 for testing import time
 import time
@@ -354,12 +359,14 @@ def action_import(plugin):
                  log_path,
             )
 
-    progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
+    # 31.5.2024 should not be needed anymore
+    # progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
     
     time.sleep(2)
-    # to add option to run main_cover.sql manually
-    
+    # to add option to run main_cover.sql manually - see postimport.py
+
     # 24.7.2022 / moved to end
+    # shows progress of import to import wizard, not final commit
     progress_dialog.setValue(100)
 
 
