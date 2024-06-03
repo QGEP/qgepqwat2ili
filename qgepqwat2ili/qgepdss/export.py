@@ -3180,6 +3180,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.prank_weir -> ABWASSER.streichwehr, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.prank_weir)
+    # to check if fk_overflow_char also has to be considered
+    if filtered:
+        query = query.join(
+            or_(
+                QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_wastewater_node,
+                QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_overflow_to,
+            ),
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
         # AVAILABLE FIELDS IN QGEP.prank_weir
         
