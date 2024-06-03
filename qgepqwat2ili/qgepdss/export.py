@@ -2158,6 +2158,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.mechanical_pretreatment -> ABWASSER.mechanischevorreinigung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.mechanical_pretreatment)
+    if filtered:
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mechanical_pretreatment
