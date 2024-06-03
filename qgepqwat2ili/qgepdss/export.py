@@ -3319,7 +3319,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hydraulic_char_data -> ABWASSER.hydr_kennwerte, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hydraulic_char_data)
-    # side overflow_char not considered
+    # side fk_overflow_char not considered in filter query
     if filtered:
         query = query.join(QGEP.wastewater_node).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
@@ -3373,6 +3373,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.backflow_prevention -> ABWASSER.rueckstausicherung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.backflow_prevention)
+    # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
