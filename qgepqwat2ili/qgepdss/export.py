@@ -2942,8 +2942,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 (QGEP.wastewater_structure, QGEP.wastewater_networkelement),
                 (QGEP.water_course_segment, QGEP.river, QGEP.sector_water_body, QGEP.discharge_point, QGEP.wastewater_networkelement),
                )
-            ).
-        filter(
+            ).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
     for row in query:
