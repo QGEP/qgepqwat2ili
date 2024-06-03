@@ -3464,6 +3464,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.tank_cleaning -> ABWASSER.beckenreinigung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.tank_cleaning)
+    # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
