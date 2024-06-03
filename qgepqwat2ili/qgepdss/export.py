@@ -3782,7 +3782,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
-        for row in query:
+    for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event_wastewater_structure
         
