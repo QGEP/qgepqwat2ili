@@ -3323,6 +3323,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hydraulic_char_data -> ABWASSER.hydr_kennwerte, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hydraulic_char_data)
+    # side overflow_char not considered
+    if filtered:
+        query = query.join(QGEP.wastewater_node).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydraulic_char_data
