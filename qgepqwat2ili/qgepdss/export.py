@@ -3774,7 +3774,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 # -- adapted 24.9.2022 to do adjust in MD code
     logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerkassoc")
     query = qgep_session.query(QGEP.re_maintenance_event_wastewater_structure)
-    for row in query:
+    if filtered:
+        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
+        for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event_wastewater_structure
         
