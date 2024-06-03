@@ -2195,6 +2195,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.retention_body -> ABWASSER.retentionskoerper, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.retention_body)
+    if filtered:
+        query = query.join(QGEP.infiltration_installation, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.retention_body
