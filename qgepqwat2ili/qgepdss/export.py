@@ -3638,7 +3638,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 # neu 17.4.2022 class maintenance_event as class, is not superclass in VSA-DSS 2015
     logger.info("Exporting QGEP.maintenance_event -> ABWASSER.maintenance_event, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.maintenance_event)
-    
+    # to check if join is correct like this n:m re_maintenance_event_wastewater_structure
+    if filtered:
+        query = query.join(QGEP.re_maintenance_event_wastewater_structure, QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event
