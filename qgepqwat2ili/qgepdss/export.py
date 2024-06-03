@@ -3130,6 +3130,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.throttle_shut_off_unit -> ABWASSER.absperr_drosselorgan, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.throttle_shut_off_unit)
+    # to check if fk_control_center__REL has also to be considered
+    if filtered:
+        query = query.join(QGEP.wastewater_networkelement).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.throttle_shut_off_unit
