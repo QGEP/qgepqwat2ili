@@ -2863,6 +2863,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.catchment_area)
     if filtered:
         query = query.join(
+            QGEP.wastewater_networkelement,
             or_(
                 QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_rw_planned,
                 QGEP.wastewater_networkelement.obj_id == QGEP.catchment_area.fk_wastewater_networkelement_rw_current,
@@ -3175,6 +3176,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # to check if fk_overflow_char also has to be considered
     if filtered:
         query = query.join(
+            QGEP.wastewater_node,
             or_(
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_wastewater_node,
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_overflow_to,
@@ -3222,6 +3224,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # to check if fk_overflow_char also has to be considered
     if filtered:
         query = query.join(
+            QGEP.wastewater_node,
             or_(
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_wastewater_node,
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_overflow_to,
@@ -3273,6 +3276,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # to check if fk_overflow_char also has to be considered
     if filtered:
         query = query.join(
+            QGEP.wastewater_node,
             or_(
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_wastewater_node,
                 QGEP.wastewater_node.obj_id == QGEP.prank_weir.fk_overflow_to,
