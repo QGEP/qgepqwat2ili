@@ -2938,7 +2938,24 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.measuring_point -> ABWASSER.messstelle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.measuring_point)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query1=query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement)
+        # needs to add QGEP.wastewater_structure as waste_water_treatment_plant is a subclass of organisation that has a relation to wastewater_structure and then wastewater_networkelement
+        #variant1 for query2
+        # query2=query.join(QGEP.waste_water_treatment_plant, (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner), (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider),QGEP.wastewater_networkelement,
+        # )
+        #variant2 for query2
+        # try with extra or_
+            # or_(
+                     # QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner,
+        # QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider,
+            # ),
+        # QGEP.wastewater_networkelement,
+        
+        # )
+        query3=query.join(QGEP.water_course_segment, QGEP.river, QGEP.sector_water_body, QGEP.discharge_point, QGEP.wastewater_networkelement)
+        # query=union(query1, query2, query3)
+        query=query.union(query1, query3)
+        query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
           #  QGEP.wastewater_networkelement,
           # or does not work with this - currently do not support other connections
