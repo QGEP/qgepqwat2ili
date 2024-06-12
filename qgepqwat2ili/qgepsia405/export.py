@@ -97,7 +97,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # 5.4.2023 add orientation 
+        # add orientation 
         val = val +  float(labelorientation)
         
         val = val % 360.0
@@ -114,10 +114,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
 
-            # 31.3.2023 obj_id instead of name
+
             # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
-
+            
+            # obj_id instead of name
             datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
             datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
 
