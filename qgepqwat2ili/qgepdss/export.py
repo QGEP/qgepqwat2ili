@@ -110,7 +110,22 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
 
         return val
+
+    def check_fk_in_subsetid (foreignkey2, subset):
+        """
+        checks, whether foreignkey is in the subset_ids - if yes it return the foreignkey, if no it will return NULL
+        """
+        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        logger.info(f"check_fk_in_subsetid -  foreignkey '{foreignkey2}'")
         
+        if foreignkey2 in subset:
+            logger.info(f"check_fk_in_subsetid - '{foreignkey2}' is in subset ")
+        else:
+            logger.info(f"check_fk_in_subsetid - '{foreignkey2}' is not in subset - replaced with None instead!")
+            foreignkey2 = None
+        return foreignkey2
+
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
@@ -1956,6 +1971,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
+
+        logger.info(f" fk_wastewater_networkelement = {(row.fk_wastewater_networkelement__REL)}")
+
         # AVAILABLE FIELDS IN QGEP.reach_point
         
         # --- reach_point ---
@@ -1973,7 +1991,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
 
-            abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            abwassernetzelementref=get_tid(check_fk_in_subsetid((row.fk_wastewater_networkelement__REL), subset_ids)),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
