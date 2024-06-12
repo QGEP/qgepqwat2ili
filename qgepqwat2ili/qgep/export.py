@@ -96,7 +96,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # 5.4.2023 add orientation 
+        # add orientation 
         val = val +  float(labelorientation)
         
         val = val % 360.0
