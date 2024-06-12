@@ -1,5 +1,3 @@
-# version von hand 13.3.2023
-
 import json
 
 from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
@@ -11,9 +9,7 @@ from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
-# 18.3.2023 adapted as in /qgep version
-# def qgep_export(selection=None):
-#def qgep_export(selection=None, labels_file=None):
+
 def qgep_export(selection=None, labels_file=None, orientation=None):
     """
     Export data from the QGEP model into the ili2pg model.
@@ -102,7 +98,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # 5.4.2023 add orientation 
+        # add orientation 
         val = val +  float(labelorientation)
         
         val = val % 360.0
@@ -120,11 +116,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
 
-            # 31.3.2023 obj_id instead of name
+
             # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
 
-
+            # obj_id instead of name
             datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
             datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
 
@@ -155,7 +151,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         return {
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": row.identifier,
-            # 5.9.2022 doppelt - erst in release 2020 bei organisation
+            # attribute organisation.gemeindenummer will be added with release 2020
             # "gemeindenummer": row.municipality_number,
             # not supported in model qgep 2015
             # "teil_vonref": get_tid(row.fk_part_of__REL),
@@ -332,7 +328,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "textinhalt": row["properties"]["LabelText"],
             "bemerkung": None,
         }
-# -- 25.9.2022 re_maintenance_event_wastewater_structure moved to end, as wastewater_structure and maintenance_event are not yet added
+
+# re_maintenance_event_wastewater_structure moved to end, as wastewater_structure and maintenance_event are not yet added
 
     logger.info("Exporting QGEP.mutation -> ABWASSER.mutation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.mutation)
@@ -360,8 +357,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             aufnahmedatum=row.date_time,
             aufnehmer=row.recorded_by,
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            # 21.7.2022 zuerst qgep datenmodell anpassen
+            # Model adapted with delta/delta_1.5.8_dss_upddate_attributes_class.sql
             #klasse=row.class,
+            klasse=row.classname,
             letzter_wert=row.last_value,
             mutationsdatum=row.date_mutation,
             objekt=null_to_emptystr(row.object),
@@ -663,7 +661,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
             reflaenge=row.ref_length,
             verlauf=ST_Force2D(row.progression_geometry),
-            # 6.9.2022 to do md rausnehmen da auf gleiche klasse
+            # reference to own class not supported in qgep
             # vorherigersektorref=get_tid(row.fk_sector_previous__REL),
         )
         abwasser_session.add(gewaessersektor)
@@ -1953,7 +1951,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             QGEP.reach,
             or_(
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from,
-           # 4.6.2024 again added
            QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
             ),
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
@@ -2919,7 +2916,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             perimeter=ST_Force2D(row.perimeter_geometry),
             retention_geplant=get_vl(row.retention_planned__REL),
             retention_ist=get_vl(row.retention_current__REL),
-            # 6.9.2022 only in Release 2020 to do in code von MD abfangen 
+            # sbw_*ref will be added with release 2020
             # sbw_rw_geplantref=get_tid(row.fk_special_building_rw_planned__REL),
             # sbw_rw_istref=get_tid(row.fk_special_building_rw_current__REL),
             # sbw_sw_geplantref=get_tid(row.fk_special_building_ww_planned__REL),
@@ -3378,7 +3375,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             foerderstrommin=row.pump_flow_min,
             hauptwehrart=get_vl(row.main_weir_kind__REL),
             mehrbelastung=row.overcharge,
-            # 6.9.2022 erst in release 2020 md anpassen
+            # primaerrichtungref will be added with release 2020
             #primaerrichtungref=get_tid(row.fk_primary_direction__REL),
             pumpenregime=get_vl(row.pump_characteristics__REL),
             qab=row.q_discharge,
@@ -3657,7 +3654,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-# neu 17.4.2022 class maintenance_event as class, is not superclass in VSA-DSS 2015
+# class maintenance_event as class, is not superclass in VSA-DSS 2015
     logger.info("Exporting QGEP.maintenance_event -> ABWASSER.maintenance_event, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.maintenance_event)
     # to check if join is correct like this n:m re_maintenance_event_wastewater_structure
@@ -3795,13 +3792,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 # -- extra commit
     abwasser_session.commit()
     
-# -- extra session2
+# -- extra session2 for re_maintenance_event_wastewater_structure
     abwasser_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
     
 
-# --    logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerk, ABWASSER.metaattribute")
-# -- adapted 24.9.2022 to do adjust in MD code
     logger.info("Exporting QGEP.re_maintenance_event_wastewater_structure -> ABWASSER.erhaltungsereignis_abwasserbauwerkassoc")
     query = qgep_session.query(QGEP.re_maintenance_event_wastewater_structure)
     if filtered:
@@ -3820,34 +3815,27 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
     
-# --        erhaltungsereignis_abwasserbauwerk = ABWASSER.erhaltungsereignis_abwasserbauwerk(
-# -- adapted 24.9.2022 to do adjust in MD code
+
         erhaltungsereignis_abwasserbauwerk = ABWASSER.erhaltungsereignis_abwasserbauwerkassoc(
             # FIELDS TO MAP TO ABWASSER.erhaltungsereignis_abwasserbauwerk
             # --- baseclass ---
             # --- sia405_baseclass ---
-# --            **base_common(row, "erhaltungsereignis_abwasserbauwerk"),
-# -- adapted 24.9.2022 to do adjust in MD code
-# -- adapted2 24.9.2022 no base for erhaltungsereignis_abwasserbauwerkassoc
-# --            **base_common(row, "erhaltungsereignis_abwasserbauwerkassoc"),
+
             # --- erhaltungsereignis_abwasserbauwerk ---
 
             abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-# --            erhaltungsereignisref=get_tid(row.fk_maintenance_event__REL),
-# -- adapted 24.9.2022 to do adjust in MD code
             erhaltungsereignis_abwasserbauwerkassocref=get_tid(row.fk_maintenance_event__REL),
             )
             
-#        abwasser_session.add(erhaltungsereignis_abwasserbauwerk)
+
         abwasser_session2.add(erhaltungsereignis_abwasserbauwerk)
-# -- 24.9.2022 adapted to do MD code - no metaattributes
-# --        create_metaattributes(row)
+
         print(".", end="")
     logger.info("done")
-# -- 25.9.22  abwasser_session.flush()
+
     abwasser_session2.flush()
 
-# -- 25.9.22    abwasser_session.commit()
+
     abwasser_session2.commit()
 
     qgep_session.close()
