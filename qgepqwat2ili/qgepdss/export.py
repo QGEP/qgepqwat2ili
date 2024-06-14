@@ -49,6 +49,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if relation is None:
             return None
+
         return tid_maker.tid_for_row(relation)
 
     def get_vl(relation):
@@ -95,6 +96,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
+
     def modulo_angle(val):
         """
         Returns an angle between 0 and 359.9 (for Orientierung in Base_d-20181005.ili)
@@ -112,23 +114,24 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         logger.info(f"modulo_angle - added orientation: {labelorientation}")
         print("modulo_angle - added orientation: ", str(labelorientation))
 
-
         return val
 
-    def check_fk_in_subsetid (foreignkey2, subset):
+    def check_fk_in_subsetid (subset, relation):
         """
         checks, whether foreignkey is in the subset_ids - if yes it return the foreignkey, if no it will return NULL
         """
         logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
-        logger.info(f"check_fk_in_subsetid -  foreignkey '{foreignkey2}'")
+        # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
+        fremdschluesselstr = getattr(relation, "obj_id")
+        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
         
-        if foreignkey2 in subset:
-            logger.info(f"check_fk_in_subsetid - '{foreignkey2}' is in subset ")
+        if fremdschluesselstr in subset:
+            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+            logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
+            return tid_maker.tid_for_row(relation)
         else:
-            logger.info(f"check_fk_in_subsetid - '{foreignkey2}' is not in subset - replaced with None instead!")
-            foreignkey2 = None
-        return foreignkey2
-
+            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!")
+            return None
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
@@ -1975,9 +1978,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
-
-        logger.info(f" fk_wastewater_networkelement = {(row.fk_wastewater_networkelement__REL)}")
-
         # AVAILABLE FIELDS IN QGEP.reach_point
         
         # --- reach_point ---
@@ -1996,7 +1996,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- haltungspunkt ---
 
             #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
-            abwassernetzelementref=get_tid(check_fk_in_subsetid((row.fk_wastewater_networkelement__REL), subset_ids)),
+            # abwassernetzelementref=get_tid(check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL)),
+            abwassernetzelementref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
