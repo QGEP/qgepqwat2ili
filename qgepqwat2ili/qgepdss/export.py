@@ -120,6 +120,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         checks, whether foreignkey is in the subset_ids - if yes it return the tid of the foreignkey, if no it will return None
         """
+        # first check for None, as is get_tid
+        if relation is None:
+            return None
+
         logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
