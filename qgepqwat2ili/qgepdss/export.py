@@ -1995,8 +1995,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
 
+            # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
             #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
-            # abwassernetzelementref=get_tid(check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL)),
             abwassernetzelementref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
