@@ -37,7 +37,8 @@ def qgep_import(precommit_callback=None):
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
-    # Allow to insert rows with cyclic dependencies at once
+    # Allow to insert rows with cyclic dependencies at once, needs data modell version 1.6.2 https://github.com/QGEP/datamodel/pull/235 to work properly
+    logger.info("SET CONSTRAINTS ALL DEFERRED;")
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
 
     def get_vl_instance(vl_table, value):

@@ -41,25 +41,8 @@ def qgep_import(precommit_callback=None):
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
 
-    # 29.3.2023 Add additional DEREFERABLE constraints
-    # ALTER TABLE qgep_od.overflow ADD CONSTRAINT rel_overflow_overflow_to FOREIGN KEY (fk_overflow_to) REFERENCES qgep_od.wastewater_node(obj_id) ON UPDATE CASCADE ON DELETE set null;
 
-    # qgep_session.execute("ALTER TABLE qgep_od.overflow ALTER CONSTRAINT rel_overflow_overflow_to DEFERRABLE;")
-    # logger.info("ALTER TABLE qgep_od.overflow ALTER CONSTRAINT rel_overflow_overflow_to DEFERRABLE;")
-    
-    # qgep_session.execute("ALTER TABLE qgep_od.throttle_shut_off_unit ALTER CONSTRAINT rel_throttle_shut_off_unit_wastewater_node DEFERRABLE;")
-    # logger.info("ALTER TABLE qgep_od.throttle_shut_off_unit ALTER CONSTRAINT rel_throttle_shut_off_unit_wastewater_node DEFERRABLE;")
-    
-    # qgep_session.execute("ALTER TABLE qgep_od.tank_emptying ALTER CONSTRAINT rel_tank_emptying_overflow DEFERRABLE;")
-    # logger.info("ALTER TABLE qgep_od.tank_emptying ALTER CONSTRAINT rel_tank_emptying_overflow DEFERRABLE;")
-
-    # qgep_session.execute("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
-    # logger.info("ALTER TABLE qgep_od.wastewater_networkelement ALTER CONSTRAINT rel_wastewater_networkelement_wastewater_structure DEFERRABLE;")
-
-    # qgep_session.execute("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
-    # logger.info("ALTER TABLE qgep_od.re_maintenance_event_wastewater_structure ALTER CONSTRAINT rel_maintenance_event_wastewater_structure_maintenance_event DEFERRABLE;")
-
-    # Allow to insert rows with cyclic dependencies at once
+    # Allow to insert rows with cyclic dependencies at once, needs data modell version 1.6.2 https://github.com/QGEP/datamodel/pull/235 to work properly
     logger.info("SET CONSTRAINTS ALL DEFERRED;")
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
 
@@ -73,7 +56,7 @@ def qgep_import(precommit_callback=None):
         # TODO : return "other" (or other applicable value) rather than None, or even throwing an exception, would probably be better
         row = qgep_session.query(vl_table).filter(vl_table.value_de == value).first()
         if row is None:
-            # 12.5.2024 write logger.warning only if value is not None
+            # write logger.warning only if value is not None
             if value != None:
                 logger.warning(
                     f'Could not find value `{value}` in value list "{vl_table.__table__.schema}.{vl_table.__name__}". Setting to None instead.'
@@ -3747,7 +3730,7 @@ def qgep_import(precommit_callback=None):
         print(".", end="")
     logger.info("done")
 
-#neu 19.4.2023
+# added logger info
     logger.info("Importing ABWASSER.erhaltungsereignis, ABWASSER.metaattribute -> QGEP.maintenance_event")
     for row, metaattribute in abwasser_session.query(ABWASSER.erhaltungsereignis, ABWASSER.metaattribute).join(
         ABWASSER.metaattribute
@@ -3804,10 +3787,10 @@ def qgep_import(precommit_callback=None):
     if precommit_callback:
         precommit_callback(qgep_session)
         logger.info("precommit_callback(qgep_session)")
-        # 11.5.2024 improve user feedback
+        # improve user feedback
         logger.info("Comitting qgep_session (precommit_callback) - please be patient ...")
     else:
-        # 11.5.2024 improve user feedback
+        # improve user feedback
         logger.info("Comitting qgep_session - please be patient (else) ...")
         qgep_session.commit()
         logger.info("qgep_session sucessfully committed")
@@ -3815,37 +3798,3 @@ def qgep_import(precommit_callback=None):
 
     abwasser_session.close()
     logger.info("abwasser_session closed")
-
-# 31.5.2024 seems to be at wrong place here - needs to be added to gui/gui_import.py - else it is executed too early.
-    
-    # TODO : put this in an "finally" block (or context handler) to make sure it's executed
-    # even if there's an exception
-
-#31.5.2024 commented out and moved to postimport.py
-    # post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    # logger.info("re-enabling symbology triggers")
-    # post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
-    # logger.info("symbology triggers successfully created!")
-    # post_session.commit()
-    # post_session.close()
-
-    #11.5.2024 add post_session2 - to do add queries for main_cover and main_node as in TEKSI, add to symbology functions
-    # see teksi ww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/datamodel/app/symbology_functions.sql#L290
-    # needs also delta_1.6.3_functions_update_fk_main_cover_main_wastewater_node.sql
-    
-#31.5.2024 commented out and moved to postimport.py
-    # post_session2 = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    
-    # logger.info("Update wastewater structure fk_main_cover")
-    # post_session2.execute("SELECT qgep_od.wastewater_structure_update_fk_main_cover('', True);")
-
-    # logger.info("Update wastewater structure fk_main_wastewater_node")
-    # post_session2.execute(
-            # "SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
-    # )
-
-    # logger.info("Refresh materialized views")
-    # post_session2.execute("SELECT qgep_network.refresh_network_simple();")
-
-    # post_session2.commit()
-    # post_session2.close()
