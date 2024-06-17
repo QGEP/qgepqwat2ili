@@ -3780,8 +3780,6 @@ def qgep_import(precommit_callback=None):
     logger.info("done")
 
 
-    # Recreate the triggers
-    # qgep_session.execute('SELECT qgep_sys.create_symbology_triggers();')
 
     # Calling the precommit callback if provided, allowing to filter before final import
     if precommit_callback:
@@ -3795,6 +3793,6 @@ def qgep_import(precommit_callback=None):
         qgep_session.commit()
         logger.info("qgep_session sucessfully committed")
         qgep_session.close()
-
+        logger.info("qgep_session closed")
     abwasser_session.close()
     logger.info("abwasser_session closed")

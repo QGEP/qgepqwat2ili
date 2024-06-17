@@ -37,7 +37,8 @@ def qgep_import(precommit_callback=None):
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
 
-    # Allow to insert rows with cyclic dependencies at once
+    # Allow to insert rows with cyclic dependencies at once, needs data modell version 1.6.2 https://github.com/QGEP/datamodel/pull/235 to work properly
+    logger.info("SET CONSTRAINTS ALL DEFERRED;")
     qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
 
     def get_vl_instance(vl_table, value):
@@ -1090,28 +1091,19 @@ def qgep_import(precommit_callback=None):
     # logger.info("done")
 
  
-    # Recreate the triggers
-    # qgep_session.execute('SELECT qgep_sys.create_symbology_triggers();')
 
     # Calling the precommit callback if provided, allowing to filter before final import
     if precommit_callback:
         precommit_callback(qgep_session)
         logger.info("precommit_callback(qgep_session)")
-        # 11.5.2024 improve user feedback
+        # improve user feedback
         logger.info("Comitting qgep_session (precommit_callback) - please be patient ...")
     else:
-        # 11.5.2024 improve user feedback
+        # improve user feedback
         logger.info("Comitting qgep_session - please be patient ...")
         qgep_session.commit()
+        logger.info("qgep_session sucessfully committed")
         qgep_session.close()
+        logger.info("qgep_session closed")
     abwasser_session.close()
-
-# 31.5.2024 seems to be at wrong place here - needs to be added to gui/gui_import.py - else it is executed too early.
-
-    # TODO : put this in an "finally" block (or context handler) to make sure it's executed
-    # even if there's an exception
- 
-    # post_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
-    # post_session.execute("SELECT qgep_sys.create_symbology_triggers();")
-    # post_session.commit()
-    # post_session.close()
+    logger.info("abwasser_session closed")
