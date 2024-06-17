@@ -217,20 +217,19 @@ class GuiImport(QDialog):
         # probably a matter of creating a savepoint before saving with
         # session.begin_nested() and one additionnal self.session.commit()
         
-        # 11.5.2024 try to add info in message bar
+        # add info in message bar
         iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Warning)
-        time.sleep(5)
-        iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - still working ...", level=Qgis.Warning)
 
-        self.session.commit()
+        try:
+            self.session.commit()
+            self.session.close()
+        except:
+            rollback_session()
 
-        self.session.close()
         iface.messageBar().pushMessage("Sucess", "Data successfully imported", level=Qgis.Success)
         
-        # 31.5.2024 add post session - in postimport.py machen stattdessen
-        # init qgep_postimport
+        # add post session - in postimport.py
         iface.messageBar().pushMessage("Info", "Start postimport", level=Qgis.Info)
-        
         qgep_postimport()
         
         iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
