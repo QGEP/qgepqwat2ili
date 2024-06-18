@@ -30,7 +30,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # Filtering
     filtered = selection is not None
+    
+    # Logging for debugging
+    logger.info(f"print filtered '{filtered}'")
+    
     subset_ids = selection if selection is not None else []
+
+    # Logging for debugging
+    logger.info(f"print subset_ids '{subset_ids}'")
 
     # Orientation
     oriented = orientation is not None
