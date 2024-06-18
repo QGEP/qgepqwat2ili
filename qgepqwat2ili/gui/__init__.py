@@ -599,6 +599,10 @@ def action_export(plugin):
 #18.3.2023
 # 22.3.2023 added try - seems not to work
 #            try:
+
+                # add logger info to check what selection is used
+                logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
+                
                 if emodel == "VSA_KEK_2019_LV95":
                     logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
                     #qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
