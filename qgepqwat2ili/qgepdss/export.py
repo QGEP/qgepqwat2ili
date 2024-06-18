@@ -2140,7 +2140,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "rohrprofil_geometrie"),
             # --- rohrprofil_geometrie ---
 
-            position=row.position,
+            aposition=row.position,
             rohrprofilref=get_tid(row.fk_pipe_profile__REL),
             x=row.x,
             y=row.y,
