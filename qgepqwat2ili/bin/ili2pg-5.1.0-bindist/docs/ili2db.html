@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.18: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.20.1: https://docutils.sourceforge.io/" />
 <title>Anleitung zur Programmfamilie ili2db</title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 7952 2016-07-26 18:15:59Z milde $
+:Id: $Id: html4css1.css 8954 2022-01-20 10:10:25Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
 
-See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+See https://docutils.sourceforge.io/docs/howto/html-stylesheets.html for how to
 customize this style sheet.
 */
 
@@ -482,10 +482,18 @@ ausgeschaltet werden (<tt class="docutils literal"><span class="pre">--skipPolyg
 java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
 java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.itf
 </pre>
+<p>Bei XTF (Interlis 2): Fehlerhafte SURFACE/AREA Attribute können
+als Linien (statt als Polygone) eingelesen werden. Die Polygonbildung muss also
+ausgeschaltet werden (<tt class="docutils literal"><span class="pre">--skipPolygonBuilding</span></tt>).</p>
+<p>Um solche Daten zu importieren (um sie danach zu flicken):</p>
+<pre class="literal-block">
+java -jar ili2gpkg.jar --schemaimport --sqlEnableNull --sqlColsAsText --skipPolygonBuilding --dbfile mogis.gpkg path/to/mo.ili
+java -jar ili2gpkg.jar --import --skipReferenceErrors --skipPolygonBuilding --skipGeometryErrors --disableValidation --dbfile mogis.gpkg path/to/data.xtf
+</pre>
 </div>
 <div class="section" id="laufzeitanforderungen">
 <h2>Laufzeitanforderungen</h2>
-<p>Das Programm setzt Java 1.6 voraus.</p>
+<p>Das Programm setzt Java 1.8 voraus.</p>
 <p><strong>PostGIS:</strong> Als Datenbank muss mindestens PostgreSQL 8.3 und PostGIS
 1.5 vorhanden sein. Falls das Interlis Datenmodell INTERLIS.UUIDOID als
 OID verwendet, wird die Funktion uuid_generate_v4() verwendet.
@@ -622,6 +630,18 @@ Die Geometrien werden
 indexiert (<tt class="docutils literal"><span class="pre">--createGeomIdx</span></tt>).</p>
 <p><strong>FileGDB:</strong> Die Geometrien sind grundsätzlich immer indexiert.</p>
 </div>
+<div class="section" id="fall-1-7">
+<h3>Fall 1.7</h3>
+<p>Die Tabellen existieren nicht und sollen in der Datenbank angelegt
+werden (<tt class="docutils literal"><span class="pre">--schemaimport</span></tt>).
+Das Modell und die Abbildungsparameter ergeben sich aus der Meta-Konfiguration, die aus einem Repository bezogen wird.</p>
+<p><strong>PostGIS:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2pg.jar <span class="pre">--schemaimport</span> <span class="pre">--metaConfig</span> ilidata:metconfigId <span class="pre">--dbdatabase</span>
+mogis <span class="pre">--dbusr</span> julia <span class="pre">--dbpwd</span> romeo</tt></p>
+<p><strong>GeoPackage:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2gpkg.jar <span class="pre">--schemaimport</span> <span class="pre">--metaConfig</span> ilidata:metconfigId <span class="pre">--dbfile</span>
+mogis.gpkg</tt></p>
+<p>Das Modell wird in die Datenbank importiert. Es werden keine Daten importiert, sondern nur die leeren Tabellen
+angelegt.</p>
+</div>
 </div>
 <div class="section" id="import-funktionen">
 <h2>Import-Funktionen</h2>
@@ -669,6 +689,31 @@ d.h. der Import in die Datenbank ist ein einzelner Commit.</p>
 <p><strong>FileGDB:</strong> Da die FileGDB keine Transaktionen unterstützt, werden die Daten
 teilweise importiert, und die FileGDB befindet sich danach evtl. in einem
 inkonsistenten Zustand.</p>
+</div>
+<div class="section" id="fall-2-4">
+<h3>Fall 2.4</h3>
+<p>Die Tabellen existieren bereits und der Inhalt einer Datei aus einem Repository (z.B. eine Katalog-Datei) soll importiert werden:</p>
+<p><strong>PostGIS:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2pg.jar <span class="pre">--import</span> <span class="pre">--dbdatabase</span> mogis <span class="pre">--dbusr</span>
+julia <span class="pre">--dbpwd</span> romeo ilidata:dataId</tt></p>
+<p><strong>GeoPackage:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2gpkg.jar <span class="pre">--import</span> <span class="pre">--dbfile</span> mogis.gpkg
+<span class="pre">--metaConfig</span> ilidata:dataId</tt></p>
+<p><strong>FileGDB:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2fgdb.jar <span class="pre">--import</span> <span class="pre">--dbfile</span> mogis.gdb
+<span class="pre">--metaConfig</span> ilidata:dataId</tt></p>
+<p>Die Daten mit der gegebenen <tt class="docutils literal">dataId</tt> werden aus dem Repository bezogen und den bereits vorhanden
+Tabellen hinzugefügt.</p>
+</div>
+<div class="section" id="fall-2-5">
+<h3>Fall 2.5</h3>
+<p>Die Tabellen existieren bereits und die Daten gemäss einer Meta-Konfiguration sollen importiert werden:</p>
+<p><strong>PostGIS:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2pg.jar <span class="pre">--import</span> <span class="pre">--dbdatabase</span> mogis <span class="pre">--dbusr</span>
+julia <span class="pre">--dbpwd</span> romeo <span class="pre">--metaConfig</span> ilidata:metconfigId</tt></p>
+<p><strong>GeoPackage:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2gpkg.jar <span class="pre">--import</span> <span class="pre">--dbfile</span> mogis.gpkg
+<span class="pre">--metaConfig</span> ilidata:metconfigId</tt></p>
+<p><strong>FileGDB:</strong> <tt class="docutils literal">java <span class="pre">-jar</span> ili2fgdb.jar <span class="pre">--import</span> <span class="pre">--dbfile</span> mogis.gdb
+<span class="pre">--metaConfig</span> ilidata:metconfigId</tt></p>
+<p>Die Meta-Konfiguration mit der gegebenen <tt class="docutils literal">metconfigId</tt> wird aus dem Repository bezogen.
+Die Referenz-/Katalog-Daten ergeben sich aus der Meta-Konfiguration und werden den bereits vorhanden
+Tabellen hinzugefügt.</p>
 </div>
 </div>
 <div class="section" id="export-funktionen">
@@ -849,6 +894,8 @@ Wird eine Datensatz (--dataset) oder Basket (--baskets) bezeichnet, der in der D
 </tr>
 <tr><td>--iliMetaAttrs filename</td>
 <td colspan="2"><p class="first">Name der Konfigurationsdatei, die zusätzliche Interlis-Metaattribute enthält (Meta-Attribute, die in den ili-Dateien nicht enthalten sind).
+<tt class="docutils literal">filename</tt> kann auch die Form <tt class="docutils literal">ilidata:DatesetId</tt>  haben,
+dann wird die entsprechende Datei aus den Repositories benutzt.
 Die Konfigurationsdatei ist Zeilenorientiert und besteht aus Abschnitten. Pro Modellelement gibt es einen Abschnitt. Der Abschnitt beginnt mit dem qualifizierten Elementnamen in eckigen Klammern. Innerhalb des Abschnitts sind die Metaattribute zu diesem Modellelement. Beispiel:</p>
 <pre class="last literal-block">
 [Model1.Topic1.Structure1]
@@ -859,8 +906,36 @@ MetaAttrN=AttrValueN
 </pre>
 </td>
 </tr>
+<tr><td><tt class="docutils literal"><span class="pre">--metaConfig</span>&nbsp; filename</tt></td>
+<td colspan="2"><p class="first">Konfiguriert ili2db mit Hilfe einer INI-Datei.
+<tt class="docutils literal">filename</tt> kann auch die Form <tt class="docutils literal">ilidata:DatesetId</tt>  haben,
+dann wird die entsprechende Datei aus den Repositories benutzt.
+Der Eintrag im ilidata.xml soll mit folgenden Kategorien markiert werden.</p>
+<blockquote class="last">
+<div class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">/home/travis/build/claeis/ili2db/docs/ili2db.rst</tt>, line 665)</p>
+<p>Cannot analyze code. Pygments package not found.</p>
+<pre class="literal-block">
+.. code:: xml
+
+   &lt;categories&gt;
+     &lt;DatasetIdx16.Code_&gt;
+       &lt;value&gt;http://codes.interlis.ch/type/metaconfig&lt;/value&gt; &lt;!-- Hinweis, dass es eine Meta-Config-Datei ist.  --&gt;
+     &lt;/DatasetIdx16.Code_&gt;
+     &lt;DatasetIdx16.Code_&gt;
+       &lt;value&gt;http://codes.interlis.ch/model/Simple23&lt;/value&gt; &lt;!-- Hinweis auf des ili-Modell Simple23 --&gt;
+     &lt;/DatasetIdx16.Code_&gt;
+   &lt;/categories&gt;
+
+</pre>
+</div>
+</blockquote>
+</td>
+</tr>
 <tr><td>--validConfig filename</td>
-<td colspan="2">Name der Konfigurationsdatei, die für die Validierung verwendet werden soll.</td>
+<td colspan="2">Name der Konfigurationsdatei, die für die Validierung verwendet werden soll.
+<tt class="docutils literal">filename</tt> kann auch die Form <tt class="docutils literal">ilidata:DatesetId</tt>  haben,
+dann wird die entsprechende Datei aus den Repositories benutzt.</td>
 </tr>
 <tr><td>--disableValidation</td>
 <td colspan="2">Schaltet die Validierung der Daten aus.</td>
@@ -870,6 +945,9 @@ MetaAttrN=AttrValueN
 </tr>
 <tr><td>--forceTypeValidation</td>
 <td colspan="2">Beschränkt die Aufweichung der Validierung mittels --validConfig auf &quot;multiplicity&quot;.</td>
+</tr>
+<tr><td>--disableBoundaryRecoding</td>
+<td colspan="2">Deaktiviert beim Import die Umcodierung von Randlinien von Flächen (damit sie OGC/ISO konform sind)</td>
 </tr>
 <tr><td>--dbhost host</td>
 <td colspan="2"><strong>PostGIS:</strong> Der hostname der Datenbank. Default ist localhost.</td>
@@ -1032,9 +1110,6 @@ So können auch Fremdschlüssel (--createFk) definiert werden. (siehe Kapitel Ab
 <tr><td>--createTypeDiscriminator</td>
 <td colspan="2">Erstellt für jede Tabelle (auch wenn das Modell keine Vererbung benutzt) eine Spalte für den Typdiskriminator. Für Klassen mit Vererbung wird die Spalte immer erstellt. (siehe Kapitel Abbildungsregeln/Tabellen)</td>
 </tr>
-<tr><td>--structWithGenericRef</td>
-<td colspan="2">Erstellt generische Spalten für den Fremdschlüssel bei Tabellen die Interlis-Strukturen abbilden. Ohne diese Option wird pro Strukturattribut eine Spalte erstellt (in der Tabelle, die die Struktur abbildet). (siehe Kapitel Abbildungsregeln/Strukturen)</td>
-</tr>
 <tr><td>--disableNameOptimization</td>
 <td colspan="2">Schaltet die Nutzung von unqualifizierten Klassennamen aus. Für alle Tabellennamen werden qualifizierte Interlis-Klassennamen (Model.Topic.Class) verwendet (und in einen gültigen Tabellennamen abgebildet). (siehe Kapitel Abbildungsregeln/Namenskonventionen)</td>
 </tr>
@@ -1060,8 +1135,12 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--oneGeomPerTable</td>
 <td colspan="2"><strong>PostGIS:</strong> Erzeugt Hilfstabellen, falls in einer Klasse/Tabelle mehr als ein Geometrie-Attribut ist, so dass pro Tabelle in der Datenbank nur eine Geometriespalte ist.</td>
 </tr>
+<tr><td>--gpkgMultiGeomPerTable</td>
+<td colspan="2"><strong>GeoPackage:</strong> Erzeugt mehrere Geometriespalten pro Tabelle, falls in einer Klasse/Tabelle mehr als ein Geometrie-Attribut ist.</td>
+</tr>
 <tr><td>--skipPolygonBuilding</td>
-<td colspan="2">Bei ITF-Dateien werden die Linientabellen gelesen, so wie sie in der ITF-Datei sind, d.h. es werden keine Polygon gebildet.</td>
+<td colspan="2">Bei ITF-Dateien werden die Linientabellen gelesen, so wie sie in der ITF-Datei sind, d.h. es werden keine Polygon gebildet.
+Bei XTF-Dateien werden die Polygone (SURFACE/AREA) als Linien eingelesen, d.h. es können auch offene Ränder oder sich kreuzende Randlinien eingelesen werden, um sie zu korrigieren.</td>
 </tr>
 <tr><td>--skipGeometryErrors</td>
 <td colspan="2">Geometry Fehler werden ignoriert (und nicht rapportiert). Spezifischere Fehlermeldungen müssen mittels --validConfig konfiguriert werden.</td>
@@ -1084,14 +1163,15 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--importBid</td>
 <td colspan="2">Liest die Behälteridentifikation (BID aus der Transferdatei) in die Spalte T_Ili_Tid der Tabelle t_ili2db_basket.</td>
 </tr>
-<tr><td>--importFetchSize</td>
-<td colspan="2">Definiert den fetchsize für die Statements beim import.</td>
+<tr><td>--exportFetchSize rows</td>
+<td colspan="2">Definiert die Anzahl Records pro SQL Abfrage beim Export aus der DB.</td>
 </tr>
-<tr><td>--exportBatchSize</td>
-<td colspan="2">Definiert den batchSize für die Statements beim export.</td>
+<tr><td>--importBatchSize rows</td>
+<td colspan="2">Definiert die Anzahl Records pro SQL-Insert/-Update beim Import in die DB.</td>
 </tr>
 <tr><td>--createBasketCol</td>
-<td colspan="2">Erstellt in jeder Tabelle eine zusätzlich Spalte T_basket um den Behälter identifizieren zu können. (siehe Kapitel Abbildungsregeln/Metadaten)</td>
+<td colspan="2">Erstellt in jeder Tabelle eine zusätzlich Spalte T_basket um den Behälter identifizieren zu können. (siehe Kapitel Abbildungsregeln/Metadaten)
+Beim <tt class="docutils literal"><span class="pre">--schemaimport</span></tt> von Modellen mit erweiterten TOPICs muss die Option benutzt werden, damit die Daten korrekt exportiert werden können.</td>
 </tr>
 <tr><td>--createDatasetCol</td>
 <td colspan="2">Erstellt in jeder Tabelle eine zusätzlich Spalte T_datasetname mit dem Namen/Identifikator des Datensatzes. Die Option bedingt die Option --dataset. Die Spalte ist redundant zur Spalte datasetname der Tabelle t_ili2db_dataset (siehe Kapitel Abbildungsregeln/Metadaten).</td>
@@ -1114,7 +1194,10 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--createDateTimeChecks</td>
 <td colspan="2">Erstellt für Datum und Zeit Datentypen CHECK-Constraints in der Datenbank.</td>
 </tr>
-<tr><td>--createTypeConstraints</td>
+<tr><td>--createMandatoryChecks</td>
+<td colspan="2">Erstellt für NULLable FK Spalten die MANDATORRY Referenzattribute oder Rollen implementieren CHECK-Constraints in der Datenbank.</td>
+</tr>
+<tr><td>--createTypeConstraint</td>
 <td colspan="2">Erstellt für die t_type Spalte ein CHECK-Constraint in der Datenbank.</td>
 </tr>
 <tr><td>--sqlColsAsText</td>
@@ -1150,6 +1233,9 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 <tr><td>--log filename</td>
 <td colspan="2">Schreibt die log-Meldungen in eine Datei.</td>
 </tr>
+<tr><td>--logtime</td>
+<td colspan="2">Ergänzt die log-Meldungen in der Log-Datei mit Zeitstempeln.</td>
+</tr>
 <tr><td colspan="3">--xtflog result.xtf           | Schreibt die log-Meldungen in eine INTERLIS 2-Datei.  Die Datei result.xtf entspricht dem Modell IliVErrors.</td>
 </tr>
 <tr><td colspan="3"><table class="first last docutils option-list" frame="void" rules="none">
@@ -1171,6 +1257,9 @@ Mehrere Sprachen können durch Semikolon getrennt werden, um die Priorität zu r
 </tr>
 <tr><td>--gui</td>
 <td colspan="2">Startet ein einfaches GUI.</td>
+</tr>
+<tr><td>--verbose</td>
+<td colspan="2">Schreibt detailiertere validierungs log-Meldungen</td>
 </tr>
 <tr><td>--trace</td>
 <td colspan="2">Erzeugt zusätzliche Log-Meldungen (wichtig für Programm-Fehleranalysen)</td>
@@ -1853,41 +1942,6 @@ CREATE TABLE D (
 <p class="last">Die Strukturtabelle enthält zusätzlich eine Spalte T_seq die die Reihenfolge der Strukturelement festlegt.</p>
 </td>
 </tr>
-<tr><td>2</td>
-<td><pre class="first last literal-block">
-STRUCTURE C =
-END C;
-
-
-
-
-
-
-CLASS D =
- attr1 : LIST OF C;
-END D;
-</pre>
-</td>
-<td><pre class="first last literal-block">
-CREATE TABLE C (
- T_Id integer PRIMARY KEY,
- T_seq integer NOT NULL,
- T_ParentId integer NOT NULL
- T_ParentType varchar(60) NOT NULL
- T_ParentAttr varchar(60) NOT NULL
-);
-
-CREATE TABLE D (
- T_Id integer PRIMARY KEY
-);
-</pre>
-</td>
-<td><p class="first">Mit der Option --structWithGenericRef werden statt für jedes Strukturattribut eine Spalte nur drei Standardspalten T_ParentId, T_ParentType, T_ParentAttr angelegt. Diese drei Spalten bilden zusammen einen generischen Fremdschlüssel.</p>
-<p>T_ParentId ist die t_id des Objektes, das das Strukturelement enthält.</p>
-<p>T_ParentType ist die konkrete Klasse (der SQL-Name des qualifizierten INTERLIS-Klassennamens <a class="footnote-reference" href="#footnote-4" id="footnote-reference-4">[4]</a>) des Objektes, das das Strukturelement enthält.</p>
-<p class="last">T_ParentAttr ist der Strukturattributname (der SQL-Name des unqualifizierten INTERLIS-Attributnamens) in der Klasse des Objektes, das das Strukturelement enthält.</p>
-</td>
-</tr>
 </tbody>
 </table>
 <p>Beispiel XML:</p>
@@ -1940,69 +1994,6 @@ CREATE TABLE D (
 <td>0</td>
 <td>&nbsp;</td>
 <td>6</td>
-</tr>
-</tbody>
-</table>
-<table border="1" class="docutils">
-<colgroup>
-<col width="46%" />
-<col width="54%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Tabelle D</th>
-<th class="head">&nbsp;</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>t_id</td>
-<td>T_Ili_Tid</td>
-</tr>
-<tr><td>6</td>
-<td>2</td>
-</tr>
-</tbody>
-</table>
-<p>Beispiel für Abbildungsvariante 2:</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="18%" />
-<col width="14%" />
-<col width="21%" />
-<col width="24%" />
-<col width="24%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Tabelle C</th>
-<th class="head">&nbsp;</th>
-<th class="head">&nbsp;</th>
-<th class="head">&nbsp;</th>
-<th class="head">&nbsp;</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>t_id</td>
-<td>t_seq</td>
-<td>t_parentid</td>
-<td>t_parenttype</td>
-<td>t_parentattr</td>
-</tr>
-<tr><td>7</td>
-<td>0</td>
-<td>6</td>
-<td>D</td>
-<td>attr1</td>
-</tr>
-<tr><td>8</td>
-<td>1</td>
-<td>6</td>
-<td>D</td>
-<td>attr1</td>
-</tr>
-<tr><td>9</td>
-<td>0</td>
-<td>6</td>
-<td>D</td>
-<td>attr2</td>
 </tr>
 </tbody>
 </table>
@@ -2299,6 +2290,159 @@ durch ili2db beim Schemaimpot in t_ili2db_meta_attrs abgelegt.
 Mit Hilfe der Option <tt class="docutils literal"><span class="pre">--iliMetaAttrs</span></tt> können beliebige weitere Metaattribute
 definiert werden, ohne das Modell (die ili-Datei) zu ändern.</p>
 </div>
+<div class="section" id="meta-konfiguration">
+<h3>Meta-Konfiguration</h3>
+<p>In der Meta-Konfigurationsdatei werden die folgenden Parameter unterstützt (hier nicht aufgeführte Kommandozeilenargument werden in der Meta-Konfiguration nicht unterstützt).
+Im Aufruf evtl. vorhandene Kommandozeilenargumente übersteuern die Angaben in der Meta-Konfigurationsdatei.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="31%" />
+<col width="49%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Konfiguration</th>
+<th class="head">Beispiel</th>
+<th class="head">Beschreibung</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>baseConfig</td>
+<td><pre class="code first last literal-block">
+[CONFIGURATION]
+baseConfig=ilidata:DatesetId
+</pre>
+</td>
+<td><p class="first">Basis-Meta-Konfiguration, auf der die aktuelle Meta-Konfiguration aufbaut.
+Statt <tt class="docutils literal">ilidata:DatesetId</tt> kann auch die Form <tt class="docutils literal"><span class="pre">file:/localfile</span></tt>
+benutzt werden, dann wird die entsprechende lokale Datei benutzt.</p>
+<p class="last">Mehrere Basiskonfigurationen werden mit einem Strichpunkt &quot;;&quot; getrennt.</p>
+</td>
+</tr>
+<tr><td>org.interlis2.validator.config</td>
+<td><pre class="code first last literal-block">
+[CONFIGURATION]
+org.interlis2.validator.config=ilidata:DatesetId
+</pre>
+</td>
+<td><p class="first">Validierungs-Konfiguration, die benutzt werden soll.
+Statt <tt class="docutils literal">ilidata:DatesetId</tt> kann auch die Form <tt class="docutils literal"><span class="pre">file:/localfile</span></tt>
+benutzt werden, dann wird die entsprechende lokale Datei  benutzt.</p>
+<p class="last">Mehrere Validierungs-Konfigurationen werden mit einem Strichpunkt &quot;;&quot; getrennt.</p>
+</td>
+</tr>
+<tr><td>ch.interlis.referenceData</td>
+<td><pre class="code first last literal-block">
+[CONFIGURATION]
+ch.interlis.referenceData=ilidata:DatesetId
+</pre>
+</td>
+<td><p class="first">Basis-Daten (z.B. Kataloge), die benutzt werden sollen.
+Statt <tt class="docutils literal">ilidata:DatesetId</tt> kann auch die Form <tt class="docutils literal"><span class="pre">file:/localfile</span></tt>
+benutzt werden, dann wird die entsprechende lokale Datei  benutzt.</p>
+<p class="last">Mehrere Basis-Daten werden mit einem Strichpunkt &quot;;&quot; getrennt.</p>
+</td>
+</tr>
+<tr><td>models</td>
+<td><pre class="code first last literal-block">
+[ch.ehi.ilivalidator]
+models=Simple23
+</pre>
+</td>
+<td>Entspricht dem Kommandozeilenargument <tt class="docutils literal"><span class="pre">--models</span></tt>.
+Hier nicht aufgeführte Kommandozeilenargument werden in der Meta-Konfiguration
+nicht unterstützt.
+models
+exportModels
+exportCrsModels
+nameLang
+dataset
+baskets
+topics
+defaultSrsAuth
+defaultSrsCode
+modelSrsCode
+multiSrs
+domains
+altSrsModel
+validConfig
+disableValidation
+disableAreaValidation
+disableRounding
+disableBoundaryRecoding
+forceTypeValidation
+createSingleEnumTab
+createEnumTabs
+createEnumTabsWithId
+createEnumTxtCol
+createEnumColAsItfCode
+beautifyEnumDispName
+noSmartMapping
+smart1Inheritance
+smart2Inheritance
+coalesceCatalogueRef
+coalesceMultiSurface
+coalesceMultiLine
+coalesceMultiPoint
+coalesceArray
+coalesceJson
+expandMultilingual
+expandLocalised
+createFk
+createFkIdx
+createUnique
+createNumChecks
+createTextChecks
+createDateTimeChecks
+createMandatoryChecks
+createImportTabs
+createStdCols
+t_id_Name
+idSeqMin
+idSeqMax
+createTypeDiscriminator
+createGeomIdx
+disableNameOptimization
+nameByTopic
+maxNameLength
+sqlColsAsText
+sqlEnableNull
+sqlExtRefCols
+strokeArcs
+skipPolygonBuilding
+skipReferenceErrors
+skipGeometryErrors
+keepAreaRef
+createTidCol
+importTid
+exportTid
+importBid
+exportFetchSize
+importBatchSize
+createBasketCol
+createDatasetCol
+ILIGML20
+ver3-translation
+translation
+createMetaInfo
+iliMetaAttrs
+createTypeConstraint</td>
+</tr>
+</tbody>
+</table>
+<p>Beispiel für eine Meta-Konfigurationsdatei:</p>
+<pre class="code literal-block">
+[CONFIGURATION]
+ch.interlis.referenceData=ilidata:63553eb4-a0dc-48eb-8596-ca1aa9bdbc0f
+
+[ch.ehi.ili2db]
+models=Simple23
+defaultSrsCode = 2056
+smart2Inheritance = true
+strokeArcs = false
+createBasketCol = true
+</pre>
+</div>
 <div class="section" id="metadaten">
 <h3>Metadaten</h3>
 <table border="1" class="docutils">
@@ -2397,6 +2541,33 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.</p>
 </tr>
 </thead>
 <tbody valign="top">
+<tr><td><tt class="docutils literal">ch.ehi.ili2db.typeKind</tt></td>
+<td><p class="first">Art des Interlis Datentyps. Mögliche Werte:</p>
+<ul class="simple">
+<li>TextType: MTEXT | TEXT | NAME | URI</li>
+<li>EnumerationType: ENUM</li>
+<li>EnumTreeValueType: ENUMTREE</li>
+<li>AlignmentType: ENUM</li>
+<li>BooleanType: BOOLEAN</li>
+<li>NumericType: NUMERIC</li>
+<li>FormattedType: FORMATTED</li>
+<li>DateTimeType: DATE | TIMEOFDAY | DATETIME</li>
+<li>CoordinateType: COORD | MULTICOORD</li>
+<li>OIDType: OID</li>
+<li>BlackboxType: XML | BINARY</li>
+<li>ClassType: CLASSQNAME</li>
+<li>AttributePathType: ATTRIBUTEQNAME</li>
+<li><dl class="first docutils">
+<dt>LineType: POLYLINE | SURFACE | AREA |</dt>
+<dd>MULTIPOLYLINE | MULTISURFACE | MULTIAREA</dd>
+</dl>
+</li>
+<li>ReferenceAttr: REFERENCE</li>
+<li>RestrictedStructureRef: STRUCTURE</li>
+</ul>
+<p class="last">Generell: Domain basiert oder Inline wird nicht unterschieden.</p>
+</td>
+</tr>
 <tr><td><tt class="docutils literal">ch.ehi.ili2db.c1Min</tt></td>
 <td>Bei Geometriespalten der Minimalwert der 1. Dimension</td>
 </tr>
@@ -2416,7 +2587,7 @@ sie beliebige (auch zukünftige) Werte/Zusatzangaben aufnehmen kann.</p>
 <td>Bei Geometriespalten der Maximalwert der 3. Dimension</td>
 </tr>
 <tr><td><tt class="docutils literal">ch.ehi.ili2db.geomType</tt></td>
-<td>Bei Geometriespalten die Art der Geometrie. Mögliche Wert:
+<td>Bei Geometriespalten die Art der Geometrie. Mögliche Werte:
 POINT, LINESTRING, POLYGON, MULTIPOINT, MULTILINESTRING
 MULTIPOLYGON, GEOMETRYCOLLECTION, CIRCULARSTRING
 COMPOUNDCURVE, CURVEPOLYGON, MULTICURVE, MULTISURFACE
@@ -2521,6 +2692,10 @@ Meta-Attribute generiert:</p>
 </tr>
 </thead>
 <tbody valign="top">
+<tr><td><tt class="docutils literal">ili2db.ili.topicClasses</tt></td>
+<td>Lister der in einem Behälter möglichen Objekte
+(als Leerzeichen getrennte Liste der SQL-Namen der Klassen)</td>
+</tr>
 <tr><td><tt class="docutils literal">ili2db.ili.attrCardinalityMin</tt></td>
 <td>minimum Anzahl Werte eines Attributes</td>
 </tr>
@@ -2611,7 +2786,7 @@ gemacht werden.</p>
 <table class="docutils footnote" frame="void" id="footnote-4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#footnote-reference-4">[4]</a></td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
+<tr><td class="label">[4]</td><td>Der SQL-Name ergibt sich aus den Namenskonventionen. Die konkrete
 Übersetzung ist in der Tabelle T_ILI2DB_CLASSNAME hinterlegt.</td></tr>
 </tbody>
 </table>
