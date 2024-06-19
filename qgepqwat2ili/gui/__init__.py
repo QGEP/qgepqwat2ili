@@ -440,7 +440,8 @@ def action_export(plugin):
                 return
 
         # 2. check wastewater_structure for all data models
-        flag_test = False
+        # flag_test - set to true if this test should be applied also
+        flag_test = True
         if flag_test:
             check_wastewater_structure = False
             check_wastewater_structure = check_wastewater_structure_subclass_data()
