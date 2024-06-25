@@ -41,6 +41,17 @@ def qgep_postimport():
     post_session.execute("SELECT qgep_od.wastewater_structure_update_fk_main_wastewater_node('', True);"
     )
 
+    # add symbology update queries - backporting from tww https://github.com/teksi/wastewater/pull/263
+    logger.info("update_wastewater_node_symbology for all datasets - please be patient")
+    post_session.execute("SELECT qgep_od.update_wastewater_node_symbology(NULL, True);")
+    logger.info("update_wastewater_node_symbology for all datasets - please be patient")
+    logger.info("update_wastewater_structure_label for all datasets - please be patient")
+    post_session.execute("SELECT qgep_od.update_wastewater_structure_label(NULL, True);")
+    logger.info("update_wastewater_node_symbology for all datasets - please be patient")
+    logger.info("update_wn_symbology_by_overflow for all datasets - please be patient")
+    post_session.execute("SELECT qgep_od.update_wn_symbology_by_overflow(NULL, True);")
+
+
     logger.info("Refresh materialized views")
     post_session.execute("SELECT qgep_network.refresh_network_simple();")
 
