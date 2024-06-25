@@ -5,6 +5,7 @@ import json
 from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.various import logger
@@ -31,6 +32,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     qgep_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     abwasser_session = Session(utils.sqlalchemy.create_engine(), autocommit=False, autoflush=False)
     tid_maker = utils.ili2db.TidMaker(id_attribute="obj_id")
+
+    # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
+    abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
     # Filtering
     filtered = selection is not None
