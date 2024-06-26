@@ -2929,10 +2929,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             abflussbeiwert_rw_ist=row.discharge_coefficient_rw_current,
             abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
             abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
-            abwassernetzelement_rw_geplantref=check_fk_in_subsetid(row.fk_wastewater_networkelement_rw_planned__REL),
-            abwassernetzelement_rw_istref=check_fk_in_subsetid(row.fk_wastewater_networkelement_rw_current__REL),
-            abwassernetzelement_sw_geplantref=check_fk_in_subsetid(row.fk_wastewater_networkelement_ww_planned__REL),
-            abwassernetzelement_sw_istref=check_fk_in_subsetid(row.fk_wastewater_networkelement_ww_current__REL),
+            # changed call from get_tid to check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
+            abwassernetzelement_rw_geplantref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement_rw_planned__REL),
+            abwassernetzelement_rw_istref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement_rw_current__REL),
+            abwassernetzelement_sw_geplantref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement_ww_planned__REL),
+            abwassernetzelement_sw_istref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement_ww_current__REL),
             befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
             befestigungsgrad_rw_ist=row.seal_factor_rw_current,
             befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
@@ -2970,7 +2971,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.measuring_point -> ABWASSER.messstelle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.measuring_point)
     if filtered:
-        query1=query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement)
+        query1 = query.join(
+            QGEP.wastewater_structure,
+            QGEP.wastewater_networkelement
+        )
         # needs to add QGEP.wastewater_structure as waste_water_treatment_plant is a subclass of organisation that has a relation to wastewater_structure and then wastewater_networkelement
         #variant1 for query2
         # query2=query.join(QGEP.waste_water_treatment_plant, (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner), (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider),QGEP.wastewater_networkelement,
@@ -2984,20 +2988,23 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # QGEP.wastewater_networkelement,
         
         # )
-        query3=query.join(QGEP.water_course_segment, QGEP.river, QGEP.sector_water_body, QGEP.discharge_point, QGEP.wastewater_networkelement)
-        # query=union(query1, query2, query3)
-        query=query.union(query1, query3)
-        query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query2 via waste_water_treatment_plant
+        query2 = query.join(
+            self.model_classes_tww_od.waste_water_treatment_plant,
+            self.model_classes_tww_od.wwtp_structure,
+            self.model_classes_tww_od.wastewater_networkelement,
         )
-          #  QGEP.wastewater_networkelement,
-          # or does not work with this - currently do not support other connections
-          #  or_(
-          #     (QGEP.waste_water_treatment_plant, QGEP.wastewater_networkelement),
-          #      (QGEP.wastewater_structure, QGEP.wastewater_networkelement),
-           # currently do not support other connections
-           #     (QGEP.water_course_segment, QGEP.river, QGEP.sector_water_body, QGEP.discharge_point, QGEP.wastewater_networkelement),
-           #    )
-            
+        query3 = query.join(
+            QGEP.water_course_segment,
+            QGEP.river,
+            QGEP.sector_water_body,
+            QGEP.discharge_point,
+            QGEP.wastewater_networkelement)
+        query = query.union(query1, query2, query3)
+        # query = query.union(query1, query3)
+        query = query.filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.measuring_point
