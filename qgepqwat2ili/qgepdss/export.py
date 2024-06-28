@@ -2990,6 +2990,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             self.model_classes_tww_od.wwtp_structure,
             self.model_classes_tww_od.wastewater_networkelement,
         )
+        # only until VSA-DSS Release 2015
         query3 = query.join(
             QGEP.water_course_segment,
             QGEP.river,
