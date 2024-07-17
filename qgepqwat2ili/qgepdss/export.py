@@ -409,6 +409,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.aquifier -> ABWASSER.grundwasserleiter, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.aquifier)
+    # always export all aquifier
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.aquifier
