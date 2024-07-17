@@ -2265,6 +2265,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.overflow_char -> ABWASSER.ueberlaufcharakteristik, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.overflow_char)
+    # always export all overflow_char datasets
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all overflow_char datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.overflow_char
