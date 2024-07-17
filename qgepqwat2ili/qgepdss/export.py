@@ -2297,6 +2297,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hq_relation -> ABWASSER.hq_relation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hq_relation)
+    if filtered:
+            # just check if overflow_char exists, but no filter
+            query = query.join(
+                QGEP.overflow_char,
+            )
+            # add sql statement to logger
+            statement = query.statement
+            logger.info(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hq_relation
