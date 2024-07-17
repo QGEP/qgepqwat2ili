@@ -366,6 +366,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.mutation -> ABWASSER.mutation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.mutation)
+    # only export explicitly specified mutation objects if filtered
+    if filtered:
+        query = query.filter(QGEP.mutation.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mutation
