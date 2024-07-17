@@ -3404,6 +3404,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             QGEP.wastewater_node,
             or_(
                 QGEP.wastewater_node.obj_id == QGEP.hydraulic_char_data.fk_wastewater_node,
+                # fk_primary_direction only added with VSA-DSS 2020
             ),
         ).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
