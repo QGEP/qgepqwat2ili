@@ -10,7 +10,6 @@ from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
-# to do add check_fk_in_subsetid to qgepdss and qgepsia405
 
 def qgep_export(selection=None, labels_file=None, orientation=None):
     """
