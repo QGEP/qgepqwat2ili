@@ -3388,11 +3388,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # side fk_overflow_char not considered in filter query
     if filtered:
         query = query.join(
-            QGEP.wastewater_node)
+            QGEP.wastewater_node,
             or_(
                 QGEP.wastewater_node.obj_id == QGEP.hydraulic_char_data.fk_wastewater_node,
             ),
-        .filter(
+        ).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
     for row in query:
