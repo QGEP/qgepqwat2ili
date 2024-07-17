@@ -444,6 +444,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.river -> ABWASSER.fliessgewaesser, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.river)
+    # always export all river
     for row in query:
         # AVAILABLE FIELDS IN QGEP.river
         
@@ -479,6 +480,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.lake -> ABWASSER.see, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.lake)
+    # always export all lake
     for row in query:
         # AVAILABLE FIELDS IN QGEP.lake
         
@@ -514,6 +516,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.water_course_segment -> ABWASSER.gewaesserabschnitt, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.water_course_segment)
+    # always export all water_course_segment
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.water_course_segment
@@ -563,6 +566,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.water_catchment -> ABWASSER.wasserfassung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.water_catchment)
+    # always export all water_catchment
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.water_catchment
@@ -596,6 +600,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     abwasser_session.flush()
 
     logger.info("Exporting QGEP.river_bank -> ABWASSER.ufer, ABWASSER.metaattribute")
+    # always export all river_bank
     query = qgep_session.query(QGEP.river_bank)
     for row in query:
 
@@ -635,6 +640,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.river_bed -> ABWASSER.gewaessersohle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.river_bed)
+    # always export all river_bed
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.river_bed
@@ -670,6 +676,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.sector_water_body -> ABWASSER.gewaessersektor, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.sector_water_body)
+    # always export all sector_water_body
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.sector_water_body
@@ -709,6 +716,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.administrative_office -> ABWASSER.amt, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.administrative_office)
+    # always export all administrative_office
     for row in query:
         # AVAILABLE FIELDS IN QGEP.administrative_office
         
@@ -743,6 +751,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.cooperative -> ABWASSER.genossenschaft_korporation, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.cooperative)
+    # always export all cooperative
     for row in query:
         # AVAILABLE FIELDS IN QGEP.cooperative
         
@@ -777,6 +786,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.canton -> ABWASSER.kanton, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.canton)
+    # always export all canton
     for row in query:
         # AVAILABLE FIELDS IN QGEP.canton
         
@@ -812,6 +822,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.waste_water_association -> ABWASSER.abwasserverband, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.waste_water_association)
+    # always export all waste_water_association
     for row in query:
         # AVAILABLE FIELDS IN QGEP.waste_water_association
         
@@ -846,6 +857,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.municipality -> ABWASSER.gemeinde, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.municipality)
+    # always export all municipality
     for row in query:
         # AVAILABLE FIELDS IN QGEP.municipality
         
@@ -886,6 +898,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.waste_water_treatment_plant -> ABWASSER.abwasserreinigungsanlage, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.waste_water_treatment_plant)
+    # always export all waste_water_treatment_plant
     for row in query:
         # AVAILABLE FIELDS IN QGEP.waste_water_treatment_plant
         
