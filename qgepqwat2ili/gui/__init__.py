@@ -440,7 +440,8 @@ def action_export(plugin):
                 return
 
         # 2. check wastewater_structure for all data models
-        flag_test = False
+        # flag_test - set to true if this test should be applied also
+        flag_test = True
         if flag_test:
             check_wastewater_structure = False
             check_wastewater_structure = check_wastewater_structure_subclass_data()
@@ -599,6 +600,10 @@ def action_export(plugin):
 #18.3.2023
 # 22.3.2023 added try - seems not to work
 #            try:
+
+                # add logger info to check what selection is used
+                logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
+                
                 if emodel == "VSA_KEK_2019_LV95":
                     logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
                     #qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 

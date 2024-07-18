@@ -11,7 +11,6 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-# def qgep_export(selection=None, labels_file=None):
 def qgep_export(selection=None, labels_file=None, orientation=None):
     """
     Export data from the QGEP model into the ili2pg model.
@@ -101,7 +100,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # 5.4.2023 add orientation 
+        # add orientation 
         val = val +  float(labelorientation)
         
         val = val % 360.0
@@ -113,15 +112,37 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return val
 
+    def check_fk_in_subsetid (subset, relation):
+        """
+        checks, whether foreignkey is in the subset_ids - if yes it return the tid of the foreignkey, if no it will return None
+        """
+        # first check for None, as is get_tid
+        if relation is None:
+            return None
+
+        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
+        fremdschluesselstr = getattr(relation, "obj_id")
+        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+        
+        if fremdschluesselstr in subset:
+            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+            logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
+            return tid_maker.tid_for_row(relation)
+        else:
+            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!")
+            return None
+
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
             # FIELDS TO MAP TO ABWASSER.metaattribute
             # --- metaattribute ---
 
-            # 31.3.2023 obj_id instead of name
+
             # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
-
+            
+            # obj_id instead of name
             datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
             datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
 
@@ -509,7 +530,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
-            abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+
+            # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
+            #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            abwassernetzelementref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
