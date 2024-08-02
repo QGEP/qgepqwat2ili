@@ -591,7 +591,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             grundwasserleiterref=get_tid(row.fk_aquifier__REL),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(wasserfassung)
         create_metaattributes(row)
@@ -702,7 +702,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bwg_code=row.code_bwg,
             kilomo=row.km_down,
             kilomu=row.km_up,
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
             reflaenge=row.ref_length,
             verlauf=ST_Force2D(row.progression_geometry),
             # reference to own class not supported in qgep
@@ -1949,7 +1949,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(badestelle)
         create_metaattributes(row)
