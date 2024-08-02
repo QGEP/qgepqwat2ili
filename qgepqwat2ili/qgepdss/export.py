@@ -3149,7 +3149,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "messreihe"),
             # --- messreihe ---
 
-            abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            # not supported in qgep - will be introduced with VSA-DSS 2020
+            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             art=get_vl(row.kind__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
