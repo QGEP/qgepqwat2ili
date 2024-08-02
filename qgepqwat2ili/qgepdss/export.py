@@ -3063,7 +3063,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             gewaesserabschnittref=get_tid(row.fk_water_course_segment__REL),
             lage=ST_Force2D(row.situation_geometry),
-            referenzstelleref=get_tid(row.fk_reference_station__REL),
+            # not supported in qgep datamodel yet, reference on same class
+            # referenzstelleref=get_tid(row.fk_reference_station__REL),
             staukoerper=get_vl(row.damming_device__REL),
             zweck=get_vl(row.purpose__REL),
         )
