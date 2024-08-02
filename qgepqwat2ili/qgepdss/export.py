@@ -591,7 +591,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             grundwasserleiterref=get_tid(row.fk_aquifier__REL),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(wasserfassung)
         create_metaattributes(row)
@@ -702,7 +702,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bwg_code=row.code_bwg,
             kilomo=row.km_down,
             kilomu=row.km_up,
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
             reflaenge=row.ref_length,
             verlauf=ST_Force2D(row.progression_geometry),
             # reference to own class not supported in qgep
@@ -1949,7 +1949,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_body__REL),
+            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(badestelle)
         create_metaattributes(row)
@@ -3063,7 +3063,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bezeichnung=null_to_emptystr(row.identifier),
             gewaesserabschnittref=get_tid(row.fk_water_course_segment__REL),
             lage=ST_Force2D(row.situation_geometry),
-            referenzstelleref=get_tid(row.fk_reference_station__REL),
+            # not supported in qgep datamodel yet, reference on same class
+            # referenzstelleref=get_tid(row.fk_reference_station__REL),
             staukoerper=get_vl(row.damming_device__REL),
             zweck=get_vl(row.purpose__REL),
         )
@@ -3148,7 +3149,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "messreihe"),
             # --- messreihe ---
 
-            abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            # not supported in qgep - will be introduced with VSA-DSS 2020
+            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             art=get_vl(row.kind__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),

@@ -48,8 +48,9 @@ def qgep_postimport():
     logger.info("update_wastewater_structure_label for all datasets - please be patient")
     post_session.execute("SELECT qgep_od.update_wastewater_structure_label(NULL, True);")
     logger.info("update_wastewater_node_symbology for all datasets - please be patient")
-    logger.info("update_wn_symbology_by_overflow for all datasets - please be patient")
-    post_session.execute("SELECT qgep_od.update_wn_symbology_by_overflow(NULL, True);")
+    # update_wastewater_structure_symbology instead of update_wn_symbology_by_overflow (tww)
+    logger.info("update_wastewater_structure_symbology for all datasets - please be patient")
+    post_session.execute("SELECT qgep_od.update_wastewater_structure_symbology(NULL, True);")
 
 
     logger.info("Refresh materialized views")
