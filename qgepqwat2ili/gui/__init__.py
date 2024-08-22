@@ -45,6 +45,8 @@ from .gui_import import GuiImport
 # 19.4.2023 / 25.4.2023 ohne Bindestrich / neu aus gui_import - Gui
 from .gui_importc import GuiImportc
 
+
+
 # 12.7.2022 for testing import time
 import time
 
@@ -354,12 +356,14 @@ def action_import(plugin):
                  log_path,
             )
 
-    progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
+    # 31.5.2024 should not be needed anymore
+    # progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
     
     time.sleep(2)
-    # to add option to run main_cover.sql manually
-    
+    # to add option to run main_cover.sql manually - see postimport.py
+
     # 24.7.2022 / moved to end
+    # shows progress of import to import wizard, not final commit
     progress_dialog.setValue(100)
 
 
@@ -436,7 +440,8 @@ def action_export(plugin):
                 return
 
         # 2. check wastewater_structure for all data models
-        flag_test = False
+        # flag_test - set to true if this test should be applied also
+        flag_test = True
         if flag_test:
             check_wastewater_structure = False
             check_wastewater_structure = check_wastewater_structure_subclass_data()
@@ -595,6 +600,10 @@ def action_export(plugin):
 #18.3.2023
 # 22.3.2023 added try - seems not to work
 #            try:
+
+                # add logger info to check what selection is used
+                logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
+                
                 if emodel == "VSA_KEK_2019_LV95":
                     logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
                     #qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path) 
@@ -828,7 +837,7 @@ def configure_from_modelbaker(iface):
     Configures config.JAVA/ILI2PG paths using modelbaker.
     Returns whether modelbaker is available, and displays instructions if not.
     """
-    REQUIRED_VERSION = "v6.4.0"  # TODO : update once https://github.com/opengisch/QgisModelBaker/pull/473 is released
+    REQUIRED_VERSION = "v6.5.2"
     modelbaker = plugins.get("QgisModelBaker")
     if modelbaker is None:
         iface.messageBar().pushMessage(
