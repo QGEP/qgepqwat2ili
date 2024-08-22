@@ -365,7 +365,7 @@ def qgep_import(precommit_callback=None):
             object=row.objekt,
             recorded_by=row.aufnehmer,
             remark=row.bemerkung,
-            system_user=row.systembenutzer,
+            user_system=row.systembenutzer,
         )
         qgep_session.add(mutation)
         print(".", end="")

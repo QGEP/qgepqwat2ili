@@ -399,7 +399,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             letzter_wert=row.last_value,
             mutationsdatum=row.date_mutation,
             objekt=null_to_emptystr(row.object),
-            systembenutzer=null_to_emptystr(row.system_user),
+            systembenutzer=null_to_emptystr(row.user_system),
         )
         abwasser_session.add(mutation)
         create_metaattributes(row)
