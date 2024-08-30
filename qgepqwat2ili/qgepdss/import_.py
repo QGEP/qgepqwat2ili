@@ -5,6 +5,7 @@ from functools import lru_cache
 from geoalchemy2.functions import ST_Force3D
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_dirty
+from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.various import logger
@@ -30,7 +31,7 @@ def qgep_import(precommit_callback=None):
     # We also drop symbology triggers as they badly affect performance. This must be done in a separate session as it
     # would deadlock other sessions.
     logger.info("drop symbology triggers")
-    pre_session.execute("SELECT qgep_sys.drop_symbology_triggers();")
+    pre_session.execute(text"SELECT qgep_sys.drop_symbology_triggers();"))
     pre_session.commit()
     pre_session.close()
 
@@ -44,7 +45,7 @@ def qgep_import(precommit_callback=None):
 
     # Allow to insert rows with cyclic dependencies at once, needs data modell version 1.6.2 https://github.com/QGEP/datamodel/pull/235 to work properly
     logger.info("SET CONSTRAINTS ALL DEFERRED;")
-    qgep_session.execute("SET CONSTRAINTS ALL DEFERRED;")
+    qgep_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
 
 
