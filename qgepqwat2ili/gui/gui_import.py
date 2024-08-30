@@ -218,7 +218,7 @@ class GuiImport(QDialog):
         # session.begin_nested() and one additionnal self.session.commit()
         
         # add info in message bar
-        iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Warning)
+        iface.messageBar().pushMessage("Please be patient!", "Importing data in qgep - working ...", level=Qgis.Info)
 
         try:
             self.session.commit()
