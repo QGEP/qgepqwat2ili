@@ -31,7 +31,7 @@ def qgep_import(precommit_callback=None):
     # We also drop symbology triggers as they badly affect performance. This must be done in a separate session as it
     # would deadlock other sessions.
     logger.info("drop symbology triggers")
-    pre_session.execute(text"SELECT qgep_sys.drop_symbology_triggers();"))
+    pre_session.execute(text("SELECT qgep_sys.drop_symbology_triggers();"))
     pre_session.commit()
     pre_session.close()
 
