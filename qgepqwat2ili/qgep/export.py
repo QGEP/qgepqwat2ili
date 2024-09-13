@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
-from ..utils.various import logger
 from ..utils.basket_utils import BasketUtils
+from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
@@ -40,10 +40,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # Filtering
     filtered = selection is not None
-    
+
     # Logging for debugging
     logger.info(f"print filtered '{filtered}'")
-    
+
     subset_ids = selection if selection is not None else []
 
     # Logging for debugging
@@ -114,9 +114,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # add orientation 
-        val = val +  float(labelorientation)
-        
+        # add orientation
+        val = val + float(labelorientation)
+
         val = val % 360.0
         if val > 359.9:
             val = 0
@@ -126,7 +126,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return val
 
-    def check_fk_in_subsetid (subset, relation):
+    def check_fk_in_subsetid(subset, relation):
         """
         checks, whether foreignkey is in the subset_ids - if yes it return the tid of the foreignkey, if no it will return None
         """
@@ -138,13 +138,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
         logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
-        
+
         if fremdschluesselstr in subset:
             logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
             logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
             return tid_maker.tid_for_row(relation)
         else:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!")
+            logger.info(
+                f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+            )
             return None
 
     def create_metaattributes(row):
@@ -154,19 +156,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # 31.3.2023 identifier instead of name
             # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
-            
             # datenherr=getattr(row.fk_dataowner__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
-            
             # 31.3.2023 obj_id instead of name
             datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
             datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=get_tid(row),
             t_seq=0,
+            t_basket=current_basket.t_id,
         )
         abwasser_session.add(metaattribute)
 
@@ -179,7 +179,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
-            "t_basket": current_basket.t_id
+            "t_basket": current_basket.t_id,
         }
 
     def wastewater_structure_common(row):
@@ -547,9 +547,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
-
             # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
-            #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             abwassernetzelementref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
@@ -902,7 +901,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 / vsa-kek 2019 / 2020 TEXT*50
-            #datengrundlage=row.base_data,
+            # datengrundlage=row.base_data,
             datengrundlage=truncate(row.base_data, 50),
             dauer=row.duration,
             detaildaten=row.data_details,
@@ -1099,7 +1098,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             datentraegerref=get_tid(row.fk_data_media__REL),
             klasse=get_vl(row.class__REL),
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
-            #objekt=null_to_emptystr(row.object),
+            # objekt=null_to_emptystr(row.object),
             objekt=truncate(null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
@@ -1140,7 +1139,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                     f"Label of object '{obj_id}' from layer '{layer_name}' is empty and will not be exported"
                 )
                 continue
-
 
             if layer_name == "vw_qgep_reach":
                 if obj_id not in tid_for_obj_id["haltung"]:
