@@ -182,14 +182,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             t_seq=0,
             t_basket=current_basket.t_id,
         )
-        print(f"create_metaattributes {current_basket.t_id}")
+        if not current_basket.t_id:
+            raise Exception("Basket id can't be null")
+
         abwasser_session.add(metaattribute)
 
     def base_common(row, type_name):
         """
         Returns common attributes for base
         """
-        print(f"base_common {current_basket.t_id}")
+        if not current_basket.t_id:
+            raise Exception("Basket id can't be null")
+
         return {
             "t_ili_tid": row.obj_id,
             "t_type": type_name,
