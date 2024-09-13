@@ -10,6 +10,7 @@ from .. import utils
 # 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger
+from ..utils.basket_utils import BasketUtils
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
@@ -34,6 +35,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
+
+    basket_utils = BasketUtils(ABWASSER, abwasser_session)
+    basket_utils.create_basket()
+
+    current_basket = basket_utils.basket_topic_sia405_abwasser
 
     # Filtering
     filtered = selection is not None
@@ -190,6 +196,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
+            "t_basket": current_basket.t_id
         }
 
     def organisation_common(row):
