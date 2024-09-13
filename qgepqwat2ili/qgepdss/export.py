@@ -6,13 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
-<<<<<<< HEAD
 
-# 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
-from ..utils.various import logger
-=======
->>>>>>> c88d128 (t_basket for metaattribute)
 from ..utils.basket_utils import BasketUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -49,11 +44,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
 
     # Logging for debugging
-<<<<<<< HEAD
     logger.debug(f"print filtered '{filtered}'")
-=======
-    logger.info(f"print filtered '{filtered}'")
->>>>>>> c88d128 (t_basket for metaattribute)
 
     subset_ids = selection if selection is not None else []
 
