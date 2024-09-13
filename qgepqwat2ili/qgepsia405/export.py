@@ -7,10 +7,9 @@ from sqlalchemy.sql import text
 
 from .. import utils
 
-# 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
-from ..utils.various import logger
 from ..utils.basket_utils import BasketUtils
+from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
@@ -43,10 +42,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # Filtering
     filtered = selection is not None
-    
+
     # Logging for debugging
     logger.info(f"print filtered '{filtered}'")
-    
+
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
@@ -181,6 +180,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=get_tid(row),
             t_seq=0,
+            t_basket=current_basket.t_id,
         )
         abwasser_session.add(metaattribute)
 
@@ -193,7 +193,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
-            "t_basket": current_basket.t_id
+            "t_basket": current_basket.t_id,
         }
 
     def wastewater_structure_common(row):

@@ -6,11 +6,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
+<<<<<<< HEAD
 
 # 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger
+=======
+>>>>>>> c88d128 (t_basket for metaattribute)
 from ..utils.basket_utils import BasketUtils
+from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
@@ -45,7 +49,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
 
     # Logging for debugging
+<<<<<<< HEAD
     logger.debug(f"print filtered '{filtered}'")
+=======
+    logger.info(f"print filtered '{filtered}'")
+>>>>>>> c88d128 (t_basket for metaattribute)
 
     subset_ids = selection if selection is not None else []
 
@@ -184,6 +192,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
             t_id=get_tid(row),
             t_seq=0,
+            t_basket=current_basket.t_id,
         )
         abwasser_session.add(metaattribute)
 
@@ -196,7 +205,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
-            "t_basket": current_basket.t_id
+            "t_basket": current_basket.t_id,
         }
 
     def organisation_common(row):
@@ -3640,9 +3649,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.param_ca_general)
     if filtered:
-        query = query.join(QGEP.catchment_area).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+        query = query.join(QGEP.catchment_area).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_general
 
@@ -3683,9 +3690,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.param_ca_mouse1)
     if filtered:
-        query = query.join(QGEP.catchment_area).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+        query = query.join(QGEP.catchment_area).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_mouse1
 
