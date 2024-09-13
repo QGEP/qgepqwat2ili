@@ -271,6 +271,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_id": t_id,
             "t_type": t_type,
             "t_ili_tid": t_id,
+            "t_basket": current_basket.t_id,
             # --- TextPos ---
             "textpos": ST_GeomFromGeoJSON(
                 json.dumps(
