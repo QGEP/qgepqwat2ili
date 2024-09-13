@@ -7,6 +7,7 @@ from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.various import logger
+from ..utils.basket_utils import BasketUtils
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
@@ -32,9 +33,21 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
+    basket_utils = BasketUtils(ABWASSER, abwasser_session)
+    basket_utils.create_basket()
+
+    current_basket = basket_utils.basket_topic_sia405_abwasser
+
     # Filtering
     filtered = selection is not None
+    
+    # Logging for debugging
+    logger.info(f"print filtered '{filtered}'")
+    
     subset_ids = selection if selection is not None else []
+
+    # Logging for debugging
+    logger.info(f"print subset_ids '{subset_ids}'")
 
     # Orientation
     oriented = orientation is not None
@@ -49,6 +62,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if relation is None:
             return None
+
         return tid_maker.tid_for_row(relation)
 
     def get_vl(relation):
@@ -90,7 +104,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
         if len(val) > max_length:
-            logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
     def modulo_angle(val):
@@ -109,7 +123,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         logger.info(f"modulo_angle - added orientation: {labelorientation}")
         print("modulo_angle - added orientation: ", str(labelorientation))
-        
+
         return val
 
     def check_fk_in_subsetid (subset, relation):
@@ -147,7 +161,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # 31.3.2023 obj_id instead of name
             datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
             datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            
+
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
@@ -165,6 +179,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_type": type_name,
             "obj_id": row.obj_id,
             "t_id": get_tid(row),
+            "t_basket": current_basket.t_id
         }
 
     def wastewater_structure_common(row):
@@ -512,9 +527,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from,
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
             ),
-        ).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.reach_point
