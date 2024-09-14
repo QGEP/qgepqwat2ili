@@ -1,6 +1,6 @@
 import json
 
-from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
+from geoalchemy2.functions import ST_Force2D
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
@@ -9,6 +9,7 @@ from .. import utils
 
 from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.basket_utils import BasketUtils
+from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -205,18 +206,25 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_id": get_tid(row),
             "t_basket": current_basket.t_id,
         }
+    qgep_export_utils = QgepExportUtils(
+        tid_maker=tid_maker,
+        current_basket=current_basket,
+        abwasser_session=abwasser_session,
+        abwasser_model=ABWASSER,
+        labelorientation=labelorientation,
+    )
 
     def organisation_common(row):
         """
         Returns common attributes for organisation
         """
         return {
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
             "bezeichnung": row.identifier,
             # attribute organisation.gemeindenummer will be added with release 2020
             # "gemeindenummer": row.municipality_number,
             # not supported in model qgep 2015
-            # "teil_vonref": get_tid(row.fk_part_of__REL),
+            # "teil_vonref": qgep_export_utils.get_tid(row.fk_part_of__REL),
             "auid": row.uid,
         }
 
@@ -225,8 +233,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for surface_water_bodies
         """
         return {
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
         }
 
     def wastewater_structure_common(row):
@@ -268,8 +276,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # Returns common attributes for maintenance_event
     # """
     # return {
-    # "ausfuehrende_firmaref": get_tid(row.fk_operating_company__REL),
-    # "massnahmeref": get_tid(row.fk_measure__REL),
+    # "ausfuehrende_firmaref": qgep_export_utils.get_tid(row.fk_operating_company__REL),
+    # "massnahmeref": qgep_export_utils.get_tid(row.fk_measure__REL),
     # }
 
     def zone_common(row):
@@ -277,8 +285,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for zone
         """
         return {
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
         }
 
     def water_control_structure_common(row):
@@ -286,31 +294,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for water_control_structure
         """
         return {
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
-            "gewaesserabschnittref": get_tid(row.fk_water_course_segment__REL),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
+            "gewaesserabschnittref": qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
             "lage": ST_Force2D(row.situation_geometry),
-        }
-
-    def wastewater_networkelement_common(row):
-        """
-        Returns common attributes for wastewater_networkelement
-        """
-        return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
-        }
-
-    def structure_part_common(row):
-        """
-        Returns common attributes for structure_part
-        """
-        return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
-            "instandstellung": get_vl(row.renovation_demand__REL),
         }
 
     def connection_object_common(row):
@@ -318,11 +305,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for connection_object
         """
         return {
-            "abwassernetzelementref": get_tid(row.fk_wastewater_networkelement__REL),
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "betreiberref": get_tid(row.fk_operator__REL),
-            "bezeichnung": null_to_emptystr(row.identifier),
-            "eigentuemerref": get_tid(row.fk_owner__REL),
+            "abwassernetzelementref": qgep_export_utils.get_tid(row.fk_wastewater_networkelement__REL),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "betreiberref": qgep_export_utils.get_tid(row.fk_operator__REL),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
+            "eigentuemerref": qgep_export_utils.get_tid(row.fk_owner__REL),
             "fremdwasseranfall": row.sewer_infiltration_water_production,
         }
 
@@ -331,10 +318,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for surface_runoff_parameters
         """
         return {
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
             "benetzungsverlust": row.wetting_loss,
-            "bezeichnung": null_to_emptystr(row.identifier),
-            "einzugsgebietref": get_tid(row.fk_catchment_area__REL),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
+            "einzugsgebietref": qgep_export_utils.get_tid(row.fk_catchment_area__REL),
             "muldenverlust": row.surface_storage,
             "verdunstungsverlust": row.evaporation_loss,
             "versickerungsverlust": row.infiltration_loss,
@@ -345,52 +332,22 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for overflow
         """
         return {
-            "abwasserknotenref": get_tid(row.fk_wastewater_node__REL),
-            "antrieb": get_vl(row.actuation__REL),
-            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
-            "bezeichnung": null_to_emptystr(row.identifier),
+            "abwasserknotenref": qgep_export_utils.get_tid(row.fk_wastewater_node__REL),
+            "antrieb": qgep_export_utils.get_vl(row.actuation__REL),
+            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
-            "einleitstelle": null_to_emptystr(row.discharge_point),
+            "einleitstelle": qgep_export_utils.null_to_emptystr(row.discharge_point),
             "fabrikat": row.brand,
-            "funktion": get_vl(row.function__REL),
+            "funktion": qgep_export_utils.get_vl(row.function__REL),
             "qan_dim": row.qon_dim,
-            "signaluebermittlung": get_vl(row.signal_transmission__REL),
-            "steuerung": get_vl(row.control__REL),
-            "steuerungszentraleref": get_tid(row.fk_control_center__REL),
+            "signaluebermittlung": qgep_export_utils.get_vl(row.signal_transmission__REL),
+            "steuerung": qgep_export_utils.get_vl(row.control__REL),
+            "steuerungszentraleref": qgep_export_utils.get_tid(row.fk_control_center__REL),
             "subventionen": row.subsidies,
-            "ueberlaufcharakteristikref": get_tid(row.fk_overflow_char__REL),
-            "ueberlaufnachref": get_tid(row.fk_overflow_to__REL),
-            "verstellbarkeit": get_vl(row.adjustability__REL),
-        }
-
-    # neu
-    def textpos_common(row, t_type, geojson_crs_def):
-        """
-        Returns common attributes for textpos
-        """
-        t_id = tid_maker.next_tid()
-        return {
-            "t_id": t_id,
-            "t_type": t_type,
-            "t_ili_tid": t_id,
-            "t_basket": current_basket.t_id,
-            # --- TextPos ---
-            "textpos": ST_GeomFromGeoJSON(
-                json.dumps(
-                    {
-                        "type": "Point",
-                        "coordinates": row["geometry"]["coordinates"],
-                        "crs": geojson_crs_def,
-                    }
-                )
-            ),
-            "textori": modulo_angle(row["properties"]["LabelRotation"]),
-            "texthali": "Left",  # can be Left/Center/Right
-            "textvali": "Bottom",  # can be Top,Cap,Half,Base,Bottom
-            # --- SIA405_TextPos ---
-            "plantyp": row["properties"]["scale"],
-            "textinhalt": row["properties"]["LabelText"],
-            "bemerkung": None,
+            "ueberlaufcharakteristikref": qgep_export_utils.get_tid(row.fk_overflow_char__REL),
+            "ueberlaufnachref": qgep_export_utils.get_tid(row.fk_overflow_to__REL),
+            "verstellbarkeit": qgep_export_utils.get_vl(row.adjustability__REL),
         }
 
     # re_maintenance_event_wastewater_structure moved to end, as wastewater_structure and maintenance_event are not yet added
@@ -416,23 +373,23 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.mutation
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "mutation"),
+            **qgep_export_utils.base_common(row, "mutation"),
             # --- mutation ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             attribut=row.attribute,
             aufnahmedatum=row.date_time,
             aufnehmer=row.recorded_by,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
             # Model adapted with delta/delta_1.5.8_dss_upddate_attributes_class.sql
             # klasse=row.class,
             klasse=row.classname,
             letzter_wert=row.last_value,
             mutationsdatum=row.date_mutation,
-            objekt=null_to_emptystr(row.object),
-            systembenutzer=null_to_emptystr(row.user_system),
+            objekt=qgep_export_utils.null_to_emptystr(row.object),
+            systembenutzer=qgep_export_utils.null_to_emptystr(row.user_system),
         )
         abwasser_session.add(mutation)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -456,17 +413,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.grundwasserleiter
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "grundwasserleiter"),
+            **qgep_export_utils.base_common(row, "grundwasserleiter"),
             # --- grundwasserleiter ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             maxgwspiegel=row.maximal_groundwater_level,
             mingwspiegel=row.minimal_groundwater_level,
             mittlerergwspiegel=row.average_groundwater_level,
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(grundwasserleiter)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -493,14 +450,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.fliessgewaesser
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "fliessgewaesser"),
+            **qgep_export_utils.base_common(row, "fliessgewaesser"),
             # --- oberflaechengewaesser ---
             **surface_water_bodies_common(row),
             # --- fliessgewaesser ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(fliessgewaesser)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -527,14 +484,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.see
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "see"),
+            **qgep_export_utils.base_common(row, "see"),
             # --- oberflaechengewaesser ---
             **surface_water_bodies_common(row),
             # --- see ---
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(see)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -560,32 +517,32 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaesserabschnitt
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaesserabschnitt"),
+            **qgep_export_utils.base_common(row, "gewaesserabschnitt"),
             # --- gewaesserabschnitt ---
-            abflussregime=get_vl(row.discharge_regime__REL),
-            algenbewuchs=get_vl(row.algae_growth__REL),
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            abflussregime=qgep_export_utils.get_vl(row.discharge_regime__REL),
+            algenbewuchs=qgep_export_utils.get_vl(row.algae_growth__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             bis=ST_Force2D(row.to_geometry),
-            breitenvariabilitaet=get_vl(row.width_variability__REL),
-            fliessgewaesserref=get_tid(row.fk_watercourse__REL),
-            gefaelle=get_vl(row.slope__REL),
+            breitenvariabilitaet=qgep_export_utils.get_vl(row.width_variability__REL),
+            fliessgewaesserref=qgep_export_utils.get_tid(row.fk_watercourse__REL),
+            gefaelle=qgep_export_utils.get_vl(row.slope__REL),
             groesse=row.size,
-            hoehenstufe=get_vl(row.altitudinal_zone__REL),
-            laengsprofil=get_vl(row.length_profile__REL),
-            linienfuehrung=get_vl(row.section_morphology__REL),
-            makrophytenbewuchs=get_vl(row.macrophyte_coverage__REL),
-            nutzung=get_vl(row.utilisation__REL),
-            oekom_klassifizierung=get_vl(row.ecom_classification__REL),
+            hoehenstufe=qgep_export_utils.get_vl(row.altitudinal_zone__REL),
+            laengsprofil=qgep_export_utils.get_vl(row.length_profile__REL),
+            linienfuehrung=qgep_export_utils.get_vl(row.section_morphology__REL),
+            makrophytenbewuchs=qgep_export_utils.get_vl(row.macrophyte_coverage__REL),
+            nutzung=qgep_export_utils.get_vl(row.utilisation__REL),
+            oekom_klassifizierung=qgep_export_utils.get_vl(row.ecom_classification__REL),
             sohlenbreite=row.bed_with,
-            tiefenvariabilitaet=get_vl(row.depth_variability__REL),
-            totholz=get_vl(row.dead_wood__REL),
+            tiefenvariabilitaet=qgep_export_utils.get_vl(row.depth_variability__REL),
+            totholz=qgep_export_utils.get_vl(row.dead_wood__REL),
             von=ST_Force2D(row.from_geometry),
-            wasserhaerte=get_vl(row.water_hardness__REL),
+            wasserhaerte=qgep_export_utils.get_vl(row.water_hardness__REL),
         )
         abwasser_session.add(gewaesserabschnitt)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -609,17 +566,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.wasserfassung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "wasserfassung"),
+            **qgep_export_utils.base_common(row, "wasserfassung"),
             # --- wasserfassung ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            grundwasserleiterref=get_tid(row.fk_aquifier__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            grundwasserleiterref=qgep_export_utils.get_tid(row.fk_aquifier__REL),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
+            oberflaechengewaesserref=qgep_export_utils.get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(wasserfassung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -643,21 +600,21 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.ufer
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "ufer"),
+            **qgep_export_utils.base_common(row, "ufer"),
             # --- ufer ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             breite=row.width,
-            gewaesserabschnittref=get_tid(row.fk_water_course_segment__REL),
-            seite=get_vl(row.side__REL),
-            uferbereich=get_vl(row.shores__REL),
-            umlandnutzung=get_vl(row.utilisation_of_shore_surroundings__REL),
-            vegetation=get_vl(row.vegetation__REL),
-            verbauungsart=get_vl(row.river_control_type__REL),
-            verbauungsgrad=get_vl(row.control_grade_of_river__REL),
+            gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
+            seite=qgep_export_utils.get_vl(row.side__REL),
+            uferbereich=qgep_export_utils.get_vl(row.shores__REL),
+            umlandnutzung=qgep_export_utils.get_vl(row.utilisation_of_shore_surroundings__REL),
+            vegetation=qgep_export_utils.get_vl(row.vegetation__REL),
+            verbauungsart=qgep_export_utils.get_vl(row.river_control_type__REL),
+            verbauungsgrad=qgep_export_utils.get_vl(row.control_grade_of_river__REL),
         )
         abwasser_session.add(ufer)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -681,18 +638,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaessersohle
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaessersohle"),
+            **qgep_export_utils.base_common(row, "gewaessersohle"),
             # --- gewaessersohle ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             breite=row.width,
-            gewaesserabschnittref=get_tid(row.fk_water_course_segment__REL),
-            verbauungsart=get_vl(row.river_control_type__REL),
-            verbauungsgrad=get_vl(row.control_grade_of_river__REL),
+            gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
+            verbauungsart=qgep_export_utils.get_vl(row.river_control_type__REL),
+            verbauungsgrad=qgep_export_utils.get_vl(row.control_grade_of_river__REL),
         )
         abwasser_session.add(gewaessersohle)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -718,22 +675,22 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaessersektor
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaessersektor"),
+            **qgep_export_utils.base_common(row, "gewaessersektor"),
             # --- gewaessersektor ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             bwg_code=row.code_bwg,
             kilomo=row.km_down,
             kilomu=row.km_up,
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
+            oberflaechengewaesserref=qgep_export_utils.get_tid(row.fk_surface_water_bodies__REL),
             reflaenge=row.ref_length,
             verlauf=ST_Force2D(row.progression_geometry),
             # reference to own class not supported in qgep
-            # vorherigersektorref=get_tid(row.fk_sector_previous__REL),
+            # vorherigersektorref=qgep_export_utils.get_tid(row.fk_sector_previous__REL),
         )
         abwasser_session.add(gewaessersektor)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -760,13 +717,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.amt
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "amt"),
+            **qgep_export_utils.base_common(row, "amt"),
             # --- organisation ---
             **organisation_common(row),
             # --- amt ---
         )
         abwasser_session.add(amt)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -795,13 +752,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.genossenschaft_korporation
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "genossenschaft_korporation"),
+            **qgep_export_utils.base_common(row, "genossenschaft_korporation"),
             # --- organisation ---
             **organisation_common(row),
             # --- genossenschaft_korporation ---
         )
         abwasser_session.add(genossenschaft_korporation)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -828,14 +785,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.kanton
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "kanton"),
+            **qgep_export_utils.base_common(row, "kanton"),
             # --- organisation ---
             **organisation_common(row),
             # --- kanton ---
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(kanton)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -864,13 +821,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.abwasserverband
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "abwasserverband"),
+            **qgep_export_utils.base_common(row, "abwasserverband"),
             # --- organisation ---
             **organisation_common(row),
             # --- abwasserverband ---
         )
         abwasser_session.add(abwasserverband)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -897,7 +854,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gemeinde
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gemeinde"),
+            **qgep_export_utils.base_common(row, "gemeinde"),
             # --- organisation ---
             **organisation_common(row),
             # --- gemeinde ---
@@ -909,7 +866,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(gemeinde)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -938,7 +895,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.abwasserreinigungsanlage
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "abwasserreinigungsanlage"),
+            **qgep_export_utils.base_common(row, "abwasserreinigungsanlage"),
             # --- organisation ---
             **organisation_common(row),
             # --- abwasserreinigungsanlage ---
@@ -954,7 +911,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             nh4=row.nh4,
         )
         abwasser_session.add(abwasserreinigungsanlage)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -980,14 +937,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.privat
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "privat"),
+            **qgep_export_utils.base_common(row, "privat"),
             # --- organisation ---
             **organisation_common(row),
             # --- privat ---
             art=row.kind,
         )
         abwasser_session.add(privat)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1002,36 +959,33 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.channel
 
         # --- wastewater_structure ---
-        # to do attributeslist of superclass
-        # --- channel ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # _bottom_label, _cover_label, _depth, _function_hierarchic, _input_label, _label, _output_label, _usage_current, accessibility, contract_section, detail_geometry_geometry, financing, fk_dataowner, fk_main_cover, fk_main_wastewater_node, fk_operator, fk_owner, fk_provider, gross_costs, identifier, inspection_interval, last_modification, location_name, records, remark, renovation_necessity, replacement_value, rv_base_year, rv_construction_type, status, structure_condition, subsidies, year_of_construction, year_of_replacement
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # measuring_point__BWREL_fk_wastewater_structure, mechanical_pretreatment__BWREL_fk_wastewater_structure, re_maintenance_event_wastewater_structure__BWREL_fk_wastewater_structure, structure_part__BWREL_fk_wastewater_structure, txt_symbol__BWREL_fk_wastewater_structure, txt_text__BWREL_fk_wastewater_structure, wastewater_networkelement__BWREL_fk_wastewater_structure, wastewater_structure_symbol__BWREL_fk_wastewater_structure, wastewater_structure_text__BWREL_fk_wastewater_structure, wwtp_structure_kind__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # accessibility__REL, bedding_encasement__REL, connection_type__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function_hierarchic__REL, function_hydraulic__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, structure_condition__REL, usage_current__REL, usage_planned__REL
 
         kanal = ABWASSER.kanal(
             # FIELDS TO MAP TO ABWASSER.kanal
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "kanal"),
+            **qgep_export_utils.base_common(row, "kanal"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- kanal ---
-            bettung_umhuellung=get_vl(row.bedding_encasement__REL),
-            funktionhierarchisch=get_vl(row.function_hierarchic__REL),
-            funktionhydraulisch=get_vl(row.function_hydraulic__REL),
-            nutzungsart_geplant=get_vl(row.usage_planned__REL),
-            nutzungsart_ist=get_vl(row.usage_current__REL),
+            bettung_umhuellung=qgep_export_utils.get_vl(row.bedding_encasement__REL),
+            funktionhierarchisch=qgep_export_utils.get_vl(row.function_hierarchic__REL),
+            funktionhydraulisch=qgep_export_utils.get_vl(row.function_hydraulic__REL),
+            nutzungsart_geplant=qgep_export_utils.get_vl(row.usage_planned__REL),
+            nutzungsart_ist=qgep_export_utils.get_vl(row.usage_current__REL),
             rohrlaenge=row.pipe_length,
             spuelintervall=row.jetting_interval,
-            verbindungsart=get_vl(row.connection_type__REL),
+            verbindungsart=qgep_export_utils.get_vl(row.connection_type__REL),
         )
         abwasser_session.add(kanal)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1061,20 +1015,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.normschacht
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "normschacht"),
+            **qgep_export_utils.base_common(row, "normschacht"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- normschacht ---
             dimension1=row.dimension1,
             dimension2=row.dimension2,
-            funktion=get_vl(row.function__REL),
+            funktion=qgep_export_utils.get_vl(row.function__REL),
             # -- attribute 3D ---
             # maechtigkeit=row.depth,
-            material=get_vl(row.material__REL),
-            oberflaechenzulauf=get_vl(row.surface_inflow__REL),
+            material=qgep_export_utils.get_vl(row.material__REL),
+            oberflaechenzulauf=qgep_export_utils.get_vl(row.surface_inflow__REL),
         )
         abwasser_session.add(normschacht)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1104,22 +1058,22 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.einleitstelle
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "einleitstelle"),
+            **qgep_export_utils.base_common(row, "einleitstelle"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- einleitstelle ---
             # -- attribute 3D ---
             # deckenkote=row.upper_elevation,
-            gewaessersektorref=get_tid(row.fk_sector_water_body__REL),
+            gewaessersektorref=qgep_export_utils.get_tid(row.fk_sector_water_body__REL),
             hochwasserkote=row.highwater_level,
             # -- attribute 3D ---
             # maechtigkeit=row.depth,
-            relevanz=get_vl(row.relevance__REL),
+            relevanz=qgep_export_utils.get_vl(row.relevance__REL),
             terrainkote=row.terrain_level,
             wasserspiegel_hydraulik=row.waterlevel_hydraulic,
         )
         abwasser_session.add(einleitstelle)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1136,36 +1090,35 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.special_structure
 
         # --- wastewater_structure ---
-        # to do attributeslist of superclass
+        # _bottom_label, _cover_label, _depth, _function_hierarchic, _input_label, _label, _output_label, _usage_current, accessibility, contract_section, detail_geometry_geometry, financing, fk_dataowner, fk_main_cover, fk_main_wastewater_node, fk_operator, fk_owner, fk_provider, gross_costs, identifier, inspection_interval, last_modification, location_name, records, remark, renovation_necessity, replacement_value, rv_base_year, rv_construction_type, status, structure_condition, subsidies, year_of_construction, year_of_replacement
+
         # --- special_structure ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # bypass, emergency_spillway, function, obj_id, stormwater_tank_arrangement, upper_elevation
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # measuring_point__BWREL_fk_wastewater_structure, mechanical_pretreatment__BWREL_fk_wastewater_structure, re_maintenance_event_wastewater_structure__BWREL_fk_wastewater_structure, structure_part__BWREL_fk_wastewater_structure, txt_symbol__BWREL_fk_wastewater_structure, txt_text__BWREL_fk_wastewater_structure, wastewater_networkelement__BWREL_fk_wastewater_structure, wastewater_structure_symbol__BWREL_fk_wastewater_structure, wastewater_structure_text__BWREL_fk_wastewater_structure, wwtp_structure_kind__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
-
+        # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
+        logger.warning(
+            f"QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
+        )
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "spezialbauwerk"),
+            **qgep_export_utils.base_common(row, "spezialbauwerk"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- spezialbauwerk ---
-            bypass=get_vl(row.bypass__REL),
-            # -- attribute 3D ---
-            # deckenkote=row.upper_elevation,
-            funktion=get_vl(row.function__REL),
-            # -- attribute 3D ---
-            # maechtigkeit=row.depth,
-            notueberlauf=get_vl(row.emergency_spillway__REL),
-            regenbecken_anordnung=get_vl(row.stormwater_tank_arrangement__REL),
+            # TODO : WARNING : upper_elevation is not mapped
+            bypass=qgep_export_utils.get_vl(row.bypass__REL),
+            funktion=qgep_export_utils.get_vl(row.function__REL),
+            notueberlauf=qgep_export_utils.get_vl(row.emergency_spillway__REL),
+            regenbecken_anordnung=qgep_export_utils.get_vl(row.stormwater_tank_arrangement__REL),
         )
         abwasser_session.add(spezialbauwerk)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1182,45 +1135,45 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.infiltration_installation
 
         # --- wastewater_structure ---
-        # to do attributeslist of superclass
+        # _bottom_label, _cover_label, _depth, _function_hierarchic, _input_label, _label, _output_label, _usage_current, accessibility, contract_section, detail_geometry_geometry, financing, fk_dataowner, fk_main_cover, fk_main_wastewater_node, fk_operator, fk_owner, fk_provider, gross_costs, identifier, inspection_interval, last_modification, location_name, records, remark, renovation_necessity, replacement_value, rv_base_year, rv_construction_type, status, structure_condition, subsidies, year_of_construction, year_of_replacement
+
         # --- infiltration_installation ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # absorption_capacity, defects, dimension1, dimension2, distance_to_aquifer, effective_area, emergency_spillway, fk_aquifier, kind, labeling, obj_id, seepage_utilization, upper_elevation, vehicle_access, watertightness
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # measuring_point__BWREL_fk_wastewater_structure, mechanical_pretreatment__BWREL_fk_infiltration_installation, mechanical_pretreatment__BWREL_fk_wastewater_structure, re_maintenance_event_wastewater_structure__BWREL_fk_wastewater_structure, retention_body__BWREL_fk_infiltration_installation, structure_part__BWREL_fk_wastewater_structure, txt_symbol__BWREL_fk_wastewater_structure, txt_text__BWREL_fk_wastewater_structure, wastewater_networkelement__BWREL_fk_wastewater_structure, wastewater_structure_symbol__BWREL_fk_wastewater_structure, wastewater_structure_text__BWREL_fk_wastewater_structure, wwtp_structure_kind__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
         versickerungsanlage = ABWASSER.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "versickerungsanlage"),
+            **qgep_export_utils.base_common(row, "versickerungsanlage"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- versickerungsanlage ---
-            art=get_vl(row.kind__REL),
-            beschriftung=get_vl(row.labeling__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            beschriftung=qgep_export_utils.get_vl(row.labeling__REL),
             # -- attribute 3D ---
             # deckenkote=row.upper_elevation,
             dimension1=row.dimension1,
             dimension2=row.dimension2,
-            grundwasserleiterref=get_tid(row.fk_aquifier__REL),
+            grundwasserleiterref=qgep_export_utils.get_tid(row.fk_aquifier__REL),
             gwdistanz=row.distance_to_aquifer,
             # -- attribute 3D ---
             # maechtigkeit=row.depth,
-            maengel=get_vl(row.defects__REL),
-            notueberlauf=get_vl(row.emergency_spillway__REL),
-            saugwagen=get_vl(row.vehicle_access__REL),
+            maengel=qgep_export_utils.get_vl(row.defects__REL),
+            notueberlauf=qgep_export_utils.get_vl(row.emergency_spillway__REL),
+            saugwagen=qgep_export_utils.get_vl(row.vehicle_access__REL),
             schluckvermoegen=row.absorption_capacity,
-            versickerungswasser=get_vl(row.seepage_utilization__REL),
-            wasserdichtheit=get_vl(row.watertightness__REL),
+            versickerungswasser=qgep_export_utils.get_vl(row.seepage_utilization__REL),
+            wasserdichtheit=qgep_export_utils.get_vl(row.watertightness__REL),
             wirksameflaeche=row.effective_area,
         )
         abwasser_session.add(versickerungsanlage)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1250,14 +1203,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.arabauwerk
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "arabauwerk"),
+            **qgep_export_utils.base_common(row, "arabauwerk"),
             # --- abwasserbauwerk ---
-            **wastewater_structure_common(row),
+            **qgep_export_utils.wastewater_structure_common(row),
             # --- arabauwerk ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(arabauwerk)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1283,15 +1236,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.planungszone
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "planungszone"),
+            **qgep_export_utils.base_common(row, "planungszone"),
             # --- zone ---
             **zone_common(row),
             # --- planungszone ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(planungszone)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1319,15 +1272,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.versickerungsbereich
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "versickerungsbereich"),
+            **qgep_export_utils.base_common(row, "versickerungsbereich"),
             # --- zone ---
             **zone_common(row),
             # --- versickerungsbereich ---
             perimeter=ST_Force2D(row.perimeter_geometry),
-            versickerungsmoeglichkeit=get_vl(row.infiltration_capacity__REL),
+            versickerungsmoeglichkeit=qgep_export_utils.get_vl(row.infiltration_capacity__REL),
         )
         abwasser_session.add(versickerungsbereich)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1355,15 +1308,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.entwaesserungssystem
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "entwaesserungssystem"),
+            **qgep_export_utils.base_common(row, "entwaesserungssystem"),
             # --- zone ---
             **zone_common(row),
             # --- entwaesserungssystem ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(entwaesserungssystem)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1391,15 +1344,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaesserschutzbereich
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaesserschutzbereich"),
+            **qgep_export_utils.base_common(row, "gewaesserschutzbereich"),
             # --- zone ---
             **zone_common(row),
             # --- gewaesserschutzbereich ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(gewaesserschutzbereich)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1427,14 +1380,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.grundwasserschutzareal
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "grundwasserschutzareal"),
+            **qgep_export_utils.base_common(row, "grundwasserschutzareal"),
             # --- zone ---
             **zone_common(row),
             # --- grundwasserschutzareal ---
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(grundwasserschutzareal)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1462,15 +1415,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.grundwasserschutzzone
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "grundwasserschutzzone"),
+            **qgep_export_utils.base_common(row, "grundwasserschutzzone"),
             # --- zone ---
             **zone_common(row),
             # --- grundwasserschutzzone ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(grundwasserschutzzone)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1486,26 +1439,27 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.pipe_profile
 
         # --- pipe_profile ---
-        # to do e.g. fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
+        # fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
+
         # --- _bwrel_ ---
-        # to do add superclassrelations e.g. profile_geometry__BWREL_fk_pipe_profile, reach__BWREL_fk_pipe_profile
+        # profile_geometry__BWREL_fk_pipe_profile, reach__BWREL_fk_pipe_profile
 
         # --- _rel_ ---
-        # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
+        # fk_dataowner__REL, fk_provider__REL, profile_type__REL
 
         rohrprofil = ABWASSER.rohrprofil(
             # FIELDS TO MAP TO ABWASSER.rohrprofil
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "rohrprofil"),
+            **qgep_export_utils.base_common(row, "rohrprofil"),
             # --- rohrprofil ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             hoehenbreitenverhaeltnis=row.height_width_ratio,
-            profiltyp=get_vl(row.profile_type__REL),
+            profiltyp=qgep_export_utils.get_vl(row.profile_type__REL),
         )
         abwasser_session.add(rohrprofil)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1530,17 +1484,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.araenergienutzung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "araenergienutzung"),
+            **qgep_export_utils.base_common(row, "araenergienutzung"),
             # --- araenergienutzung ---
-            abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            abwasserreinigungsanlageref=qgep_export_utils.get_tid(row.fk_waste_water_treatment_plant__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             gasmotor=row.gas_motor,
             turbinierung=row.turbining,
             waermepumpe=row.heat_pump,
         )
         abwasser_session.add(araenergienutzung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1565,15 +1519,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.abwasserbehandlung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "abwasserbehandlung"),
+            **qgep_export_utils.base_common(row, "abwasserbehandlung"),
             # --- abwasserbehandlung ---
-            abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            abwasserreinigungsanlageref=qgep_export_utils.get_tid(row.fk_waste_water_treatment_plant__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
         )
         abwasser_session.add(abwasserbehandlung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1598,11 +1552,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.schlammbehandlung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "schlammbehandlung"),
+            **qgep_export_utils.base_common(row, "schlammbehandlung"),
             # --- schlammbehandlung ---
-            abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            abwasserreinigungsanlageref=qgep_export_utils.get_tid(row.fk_waste_water_treatment_plant__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             entwaessertklaerschlammstapelung=row.stacking_of_dehydrated_sludge,
             entwaesserung=row.dehydration,
             faulschlammverbrennung=row.digested_sludge_combustion,
@@ -1612,12 +1566,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             kompostierung=row.composting,
             mischschlammvoreindickung=row.predensification_of_mixed_sludge,
             primaerschlammvoreindickung=row.predensification_of_primary_sludge,
-            stabilisierung=get_vl(row.stabilisation__REL),
+            stabilisierung=qgep_export_utils.get_vl(row.stabilisation__REL),
             trocknung=row.drying,
             ueberschusschlammvoreindickung=row.predensification_of_excess_sludge,
         )
         abwasser_session.add(schlammbehandlung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1646,13 +1600,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.steuerungszentrale
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "steuerungszentrale"),
+            **qgep_export_utils.base_common(row, "steuerungszentrale"),
             # --- steuerungszentrale ---
-            bezeichnung=null_to_emptystr(row.identifier),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             lage=ST_Force2D(row.situation_geometry),
         )
         abwasser_session.add(steuerungszentrale)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1678,13 +1632,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.furt
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "furt"),
+            **qgep_export_utils.base_common(row, "furt"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- furt ---
         )
         abwasser_session.add(furt)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1710,16 +1664,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaesserabsturz
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaesserabsturz"),
+            **qgep_export_utils.base_common(row, "gewaesserabsturz"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- gewaesserabsturz ---
             absturzhoehe=row.vertical_drop,
-            material=get_vl(row.material__REL),
-            typ=get_vl(row.kind__REL),
+            material=qgep_export_utils.get_vl(row.material__REL),
+            typ=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(gewaesserabsturz)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1745,14 +1699,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.schleuse
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "schleuse"),
+            **qgep_export_utils.base_common(row, "schleuse"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- schleuse ---
             absturzhoehe=row.vertical_drop,
         )
         abwasser_session.add(schleuse)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1778,13 +1732,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.durchlass
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "durchlass"),
+            **qgep_export_utils.base_common(row, "durchlass"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- durchlass ---
         )
         abwasser_session.add(durchlass)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1812,14 +1766,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.geschiebesperre
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "geschiebesperre"),
+            **qgep_export_utils.base_common(row, "geschiebesperre"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- geschiebesperre ---
             absturzhoehe=row.vertical_drop,
         )
         abwasser_session.add(geschiebesperre)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1845,15 +1799,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gewaesserwehr
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gewaesserwehr"),
+            **qgep_export_utils.base_common(row, "gewaesserwehr"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- gewaesserwehr ---
             absturzhoehe=row.vertical_drop,
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(gewaesserwehr)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1879,15 +1833,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.sohlrampe
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "sohlrampe"),
+            **qgep_export_utils.base_common(row, "sohlrampe"),
             # --- gewaesserverbauung ---
             **water_control_structure_common(row),
             # --- sohlrampe ---
             absturzhoehe=row.vertical_drop,
-            befestigung=get_vl(row.stabilisation__REL),
+            befestigung=qgep_export_utils.get_vl(row.stabilisation__REL),
         )
         abwasser_session.add(sohlrampe)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1910,15 +1864,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.fischpass
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "fischpass"),
+            **qgep_export_utils.base_common(row, "fischpass"),
             # --- fischpass ---
             absturzhoehe=row.vertical_drop,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            gewaesserverbauungref=get_tid(row.fk_water_control_structure__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            gewaesserverbauungref=qgep_export_utils.get_tid(row.fk_water_control_structure__REL),
         )
         abwasser_session.add(fischpass)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1941,15 +1895,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.badestelle
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "badestelle"),
+            **qgep_export_utils.base_common(row, "badestelle"),
             # --- badestelle ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             lage=ST_Force2D(row.situation_geometry),
-            oberflaechengewaesserref=get_tid(row.fk_surface_water_bodies__REL),
+            oberflaechengewaesserref=qgep_export_utils.get_tid(row.fk_surface_water_bodies__REL),
         )
         abwasser_session.add(badestelle)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -1976,10 +1930,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.hydr_geometrie
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "hydr_geometrie"),
+            **qgep_export_utils.base_common(row, "hydr_geometrie"),
             # --- hydr_geometrie ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             nutzinhalt=row.utilisable_capacity,
             nutzinhalt_fangteil=row.usable_capacity_storage,
             nutzinhalt_klaerteil=row.usable_capacity_treatment,
@@ -1987,7 +1941,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             volumen_pumpensumpf=row.volume_pump_sump,
         )
         abwasser_session.add(hydr_geometrie)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2007,34 +1961,35 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.reach_point
 
         # --- reach_point ---
-        # to do e.g. fk_dataowner, fk_provider, height_width_ratio, identifier, last_modification, obj_id, profile_type, remark
+        # elevation_accuracy, fk_dataowner, fk_provider, fk_wastewater_networkelement, identifier, last_modification, level, obj_id, outlet_shape, position_of_connection, remark, situation_geometry
+
         # --- _bwrel_ ---
-        # to do add superclassrelations e.g. profile_geometry__BWREL_fk_pipe_profile, reach__BWREL_fk_pipe_profile
+        # examination__BWREL_fk_reach_point, reach__BWREL_fk_reach_point_from, reach__BWREL_fk_reach_point_to
 
         # --- _rel_ ---
-        # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
+        # elevation_accuracy__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_networkelement__REL, outlet_shape__REL
 
         haltungspunkt = ABWASSER.haltungspunkt(
             # FIELDS TO MAP TO ABWASSER.haltungspunkt
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "haltungspunkt"),
+            **qgep_export_utils.base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
-            # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
-            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
-            abwassernetzelementref=check_fk_in_subsetid(
+            # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
+            # abwassernetzelementref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement__REL),
+            abwassernetzelementref=qgep_export_utils.check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement__REL
             ),
-            auslaufform=get_vl(row.outlet_shape__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            hoehengenauigkeit=get_vl(row.elevation_accuracy__REL),
+            auslaufform=qgep_export_utils.get_vl(row.outlet_shape__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            hoehengenauigkeit=qgep_export_utils.get_vl(row.elevation_accuracy__REL),
             kote=row.level,
             lage=ST_Force2D(row.situation_geometry),
             lage_anschluss=row.position_of_connection,
         )
         abwasser_session.add(haltungspunkt)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2049,32 +2004,31 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.wastewater_node
 
         # --- wastewater_networkelement ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
         # --- wastewater_node ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "abwasserknoten"),
+            **qgep_export_utils.base_common(row, "abwasserknoten"),
             # --- abwassernetzelement ---
-            **wastewater_networkelement_common(row),
+            **qgep_export_utils.wastewater_networkelement_common(row),
             # --- abwasserknoten ---
-            hydr_geometrieref=get_tid(row.fk_hydr_geometry__REL),
+            hydr_geometrieref=qgep_export_utils.get_tid(row.fk_hydr_geometry__REL),
             lage=ST_Force2D(row.situation_geometry),
             rueckstaukote=row.backflow_level,
             sohlenkote=row.bottom_level,
         )
         abwasser_session.add(abwasserknoten)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2087,48 +2041,51 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.reach
 
         # --- wastewater_networkelement ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
         # --- reach ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # clear_height, coefficient_of_friction, elevation_determination, fk_pipe_profile, fk_reach_point_from, fk_reach_point_to, horizontal_positioning, inside_coating, length_effective, material, obj_id, progression_geometry, reliner_material, reliner_nominal_size, relining_construction, relining_kind, ring_stiffness, slope_building_plan, wall_roughness
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, reach_point__BWREL_fk_wastewater_networkelement, reach_text__BWREL_fk_reach, txt_text__BWREL_fk_reach
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
+        logger.warning(
+            f"QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
+        )
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "haltung"),
+            **qgep_export_utils.base_common(row, "haltung"),
             # --- abwassernetzelement ---
-            **wastewater_networkelement_common(row),
+            **qgep_export_utils.wastewater_networkelement_common(row),
             # --- haltung ---
-            # -- attribute 3D ---            #hoehenbestimmung=get_vl(row.elevation_determination__REL),
-            innenschutz=get_vl(row.inside_coating__REL),
+            # NOT MAPPED : elevation_determination
+            innenschutz=qgep_export_utils.get_vl(row.inside_coating__REL),
             laengeeffektiv=row.length_effective,
-            lagebestimmung=get_vl(row.horizontal_positioning__REL),
+            lagebestimmung=qgep_export_utils.get_vl(row.horizontal_positioning__REL),
             lichte_hoehe=row.clear_height,
-            material=get_vl(row.material__REL),
-            nachhaltungspunktref=get_tid(row.fk_reach_point_to__REL),
-            plangefaelle=row.slope_building_plan,
+            material=qgep_export_utils.get_vl(row.material__REL),
+            nachhaltungspunktref=qgep_export_utils.get_tid(row.fk_reach_point_to__REL),
+            plangefaelle=row.slope_building_plan,  # TODO : check, does this need conversion ?
             reibungsbeiwert=row.coefficient_of_friction,
-            reliner_art=get_vl(row.relining_kind__REL),
-            reliner_bautechnik=get_vl(row.relining_construction__REL),
-            reliner_material=get_vl(row.reliner_material__REL),
+            reliner_art=qgep_export_utils.get_vl(row.relining_kind__REL),
+            reliner_bautechnik=qgep_export_utils.get_vl(row.relining_construction__REL),
+            reliner_material=qgep_export_utils.get_vl(row.reliner_material__REL),
             reliner_nennweite=row.reliner_nominal_size,
             ringsteifigkeit=row.ring_stiffness,
-            rohrprofilref=get_tid(row.fk_pipe_profile__REL),
+            rohrprofilref=qgep_export_utils.get_tid(row.fk_pipe_profile__REL),
             verlauf=ST_Force2D(row.progression_geometry),
             # -- attribute 3D ---
             # verlauf3d=row.progression3d,
-            vonhaltungspunktref=get_tid(row.fk_reach_point_from__REL),
+            vonhaltungspunktref=qgep_export_utils.get_tid(row.fk_reach_point_from__REL),
             wandrauhigkeit=row.wall_roughness,
         )
         abwasser_session.add(haltung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2157,15 +2114,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.rohrprofil_geometrie
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "rohrprofil_geometrie"),
+            **qgep_export_utils.base_common(row, "rohrprofil_geometrie"),
             # --- rohrprofil_geometrie ---
             aposition=row.position,
-            rohrprofilref=get_tid(row.fk_pipe_profile__REL),
+            rohrprofilref=qgep_export_utils.get_tid(row.fk_pipe_profile__REL),
             x=row.x,
             y=row.y,
         )
         abwasser_session.add(rohrprofil_geometrie)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2194,15 +2151,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.hydr_geomrelation
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "hydr_geomrelation"),
+            **qgep_export_utils.base_common(row, "hydr_geomrelation"),
             # --- hydr_geomrelation ---
             benetztequerschnittsflaeche=row.wet_cross_section_area,
-            hydr_geometrieref=get_tid(row.fk_hydr_geometry__REL),
+            hydr_geometrieref=qgep_export_utils.get_tid(row.fk_hydr_geometry__REL),
             wasseroberflaeche=row.water_surface,
             wassertiefe=row.water_depth,
         )
         abwasser_session.add(hydr_geomrelation)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2231,16 +2188,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.mechanischevorreinigung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "mechanischevorreinigung"),
+            **qgep_export_utils.base_common(row, "mechanischevorreinigung"),
             # --- mechanischevorreinigung ---
-            abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            versickerungsanlageref=get_tid(row.fk_infiltration_installation__REL),
+            abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            versickerungsanlageref=qgep_export_utils.get_tid(row.fk_infiltration_installation__REL),
         )
         abwasser_session.add(mechanischevorreinigung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2269,16 +2226,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.retentionskoerper
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "retentionskoerper"),
+            **qgep_export_utils.base_common(row, "retentionskoerper"),
             # --- retentionskoerper ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             retention_volumen=row.volume,
-            versickerungsanlageref=get_tid(row.fk_infiltration_installation__REL),
+            versickerungsanlageref=qgep_export_utils.get_tid(row.fk_infiltration_installation__REL),
         )
         abwasser_session.add(retentionskoerper)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2308,15 +2265,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.ueberlaufcharakteristik
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "ueberlaufcharakteristik"),
+            **qgep_export_utils.base_common(row, "ueberlaufcharakteristik"),
             # --- ueberlaufcharakteristik ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            kennlinie_digital=get_vl(row.overflow_char_digital__REL),
-            kennlinie_typ=get_vl(row.kind_overflow_char__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            kennlinie_digital=qgep_export_utils.get_vl(row.overflow_char_digital__REL),
+            kennlinie_typ=qgep_export_utils.get_vl(row.kind_overflow_char__REL),
         )
         abwasser_session.add(ueberlaufcharakteristik)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2347,15 +2304,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.hq_relation
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "hq_relation"),
+            **qgep_export_utils.base_common(row, "hq_relation"),
             # --- hq_relation ---
             abfluss=row.flow,
             hoehe=row.altitude,
-            ueberlaufcharakteristikref=get_tid(row.fk_overflow_char__REL),
+            ueberlaufcharakteristikref=qgep_export_utils.get_tid(row.fk_overflow_char__REL),
             zufluss=row.flow_from,
         )
         abwasser_session.add(hq_relation)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2372,29 +2329,29 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.dryweather_downspout
 
         # --- structure_part ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
         # --- dryweather_downspout ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # diameter, obj_id
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, renovation_demand__REL
 
         trockenwetterfallrohr = ABWASSER.trockenwetterfallrohr(
             # FIELDS TO MAP TO ABWASSER.trockenwetterfallrohr
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "trockenwetterfallrohr"),
+            **qgep_export_utils.base_common(row, "trockenwetterfallrohr"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- trockenwetterfallrohr ---
             durchmesser=row.diameter,
         )
         abwasser_session.add(trockenwetterfallrohr)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2409,29 +2366,29 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.access_aid
 
         # --- structure_part ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
         # --- access_aid ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # kind, obj_id
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
 
         einstiegshilfe = ABWASSER.einstiegshilfe(
             # FIELDS TO MAP TO ABWASSER.einstiegshilfe
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "einstiegshilfe"),
+            **qgep_export_utils.base_common(row, "einstiegshilfe"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- einstiegshilfe ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(einstiegshilfe)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2448,29 +2405,29 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.dryweather_flume
 
         # --- structure_part ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
         # --- dryweather_flume ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # material, obj_id
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, renovation_demand__REL
 
         trockenwetterrinne = ABWASSER.trockenwetterrinne(
             # FIELDS TO MAP TO ABWASSER.trockenwetterrinne
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "trockenwetterrinne"),
+            **qgep_export_utils.base_common(row, "trockenwetterrinne"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- trockenwetterrinne ---
-            material=get_vl(row.material__REL),
+            material=qgep_export_utils.get_vl(row.material__REL),
         )
         abwasser_session.add(trockenwetterrinne)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2485,40 +2442,38 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.cover
 
         # --- structure_part ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
         # --- cover ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # brand, cover_shape, diameter, fastening, level, material, obj_id, positional_accuracy, situation_geometry, sludge_bucket, venting
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id, wastewater_structure__BWREL_fk_main_cover
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # cover_shape__REL, fastening__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, positional_accuracy__REL, renovation_demand__REL, sludge_bucket__REL, venting__REL
 
         deckel = ABWASSER.deckel(
             # FIELDS TO MAP TO ABWASSER.deckel
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "deckel"),
+            **qgep_export_utils.base_common(row, "deckel"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- deckel ---
-            deckelform=get_vl(row.cover_shape__REL),
+            deckelform=qgep_export_utils.get_vl(row.cover_shape__REL),
             durchmesser=row.diameter,
-            entlueftung=get_vl(row.venting__REL),
+            entlueftung=qgep_export_utils.get_vl(row.venting__REL),
             fabrikat=row.brand,
             kote=row.level,
             lage=ST_Force2D(row.situation_geometry),
-            lagegenauigkeit=get_vl(row.positional_accuracy__REL),
-            # -- attribute 3D ---
-            # maechtigkeit=row.depth,
-            material=get_vl(row.material__REL),
-            schlammeimer=get_vl(row.sludge_bucket__REL),
-            verschluss=get_vl(row.fastening__REL),
+            lagegenauigkeit=qgep_export_utils.get_vl(row.positional_accuracy__REL),
+            material=qgep_export_utils.get_vl(row.material__REL),
+            schlammeimer=qgep_export_utils.get_vl(row.sludge_bucket__REL),
+            verschluss=qgep_export_utils.get_vl(row.fastening__REL),
         )
         abwasser_session.add(deckel)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2550,16 +2505,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.elektrischeeinrichtung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "elektrischeeinrichtung"),
+            **qgep_export_utils.base_common(row, "elektrischeeinrichtung"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- elektrischeeinrichtung ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             bruttokosten=row.gross_costs,
             ersatzjahr=row.year_of_replacement,
         )
         abwasser_session.add(elektrischeeinrichtung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2591,16 +2546,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.elektromechanischeausruestung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "elektromechanischeausruestung"),
+            **qgep_export_utils.base_common(row, "elektromechanischeausruestung"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- elektromechanischeausruestung ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             bruttokosten=row.gross_costs,
             ersatzjahr=row.year_of_replacement,
         )
         abwasser_session.add(elektromechanischeausruestung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2615,29 +2570,29 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # AVAILABLE FIELDS IN QGEP.benching
 
         # --- structure_part ---
-        # to do attributeslist of superclass
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
         # --- benching ---
-        # to do attributeslist of subclass
-        # to do extra funktion schreiben wo alle englischen attribute erzeugt werden
+        # kind, obj_id
 
         # --- _bwrel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese superklasse erzeugt werden z.B. # measuring_point__BWREL_fk_wastewater_structure,
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
 
         # --- _rel_ ---
-        # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
 
         bankett = ABWASSER.bankett(
             # FIELDS TO MAP TO ABWASSER.bankett
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "bankett"),
+            **qgep_export_utils.base_common(row, "bankett"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- bankett ---
-            art=get_vl(row.kind__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
         )
         abwasser_session.add(bankett)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2667,7 +2622,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gebaeude
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gebaeude"),
+            **qgep_export_utils.base_common(row, "gebaeude"),
             # --- anschlussobjekt ---
             **connection_object_common(row),
             # --- gebaeude ---
@@ -2677,7 +2632,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             standortname=row.location_name,
         )
         abwasser_session.add(gebaeude)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2707,7 +2662,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.reservoir
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "reservoir"),
+            **qgep_export_utils.base_common(row, "reservoir"),
             # --- anschlussobjekt ---
             **connection_object_common(row),
             # --- reservoir ---
@@ -2715,7 +2670,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             standortname=row.location_name,
         )
         abwasser_session.add(reservoir)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2747,17 +2702,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.einzelflaeche
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "einzelflaeche"),
+            **qgep_export_utils.base_common(row, "einzelflaeche"),
             # --- anschlussobjekt ---
             **connection_object_common(row),
             # --- einzelflaeche ---
-            befestigung=get_vl(row.pavement__REL),
-            funktion=get_vl(row.function__REL),
+            befestigung=qgep_export_utils.get_vl(row.pavement__REL),
+            funktion=qgep_export_utils.get_vl(row.function__REL),
             neigung=row.inclination,
             perimeter=ST_Force2D(row.perimeter_geometry),
         )
         abwasser_session.add(einzelflaeche)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2787,7 +2742,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.brunnen
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "brunnen"),
+            **qgep_export_utils.base_common(row, "brunnen"),
             # --- anschlussobjekt ---
             **connection_object_common(row),
             # --- brunnen ---
@@ -2795,7 +2750,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             standortname=row.location_name,
         )
         abwasser_session.add(brunnen)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2822,16 +2777,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.gefahrenquelle
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "gefahrenquelle"),
+            **qgep_export_utils.base_common(row, "gefahrenquelle"),
             # --- gefahrenquelle ---
-            anschlussobjektref=get_tid(row.fk_connection_object__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            eigentuemerref=get_tid(row.fk_owner__REL),
+            anschlussobjektref=qgep_export_utils.get_tid(row.fk_connection_object__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            eigentuemerref=qgep_export_utils.get_tid(row.fk_owner__REL),
             lage=ST_Force2D(row.situation_geometry),
         )
         abwasser_session.add(gefahrenquelle)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2858,18 +2813,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.unfall
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "unfall"),
+            **qgep_export_utils.base_common(row, "unfall"),
             # --- unfall ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             datum=row.date,
-            gefahrenquelleref=get_tid(row.fk_hazard_source__REL),
+            gefahrenquelleref=qgep_export_utils.get_tid(row.fk_hazard_source__REL),
             lage=ST_Force2D(row.situation_geometry),
             ort=row.place,
             verursacher=row.responsible,
         )
         abwasser_session.add(unfall)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2896,16 +2851,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.stoff
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "stoff"),
+            **qgep_export_utils.base_common(row, "stoff"),
             # --- stoff ---
             art=row.kind,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            gefahrenquelleref=get_tid(row.fk_hazard_source__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            gefahrenquelleref=qgep_export_utils.get_tid(row.fk_hazard_source__REL),
             lagerung=row.stockage,
         )
         abwasser_session.add(stoff)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -2942,7 +2897,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.einzugsgebiet
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "einzugsgebiet"),
+            **qgep_export_utils.base_common(row, "einzugsgebiet"),
             # --- einzugsgebiet ---
             abflussbegrenzung_geplant=row.runoff_limit_planned,
             abflussbegrenzung_ist=row.runoff_limit_current,
@@ -2950,49 +2905,49 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             abflussbeiwert_rw_ist=row.discharge_coefficient_rw_current,
             abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
             abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
-            # changed call from get_tid to check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
-            abwassernetzelement_rw_geplantref=check_fk_in_subsetid(
+            # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
+            abwassernetzelement_rw_geplantref=qgep_export_utils.check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
             ),
-            abwassernetzelement_rw_istref=check_fk_in_subsetid(
+            abwassernetzelement_rw_istref=qgep_export_utils.check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement_rw_current__REL
             ),
-            abwassernetzelement_sw_geplantref=check_fk_in_subsetid(
+            abwassernetzelement_sw_geplantref=qgep_export_utils.check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement_ww_planned__REL
             ),
-            abwassernetzelement_sw_istref=check_fk_in_subsetid(
+            abwassernetzelement_sw_istref=qgep_export_utils.check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement_ww_current__REL
             ),
             befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
             befestigungsgrad_rw_ist=row.seal_factor_rw_current,
             befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
             befestigungsgrad_sw_ist=row.seal_factor_ww_current,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            direkteinleitung_in_gewaesser_geplant=get_vl(row.direct_discharge_planned__REL),
-            direkteinleitung_in_gewaesser_ist=get_vl(row.direct_discharge_current__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            direkteinleitung_in_gewaesser_geplant=qgep_export_utils.get_vl(row.direct_discharge_planned__REL),
+            direkteinleitung_in_gewaesser_ist=qgep_export_utils.get_vl(row.direct_discharge_current__REL),
             einwohnerdichte_geplant=row.population_density_planned,
             einwohnerdichte_ist=row.population_density_current,
-            entwaesserungssystem_geplant=get_vl(row.drainage_system_planned__REL),
-            entwaesserungssystem_ist=get_vl(row.drainage_system_current__REL),
+            entwaesserungssystem_geplant=qgep_export_utils.get_vl(row.drainage_system_planned__REL),
+            entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
             flaeche=row.surface_area,
             fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
             fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
             perimeter=ST_Force2D(row.perimeter_geometry),
-            retention_geplant=get_vl(row.retention_planned__REL),
-            retention_ist=get_vl(row.retention_current__REL),
+            retention_geplant=qgep_export_utils.get_vl(row.retention_planned__REL),
+            retention_ist=qgep_export_utils.get_vl(row.retention_current__REL),
             # sbw_*ref will be added with release 2020
-            # sbw_rw_geplantref=get_tid(row.fk_special_building_rw_planned__REL),
-            # sbw_rw_istref=get_tid(row.fk_special_building_rw_current__REL),
-            # sbw_sw_geplantref=get_tid(row.fk_special_building_ww_planned__REL),
-            # sbw_sw_istref=get_tid(row.fk_special_building_ww_current__REL),
+            # sbw_rw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_rw_planned__REL),
+            # sbw_rw_istref=qgep_export_utils.get_tid(row.fk_special_building_rw_current__REL),
+            # sbw_sw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_ww_planned__REL),
+            # sbw_sw_istref=qgep_export_utils.get_tid(row.fk_special_building_ww_current__REL),
             schmutzabwasseranfall_geplant=row.waste_water_production_planned,
             schmutzabwasseranfall_ist=row.waste_water_production_current,
-            versickerung_geplant=get_vl(row.infiltration_planned__REL),
-            versickerung_ist=get_vl(row.infiltration_current__REL),
+            versickerung_geplant=qgep_export_utils.get_vl(row.infiltration_planned__REL),
+            versickerung_ist=qgep_export_utils.get_vl(row.infiltration_current__REL),
         )
         abwasser_session.add(einzugsgebiet)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3054,23 +3009,23 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.messstelle
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "messstelle"),
+            **qgep_export_utils.base_common(row, "messstelle"),
             # --- messstelle ---
-            abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
+            abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
+            abwasserreinigungsanlageref=qgep_export_utils.get_tid(row.fk_waste_water_treatment_plant__REL),
             art=row.kind,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            betreiberref=get_tid(row.fk_operator__REL),
-            bezeichnung=null_to_emptystr(row.identifier),
-            gewaesserabschnittref=get_tid(row.fk_water_course_segment__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            betreiberref=qgep_export_utils.get_tid(row.fk_operator__REL),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
             lage=ST_Force2D(row.situation_geometry),
             # not supported in qgep datamodel yet, reference on same class
-            # referenzstelleref=get_tid(row.fk_reference_station__REL),
-            staukoerper=get_vl(row.damming_device__REL),
-            zweck=get_vl(row.purpose__REL),
+            # referenzstelleref=qgep_export_utils.get_tid(row.fk_reference_station__REL),
+            staukoerper=qgep_export_utils.get_vl(row.damming_device__REL),
+            zweck=qgep_export_utils.get_vl(row.purpose__REL),
         )
         abwasser_session.add(messstelle)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3105,17 +3060,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.messgeraet
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "messgeraet"),
+            **qgep_export_utils.base_common(row, "messgeraet"),
             # --- messgeraet ---
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             fabrikat=row.brand,
-            messstelleref=get_tid(row.fk_measuring_point__REL),
+            messstelleref=qgep_export_utils.get_tid(row.fk_measuring_point__REL),
             seriennummer=row.serial_number,
         )
         abwasser_session.add(messgeraet)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3148,18 +3103,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.messreihe
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "messreihe"),
+            **qgep_export_utils.base_common(row, "messreihe"),
             # --- messreihe ---
             # not supported in qgep - will be introduced with VSA-DSS 2020
-            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            # abwassernetzelementref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             dimension=row.dimension,
-            messstelleref=get_tid(row.fk_measuring_point__REL),
+            messstelleref=qgep_export_utils.get_tid(row.fk_measuring_point__REL),
         )
         abwasser_session.add(messreihe)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3201,19 +3156,19 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.messresultat
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "messresultat"),
+            **qgep_export_utils.base_common(row, "messresultat"),
             # --- messresultat ---
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
-            messart=get_vl(row.measurement_type__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            messart=qgep_export_utils.get_vl(row.measurement_type__REL),
             messdauer=row.measuring_duration,
-            messgeraetref=get_tid(row.fk_measuring_device__REL),
-            messreiheref=get_tid(row.fk_measurement_series__REL),
+            messgeraetref=qgep_export_utils.get_tid(row.fk_measuring_device__REL),
+            messreiheref=qgep_export_utils.get_tid(row.fk_measurement_series__REL),
             wert=row.value,
             zeit=row.time,
         )
         abwasser_session.add(messresultat)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3247,28 +3202,28 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.absperr_drosselorgan
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "absperr_drosselorgan"),
+            **qgep_export_utils.base_common(row, "absperr_drosselorgan"),
             # --- absperr_drosselorgan ---
-            abwasserknotenref=get_tid(row.fk_wastewater_node__REL),
-            antrieb=get_vl(row.actuation__REL),
-            art=get_vl(row.kind__REL),
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            abwasserknotenref=qgep_export_utils.get_tid(row.fk_wastewater_node__REL),
+            antrieb=qgep_export_utils.get_vl(row.actuation__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             bruttokosten=row.gross_costs,
             drosselorgan_oeffnung_ist=row.throttle_unit_opening_current,
             drosselorgan_oeffnung_ist_optimiert=row.throttle_unit_opening_current_optimized,
             fabrikat=row.manufacturer,
             querschnitt=row.cross_section,
-            signaluebermittlung=get_vl(row.signal_transmission__REL),
-            steuerung=get_vl(row.control__REL),
-            steuerungszentraleref=get_tid(row.fk_control_center__REL),
+            signaluebermittlung=qgep_export_utils.get_vl(row.signal_transmission__REL),
+            steuerung=qgep_export_utils.get_vl(row.control__REL),
+            steuerungszentraleref=qgep_export_utils.get_tid(row.fk_control_center__REL),
             subventionen=row.subsidies,
-            ueberlaufref=get_tid(row.fk_overflow__REL),
-            verstellbarkeit=get_vl(row.adjustability__REL),
+            ueberlaufref=qgep_export_utils.get_tid(row.fk_overflow__REL),
+            verstellbarkeit=qgep_export_utils.get_vl(row.adjustability__REL),
             wirksamer_qs=row.effective_cross_section,
         )
         abwasser_session.add(absperr_drosselorgan)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3303,18 +3258,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.streichwehr
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "streichwehr"),
+            **qgep_export_utils.base_common(row, "streichwehr"),
             # --- ueberlauf ---
             **overflow_common(row),
             # --- streichwehr ---
             hydrueberfalllaenge=row.hydraulic_overflow_length,
             kotemax=row.level_max,
             kotemin=row.level_min,
-            ueberfallkante=get_vl(row.weir_edge__REL),
-            wehr_art=get_vl(row.weir_kind__REL),
+            ueberfallkante=qgep_export_utils.get_vl(row.weir_edge__REL),
+            wehr_art=qgep_export_utils.get_vl(row.weir_kind__REL),
         )
         abwasser_session.add(streichwehr)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3349,22 +3304,22 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.foerderaggregat
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "foerderaggregat"),
+            **qgep_export_utils.base_common(row, "foerderaggregat"),
             # --- ueberlauf ---
             **overflow_common(row),
             # --- foerderaggregat ---
             arbeitspunkt=row.operating_point,
-            aufstellungantrieb=get_vl(row.placement_of_actuation__REL),
-            aufstellungfoerderaggregat=get_vl(row.placement_of_pump__REL),
-            bauart=get_vl(row.construction_type__REL),
+            aufstellungantrieb=qgep_export_utils.get_vl(row.placement_of_actuation__REL),
+            aufstellungfoerderaggregat=qgep_export_utils.get_vl(row.placement_of_pump__REL),
+            bauart=qgep_export_utils.get_vl(row.construction_type__REL),
             foerderstrommax_einzel=row.pump_flow_max_single,
             foerderstrommin_einzel=row.pump_flow_min_single,
             kotestart=row.start_level,
             kotestop=row.stop_level,
-            nutzungsart_ist=get_vl(row.usage_current__REL),
+            nutzungsart_ist=qgep_export_utils.get_vl(row.usage_current__REL),
         )
         abwasser_session.add(foerderaggregat)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3399,16 +3354,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.leapingwehr
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "leapingwehr"),
+            **qgep_export_utils.base_common(row, "leapingwehr"),
             # --- ueberlauf ---
             **overflow_common(row),
             # --- leapingwehr ---
             breite=row.width,
             laenge=row.length,
-            oeffnungsform=get_vl(row.opening_shape__REL),
+            oeffnungsform=qgep_export_utils.get_vl(row.opening_shape__REL),
         )
         abwasser_session.add(leapingwehr)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3442,32 +3397,32 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.hydr_kennwerte
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "hydr_kennwerte"),
+            **qgep_export_utils.base_common(row, "hydr_kennwerte"),
             # --- hydr_kennwerte ---
-            abwasserknotenref=get_tid(row.fk_wastewater_node__REL),
+            abwasserknotenref=qgep_export_utils.get_tid(row.fk_wastewater_node__REL),
             aggregatezahl=row.aggregate_number,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
-            bezeichnung=null_to_emptystr(row.identifier),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             foerderhoehe_geodaetisch=row.delivery_height_geodaetic,
             foerderstrommax=row.pump_flow_max,
             foerderstrommin=row.pump_flow_min,
-            hauptwehrart=get_vl(row.main_weir_kind__REL),
+            hauptwehrart=qgep_export_utils.get_vl(row.main_weir_kind__REL),
             mehrbelastung=row.overcharge,
             # primaerrichtungref will be added with release 2020
-            # primaerrichtungref=get_tid(row.fk_primary_direction__REL),
-            pumpenregime=get_vl(row.pump_characteristics__REL),
+            # primaerrichtungref=qgep_export_utils.get_tid(row.fk_primary_direction__REL),
+            pumpenregime=qgep_export_utils.get_vl(row.pump_characteristics__REL),
             qab=row.q_discharge,
             qan=row.qon,
-            springt_an=get_vl(row.is_overflowing__REL),
-            astatus=get_vl(row.status__REL),
-            ueberlaufcharakteristikref=get_tid(row.fk_overflow_char__REL),
+            springt_an=qgep_export_utils.get_vl(row.is_overflowing__REL),
+            astatus=qgep_export_utils.get_vl(row.status__REL),
+            ueberlaufcharakteristikref=qgep_export_utils.get_tid(row.fk_overflow_char__REL),
             ueberlaufdauer=row.overflow_duration,
             ueberlauffracht=row.overflow_freight,
             ueberlaufhaeufigkeit=row.overflow_frequency,
             ueberlaufmenge=row.overflow_volume,
         )
         abwasser_session.add(hydr_kennwerte)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3500,18 +3455,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.rueckstausicherung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "rueckstausicherung"),
+            **qgep_export_utils.base_common(row, "rueckstausicherung"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- rueckstausicherung ---
-            absperr_drosselorganref=get_tid(row.fk_throttle_shut_off_unit__REL),
-            art=get_vl(row.kind__REL),
+            absperr_drosselorganref=qgep_export_utils.get_tid(row.fk_throttle_shut_off_unit__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
             bruttokosten=row.gross_costs,
             ersatzjahr=row.year_of_replacement,
-            foerderaggregatref=get_tid(row.fk_pump__REL),
+            foerderaggregatref=qgep_export_utils.get_tid(row.fk_pump__REL),
         )
         abwasser_session.add(rueckstausicherung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3543,18 +3498,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.feststoffrueckhalt
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "feststoffrueckhalt"),
+            **qgep_export_utils.base_common(row, "feststoffrueckhalt"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- feststoffrueckhalt ---
             anspringkote=row.overflow_level,
-            art=get_vl(row.type__REL),
+            art=qgep_export_utils.get_vl(row.type__REL),
             bruttokosten=row.gross_costs,
             dimensionierungswert=row.dimensioning_value,
             ersatzjahr=row.year_of_replacement,
         )
         abwasser_session.add(feststoffrueckhalt)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3584,16 +3539,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.beckenreinigung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "beckenreinigung"),
+            **qgep_export_utils.base_common(row, "beckenreinigung"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- beckenreinigung ---
-            art=get_vl(row.type__REL),
+            art=qgep_export_utils.get_vl(row.type__REL),
             bruttokosten=row.gross_costs,
             ersatzjahr=row.year_of_replacement,
         )
         abwasser_session.add(beckenreinigung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3626,19 +3581,19 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.beckenentleerung
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "beckenentleerung"),
+            **qgep_export_utils.base_common(row, "beckenentleerung"),
             # --- bauwerksteil ---
-            **structure_part_common(row),
+            **qgep_export_utils.structure_part_common(row),
             # --- beckenentleerung ---
-            absperr_drosselorganref=get_tid(row.fk_throttle_shut_off_unit__REL),
-            art=get_vl(row.type__REL),
+            absperr_drosselorganref=qgep_export_utils.get_tid(row.fk_throttle_shut_off_unit__REL),
+            art=qgep_export_utils.get_vl(row.type__REL),
             bruttokosten=row.gross_costs,
             ersatzjahr=row.year_of_replacement,
             leistung=row.flow,
-            ueberlaufref=get_tid(row.fk_overflow__REL),
+            ueberlaufref=qgep_export_utils.get_tid(row.fk_overflow__REL),
         )
         abwasser_session.add(beckenentleerung)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3668,7 +3623,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.ezg_parameter_allg
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "ezg_parameter_allg"),
+            **qgep_export_utils.base_common(row, "ezg_parameter_allg"),
             # --- oberflaechenabflussparameter ---
             **surface_runoff_parameters_common(row),
             # --- ezg_parameter_allg ---
@@ -3679,7 +3634,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             trockenwetteranfall=row.dry_wheather_flow,
         )
         abwasser_session.add(ezg_parameter_allg)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3709,7 +3664,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.ezg_parameter_mouse1
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "ezg_parameter_mouse1"),
+            **qgep_export_utils.base_common(row, "ezg_parameter_mouse1"),
             # --- oberflaechenabflussparameter ---
             **surface_runoff_parameters_common(row),
             # --- ezg_parameter_mouse1 ---
@@ -3721,7 +3676,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             trockenwetteranfall=row.dry_wheather_flow,
         )
         abwasser_session.add(ezg_parameter_mouse1)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3753,33 +3708,33 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # FIELDS TO MAP TO ABWASSER.erhaltungsereignis
             # --- baseclass ---
             # --- sia405_baseclass ---
-            **base_common(row, "erhaltungsereignis"),
+            **qgep_export_utils.base_common(row, "erhaltungsereignis"),
             # --- erhaltungsereignis ---
             # abwasserbauwerkref=row.REPLACE_ME,  # TODO : convert this to M2N relation through re_maintenance_event_wastewater_structure
-            art=get_vl(row.kind__REL),
-            astatus=get_vl(row.status__REL),
-            ausfuehrende_firmaref=get_tid(row.fk_operating_company__REL),
+            art=qgep_export_utils.get_vl(row.kind__REL),
+            astatus=qgep_export_utils.get_vl(row.status__REL),
+            ausfuehrende_firmaref=qgep_export_utils.get_tid(row.fk_operating_company__REL),
             ausfuehrender=row.operator,
-            bemerkung=truncate(emptystr_to_null(row.remark), 80),
+            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
             # model difference qgep and vsa-dss 2015
-            # bezeichnung=null_to_emptystr(row.identifier),
-            bezeichnung=truncate(null_to_emptystr(row.identifier), 20),
+            # bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+            bezeichnung=qgep_export_utils.truncate(qgep_export_utils.null_to_emptystr(row.identifier), 20),
             # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 TEXT*50
             # datengrundlage=row.base_data,
-            datengrundlage=truncate(row.base_data, 50),
+            datengrundlage=qgep_export_utils.truncate(row.base_data, 50),
             dauer=row.duration,
             detaildaten=row.data_details,
-            # model difference qgep TEXT*255 and vsa-dss 2015 TEXT*50, no truncate needed anymore for 2020
+            # model difference qgep TEXT*255 and vsa-dss 2015 TEXT*50, no qgep_export_utils.truncate needed anymore for 2020
             # ergebnis=row.result,
-            ergebnis=truncate(row.result, 50),
+            ergebnis=qgep_export_utils.truncate(row.result, 50),
             grund=row.reason,
             kosten=row.cost,
             # will be added in VSA-DSS 2020
-            # massnahmeref: get_tid(row.fk_measure__REL),
+            # massnahmeref: qgep_export_utils.get_tid(row.fk_measure__REL),
             zeitpunkt=row.time_point,
         )
         abwasser_session.add(erhaltungsereignis)
-        create_metaattributes(row)
+        qgep_export_utils.create_metaattributes(row)
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
@@ -3904,8 +3859,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- baseclass ---
             # --- sia405_baseclass ---
             # --- erhaltungsereignis_abwasserbauwerk ---
-            abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            erhaltungsereignis_abwasserbauwerkassocref=get_tid(row.fk_maintenance_event__REL),
+            abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
+            erhaltungsereignis_abwasserbauwerkassocref=qgep_export_utils.get_tid(row.fk_maintenance_event__REL),
         )
 
         abwasser_session2.add(erhaltungsereignis_abwasserbauwerk)
