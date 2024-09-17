@@ -56,10 +56,11 @@ from qgis.PyQt.QtWidgets import QDialog
 
 def _show_results(title, message, log_path, level):
     widget = iface.messageBar().createMessage(title, message)
-    button = QPushButton(widget)
-    button.setText("Show logs")
-    button.pressed.connect(lambda p=log_path: webbrowser.open(p))
-    widget.layout().addWidget(button)
+    if log_path:
+        button = QPushButton(widget)
+        button.setText("Show logs")
+        button.pressed.connect(lambda p=log_path: webbrowser.open(p))
+        widget.layout().addWidget(button)
     iface.messageBar().pushWidget(widget, level)
 
 
@@ -433,7 +434,7 @@ def action_export(plugin):
                 progress_dialog.close()
                 print("number of subclass elements of organisation NOT CORRECT")
                 show_failure(
-                    "ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od",
+                    "ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od",
                     f"Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
                     None,
                 )
@@ -456,7 +457,7 @@ def action_export(plugin):
                 progress_dialog.close()
                 print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
                 show_failure(
-                    "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od",
+                    "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od",
                     f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
                     None,
                 )

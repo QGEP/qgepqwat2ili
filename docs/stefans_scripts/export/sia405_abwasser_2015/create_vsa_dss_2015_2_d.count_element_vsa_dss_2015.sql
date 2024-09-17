@@ -149,7 +149,7 @@ check_wastewater_structures = check_wastewater_structures - table_elements::inte
 
 -- falls null ist gut, sonst
 IF check_wastewater_structures <> 0 THEN
-    list = list || 'ERROR: number of subclass elements of wastewater_structures NOT CORRECT in schmea vsa_dss_2015_2_d_3122: checksum = ' || check_wastewater_structures || ', ';
+    list = list || 'ERROR: number of subclass elements of wastewater_structures NOT CORRECT in schema vsa_dss_2015_2_d_3122: checksum = ' || check_wastewater_structures || ', ';
 ELSE
     list = list || ' OK: number of subclass elements of wastewater_structures OK in schema vsa_dss_2015_2_d_3122!' || ', ';
 END IF;
@@ -194,7 +194,7 @@ list = list || table_elements || ', ';
 
 -- falls null ist gut, sonst
 IF check_wastewater_networkelements <> 0 THEN
-    list = list || 'ERROR: number of subclass elements of wastewater_networkelements NOT CORRECT in schmea vsa_dss_2015_2_d_3122: checksum = ' || check_wastewater_networkelements || ', ';
+    list = list || 'ERROR: number of subclass elements of wastewater_networkelements NOT CORRECT in schema vsa_dss_2015_2_d_3122: checksum = ' || check_wastewater_networkelements || ', ';
 ELSE
     list = list || ' OK: number of subclass elements of wastewater_networkelements OK in schema vsa_dss_2015_2_d_3122!' || ', ';
 END IF;
@@ -254,7 +254,7 @@ check_structure_parts = check_structure_parts - table_elements::integer;
 
 -- falls null ist gut, sonst
 IF check_structure_parts <> 0 THEN
-    list = list || 'ERROR: number of subclass elements of structure parts NOT CORRECT in schmea vsa_dss_2015_2_d_3122: checksum = ' || check_structure_parts || ', ';
+    list = list || 'ERROR: number of subclass elements of structure parts NOT CORRECT in schema vsa_dss_2015_2_d_3122: checksum = ' || check_structure_parts || ', ';
 ELSE
     list = list || ' OK: number of subclass elements of structure parts OK in schema vsa_dss_2015_2_d_3122!' || ', ';
 END IF;
