@@ -43,10 +43,10 @@ def check_organisation_subclass_data():
         else:
             organisation_subclass_check = False
             logger.info(
-                f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
+                f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
             print(
-                f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
+                f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
 
     return organisation_subclass_check
