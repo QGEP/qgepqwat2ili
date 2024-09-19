@@ -40,9 +40,13 @@ def check_organisation_subclass_data():
             organisation_subclass_check=True
             logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
         else:
-            organisation_subclass_check=False
-            logger.info(f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
-            print (f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)")
+            organisation_subclass_check = False
+            logger.info(
+                f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
+            )
+            print(
+                f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
+            )
 
     return organisation_subclass_check
 
@@ -76,9 +80,13 @@ def check_wastewater_structure_subclass_data():
             wastewater_structure_subclass_check=True
             logger.info(f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!")
         else:
-            wastewater_structure_subclass_check=False
-            logger.info(f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)")
-            print (f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)")
+            wastewater_structure_subclass_check = False
+            logger.info(
+                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
+            )
+            print(
+                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
+            )
 
     return wastewater_structure_subclass_check
 
