@@ -386,7 +386,7 @@ def action_export(plugin):
 
         # Prepare file dialog
         default_folder = QgsSettings().value(
-            "qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath()
+            "qgep_plugin/last_interlis_path", QgsProject.instance().absolutePath()
         )
         file_name, _ = QFileDialog.getSaveFileName(
             None,
@@ -397,7 +397,7 @@ def action_export(plugin):
         if not file_name:
             # Operation canceled
             return
-        QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
+        QgsSettings().setValue("qgep_plugin/last_interlis_path", os.path.dirname(file_name))
 
         # File name without extension (used later for export)
         file_name_base, _ = os.path.splitext(file_name)
@@ -425,7 +425,7 @@ def action_export(plugin):
                 print("OK: Integrity checks organisation")
                 show_success(
                     "Sucess",
-                    f"OK: Integrity checks organisation",
+                    "OK: Integrity checks organisation",
                     None,
                 )
             else:
@@ -433,7 +433,7 @@ def action_export(plugin):
                 print("number of subclass elements of organisation NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od",
-                    f"Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
+                    "Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
                     None,
                 )
                 return
@@ -448,7 +448,7 @@ def action_export(plugin):
                 print("OK: Integrity checks wastewater_structure")
                 show_success(
                     "Sucess",
-                    f"OK: Integrity checks wastewater_structure",
+                    "OK: Integrity checks wastewater_structure",
                     None,
                 )
             else:
@@ -456,7 +456,7 @@ def action_export(plugin):
                 print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od",
-                    f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
+                    "Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
                     None,
                 )
                 return
@@ -468,7 +468,7 @@ def action_export(plugin):
             print("OK: Integrity checks identifiers not isNull")
             show_success(
                 "Sucess",
-                f"OK: Integrity checks identifiers not isNull",
+                "OK: Integrity checks identifiers not isNull",
                 None,
             )
 
@@ -477,7 +477,7 @@ def action_export(plugin):
             print("INFO: missing identifiers")
             show_hint(
                 "INFO: Missing identifiers in schema qgep_od",
-                f"Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
+                "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
                 None,
             )
             # just show hint, but continue

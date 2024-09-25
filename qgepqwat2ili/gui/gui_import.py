@@ -229,9 +229,12 @@ class GuiImport(QDialog):
 
         try:
             self.session.commit()
+        except Exception as e:
+            self.session.rollback_session()
+            iface.messageBar().pushMessage("Error", f"An error occurred: {e}", level=Qgis.Warning)
+            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+        finally:
             self.session.close()
-        except:
-            rollback_session()
 
         iface.messageBar().pushMessage("Sucess", "Data successfully imported", level=Qgis.Success)
 
@@ -240,11 +243,6 @@ class GuiImport(QDialog):
         qgep_postimport()
 
         iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
-
-    def rollback_session(self):
-        self.session.rollback()
-        self.session.close()
-        iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
 
     def get_obj_from_listitem(self, listitem):
         for obj, editor in self.editors.items():

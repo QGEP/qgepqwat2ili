@@ -20,7 +20,7 @@ def check_organisation_subclass_data():
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
-    cursor.execute(f"SELECT obj_id FROM qgep_od.organisation;")
+    cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
@@ -40,7 +40,7 @@ def check_organisation_subclass_data():
         if organisation_count == 0:
             organisation_subclass_check = True
             logger.info(
-                f"OK: number of subclass elements of class organisation OK in schema qgep_od!"
+                "OK: number of subclass elements of class organisation OK in schema qgep_od!"
             )
         else:
             organisation_subclass_check = False
@@ -83,7 +83,7 @@ def check_wastewater_structure_subclass_data():
         if wastewater_structure_count == 0:
             wastewater_structure_subclass_check = True
             logger.info(
-                f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
+                "OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
             )
         else:
             wastewater_structure_subclass_check = False
@@ -411,7 +411,7 @@ def get_xtf_model2(xtf_file):
         # except utils.various.CmdException:
         except:
             if model_found:
-                logger.info(f"{i-1} times MODEL information was found!")
+                logger.info(f"{i - 1} times MODEL information was found!")
                 break
             else:
                 logger.info("No MODEL information was found!")

@@ -65,7 +65,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if val is None:
             logger.warning(
-                f"A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
+                "A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
             )
             val = ""
         return val
@@ -78,7 +78,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if val == "":
             logger.warning(
-                f"An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+                "An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
             )
             val = None
         return val
@@ -172,7 +172,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for wastewater_structure
         """
         logger.warning(
-            f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
+            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
         )
         return {
             # --- abwasserbauwerk ---
@@ -398,7 +398,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
         logger.warning(
-            f"QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
@@ -445,7 +445,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
         logger.warning(
-            f"QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         versickerungsanlage = ABWASSER.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
@@ -581,7 +581,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
         logger.warning(
-            f"QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
+            "QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
         )
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
@@ -623,7 +623,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
         logger.warning(
-            f"QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
+            "QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
         )
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung

@@ -101,7 +101,7 @@ def qwat_export(include_hydraulics=False):
 
     def create_metaattributes(instance):
         logger.warning(
-            f"QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
+            "QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
         )
 
         # NOTE : QWAT doesn't define meta attributes, so we create a dummy metattribute
@@ -758,7 +758,7 @@ def qwat_export(include_hydraulics=False):
 
         # We split the geometry
         logger.warning(
-            f"Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
+            "Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
         )
         # TODO the geometry of the new node does not necessarily lie in the middle (nor on the segment)
         leitung_a.geometrie = ST_ForceCurve(
