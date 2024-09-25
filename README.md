@@ -10,9 +10,9 @@ Note that this currently only supports up to date QGEP and QWAT (1.5.6/1.3.6 res
 
 ### Installation
 
-The tool requires 
-**python** (3.6 or newer) and 
-**java** to be available (see https://qgep.github.io/docs/admin-guide/interlis-io/index.html#java). 
+The tool requires
+**python** (3.6 or newer) and
+**java** to be available (see https://qgep.github.io/docs/admin-guide/interlis-io/index.html#java).
 
 Then, it can be installed like any other python library:
 ```

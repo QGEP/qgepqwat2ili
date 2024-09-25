@@ -144,7 +144,9 @@ def qwat_export(include_hydraulics=False):
         for geom_idx in range(geom_count):
             spezialbauwerk_flaeche = WASSER.spezialbauwerk_flaeche(
                 # --- spezialbauwerk_flaeche ---
-                geometrie=ST_ForceCurve(ST_GeometryN(sanitize_geom(row.geometry_polygon), geom_idx + 1)),
+                geometrie=ST_ForceCurve(
+                    ST_GeometryN(sanitize_geom(row.geometry_polygon), geom_idx + 1)
+                ),
                 spezialbauwerkref__REL=spezialbauwerk,
             )
             wasser_session.add(spezialbauwerk_flaeche)
@@ -214,7 +216,9 @@ def qwat_export(include_hydraulics=False):
     # But we still need to create leitungsknoten for plain nodes (not subclass instances)
     logger.info("Exporting QWAT.node -> WASSER.rohrleitungsteil")
     for row in (
-        qwat_session.query(QWAT.node).join(QWAT.network_element, isouter=True).filter(QWAT.network_element.id == None)
+        qwat_session.query(QWAT.node)
+        .join(QWAT.network_element, isouter=True)
+        .filter(QWAT.network_element.id == None)
     ):
         # In most cases, leitungsknoten will be created further down by subclasses.
         # But we still need to create leitungsknoten for plain nodes (not subclass instances)
@@ -264,14 +268,18 @@ def qwat_export(include_hydraulics=False):
             hydraulischer_strang = WASSER.hydraulischer_strang(
                 # --- baseclass ---
                 # --- sia405_baseclass ---
-                **base_common(row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang),
+                **base_common(
+                    row, "hydraulischer_strang", tid_for_class=WASSER.hydraulischer_strang
+                ),
                 # --- hydraulischer_strang ---
                 bemerkung=truncate(sanitize_str(row.remark), 80),
                 bisknotenref=get_tid(row.fk_node_b__REL, QWAT.node),
                 durchfluss=DOES_NOT_EXIST_IN_QWAT,
                 fliessgeschwindigkeit=DOES_NOT_EXIST_IN_QWAT,
                 name_nummer=str(row.id),
-                referenz_durchmesser=clamp(get_vl(row.fk_material__REL, "diameter_nominal"), min_val=0),
+                referenz_durchmesser=clamp(
+                    get_vl(row.fk_material__REL, "diameter_nominal"), min_val=0
+                ),
                 referenz_laenge=row._length2d,
                 referenz_rauheit=DOES_NOT_EXIST_IN_QWAT,
                 verbrauch=DOES_NOT_EXIST_IN_QWAT,
@@ -379,7 +387,9 @@ def qwat_export(include_hydraulics=False):
             # --- leitungsknoten ---
             **leitungsknoten_common(row),
             # --- hydrant ---
-            art=get_vl(row.fk_model_inf__REL) if row.underground else get_vl(row.fk_model_sup__REL),
+            art=(
+                get_vl(row.fk_model_inf__REL) if row.underground else get_vl(row.fk_model_sup__REL)
+            ),
             dimension=DOES_NOT_EXIST_IN_QWAT,
             entnahme=row.flow,
             fliessdruck=row.pressure_dynamic,
@@ -716,8 +726,12 @@ def qwat_export(include_hydraulics=False):
                 6403: "motorisch.ohne_Fernsteuerung",
                 6406: "motorisch.mit_Fernsteuerung",
             }.get(get_vl(row.fk_valve_actuation__REL, "id"), "keiner"),
-            schaltzustand="unbekannt" if row.closed is None else ("geschlossen" if row.closed else "offen"),
-            schliessrichtung="links" if get_vl(row.fk_valve_actuation__REL, "id") == 6402 else "rechts",
+            schaltzustand=(
+                "unbekannt" if row.closed is None else ("geschlossen" if row.closed else "offen")
+            ),
+            schliessrichtung=(
+                "links" if get_vl(row.fk_valve_actuation__REL, "id") == 6402 else "rechts"
+            ),
             typ=DOES_NOT_EXIST_IN_QWAT,
             zulaessiger_bauteil_betriebsdruck=DOES_NOT_EXIST_IN_QWAT,
             zustand=get_vl(row.fk_status__REL),
@@ -732,7 +746,9 @@ def qwat_export(include_hydraulics=False):
         # Otherwise, we split the pipe at the valve.
 
         # Get the related pipe
-        leitung_a = wasser_session.query(WASSER.leitung).get(get_tid(row.fk_pipe__REL, for_class=WASSER.leitung))
+        leitung_a = wasser_session.query(WASSER.leitung).get(
+            get_tid(row.fk_pipe__REL, for_class=WASSER.leitung)
+        )
 
         # We clone the pipe
         leitung_b = utils.sqlalchemy.copy_instance(leitung_a)

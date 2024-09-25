@@ -1,13 +1,14 @@
 import collections
 
-import psycopg2
 # 11.4.2023
 import xml.etree.ElementTree as ET
 
+import psycopg2
 from sqlalchemy.ext.automap import AutomapBase
 
 from .. import config
 from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
+
 
 # Checking if subclass entries of organisation are set and match number of organisation entries
 def check_organisation_subclass_data():
@@ -18,27 +19,29 @@ def check_organisation_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-    
+
     cursor.execute(f"SELECT obj_id FROM qgep_od.organisation;")
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
         for subclass in [
-            ('administrative_office'),
-            ('waste_water_association'),
-            ('municipality'),
-            ('canton'),
-            ('cooperative'),
-            ('private'),
-            ('waste_water_treatment_plant'),
+            ("administrative_office"),
+            ("waste_water_association"),
+            ("municipality"),
+            ("canton"),
+            ("cooperative"),
+            ("private"),
+            ("waste_water_treatment_plant"),
         ]:
             cursor.execute(f"SELECT obj_id FROM qgep_od.{subclass};")
             logger.info(f"Number of {subclass} datasets: {cursor.rowcount}")
             organisation_count = organisation_count - cursor.rowcount
 
         if organisation_count == 0:
-            organisation_subclass_check=True
-            logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
+            organisation_subclass_check = True
+            logger.info(
+                f"OK: number of subclass elements of class organisation OK in schema qgep_od!"
+            )
         else:
             organisation_subclass_check = False
             logger.info(
@@ -50,6 +53,7 @@ def check_organisation_subclass_data():
 
     return organisation_subclass_check
 
+
 # Checking if subclass entries of wastewater_structure are set and match number of wastewater_structure entries
 def check_wastewater_structure_subclass_data():
 
@@ -59,26 +63,28 @@ def check_wastewater_structure_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-    
+
     cursor.execute(f"SELECT obj_id FROM qgep_od.wastewater_structure;")
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
         for subclass in [
-            ('manhole'),
-            ('channel'),
-            ('special_structure'),
-            ('infiltration_installation'),
-            ('discharge_point'),
-            ('wwtp_structure'),
+            ("manhole"),
+            ("channel"),
+            ("special_structure"),
+            ("infiltration_installation"),
+            ("discharge_point"),
+            ("wwtp_structure"),
         ]:
             cursor.execute(f"SELECT obj_id FROM qgep_od.{subclass};")
             logger.info(f"Number of {subclass} datasets: {cursor.rowcount}")
             wastewater_structure_count = wastewater_structure_count - cursor.rowcount
 
         if wastewater_structure_count == 0:
-            wastewater_structure_subclass_check=True
-            logger.info(f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!")
+            wastewater_structure_subclass_check = True
+            logger.info(
+                f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
+            )
         else:
             wastewater_structure_subclass_check = False
             logger.info(
@@ -100,53 +106,56 @@ def check_identifier_null():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-    
+
     missing_identifier_count = 0
     for notsubclass in [
-        #VSA-KEK
-        ('file'),
-        ('data_media'),
-        ('maintenance_event'),
-        #SIA405 Abwasser
-        ('organisation'),
-        ('wastewater_structure'),
-        ('wastewater_networkelement'),
-        ('structure_part'),
-        ('reach_point'),
-        ('pipe_profile'),
-        #VSA-DSS
-        ('catchment_area'),
-        ('connection_object'),
-        ('control_center'),
-        ('hazard_source'),
-        ('hydr_geometry'),
-        ('hydraulic_char_data'),
-        ('measurement_result'),
-        ('measurement_series'),
-        ('measuring_device'),
-        ('measuring_point'),
-        ('mechanical_pretreatment'),
-        ('overflow'),
-        ('overflow_char'),
-        ('retention_body'),
-        ('river_bank'),
-        ('river_bed'),
-        ('sector_water_body'),
-        ('substance'),
-        ('surface_runoff_parameters'),
-        ('surface_water_bodies'),
-        ('throttle_shut_off_unit'),
-        ('waste_water_treatment'),
-        ('water_catchment'),
-        ('water_control_structure'),
-        ('water_course_segment'),
-        ('wwtp_energy_use'),
-        ('zone'),
-        
-        ]:
-        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;"
+        )
         # use cursor.fetchone()[0] instead of cursor.rowcount
-        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.fetchone()[0]}")
+        logger.info(
+            f"Number of datasets in {notsubclass} without identifier : {cursor.fetchone()[0]}"
+        )
 
         if cursor.fetchone() is None:
             missing_identifier_count = missing_identifier_count
@@ -154,12 +163,12 @@ def check_identifier_null():
             missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
 
     if missing_identifier_count == 0:
-        identifier_null_check=True
+        identifier_null_check = True
         logger.info(f"OK: all identifiers set in qgep_od!")
     else:
-        identifier_null_check=False
+        identifier_null_check = False
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
-        print (f"ERROR: Missing identifiers: {missing_identifier_count}")
+        print(f"ERROR: Missing identifiers: {missing_identifier_count}")
 
     return identifier_null_check
 
@@ -173,10 +182,14 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
 
     if not recreate_schema:
         # If the schema already exists, we just truncate all tables
-        cursor.execute(f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema}';")
+        cursor.execute(
+            f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema}';"
+        )
         if cursor.rowcount > 0:
             logger.info(f"Schema {schema} already exists, we truncate instead")
-            cursor.execute(f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}';")
+            cursor.execute(
+                f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}';"
+            )
             for row in cursor.fetchall():
                 cursor.execute(f"TRUNCATE TABLE {schema}.{row[0]} CASCADE;")
             return
@@ -224,42 +237,42 @@ def validate_xtf_data(xtf_file, log_path):
         f'"{config.JAVA}" -jar "{config.ILIVALIDATOR}" --modeldir "{config.ILI_FOLDER}" --log "{log_path}" "{xtf_file}"'
     )
 
-# 22.7.2022 sb 
+
+# 22.7.2022 sb
 def get_xtf_model(xtf_file):
     logger.info("GET XTF MODEL... ")
     print("xtf_file: " + xtf_file)
     # logger.info("vorher" + imodel)
-# funktioniert nicht
+    # funktioniert nicht
     # global imodel # define imodel as global variable for import model name
-    # impmodel = "" 
+    # impmodel = ""
 
     # open and read xtf / xml file line by line until <DATASECTION>
-    #<DATASECTION>
-    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+    # <DATASECTION>
+    # <VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
     # read string between < and . -> eg. VSA_KEK_2019_LV95
-    # impmodel 
+    # impmodel
     from io import open
-    import re
-    
+
     model_list = []
-    
-    #checkdatasection = -1
+
+    # checkdatasection = -1
     checkmodelssection = -1
     impmodel = "not found"
-    
-    with open(xtf_file, mode="r", encoding="utf-8") as f:
+
+    with open(xtf_file, encoding="utf-8") as f:
         while True:
-            #if checkdatasection == -1:
+            # if checkdatasection == -1:
             if checkmodelssection == -1:
-            
+
                 line = f.readline()
                 if not line:
                     break
                 else:
-                    #checkdatasection = line.find('<DATASECTION>')
-                    #logger.info(str(checkdatasection))
-                    #print("checkdatasection (ili2db): " + str(checkdatasection))
-                    checkmodelssection = line.find('<MODELS>')
+                    # checkdatasection = line.find('<DATASECTION>')
+                    # logger.info(str(checkdatasection))
+                    # print("checkdatasection (ili2db): " + str(checkdatasection))
+                    checkmodelssection = line.find("<MODELS>")
                     logger.info(str(checkmodelssection))
                     print("checkmodelssection (ili2db): " + str(checkmodelssection))
                     logger.info(str(line))
@@ -276,7 +289,7 @@ def get_xtf_model(xtf_file):
                     # print("checkdatasection (ili2db): " + str(checkdatasection))
                     logger.info("checkmodelssection2 " + str(checkmodelssection))
                     print("checkmodelssection2 (ili2db): " + str(checkmodelssection))
-                    #strmodel = str(line2.strip())
+                    # strmodel = str(line2.strip())
                     strmodel = str(line2)
                     strmodel = strmodel.strip()
                     print("strmodel (ili2db): " + strmodel)
@@ -287,33 +300,33 @@ def get_xtf_model(xtf_file):
                     a = strmodel.find("</MODELS>")
                     logger.info("strmodel.find a </MODELS>: " + str(a))
                     print("strmodel.find a </MODELS>: " + str(a))
-                    #if strmodel.find("</MODELS>") > -1:
+                    # if strmodel.find("</MODELS>") > -1:
                     if a == -1:
                         b = strmodel.find("<MODEL>")
-                        logger.info("strmodel.find b \<MODEL: " + str(b))
-                        print("strmodel.find b \<MODEL: " + str(b))
+                        logger.info(r"strmodel.find b \<MODEL: " + str(b))
+                        print(r"strmodel.find b \<MODEL: " + str(b))
                         if strmodel.find("<MODEL") > -1:
                             print("strmodel (ili2db): " + strmodel)
                             logger.info("MODELS definition found in xtf: " + strmodel)
-                    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
-                    # read string between < and . -> eg. VSA_KEK_2019_LV95
-                    
-                    # result = re.search('<(.*).',strmodel)
-                    # result = str(result.group(1))
-                    # result2 = result.split('.',1)
-                    # result3 = str(result2[0])
-                    # result4 = result3.strip('<')
-                    # impmodel = str(result4)
+                            # <VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+                            # read string between < and . -> eg. VSA_KEK_2019_LV95
+
+                            # result = re.search('<(.*).',strmodel)
+                            # result = str(result.group(1))
+                            # result2 = result.split('.',1)
+                            # result3 = str(result2[0])
+                            # result4 = result3.strip('<')
+                            # impmodel = str(result4)
                             # Search MODELNAME in MODEL entry:     # <MODEL NAME="VSA_KEK_2019_LV95" VERSION="20.01.2021" URI="http://www.vsa.ch/models" />
-                            char1 = '='
-                            char2 = 'VERSION='
-                            result = strmodel[strmodel.find(char1)+1 : strmodel.find(char2)]
-                    # result = re.search('<(.*).',strmodel)
-                    # result = str(result.group(1))
-                    # result2 = result.split('.',1)
-                    # result3 = str(result2[0])
-                    # result4 = result3.strip('<')
-                    # impmodel = str(result4)
+                            char1 = "="
+                            char2 = "VERSION="
+                            result = strmodel[strmodel.find(char1) + 1 : strmodel.find(char2)]
+                            # result = re.search('<(.*).',strmodel)
+                            # result = str(result.group(1))
+                            # result2 = result.split('.',1)
+                            # result3 = str(result2[0])
+                            # result4 = result3.strip('<')
+                            # impmodel = str(result4)
                             # strip spaces
                             result = result.strip()
                             # strip "
@@ -325,18 +338,18 @@ def get_xtf_model(xtf_file):
                         else:
                             print("goto next line")
                     else:
-                        print("<\/MODEL> found - stop checking!")
+                        print(r"<\/MODEL> found - stop checking!")
                         logger.info("</MODEL> found - stop checking!")
                         break
     print(model_list)
     logger.info("model_list:")
     logger.info(str(model_list))
-    
+
     if len(model_list) > 0:
-    # if impmodel == "not found":
+        # if impmodel == "not found":
         # # write that MODEL was not found
         # logger.info("MODEL was " + impmodel + " was not found!")
-    # else:
+        # else:
         if "VSA_KEK_2019_LV95" in model_list:
             impmodel = "VSA_KEK_2019_LV95"
         elif "SIA405_ABWASSER_2015_LV95" in model_list:
@@ -355,30 +368,29 @@ def get_xtf_model(xtf_file):
     f.close()
 
     logger.info("MODEL found: " + str(impmodel))
-    print("MODEL found: ",str(impmodel))
+    print("MODEL found: ", str(impmodel))
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
+
 
 def get_xtf_model2(xtf_file):
     logger.info("GET XTF MODEL xml version... ")
     print("xtf_file: " + xtf_file)
     # logger.info("vorher" + imodel)
-# funktioniert nicht
+    # funktioniert nicht
     # global imodel # define imodel as global variable for import model name
-    # impmodel = "" 
+    # impmodel = ""
 
     # open and read xtf / xml file line by line until <DATASECTION>
-    #<DATASECTION>
-    #<VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
+    # <DATASECTION>
+    # <VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
     # read string between < and . -> eg. VSA_KEK_2019_LV95
-    # impmodel 
-    from io import open
-    
+    # impmodel
+
     model_list = []
-    
-    #checkdatasection = -1
-    checkmodelssection = -1
+
+    # checkdatasection = -1
     impmodel = "not found"
 
     # from xml file
@@ -386,7 +398,7 @@ def get_xtf_model2(xtf_file):
     rootinterlis = tree.getroot()
     print("rootinterlis.findall:", rootinterlis.findall("."))
     logger.info("rootinterlis.findall:", rootinterlis.findall("."))
-    
+
     i = 0
     model_found = False
 
@@ -394,26 +406,26 @@ def get_xtf_model2(xtf_file):
         try:
             j = i
             i = i + 1
-            model_list.append(rootinterlis[0][0][j].get('NAME'))
+            model_list.append(rootinterlis[0][0][j].get("NAME"))
             model_found = True
-        #except utils.various.CmdException:
+        # except utils.various.CmdException:
         except:
             if model_found:
                 logger.info(f"{i-1} times MODEL information was found!")
                 break
-            else: 
+            else:
                 logger.info("No MODEL information was found!")
                 break
-            
+
     print(model_list)
     logger.info("model_list:")
     logger.info(str(model_list))
-    
+
     if len(model_list) > 0:
-    # if impmodel == "not found":
+        # if impmodel == "not found":
         # # write that MODEL was not found
         # logger.info("MODEL was " + impmodel + " was not found!")
-    # else:
+        # else:
         if "VSA_KEK_2019_LV95" in model_list:
             impmodel = "VSA_KEK_2019_LV95"
         elif "SIA405_ABWASSER_2015_LV95" in model_list:
@@ -429,7 +441,7 @@ def get_xtf_model2(xtf_file):
         logger.info("MODEL information was " + impmodel + "!")
 
     logger.info("MODEL found: " + str(impmodel))
-    print("MODEL found: ",str(impmodel))
+    print("MODEL found: ", str(impmodel))
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel

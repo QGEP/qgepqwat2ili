@@ -45,7 +45,9 @@ def qwat_import():
     logger.info("done")
 
     logger.info("Importing WASSER.hydraulischer_strang, WASSER.leitung -> QWAT.pipe")
-    for row, leitung in wasser_session.query(WASSER.hydraulischer_strang, WASSER.leitung).join(WASSER.leitung):
+    for row, leitung in wasser_session.query(WASSER.hydraulischer_strang, WASSER.leitung).join(
+        WASSER.leitung
+    ):
 
         # baseclass --- hydraulischer_strang.t_type, hydraulischer_strang.t_ili_tid
         # sia405_baseclass --- hydraulischer_strang.obj_id
