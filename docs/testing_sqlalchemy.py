@@ -1,9 +1,9 @@
 import collections
 
-from geoalchemy2 import (  # imports needed to avoid type unrecognized error
-    Geography,
-    Geometry,
-)
+# from geoalchemy2 import (  # imports needed to avoid type unrecognized error
+#     Geography,
+#     Geometry,
+# )
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, create_engine
 from sqlalchemy.ext.automap import automap_base, name_for_collection_relationship
 from sqlalchemy.ext.declarative import declarative_base

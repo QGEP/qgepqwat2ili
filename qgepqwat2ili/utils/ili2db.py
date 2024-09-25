@@ -64,7 +64,7 @@ def check_wastewater_structure_subclass_data():
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
-    cursor.execute(f"SELECT obj_id FROM qgep_od.wastewater_structure;")
+    cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -164,7 +164,7 @@ def check_identifier_null():
 
     if missing_identifier_count == 0:
         identifier_null_check = True
-        logger.info(f"OK: all identifiers set in qgep_od!")
+        logger.info("OK: all identifiers set in qgep_od!")
     else:
         identifier_null_check = False
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
@@ -409,7 +409,7 @@ def get_xtf_model2(xtf_file):
             model_list.append(rootinterlis[0][0][j].get("NAME"))
             model_found = True
         # except utils.various.CmdException:
-        except:
+        except Exception:
             if model_found:
                 logger.info(f"{i - 1} times MODEL information was found!")
                 break

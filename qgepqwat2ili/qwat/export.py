@@ -218,7 +218,7 @@ def qwat_export(include_hydraulics=False):
     for row in (
         qwat_session.query(QWAT.node)
         .join(QWAT.network_element, isouter=True)
-        .filter(QWAT.network_element.id == None)
+        .filter(QWAT.network_element.id is None)
     ):
         # In most cases, leitungsknoten will be created further down by subclasses.
         # But we still need to create leitungsknoten for plain nodes (not subclass instances)

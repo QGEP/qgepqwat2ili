@@ -2985,12 +2985,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # QGEP.wastewater_networkelement,
 
         # )
-        # query2 via waste_water_treatment_plant
-        query2 = query.join(
-            self.model_classes_tww_od.waste_water_treatment_plant,
-            self.model_classes_tww_od.wwtp_structure,
-            self.model_classes_tww_od.wastewater_networkelement,
-        )
+        # query2 via waste_water_treatment_plant TODO : Mapping
+        # query2 = query.join(
+        #     self.model_classes_tww_od.waste_water_treatment_plant,
+        #     self.model_classes_tww_od.wwtp_structure,
+        #     self.model_classes_tww_od.wastewater_networkelement,
+        # )
         # only until VSA-DSS Release 2015
         query3 = query.join(
             QGEP.water_course_segment,

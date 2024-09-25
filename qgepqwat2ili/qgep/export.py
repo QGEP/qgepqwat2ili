@@ -888,7 +888,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
         logger.warning(
-            f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
+            "QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
         )
 
         untersuchung = ABWASSER.untersuchung(

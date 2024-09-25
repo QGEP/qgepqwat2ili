@@ -118,7 +118,7 @@ def action_import(plugin):
     global import_dialog  # avoid garbage collection
 
     default_folder = QgsSettings().value(
-        "qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath()
+        "qgep_plugin/last_interlis_path", QgsProject.instance().absolutePath()
     )
     file_name, _ = QFileDialog.getOpenFileName(
         None,
@@ -129,11 +129,11 @@ def action_import(plugin):
     if not file_name:
         # Operation canceled
         return
-    QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
+    QgsSettings().setValue("qgep_plugin/last_interlis_path", os.path.dirname(file_name))
 
     # Configure logging
     s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
-    logs_next_to_file = s == True or s == "true"
+    logs_next_to_file = s is True or s == "true"
     if logs_next_to_file:
         base_log_path = file_name
     else:
