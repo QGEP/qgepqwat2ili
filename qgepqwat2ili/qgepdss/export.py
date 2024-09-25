@@ -2972,14 +2972,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.measuring_point)
     if filtered:
         query1 = query.join(
-            QGEP.wastewater_structure, 
+            QGEP.wastewater_structure,
             QGEP.wastewater_networkelement,
         )
         # needs to add QGEP.wastewater_structure as waste_water_treatment_plant is a subclass of organisation that has a relation to wastewater_structure and then wastewater_networkelement
         # variant1 for query2
         # query2=query.join(
-        #   QGEP.waste_water_treatment_plant, 
-        #   (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner), 
+        #   QGEP.waste_water_treatment_plant,
+        #   (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner),
         #   (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider),
         #   QGEP.wastewater_networkelement,
         # )
