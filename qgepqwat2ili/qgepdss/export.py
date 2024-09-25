@@ -2971,10 +2971,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.measuring_point -> ABWASSER.messstelle, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.measuring_point)
     if filtered:
-        query1 = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement)
+        query1 = query.join(
+            QGEP.wastewater_structure, 
+            QGEP.wastewater_networkelement,
+        )
         # needs to add QGEP.wastewater_structure as waste_water_treatment_plant is a subclass of organisation that has a relation to wastewater_structure and then wastewater_networkelement
         # variant1 for query2
-        # query2=query.join(QGEP.waste_water_treatment_plant, (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner), (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider),QGEP.wastewater_networkelement,
+        # query2=query.join(
+        #   QGEP.waste_water_treatment_plant, 
+        #   (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_owner), 
+        #   (QGEP.wastewater_structure, QGEP.waste_water_treatment_plant.obj_id == QGEP.wastewater_structure.fk_provider),
+        #   QGEP.wastewater_networkelement,
         # )
         # variant2 for query2
         # try with extra or_
@@ -2985,12 +2992,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # QGEP.wastewater_networkelement,
 
         # )
-        # query2 via waste_water_treatment_plant TODO : Mapping
-        # query2 = query.join(
-        #     self.model_classes_tww_od.waste_water_treatment_plant,
-        #     self.model_classes_tww_od.wwtp_structure,
-        #     self.model_classes_tww_od.wastewater_networkelement,
-        # )
+        # query2 via waste_water_treatment_plant TODO : Fix Mapping
+        query2 = query.join(
+            QGEP.model_classes_tww_od.waste_water_treatment_plant,
+            QGEP.model_classes_tww_od.wwtp_structure,
+            QGEP.model_classes_tww_od.wastewater_networkelement,
+        )
         # only until VSA-DSS Release 2015
         query3 = query.join(
             QGEP.water_course_segment,
