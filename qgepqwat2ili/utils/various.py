@@ -27,7 +27,13 @@ class DeduplicatedLogger(logging.Logger):
         this_message = (level, msg)
         if self._last_message is None or self._last_message != this_message:
             if self._repeated > 0:
-                super()._log(self._last_message[0], f"[repeated {self._repeated} times]", args, exc_info, extra)
+                super()._log(
+                    self._last_message[0],
+                    f"[repeated {self._repeated} times]",
+                    args,
+                    exc_info,
+                    extra,
+                )
 
             super()._log(level, msg, args, exc_info, extra)
             self._repeated = 0
@@ -57,7 +63,7 @@ def exec_(command, check=True, output_content=False):
     except subprocess.CalledProcessError as e:
         if check:
             logger.exception(e.output.decode("windows-1252" if os.name == "nt" else "utf-8"))
-            raise CmdException(f"Command errored ! See logs for more info.")
+            raise CmdException("Command errored ! See logs for more info.")
         return e.output if output_content else e.returncode
     return proc.stdout.decode().strip() if output_content else proc.returncode
 
@@ -125,7 +131,9 @@ def setup_test_db(template="full"):
         dexec_(
             "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_data_and_structure_sample.backup"
         )
-        dexec_("wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_structure_only.sql")
+        dexec_(
+            "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_structure_only.sql"
+        )
         dexec_(
             "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_value_list_data_only.sql"
         )
@@ -147,23 +155,27 @@ def setup_test_db(template="full"):
         )
         dexec_(
             "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.4.0_data_and_structure_sample.backup"
-            )
+        )
         dexec_("createdb -U postgres --template=qgep_prod tpl_full")
 
         # Hotfix qgep invalid demo data
-        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qgep_demodata_hotfix.sql")
+        delta_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "test_data", "qgep_demodata_hotfix.sql"
+        )
         exec_(f"docker cp {delta_path} qgepqwat:/qgep_demodata_hotfix.sql")
         dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qgep_demodata_hotfix.sql")
 
         # Hotfix qwat invalid demo data
-        delta_path = os.path.join(os.path.dirname(__file__), "..", "data", "test_data", "qwat_demodata_hotfix.sql")
+        delta_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "test_data", "qwat_demodata_hotfix.sql"
+        )
         exec_(f"docker cp {delta_path} qgepqwat:/qwat_demodata_hotfix.sql")
         dexec_("psql -U postgres -d tpl_full -v ON_ERROR_STOP=1 -f /qwat_demodata_hotfix.sql")
 
     dexec_(
-        f'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
+        'psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid<>pg_backend_pid();"'
     )
-    dexec_(f"dropdb -U postgres qgep_prod --if-exists")
+    dexec_("dropdb -U postgres qgep_prod --if-exists")
     dexec_(f"createdb -U postgres --template=tpl_{template} qgep_prod")
 
 
