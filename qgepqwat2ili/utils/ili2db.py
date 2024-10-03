@@ -172,6 +172,7 @@ def check_identifier_null():
 
     return identifier_null_check
 
+
 # Checking if MAMDATORY eigentuemerref not is Null
 def check_fk_owner_null():
 
@@ -210,6 +211,7 @@ def check_fk_owner_null():
 
     return check_fk_owner_null
 
+
 # Checking if MAMDATORY eigentuemerref not is Null
 def check_fk_operator_null():
 
@@ -243,10 +245,13 @@ def check_fk_operator_null():
         logger.info("OK: all mandatory fk_operator set in qgep_od!")
     else:
         missing_fk_operator_count = False
-        logger.info(f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}")
+        logger.info(
+            f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}"
+        )
         print(f"ERROR: Missing mandatory fk_operator: {missing_fk_operator_count}")
 
     return check_fk_operator_null
+
 
 # Checking if MAMDATORY datenherrref not is Null
 def check_fk_dataowner_null():
@@ -318,10 +323,13 @@ def check_fk_dataowner_null():
         logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
     else:
         missing_fk_dataowner_count = False
-        logger.info(f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}")
+        logger.info(
+            f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}"
+        )
         print(f"ERROR: Missing mandatory fk_dataowner: {missing_fk_dataowner_count}")
 
     return check_fk_dataowner_null
+
 
 # Checking if MAMDATORY datenlieferantref not is Null
 def check_fk_provider_null():
@@ -393,10 +401,13 @@ def check_fk_provider_null():
         logger.info("OK: all mandatory fk_provider set in qgep_od!")
     else:
         missing_fk_provider_count = False
-        logger.info(f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}")
+        logger.info(
+            f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}"
+        )
         print(f"ERROR: Missing mandatory fk_provider: {missing_fk_provider_count}")
 
     return check_fk_provider_null
+
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
