@@ -549,7 +549,7 @@ def action_export(plugin):
             # just show hint, but continue
             # return
 
-       # 6. relation check check_fk_provider_null
+        # 6. relation check check_fk_provider_null
         check_fk_provider_null = False
         check_fk_provider_null = check_fk_provider_null()
         if check_fk_provider_null:
@@ -570,7 +570,6 @@ def action_export(plugin):
             )
             # just show hint, but continue
             # return
-
 
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
