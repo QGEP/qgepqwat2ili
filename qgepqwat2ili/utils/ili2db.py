@@ -210,6 +210,44 @@ def check_fk_owner_null():
 
     return check_fk_owner_null
 
+# Checking if MAMDATORY eigentuemerref not is Null
+def check_fk_operator_null():
+
+    logger.info("INTEGRITY CHECK missing operator references fk_operator...")
+    print("INTEGRITY CHECK missing operator references fk_operator...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_operator_count = 0
+    for notsubclass in [
+        # SIA405 Abwasser
+        ("wastewater_structure"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_operator_count} WHERE fk_operator is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(
+            f"Number of datasets in {notsubclass} without fk_operator : {cursor.fetchone()[0]}"
+        )
+
+        if cursor.fetchone() is None:
+            missing_fk_operator_count = missing_fk_operator_count
+        else:
+            missing_fk_operator_count = missing_fk_operator_count + int(cursor.fetchone()[0])
+
+    if missing_fk_operator_count == 0:
+        check_fk_operator_null = True
+        logger.info("OK: all mandatory fk_operator set in qgep_od!")
+    else:
+        missing_fk_operator_count = False
+        logger.info(f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}")
+        print(f"ERROR: Missing mandatory fk_operator: {missing_fk_operator_count}")
+
+    return check_fk_operator_null
+    
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
 
