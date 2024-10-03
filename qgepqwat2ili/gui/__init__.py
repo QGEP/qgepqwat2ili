@@ -483,7 +483,7 @@ def action_export(plugin):
             # just show hint, but continue
             # return
 
-        # 4. identifier check check_fk_owner_null
+        # 4. relation check check_fk_owner_null
         check_fk_owner_null = False
         check_fk_owner_null = check_fk_owner_null()
         if check_fk_owner_null:
@@ -505,7 +505,7 @@ def action_export(plugin):
             # just show hint, but continue
             # return
 
-        # 5. identifier check check_fk_operator_null
+        # 5. relation check check_fk_operator_null
         check_fk_operator_null = False
         check_fk_operator_null = check_fk_operator_null()
         if check_fk_operator_null:
@@ -526,7 +526,52 @@ def action_export(plugin):
             )
             # just show hint, but continue
             # return
-            
+
+        # 6. relation check check_fk_dataowner_null
+        check_fk_dataowner_null = False
+        check_fk_dataowner_null = check_fk_dataowner_null()
+        if check_fk_dataowner_null:
+            print("OK: Integrity checks fk_dataowner not isNull")
+            show_success(
+                "Sucess",
+                "OK: Integrity checks fk_dataowner not isNull",
+                None,
+            )
+
+        else:
+            progress_dialog.close()
+            print("INFO: missing fk_dataowner")
+            show_hint(
+                "INFO: Missing fk_dataowner in schema qgep_od",
+                "Add missing fk_dataowner to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                None,
+            )
+            # just show hint, but continue
+            # return
+
+       # 6. relation check check_fk_provider_null
+        check_fk_provider_null = False
+        check_fk_provider_null = check_fk_provider_null()
+        if check_fk_provider_null:
+            print("OK: Integrity checks fk_provider not isNull")
+            show_success(
+                "Sucess",
+                "OK: Integrity checks fk_provider not isNull",
+                None,
+            )
+
+        else:
+            progress_dialog.close()
+            print("INFO: missing fk_provider")
+            show_hint(
+                "INFO: Missing fk_provider in schema qgep_od",
+                "Add missing fk_provider to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                None,
+            )
+            # just show hint, but continue
+            # return
+
+
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
