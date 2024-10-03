@@ -323,7 +323,80 @@ def check_fk_dataowner_null():
 
     return check_fk_dataowner_null
 
+# Checking if MAMDATORY datenlieferantref not is Null
+def check_fk_provider_null():
 
+    logger.info("INTEGRITY CHECK missing provider references fk_provider...")
+    print("INTEGRITY CHECK missing provider references fk_provider...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_provider_count = 0
+    for notsubclass in [
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_provider_count} WHERE fk_provider is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(
+            f"Number of datasets in {notsubclass} without fk_provider : {cursor.fetchone()[0]}"
+        )
+
+        if cursor.fetchone() is None:
+            missing_fk_provider_count = missing_fk_provider_count
+        else:
+            missing_fk_provider_count = missing_fk_provider_count + int(cursor.fetchone()[0])
+
+    if missing_fk_provider_count == 0:
+        check_fk_provider_null = True
+        logger.info("OK: all mandatory fk_provider set in qgep_od!")
+    else:
+        missing_fk_provider_count = False
+        logger.info(f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}")
+        print(f"ERROR: Missing mandatory fk_provider: {missing_fk_provider_count}")
+
+    return check_fk_provider_null
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
