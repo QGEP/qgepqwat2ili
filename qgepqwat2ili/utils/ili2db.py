@@ -212,7 +212,7 @@ def check_fk_owner_null():
     return check_fk_owner_null
 
 
-# Checking if MAMDATORY eigentuemerref not is Null
+# Checking if MAMDATORY betreiberref not is Null
 def check_fk_operator_null():
 
     logger.info("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
