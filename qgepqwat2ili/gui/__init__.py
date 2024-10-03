@@ -505,6 +505,28 @@ def action_export(plugin):
             # just show hint, but continue
             # return
 
+        # 5. identifier check check_fk_operator_null
+        check_fk_operator_null = False
+        check_fk_operator_null = check_fk_operator_null()
+        if check_fk_operator_null:
+            print("OK: Integrity checks fk_operator not isNull")
+            show_success(
+                "Sucess",
+                "OK: Integrity checks fk_operator not isNull",
+                None,
+            )
+
+        else:
+            progress_dialog.close()
+            print("INFO: missing MANDATORY fk_operator")
+            show_hint(
+                "INFO: Missing MANDATORY fk_operator in schema qgep_od",
+                "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
+                None,
+            )
+            # just show hint, but continue
+            # return
+            
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
