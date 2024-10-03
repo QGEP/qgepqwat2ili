@@ -175,8 +175,8 @@ def check_identifier_null():
 # Checking if MAMDATORY eigentuemerref not is Null
 def check_fk_owner_null():
 
-    logger.info("INTEGRITY CHECK missing owner references fk_owner...")
-    print("INTEGRITY CHECK missing owner references fk_owner...")
+    logger.info("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
+    print("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -213,8 +213,8 @@ def check_fk_owner_null():
 # Checking if MAMDATORY eigentuemerref not is Null
 def check_fk_operator_null():
 
-    logger.info("INTEGRITY CHECK missing operator references fk_operator...")
-    print("INTEGRITY CHECK missing operator references fk_operator...")
+    logger.info("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
+    print("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -247,7 +247,84 @@ def check_fk_operator_null():
         print(f"ERROR: Missing mandatory fk_operator: {missing_fk_operator_count}")
 
     return check_fk_operator_null
-    
+
+# Checking if MAMDATORY datenherrref not is Null
+def check_fk_dataowner_null():
+
+    logger.info("INTEGRITY CHECK missing dataowner references fk_dataowner...")
+    print("INTEGRITY CHECK missing dataowner references fk_dataowner...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_dataowner_count = 0
+    for notsubclass in [
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_dataowner_count} WHERE fk_dataowner is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(
+            f"Number of datasets in {notsubclass} without fk_dataowner : {cursor.fetchone()[0]}"
+        )
+
+        if cursor.fetchone() is None:
+            missing_fk_dataowner_count = missing_fk_dataowner_count
+        else:
+            missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
+
+    if missing_fk_dataowner_count == 0:
+        check_fk_dataowner_null = True
+        logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
+    else:
+        missing_fk_dataowner_count = False
+        logger.info(f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}")
+        print(f"ERROR: Missing mandatory fk_dataowner: {missing_fk_dataowner_count}")
+
+    return check_fk_dataowner_null
+
+
+
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
 
