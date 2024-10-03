@@ -172,6 +172,43 @@ def check_identifier_null():
 
     return identifier_null_check
 
+# Checking if MAMDATORY eigentuemerref not is Null
+def check_fk_owner_null():
+
+    logger.info("INTEGRITY CHECK missing owner references fk_owner...")
+    print("INTEGRITY CHECK missing owner references fk_owner...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_owner_count = 0
+    for notsubclass in [
+        # SIA405 Abwasser
+        ("wastewater_structure"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_owner_count} WHERE fk_owner is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(
+            f"Number of datasets in {notsubclass} without fk_owner : {cursor.fetchone()[0]}"
+        )
+
+        if cursor.fetchone() is None:
+            missing_fk_owner_count = missing_fk_owner_count
+        else:
+            missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
+
+    if missing_fk_owner_count == 0:
+        check_fk_owner_null = True
+        logger.info("OK: all mandatory fk_owner set in qgep_od!")
+    else:
+        missing_fk_owner_count = False
+        logger.info(f"ERROR: Missing mandatory fk_owner in qgep_od: {missing_fk_owner_count}")
+        print(f"ERROR: Missing mandatory fk_owner: {missing_fk_owner_count}")
+
+    return check_fk_owner_null
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
     logger.info("CONNECTING TO DATABASE...")
