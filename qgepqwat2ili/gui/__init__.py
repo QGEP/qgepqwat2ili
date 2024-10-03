@@ -483,6 +483,28 @@ def action_export(plugin):
             # just show hint, but continue
             # return
 
+        # 4. identifier check check_fk_owner_null
+        check_fk_owner_null = False
+        check_fk_owner_null = check_fk_owner_null()
+        if check_fk_owner_null:
+            print("OK: Integrity checks fk_owner not isNull")
+            show_success(
+                "Sucess",
+                "OK: Integrity checks fk_owner not isNull",
+                None,
+            )
+
+        else:
+            progress_dialog.close()
+            print("INFO: missing MANDATORY fk_owner")
+            show_hint(
+                "INFO: Missing MANDATORY fk_owner in schema qgep_od",
+                "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
+                None,
+            )
+            # just show hint, but continue
+            # return
+
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
 
