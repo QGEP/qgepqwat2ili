@@ -436,7 +436,7 @@ def check_fk_provider_null():
         if class_fk_provider_count == 0:
             missing_fk_provider_count = missing_fk_provider_count
         else:
-            # missing_fk_provider_count = missing_fk_provider_count
+            # missing_fk_provider_count = missing_fk_provider_count + int(cursor.fetchone()[0])
             missing_fk_provider_count = missing_fk_provider_count + class_fk_provider_count
 
         # add for testing
@@ -453,6 +453,32 @@ def check_fk_provider_null():
         print(f"ERROR: Missing mandatory fk_provider: {missing_fk_provider_count}")
 
     return check_fk_provider_null
+
+def get_wwtp_structure_ids():
+# get list of id's of class wwtp_strucuture (ARABauwerk)
+
+    logger.info("get list of id's of class wwtp_strucuture (ARABauwerk)...")
+    print("get list of id's of class wwtp_strucuture (ARABauwerk)...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    wwtp_structure_ids = []
+
+    cursor.execute(
+        f"select obj_id from qgep_od.wwtp_strucuture;"
+    )
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    wwtp_structure_count = int(cursor.fetchone()[0])
+    if wwtp_structure_count == 0:
+        wwtp_structure_ids = None
+    else:
+        records = cursor.fetchall()
+        for row in records:
+            wwtp_structure_ids = wwtp_structure_ids + row[0] + ','
+
+    return wwtp_structure_ids
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
