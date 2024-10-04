@@ -455,8 +455,8 @@ def check_fk_provider_null():
     return check_fk_provider_null
 
 
-def get_wwtp_structure_ids():
-    # get list of id's of class wwtp_structure (ARABauwerk)
+def skip_wwtp_structure_ids():
+    # get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
 
     logger.info("get list of id's of class wwtp_structure (ARABauwerk)...")
     print("get list of id's of class wwtp_structure (ARABauwerk)...")
@@ -465,23 +465,35 @@ def get_wwtp_structure_ids():
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
-    wwtp_structure_ids = []
+    not_wwtp_structure_ids = []
 
-    # select all obj_id from wwtp_structure
+    # select all obj_id from wastewater_structure that are not in wwtp_structure
     cursor.execute(
-        f"SELECT obj_id FROM qgep_od.wwtp_structure;"
+        f"SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
     )
+    #remove - only for testing
+    #cursor.execute(
+    #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
+    #)
+    
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     #wwtp_structure_count = int(cursor.fetchone()[0])
     #if wwtp_structure_count == 0:
     if cursor.fetchone() is None:
-        wwtp_structure_ids = None
+        not_wwtp_structure_ids = None
     else:
         records = cursor.fetchall()
         for row in records:
-            wwtp_structure_ids = wwtp_structure_ids + row[0] + ","
+            logger.info(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            # not_wwtp_structure_ids = not_wwtp_structure_ids + str(row[0]) + ","
+            strrow = str(row[0])
+            #not_wwtp_structure_ids = ','.join([not_wwtp_structure_ids, strrow])
+            #not_wwtp_structure_ids = not_wwtp_structure_ids + row[0]
+            not_wwtp_structure_ids.append(strrow)
+            logger.info(f" building up '{not_wwtp_structure_ids}' ...")
 
-    return wwtp_structure_ids
+    return not_wwtp_structure_ids
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
