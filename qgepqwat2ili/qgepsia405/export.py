@@ -40,10 +40,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_strucuture (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
-    wwtp_structure_ids = get_wwtp_structure_ids()
+    get_wwtp_structure_ids()
     logger.info(
-                "wwtp_structure_ids : {wwtp_structure_ids}",
-            )
+        "wwtp_structure_ids : {wwtp_structure_ids}",
+    )
 
     # Orientation
     oriented = orientation is not None
