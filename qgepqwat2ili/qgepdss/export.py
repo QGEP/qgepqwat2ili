@@ -140,10 +140,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
             return tid_maker.tid_for_row(relation)
         else:
-            logger.info(
-                f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
-            )
-            return None
+            if filtered:
+                logger.info(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                )
+                return None
+            else:
+                return tid_maker.tid_for_row(relation)
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(

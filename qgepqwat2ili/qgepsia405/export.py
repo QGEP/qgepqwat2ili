@@ -135,7 +135,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                     f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
                 )
                 return None
-            else
+            else:
                 return tid_maker.tid_for_row(relation)
 
     def create_metaattributes(row):
