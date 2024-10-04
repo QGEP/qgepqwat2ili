@@ -475,10 +475,10 @@ def skip_wwtp_structure_ids():
     #cursor.execute(
     #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
     #)
-    
+
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-    #wwtp_structure_count = int(cursor.fetchone()[0])
-    #if wwtp_structure_count == 0:
+    # wwtp_structure_count = int(cursor.fetchone()[0])
+    # if wwtp_structure_count == 0:
     if cursor.fetchone() is None:
         not_wwtp_structure_ids = None
     else:

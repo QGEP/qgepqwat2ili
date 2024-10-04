@@ -40,8 +40,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
+
     wastewater_structure_id_sia405abwasser_list = None
     wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+
     logger.info(
         f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
     )
