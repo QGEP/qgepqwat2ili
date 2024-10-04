@@ -360,7 +360,7 @@ def action_import(plugin):
     # 31.5.2024 should not be needed anymore
     # progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
 
-    time.sleep(2)
+    # time.sleep(2)
     # to add option to run main_cover.sql manually - see postimport.py
 
     # 24.7.2022 / moved to end
