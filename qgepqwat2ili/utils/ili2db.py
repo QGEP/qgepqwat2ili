@@ -217,10 +217,8 @@ def check_fk_owner_null():
             #missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
             missing_fk_owner_count = missing_fk_owner_count + class_fk_owner_count
 
-        # add for testing 
-        logger.info(
-            f"missing_fk_owner_count : {missing_fk_owner_count}"
-        )
+        # add for testing
+        logger.info(f"missing_fk_owner_count : {missing_fk_owner_count}")
 
     if missing_fk_owner_count == 0:
         check_fk_owner_null = True
@@ -262,10 +260,8 @@ def check_fk_operator_null():
             missing_fk_operator_count = missing_fk_operator_count
         else:
             missing_fk_operator_count = missing_fk_operator_count + int(cursor.fetchone()[0])
-        # add for testing 
-        logger.info(
-            f"missing_fk_operator_count : {missing_fk_operator_count}"
-        )
+        # add for testing
+        logger.info(f"missing_fk_operator_count : {missing_fk_operator_count}")
 
     if missing_fk_operator_count == 0:
         check_fk_operator_null = True
@@ -347,6 +343,7 @@ def check_fk_dataowner_null():
             f"Number of datasets in {notsubclass} without fk_dataowner (tttt) : {class_fk_dataowner_count}"
         )
 
+
         # if cursor.fetchone() is None:
         if class_fk_dataowner_count == 0:
             missing_fk_dataowner_count = missing_fk_dataowner_count
@@ -354,10 +351,8 @@ def check_fk_dataowner_null():
             #missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
             missing_fk_dataowner_count = missing_fk_dataowner_count + class_fk_dataowner_count
 
-        # add for testing 
-        logger.info(
-            f"missing_fk_dataowner_count : {missing_fk_dataowner_count}"
-        )
+        # add for testing
+        logger.info(f"missing_fk_dataowner_count : {missing_fk_dataowner_count}")
 
     if missing_fk_dataowner_count == 0:
         check_fk_dataowner_null = True
@@ -445,10 +440,8 @@ def check_fk_provider_null():
             # missing_fk_provider_count = missing_fk_provider_count
             missing_fk_provider_count = missing_fk_provider_count + class_fk_provider_count
 
-        # add for testing 
-        logger.info(
-            f"missing_fk_provider_count : {missing_fk_provider_count}"
-        )
+        # add for testing
+        logger.info(f"missing_fk_provider_count : {missing_fk_provider_count}")
 
     if missing_fk_provider_count == 0:
         check_fk_provider_null = True
