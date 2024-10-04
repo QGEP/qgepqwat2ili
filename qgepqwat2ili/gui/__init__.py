@@ -3,7 +3,6 @@ import os
 import tempfile
 
 # 12.7.2022 for testing import time
-import time
 import webbrowser
 from types import SimpleNamespace
 
