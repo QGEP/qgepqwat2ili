@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
-from ..utils.various import logger
-#4.10.2024
-from ..utils.ili2db import get_wwtp_structure_ids
 
+# 4.10.2024
+from ..utils.ili2db import get_wwtp_structure_ids
+from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
