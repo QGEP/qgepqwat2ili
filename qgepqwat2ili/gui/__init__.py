@@ -27,12 +27,12 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
 from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
+    check_fk_dataowner_null,
+    check_fk_operator_null,
+    check_fk_owner_null,
+    check_fk_provider_null,
     check_identifier_null,
     check_organisation_subclass_data,
-    check_fk_owner_null,
-    check_fk_operator_null,
-    check_fk_dataowner_null,
-    check_fk_provider_null,
     check_wastewater_structure_subclass_data,
     create_ili_schema,
     export_xtf_data,
