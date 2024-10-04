@@ -467,10 +467,14 @@ def get_wwtp_structure_ids():
 
     wwtp_structure_ids = []
 
-    cursor.execute(f"select obj_id from qgep_od.wwtp_structure;")
+    # select all obj_id from wwtp_structure
+    cursor.execute(
+        f"SELECT obj_id FROM qgep_od.wwtp_structure;"
+    )
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-    wwtp_structure_count = int(cursor.fetchone()[0])
-    if wwtp_structure_count == 0:
+    #wwtp_structure_count = int(cursor.fetchone()[0])
+    #if wwtp_structure_count == 0:
+    if cursor.fetchone() is None:
         wwtp_structure_ids = None
     else:
         records = cursor.fetchall()
