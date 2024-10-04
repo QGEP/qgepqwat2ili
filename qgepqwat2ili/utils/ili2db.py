@@ -188,9 +188,7 @@ def check_fk_owner_null():
         # SIA405 Abwasser
         ("wastewater_structure"),
     ]:
-        cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null;"
-        )
+        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null;")
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
             f"Number of datasets in {notsubclass} without fk_owner : {cursor.fetchone()[0]}"
