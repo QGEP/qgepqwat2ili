@@ -159,18 +159,18 @@ def check_identifier_null():
         logger.info(
             f"Number of datasets in {notsubclass} without fk_dataowner (tttt) : {class_identifier_count}"
         )
-        
-        #if cursor.fetchone() is None:
+
+        # if cursor.fetchone() is None:
         if class_identifier_count == 0:
             missing_identifier_count = missing_identifier_count
         else:
-            #missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
-            missing_identifier_count = missing_identifier_count + class_identifier_count(cursor.fetchone()[0])
+            # missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
+            missing_identifier_count = missing_identifier_count + class_identifier_count(
+                cursor.fetchone()[0]
+            )
 
-        # add for testing 
-        logger.info(
-            f"missing_fk_dataowner_count : {missing_identifier_count}"
-        )
+        # add for testing
+        logger.info(f"missing_fk_dataowner_count : {missing_identifier_count}")
 
     if missing_identifier_count == 0:
         identifier_null_check = True
@@ -203,18 +203,18 @@ def check_fk_owner_null():
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
         class_fk_owner_count = int(cursor.fetchone()[0])
-        #logger.info(
+        # logger.info(
         #    f"Number of datasets in {notsubclass} without fk_owner : {cursor.fetchone()[0]}"
-        #)
+        # )
         logger.info(
             f"Number of datasets in {notsubclass} without fk_owner (tttt) : {class_fk_owner_count}"
         )
 
-        #if cursor.fetchone() is None:
+        # if cursor.fetchone() is None:
         if class_fk_owner_count == 0:
             missing_fk_owner_count = missing_fk_owner_count
         else:
-            #missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
+            # missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
             missing_fk_owner_count = missing_fk_owner_count + class_fk_owner_count
 
         # add for testing
@@ -335,20 +335,19 @@ def check_fk_dataowner_null():
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
         class_fk_dataowner_count = int(cursor.fetchone()[0])
-        
-        #logger.info(
+
+        # logger.info(
         #    f"Number of datasets in {notsubclass} without fk_dataowner : {cursor.fetchone()[0]}"
-        #)
+        # )
         logger.info(
             f"Number of datasets in {notsubclass} without fk_dataowner (tttt) : {class_fk_dataowner_count}"
         )
-
 
         # if cursor.fetchone() is None:
         if class_fk_dataowner_count == 0:
             missing_fk_dataowner_count = missing_fk_dataowner_count
         else:
-            #missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
+            # missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
             missing_fk_dataowner_count = missing_fk_dataowner_count + class_fk_dataowner_count
 
         # add for testing
@@ -426,14 +425,14 @@ def check_fk_provider_null():
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
         class_fk_provider_count = int(cursor.fetchone()[0])
-        #logger.info(
+        # logger.info(
         #    f"Number of datasets in {notsubclass} without fk_provider : {cursor.fetchone()[0]}"
-        #)
+        # )
         logger.info(
             f"Number of datasets in {notsubclass} without fk_dataowner (tttt) : {class_fk_provider_count}"
         )
 
-        #if cursor.fetchone() is None:
+        # if cursor.fetchone() is None:
         if class_fk_provider_count == 0:
             missing_fk_provider_count = missing_fk_provider_count
         else:
