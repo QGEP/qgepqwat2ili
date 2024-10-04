@@ -507,8 +507,8 @@ def action_export(plugin):
                     "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
                     None,
                 )
-                # just show hint, but continue
-                # return
+                # make mandatory
+                return
 
             # 5. relation check check_fk_operator_null
             check_fk_operator = False
@@ -529,8 +529,8 @@ def action_export(plugin):
                     "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
                     None,
                 )
-                # just show hint, but continue
-                # return
+                # make mandatory
+                return
 
         # 6. relation check check_fk_dataowner_null
         if flag_test:
