@@ -48,7 +48,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
     )
 
-
     # Orientation
     oriented = orientation is not None
     if oriented:
@@ -222,7 +221,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return {
             # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            "abwasserbauwerkref": check_fk_in_subsetid(wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }

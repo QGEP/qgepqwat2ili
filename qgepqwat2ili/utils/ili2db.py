@@ -471,10 +471,10 @@ def skip_wwtp_structure_ids():
     cursor.execute(
         f"SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
     )
-    #remove - only for testing
-    #cursor.execute(
+    # remove - only for testing
+    # cursor.execute(
     #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
-    #)
+    # )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # wwtp_structure_count = int(cursor.fetchone()[0])
@@ -488,8 +488,8 @@ def skip_wwtp_structure_ids():
             # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
             # not_wwtp_structure_ids = not_wwtp_structure_ids + str(row[0]) + ","
             strrow = str(row[0])
-            #not_wwtp_structure_ids = ','.join([not_wwtp_structure_ids, strrow])
-            #not_wwtp_structure_ids = not_wwtp_structure_ids + row[0]
+            # not_wwtp_structure_ids = ','.join([not_wwtp_structure_ids, strrow])
+            # not_wwtp_structure_ids = not_wwtp_structure_ids + row[0]
             not_wwtp_structure_ids.append(strrow)
             logger.info(f" building up '{not_wwtp_structure_ids}' ...")
 
