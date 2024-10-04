@@ -501,9 +501,9 @@ def action_export(plugin):
 
             else:
                 progress_dialog.close()
-                print("INFO: missing MANDATORY fk_owner")
+                print("ERROR: missing MANDATORY fk_owner")
                 show_hint(
-                    "INFO: Missing MANDATORY fk_owner in schema qgep_od",
+                    "ERROR: Missing MANDATORY fk_owner in schema qgep_od",
                     "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
                     None,
                 )
@@ -523,9 +523,9 @@ def action_export(plugin):
 
             else:
                 progress_dialog.close()
-                print("INFO: missing MANDATORY fk_operator")
+                print("ERROR: missing MANDATORY fk_operator")
                 show_hint(
-                    "INFO: Missing MANDATORY fk_operator in schema qgep_od",
+                    "ERROR: Missing MANDATORY fk_operator in schema qgep_od",
                     "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
                     None,
                 )
