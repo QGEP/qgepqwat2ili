@@ -189,7 +189,7 @@ def check_fk_owner_null():
         ("wastewater_structure"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_owner_count} WHERE fk_owner is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
@@ -306,7 +306,7 @@ def check_fk_dataowner_null():
         ("zone"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_dataowner_count} WHERE fk_dataowner is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_dataowner is null;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
@@ -384,7 +384,7 @@ def check_fk_provider_null():
         ("zone"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_provider_count} WHERE fk_provider is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_provider is null;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
