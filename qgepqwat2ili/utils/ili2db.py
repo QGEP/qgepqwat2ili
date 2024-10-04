@@ -456,10 +456,10 @@ def check_fk_provider_null():
 
 
 def get_wwtp_structure_ids():
-    # get list of id's of class wwtp_strucuture (ARABauwerk)
+    # get list of id's of class wwtp_structure (ARABauwerk)
 
-    logger.info("get list of id's of class wwtp_strucuture (ARABauwerk)...")
-    print("get list of id's of class wwtp_strucuture (ARABauwerk)...")
+    logger.info("get list of id's of class wwtp_structure (ARABauwerk)...")
+    print("get list of id's of class wwtp_structure (ARABauwerk)...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -467,7 +467,7 @@ def get_wwtp_structure_ids():
 
     wwtp_structure_ids = []
 
-    cursor.execute(f"select obj_id from qgep_od.wwtp_strucuture;")
+    cursor.execute(f"select obj_id from qgep_od.wwtp_structure;")
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     wwtp_structure_count = int(cursor.fetchone()[0])
     if wwtp_structure_count == 0:
