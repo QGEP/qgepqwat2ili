@@ -102,7 +102,7 @@ def action_importc(plugin):
         progress_dialog.show()
         progress_dialog.setLabelText("waiting...")
         # delays the execution for 5.5 secs.
-        time.sleep(5.5)
+        # time.sleep(5.5)
         progress_dialog.close
         # end action_do_importc
 
