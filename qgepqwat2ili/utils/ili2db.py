@@ -199,11 +199,16 @@ def check_fk_owner_null():
         else:
             missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
 
+        # add for testing 
+        logger.info(
+            f"missing_fk_owner_count : {missing_fk_owner_count}"
+        )
+
     if missing_fk_owner_count == 0:
         check_fk_owner_null = True
         logger.info("OK: all mandatory fk_owner set in qgep_od!")
     else:
-        missing_fk_owner_count = False
+        check_fk_owner_null = False
         logger.info(f"ERROR: Missing mandatory fk_owner in qgep_od: {missing_fk_owner_count}")
         print(f"ERROR: Missing mandatory fk_owner: {missing_fk_owner_count}")
 
@@ -237,12 +242,16 @@ def check_fk_operator_null():
             missing_fk_operator_count = missing_fk_operator_count
         else:
             missing_fk_operator_count = missing_fk_operator_count + int(cursor.fetchone()[0])
+        # add for testing 
+        logger.info(
+            f"missing_fk_operator_count : {missing_fk_operator_count}"
+        )
 
     if missing_fk_operator_count == 0:
         check_fk_operator_null = True
         logger.info("OK: all mandatory fk_operator set in qgep_od!")
     else:
-        missing_fk_operator_count = False
+        check_fk_operator_null = False
         logger.info(
             f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}"
         )
@@ -307,20 +316,34 @@ def check_fk_dataowner_null():
             f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_dataowner is null;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
+        
+        # hilfvariable
+        tttt = int(cursor.fetchone()[0])
+        
+        #logger.info(
+        #    f"Number of datasets in {notsubclass} without fk_dataowner : {cursor.fetchone()[0]}"
+        #)
         logger.info(
-            f"Number of datasets in {notsubclass} without fk_dataowner : {cursor.fetchone()[0]}"
+            f"2. Number of datasets in {notsubclass} without fk_dataowner (tttt) : {tttt}"
         )
 
-        if cursor.fetchone() is None:
+        # if cursor.fetchone() is None:
+        if tttt == 0:
             missing_fk_dataowner_count = missing_fk_dataowner_count
         else:
-            missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
+            #missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
+            missing_fk_dataowner_count = missing_fk_dataowner_count + tttt
+
+        # add for testing 
+        logger.info(
+            f"missing_fk_dataowner_count : {missing_fk_dataowner_count}"
+        )
 
     if missing_fk_dataowner_count == 0:
         check_fk_dataowner_null = True
         logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
     else:
-        missing_fk_dataowner_count = False
+        check_fk_dataowner_null = False
         logger.info(
             f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}"
         )
@@ -389,16 +412,35 @@ def check_fk_provider_null():
             f"Number of datasets in {notsubclass} without fk_provider : {cursor.fetchone()[0]}"
         )
 
+        # if no data in class cursor will be None
         if cursor.fetchone() is None:
             missing_fk_provider_count = missing_fk_provider_count
+            # add for testing 
+            logger.info(
+                f"No data in class {notsubclass}"
+            )
+            #logger.info(
+            #    f"cursor.fetchone() is None : {int(cursor.fetchone()[0])}"
+            #)
         else:
-            missing_fk_provider_count = missing_fk_provider_count + int(cursor.fetchone()[0])
+            if int(cursor.fetchone()[0]) == 0:
+                # missing_fk_provider_count = missing_fk_provider_count
+                logger.info(
+                    f"{(cursor.fetchone()[0])} missing fk_provider in class {notsubclass}"
+                )
+            else:
+                missing_fk_provider_count = missing_fk_provider_count + int(cursor.fetchone()[0])
+
+        # add for testing 
+        logger.info(
+            f"missing_fk_provider_count : {missing_fk_provider_count}"
+        )
 
     if missing_fk_provider_count == 0:
         check_fk_provider_null = True
         logger.info("OK: all mandatory fk_provider set in qgep_od!")
     else:
-        missing_fk_provider_count = False
+        check_fk_provider_null = False
         logger.info(
             f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}"
         )
