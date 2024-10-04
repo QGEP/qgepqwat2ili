@@ -489,9 +489,9 @@ def action_export(plugin):
 
         # 4. relation check check_fk_owner_null
         if flag_test:
-            check_fk_owner_null = False
-            check_fk_owner_null = check_fk_owner_null()
-            if check_fk_owner_null:
+            check_fk_owner = False
+            check_fk_owner = check_fk_owner_null()
+            if check_fk_owner:
                 print("OK: Integrity checks fk_owner not isNull")
                 show_success(
                     "Sucess",
@@ -511,9 +511,9 @@ def action_export(plugin):
                 # return
 
             # 5. relation check check_fk_operator_null
-            check_fk_operator_null = False
-            check_fk_operator_null = check_fk_operator_null()
-            if check_fk_operator_null:
+            check_fk_operator = False
+            check_fk_operator = check_fk_operator_null()
+            if check_fk_operator:
                 print("OK: Integrity checks fk_operator not isNull")
                 show_success(
                     "Sucess",
@@ -534,9 +534,9 @@ def action_export(plugin):
 
         # 6. relation check check_fk_dataowner_null
         if flag_test:
-            check_fk_dataowner_null = False
-            check_fk_dataowner_null = check_fk_dataowner_null()
-            if check_fk_dataowner_null:
+            check_fk_dataowner = False
+            check_fk_dataowner = check_fk_dataowner_null()
+            if check_fk_dataowner:
                 print("OK: Integrity checks fk_dataowner not isNull")
                 show_success(
                     "Sucess",
@@ -556,9 +556,9 @@ def action_export(plugin):
                 # return
 
             # 6. relation check check_fk_provider_null
-            check_fk_provider_null = False
-            check_fk_provider_null = check_fk_provider_null()
-            if check_fk_provider_null:
+            check_fk_provider = False
+            check_fk_provider = check_fk_provider_null()
+            if check_fk_provider:
                 print("OK: Integrity checks fk_provider not isNull")
                 show_success(
                     "Sucess",
