@@ -226,7 +226,7 @@ def check_fk_operator_null():
         ("wastewater_structure"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{missing_fk_operator_count} WHERE fk_operator is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_operator is null;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
