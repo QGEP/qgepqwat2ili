@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
+
 # 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger
@@ -44,9 +45,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # Logging for debugging
     logger.info(f"print subset_ids '{subset_ids}'")
-    
-   # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
-                                               
+
+    # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
 
     wastewater_structure_id_sia405abwasser_list = None
     wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
@@ -54,11 +54,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info(
         f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
     )
-
-
-
-
-
 
     # Orientation
     oriented = orientation is not None
