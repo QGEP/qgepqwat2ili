@@ -469,7 +469,7 @@ def skip_wwtp_structure_ids():
 
     # select all obj_id from wastewater_structure that are not in wwtp_structure
     cursor.execute(
-        f"SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
+        "SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
     )
     # remove - only for testing
     # cursor.execute(
