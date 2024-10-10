@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
+
 # 4.10.2024
 from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger

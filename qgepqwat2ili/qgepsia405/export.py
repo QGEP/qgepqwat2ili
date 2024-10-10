@@ -61,6 +61,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if relation is None:
             return None
+
         return tid_maker.tid_for_row(relation)
 
     def get_vl(relation):
@@ -102,7 +103,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
         if len(val) > max_length:
-            logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            # _log() got an unexpected keyword argument 'stacklevel'
+            #    logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
     def modulo_angle(val):
