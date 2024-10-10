@@ -26,9 +26,7 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 # 28.3.2023 additional import for sia405, export to be discussed further
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
-
-from ..utils.ili2db import (  
-    # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
+from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
     check_fk_dataowner_null,
     check_fk_operator_null,
     check_fk_owner_null,

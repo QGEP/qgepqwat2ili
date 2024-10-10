@@ -7,7 +7,9 @@ from .various import logger
 
 class QgepExportUtils:
 
-    def __init__(self, tid_maker, current_basket, abwasser_session, abwasser_model, labelorientation):
+    def __init__(
+        self, tid_maker, current_basket, abwasser_session, abwasser_model, labelorientation
+    ):
         self.tid_maker = tid_maker
         self.current_basket = current_basket
         self.abwasser_session = abwasser_session
@@ -116,8 +118,12 @@ class QgepExportUtils:
             # datenherr=getattr(row.fk_dataowner__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
             # 31.3.2023 obj_id instead of name
-            datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
+            datenherr=getattr(
+                row.fk_dataowner__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
+            datenlieferant=getattr(
+                row.fk_provider__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=self.get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
@@ -150,7 +156,9 @@ class QgepExportUtils:
         """
         Returns common attributes for wastewater_structure
         """
-        logger.warning(f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.")
+        logger.warning(
+            f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
+        )
         return {
             # --- abwasserbauwerk ---
             "akten": row.records,

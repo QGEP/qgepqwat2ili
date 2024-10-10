@@ -63,7 +63,7 @@ def check_wastewater_structure_subclass_data():
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
     cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
-    
+
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -587,8 +587,7 @@ def get_xtf_model(xtf_file):
     checkmodelssection = -1
     impmodel = "not found"
 
-
-    with open(xtf_file, mode="r", encoding="utf-8") as f:
+    with open(xtf_file, encoding="utf-8") as f:
         while True:
             # if checkdatasection == -1:
             if checkmodelssection == -1:
