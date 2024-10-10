@@ -19,8 +19,7 @@ def check_organisation_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
-    cursor.execute(f"SELECT obj_id FROM qgep_od.organisation;")
+    cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
@@ -39,7 +38,9 @@ def check_organisation_subclass_data():
 
         if organisation_count == 0:
             organisation_subclass_check = True
-            logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
+            logger.info(
+                "OK: number of subclass elements of class organisation OK in schema qgep_od!"
+            )
         else:
             organisation_subclass_check = False
             logger.info(
@@ -61,8 +62,8 @@ def check_wastewater_structure_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
-    cursor.execute(f"SELECT obj_id FROM qgep_od.wastewater_structure;")
+    cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
+    
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -80,7 +81,9 @@ def check_wastewater_structure_subclass_data():
 
         if wastewater_structure_count == 0:
             wastewater_structure_subclass_check = True
-            logger.info(f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!")
+            logger.info(
+                "OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
+            )
         else:
             wastewater_structure_subclass_check = False
             logger.info(
@@ -104,6 +107,7 @@ def check_identifier_null():
     cursor = connection.cursor()
 
     missing_identifier_count = 0
+    # add classes to be checked
     for notsubclass in [
         # VSA-KEK
         ("file"),
@@ -145,24 +149,350 @@ def check_identifier_null():
         ("wwtp_energy_use"),
         ("zone"),
     ]:
-        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;"
+        )
         # use cursor.fetchone()[0] instead of cursor.rowcount
-        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.fetchone()[0]}")
+        # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        class_identifier_count = int(cursor.fetchone()[0])
+        logger.info(
+            f"Number of datasets in class '{notsubclass}' without identifier : {class_identifier_count}"
+        )
 
-        if cursor.fetchone() is None:
+        # if cursor.fetchone() is None:
+        if class_identifier_count == 0:
             missing_identifier_count = missing_identifier_count
         else:
-            missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
+            # missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
+            missing_identifier_count = missing_identifier_count + class_identifier_count(
+                cursor.fetchone()[0]
+            )
+
+        # add for testing
+        logger.info(f"missing_identifier_count : {missing_identifier_count}")
 
     if missing_identifier_count == 0:
         identifier_null_check = True
-        logger.info(f"OK: all identifiers set in qgep_od!")
+        logger.info("OK: all identifiers set in qgep_od!")
     else:
         identifier_null_check = False
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
         print(f"ERROR: Missing identifiers: {missing_identifier_count}")
 
     return identifier_null_check
+
+
+# Checking if MAMDATORY eigentuemerref not is Null
+def check_fk_owner_null():
+
+    logger.info("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
+    print("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_owner_count = 0
+    # add MANDATORY classes to be checked
+    for notsubclass in [
+        # SIA405 Abwasser
+        ("wastewater_structure"),
+    ]:
+        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null;")
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        class_fk_owner_count = int(cursor.fetchone()[0])
+        # logger.info(
+        #    f"Number of datasets in class '{notsubclass}' without fk_owner : {cursor.fetchone()[0]}"
+        # )
+        logger.info(
+            f"Number of datasets in class '{notsubclass}' without fk_owner : {class_fk_owner_count}"
+        )
+
+        # if cursor.fetchone() is None:
+        if class_fk_owner_count == 0:
+            missing_fk_owner_count = missing_fk_owner_count
+        else:
+            # missing_fk_owner_count = missing_fk_owner_count + int(cursor.fetchone()[0])
+            missing_fk_owner_count = missing_fk_owner_count + class_fk_owner_count
+
+        # add for testing
+        logger.info(f"missing_fk_owner_count : {missing_fk_owner_count}")
+
+    if missing_fk_owner_count == 0:
+        check_fk_owner_null = True
+        logger.info("OK: all mandatory fk_owner set in qgep_od!")
+    else:
+        check_fk_owner_null = False
+        logger.info(f"ERROR: Missing mandatory fk_owner in qgep_od: {missing_fk_owner_count}")
+        print(f"ERROR: Missing mandatory fk_owner: {missing_fk_owner_count}")
+
+    return check_fk_owner_null
+
+
+# Checking if MAMDATORY betreiberref not is Null
+def check_fk_operator_null():
+
+    logger.info("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
+    print("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_operator_count = 0
+
+    # add MANDATORY classes to be checked
+    for notsubclass in [
+        # SIA405 Abwasser
+        ("wastewater_structure"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_operator is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        logger.info(
+            f"Number of datasets in class '{notsubclass}' without fk_operator : {cursor.fetchone()[0]}"
+        )
+
+        if cursor.fetchone() is None:
+            missing_fk_operator_count = missing_fk_operator_count
+        else:
+            missing_fk_operator_count = missing_fk_operator_count + int(cursor.fetchone()[0])
+        # add for testing
+        logger.info(f"missing_fk_operator_count : {missing_fk_operator_count}")
+
+    if missing_fk_operator_count == 0:
+        check_fk_operator_null = True
+        logger.info("OK: all mandatory fk_operator set in qgep_od!")
+    else:
+        check_fk_operator_null = False
+        logger.info(
+            f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}"
+        )
+        print(f"ERROR: Missing mandatory fk_operator: {missing_fk_operator_count}")
+
+    return check_fk_operator_null
+
+
+# Checking if MAMDATORY datenherrref not is Null
+def check_fk_dataowner_null():
+
+    logger.info("INTEGRITY CHECK missing dataowner references fk_dataowner...")
+    print("INTEGRITY CHECK missing dataowner references fk_dataowner...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_dataowner_count = 0
+    # add MANDATORY classes to be checked
+    for notsubclass in [
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_dataowner is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        class_fk_dataowner_count = int(cursor.fetchone()[0])
+
+        # logger.info(
+        #    f"Number of datasets in class '{notsubclass}' without fk_dataowner : {cursor.fetchone()[0]}"
+        # )
+        logger.info(
+            f"Number of datasets in class '{notsubclass}' without fk_dataowner : {class_fk_dataowner_count}"
+        )
+
+        # if cursor.fetchone() is None:
+        if class_fk_dataowner_count == 0:
+            missing_fk_dataowner_count = missing_fk_dataowner_count
+        else:
+            # missing_fk_dataowner_count = missing_fk_dataowner_count + int(cursor.fetchone()[0])
+            missing_fk_dataowner_count = missing_fk_dataowner_count + class_fk_dataowner_count
+
+        # add for testing
+        logger.info(f"missing_fk_dataowner_count : {missing_fk_dataowner_count}")
+
+    if missing_fk_dataowner_count == 0:
+        check_fk_dataowner_null = True
+        logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
+    else:
+        check_fk_dataowner_null = False
+        logger.info(
+            f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}"
+        )
+        print(f"ERROR: Missing mandatory fk_dataowner: {missing_fk_dataowner_count}")
+
+    return check_fk_dataowner_null
+
+
+# Checking if MAMDATORY datenlieferantref not is Null
+def check_fk_provider_null():
+
+    logger.info("INTEGRITY CHECK missing provider references fk_provider...")
+    print("INTEGRITY CHECK missing provider references fk_provider...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    missing_fk_provider_count = 0
+    # add MANDATORY classes to be checked
+    for notsubclass in [
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_provider is null;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        class_fk_provider_count = int(cursor.fetchone()[0])
+        # logger.info(
+        #    f"Number of datasets in class '{notsubclass}' without fk_provider : {cursor.fetchone()[0]}"
+        # )
+        logger.info(
+            f"Number of datasets in class '{notsubclass}' without fk_dataowner : {class_fk_provider_count}"
+        )
+
+        # if cursor.fetchone() is None:
+        if class_fk_provider_count == 0:
+            missing_fk_provider_count = missing_fk_provider_count
+        else:
+            # missing_fk_provider_count = missing_fk_provider_count + int(cursor.fetchone()[0])
+            missing_fk_provider_count = missing_fk_provider_count + class_fk_provider_count
+
+        # add for testing
+        logger.info(f"missing_fk_provider_count : {missing_fk_provider_count}")
+
+    if missing_fk_provider_count == 0:
+        check_fk_provider_null = True
+        logger.info("OK: all mandatory fk_provider set in qgep_od!")
+    else:
+        check_fk_provider_null = False
+        logger.info(
+            f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}"
+        )
+        print(f"ERROR: Missing mandatory fk_provider: {missing_fk_provider_count}")
+
+    return check_fk_provider_null
+
+
+def skip_wwtp_structure_ids():
+    # get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
+
+    logger.info("get list of id's of class wwtp_structure (ARABauwerk)...")
+    print("get list of id's of class wwtp_structure (ARABauwerk)...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    not_wwtp_structure_ids = []
+
+    # select all obj_id from wastewater_structure that are not in wwtp_structure
+    cursor.execute(
+        "SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
+    )
+    # remove - only for testing
+    # cursor.execute(
+    #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
+    # )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # wwtp_structure_count = int(cursor.fetchone()[0])
+    # if wwtp_structure_count == 0:
+    if cursor.fetchone() is None:
+        not_wwtp_structure_ids = None
+    else:
+        records = cursor.fetchall()
+        for row in records:
+            logger.info(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            # not_wwtp_structure_ids = not_wwtp_structure_ids + str(row[0]) + ","
+            strrow = str(row[0])
+            # not_wwtp_structure_ids = ','.join([not_wwtp_structure_ids, strrow])
+            # not_wwtp_structure_ids = not_wwtp_structure_ids + row[0]
+            not_wwtp_structure_ids.append(strrow)
+            logger.info(f" building up '{not_wwtp_structure_ids}' ...")
+
+    return not_wwtp_structure_ids
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False, create_basket_col=False):
@@ -174,10 +504,14 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False, create_bas
 
     if not recreate_schema:
         # If the schema already exists, we just truncate all tables
-        cursor.execute(f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema}';")
+        cursor.execute(
+            f"SELECT schema_name FROM information_schema.schemata WHERE schema_name = '{schema}';"
+        )
         if cursor.rowcount > 0:
             logger.info(f"Schema {schema} already exists, we truncate instead")
-            cursor.execute(f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}';")
+            cursor.execute(
+                f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}';"
+            )
             for row in cursor.fetchall():
                 cursor.execute(f"TRUNCATE TABLE {schema}.{row[0]} CASCADE;")
             return
@@ -253,6 +587,7 @@ def get_xtf_model(xtf_file):
     checkmodelssection = -1
     impmodel = "not found"
 
+
     with open(xtf_file, mode="r", encoding="utf-8") as f:
         while True:
             # if checkdatasection == -1:
@@ -296,8 +631,8 @@ def get_xtf_model(xtf_file):
                     # if strmodel.find("</MODELS>") > -1:
                     if a == -1:
                         b = strmodel.find("<MODEL>")
-                        logger.info("strmodel.find b \<MODEL: " + str(b))
-                        print("strmodel.find b \<MODEL: " + str(b))
+                        logger.info(r"strmodel.find b \<MODEL: " + str(b))
+                        print(r"strmodel.find b \<MODEL: " + str(b))
                         if strmodel.find("<MODEL") > -1:
                             print("strmodel (ili2db): " + strmodel)
                             logger.info("MODELS definition found in xtf: " + strmodel)
@@ -331,7 +666,7 @@ def get_xtf_model(xtf_file):
                         else:
                             print("goto next line")
                     else:
-                        print("<\/MODEL> found - stop checking!")
+                        print(r"<\/MODEL> found - stop checking!")
                         logger.info("</MODEL> found - stop checking!")
                         break
     print(model_list)
@@ -402,9 +737,9 @@ def get_xtf_model2(xtf_file):
             model_list.append(rootinterlis[0][0][j].get("NAME"))
             model_found = True
         # except utils.various.CmdException:
-        except:
+        except Exception:
             if model_found:
-                logger.info(f"{i-1} times MODEL information was found!")
+                logger.info(f"{i - 1} times MODEL information was found!")
                 break
             else:
                 logger.info("No MODEL information was found!")

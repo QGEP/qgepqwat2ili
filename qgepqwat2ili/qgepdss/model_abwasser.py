@@ -16,13 +16,15 @@ class sia405_baseclass(baseclass):
     __tablename__ = "sia405_baseclass"
     __table_args__ = {"schema": SCHEMA}
 
+
 # 21.7.2022 / 22.7.2022 von hand () angepasst, kein sia405_baseclass -> baseclass
 # 26.7.2022 baseclass geht auch nicht -> base
 # class erhaltungsereignis_abwasserbauwerk(baseclass):
 # leer lassen ()
-class erhaltungsereignis_abwasserbauwerk():
+class erhaltungsereignis_abwasserbauwerk:
     __tablename__ = "erhaltungsereignis_abwasserbauwerkassoc"
     __table_args__ = {"schema": SCHEMA}
+
 
 class organisation(sia405_baseclass):
     __tablename__ = "organisation"
@@ -153,9 +155,10 @@ class erhaltungsereignis(sia405_baseclass):
     __tablename__ = "erhaltungsereignis"
     __table_args__ = {"schema": SCHEMA}
 
-#18.7.2022 class zone(sia405_baseclass):
+
+# 18.7.2022 class zone(sia405_baseclass):
 class azone(sia405_baseclass):
-#    __tablename__ = "azone"
+    #    __tablename__ = "azone"
     __tablename__ = "azone"
     __table_args__ = {"schema": SCHEMA}
 

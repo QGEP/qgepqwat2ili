@@ -3,7 +3,7 @@ import os
 import tempfile
 
 # 12.7.2022 for testing import time
-import time
+# import time
 import webbrowser
 from types import SimpleNamespace
 
@@ -26,7 +26,13 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 # 28.3.2023 additional import for sia405, export to be discussed further
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
-from ..utils.ili2db import (
+
+from ..utils.ili2db import (  
+    # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
+    check_fk_dataowner_null,
+    check_fk_operator_null,
+    check_fk_owner_null,
+    check_fk_provider_null,
     check_identifier_null,
     check_organisation_subclass_data,
     check_wastewater_structure_subclass_data,
@@ -98,7 +104,7 @@ def action_importc(plugin):
         progress_dialog.show()
         progress_dialog.setLabelText("waiting...")
         # delays the execution for 5.5 secs.
-        time.sleep(5.5)
+        # time.sleep(5.5)
         progress_dialog.close
         # end action_do_importc
 
@@ -117,18 +123,23 @@ def action_import(plugin):
 
     global import_dialog  # avoid garbage collection
 
-    default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
+    default_folder = QgsSettings().value(
+        "qgep_plugin/last_interlis_path", QgsProject.instance().absolutePath()
+    )
     file_name, _ = QFileDialog.getOpenFileName(
-        None, plugin.tr("Import file"), default_folder, plugin.tr("Interlis transfer files (*.xtf)")
+        None,
+        plugin.tr("Import file"),
+        default_folder,
+        plugin.tr("Interlis transfer files (*.xtf)"),
     )
     if not file_name:
         # Operation canceled
         return
-    QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
+    QgsSettings().setValue("qgep_plugin/last_interlis_path", os.path.dirname(file_name))
 
     # Configure logging
     s = QgsSettings().value("qgep_plugin/logs_next_to_file", False)
-    logs_next_to_file = s == True or s == "true"
+    logs_next_to_file = s is True or s == "true"
     if logs_next_to_file:
         base_log_path = file_name
     else:
@@ -314,7 +325,9 @@ def action_import(plugin):
     # progress_dialog.setValue(100)
     progress_dialog.setValue(66)
 
-    log_handler = logging.FileHandler(make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8")
+    log_handler = logging.FileHandler(
+        make_log_path(base_log_path, "qgepqwat2ili-import"), mode="w", encoding="utf-8"
+    )
     log_handler.setLevel(logging.INFO)
     log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
     with LoggingHandlerContext(log_handler):
@@ -349,7 +362,7 @@ def action_import(plugin):
     # 31.5.2024 should not be needed anymore
     # progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
 
-    time.sleep(2)
+    # time.sleep(2)
     # to add option to run main_cover.sql manually - see postimport.py
 
     # 24.7.2022 / moved to end
@@ -378,7 +391,9 @@ def action_export(plugin):
         print(eorientation)
 
         # Prepare file dialog
-        default_folder = QgsSettings().value("qgep_pluging/last_interlis_path", QgsProject.instance().absolutePath())
+        default_folder = QgsSettings().value(
+            "qgep_plugin/last_interlis_path", QgsProject.instance().absolutePath()
+        )
         file_name, _ = QFileDialog.getSaveFileName(
             None,
             plugin.tr("Export to file"),
@@ -388,7 +403,7 @@ def action_export(plugin):
         if not file_name:
             # Operation canceled
             return
-        QgsSettings().setValue("qgep_pluging/last_interlis_path", os.path.dirname(file_name))
+        QgsSettings().setValue("qgep_plugin/last_interlis_path", os.path.dirname(file_name))
 
         # File name without extension (used later for export)
         file_name_base, _ = os.path.splitext(file_name)
@@ -416,7 +431,7 @@ def action_export(plugin):
                 print("OK: Integrity checks organisation")
                 show_success(
                     "Sucess",
-                    f"OK: Integrity checks organisation",
+                    "OK: Integrity checks organisation",
                     None,
                 )
             else:
@@ -424,7 +439,7 @@ def action_export(plugin):
                 print("number of subclass elements of organisation NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od",
-                    f"Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
+                    "Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
                     None,
                 )
                 return
@@ -439,7 +454,7 @@ def action_export(plugin):
                 print("OK: Integrity checks wastewater_structure")
                 show_success(
                     "Sucess",
-                    f"OK: Integrity checks wastewater_structure",
+                    "OK: Integrity checks wastewater_structure",
                     None,
                 )
             else:
@@ -447,32 +462,123 @@ def action_export(plugin):
                 print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od",
-                    f"Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
+                    "Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
                     None,
                 )
                 return
 
         # 3. identifier check check_identifier_null
-        check_identifier = False
-        check_identifier = check_identifier_null()
-        if check_identifier:
-            print("OK: Integrity checks identifiers not isNull")
-            show_success(
-                "Sucess",
-                f"OK: Integrity checks identifiers not isNull",
-                None,
-            )
+        if flag_test:
+            check_identifier = False
+            check_identifier = check_identifier_null()
+            if check_identifier:
+                print("OK: Integrity checks identifiers not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks identifiers not isNull",
+                    None,
+                )
 
-        else:
-            progress_dialog.close()
-            print("INFO: missing identifiers")
-            show_hint(
-                "INFO: Missing identifiers in schema qgep_od",
-                f"Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
-                None,
-            )
-            # just show hint, but continue
-            # return
+            else:
+                progress_dialog.close()
+                print("INFO: missing identifiers")
+                show_hint(
+                    "INFO: Missing identifiers in schema qgep_od",
+                    "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
+
+        # 4. relation check check_fk_owner_null
+        if flag_test:
+            check_fk_owner = False
+            check_fk_owner = check_fk_owner_null()
+            if check_fk_owner:
+                print("OK: Integrity checks fk_owner not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_owner not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("ERROR: missing MANDATORY fk_owner")
+                show_failure(
+                    "ERROR: Missing MANDATORY fk_owner in schema qgep_od",
+                    "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # make mandatory
+                return
+
+            # 5. relation check check_fk_operator_null
+            check_fk_operator = False
+            check_fk_operator = check_fk_operator_null()
+            if check_fk_operator:
+                print("OK: Integrity checks fk_operator not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_operator not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("ERROR: missing MANDATORY fk_operator")
+                show_failure(
+                    "ERROR: Missing MANDATORY fk_operator in schema qgep_od",
+                    "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # make mandatory
+                return
+
+        # 6. relation check check_fk_dataowner_null
+        if flag_test:
+            check_fk_dataowner = False
+            check_fk_dataowner = check_fk_dataowner_null()
+            if check_fk_dataowner:
+                print("OK: Integrity checks fk_dataowner not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_dataowner not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("INFO: missing fk_dataowner")
+                show_hint(
+                    "INFO: Missing fk_dataowner in schema qgep_od",
+                    "Add missing fk_dataowner to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
+
+            # 6. relation check check_fk_provider_null
+            check_fk_provider = False
+            check_fk_provider = check_fk_provider_null()
+            if check_fk_provider:
+                print("OK: Integrity checks fk_provider not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_provider not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("INFO: missing fk_provider")
+                show_hint(
+                    "INFO: Missing fk_provider in schema qgep_od",
+                    "Add missing fk_provider to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
 
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
@@ -585,7 +691,9 @@ def action_export(plugin):
         progress_dialog.setLabelText("Converting from QGEP...")
         QApplication.processEvents()
 
-        log_handler = logging.FileHandler(make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8")
+        log_handler = logging.FileHandler(
+            make_log_path(file_name, "qgepqwat2ili-export"), mode="w", encoding="utf-8"
+        )
         log_handler.setLevel(logging.INFO)
         log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
         with LoggingHandlerContext(log_handler):
@@ -601,7 +709,9 @@ def action_export(plugin):
                 # qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 # 3.4.2023 neu mit eorientation
                 qgep_export(
-                    selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation
+                    selection=export_dialog.selected_ids,
+                    labels_file=labels_file_path,
+                    orientation=eorientation,
                 )
             # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
             elif emodel == "SIA405_ABWASSER_2015_LV95":
@@ -609,14 +719,18 @@ def action_export(plugin):
                 # qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 # 3.4.2023 neu mit eorientation
                 qgepsia405_export(
-                    selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation
+                    selection=export_dialog.selected_ids,
+                    labels_file=labels_file_path,
+                    orientation=eorientation,
                 )
             elif emodel == "DSS_2015_LV95":
                 logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
                 # qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 # 3.4.2023 neu mit eorientation
                 qgepdss_export(
-                    selection=export_dialog.selected_ids, labels_file=labels_file_path, orientation=eorientation
+                    selection=export_dialog.selected_ids,
+                    labels_file=labels_file_path,
+                    orientation=eorientation,
                 )
             else:
                 progress_dialog.close()
@@ -663,7 +777,9 @@ def action_export(plugin):
                     continue
                 progress_dialog.setValue(progress + 10)
 
-                progress_dialog.setLabelText(f"Validating the network output file [{model_name}]...")
+                progress_dialog.setLabelText(
+                    f"Validating the network output file [{model_name}]..."
+                )
                 QApplication.processEvents()
                 log_path = make_log_path(base_log_path, f"ilivalidator-{model_name}")
                 try:
@@ -844,7 +960,9 @@ def configure_from_modelbaker(iface):
         )
         return False
 
-    elif modelbaker.__version__ != "dev" and parse_version(modelbaker.__version__) < parse_version(REQUIRED_VERSION):
+    elif modelbaker.__version__ != "dev" and parse_version(modelbaker.__version__) < parse_version(
+        REQUIRED_VERSION
+    ):
         iface.messageBar().pushMessage(
             "Error",
             f"This feature requires a more recent version of the ModelBaker plugin (currently : {modelbaker.__version__}). Please install and activate version {REQUIRED_VERSION} or newer from the plugin manager.",

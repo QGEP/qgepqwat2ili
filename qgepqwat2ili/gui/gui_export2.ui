@@ -74,8 +74,8 @@
        </property>
       </spacer>
     </item>
-	
-	
+
+
     </layout>
    <!-- </item> -->
    <item>
@@ -107,16 +107,16 @@
        </property>
        <property name="text">
         <string>choose a model</string>
-						  
-							
-			   
+
+
+
        </property>
       </widget>
      </item>
     </layout>
    </item>
-   
-   
+
+
    <item>
     <widget class="QLabel" name="label_2">
      <property name="enabled">
@@ -141,7 +141,7 @@
   </layout>
  </widget>
  <resources/>
- 
+
  <connections>
   <connection>
    <sender>buttonBox</sender>
@@ -190,6 +190,6 @@
      <y>139</y>
     </hint>
    </hints>
-  </connection>										   
+  </connection>
  </connections>
 </ui>

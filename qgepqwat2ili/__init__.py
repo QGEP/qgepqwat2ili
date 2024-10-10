@@ -10,7 +10,11 @@ from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
 from .qgepdss.export import qgep_export as qgepdss_export
 from .qgepdss.import_ import qgep_import as qgepdss_import
+
+# 4.4.2023
 from .qgepsia405.export import qgep_export as qgepsia405_export
+
+# 5.4.2023
 from .qgepsia405.import_ import qgep_import as qgepsia405_import
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
@@ -23,7 +27,8 @@ from .utils.various import make_log_path
 def main(args):
 
     parser = argparse.ArgumentParser(
-        description="ili2QWAT / ili2QGEP entrypoint", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="ili2QWAT / ili2QGEP entrypoint",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     subparsers = parser.add_subparsers(title="subcommands", dest="parser")
@@ -63,7 +68,9 @@ def main(args):
     )
 
     parser_qgep.add_argument(
-        "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
+        "--recreate_schema",
+        action="store_true",
+        help="drops schema and reruns ili2pg importschema",
     )
     parser_qgep.add_argument(
         "--skip_validation",
@@ -106,7 +113,9 @@ def main(args):
         help="if provided, exports will include hydraulischer_strang and hydraulischer_node classes (these are currently likely to make the export invalid due to issues with the current ili model)",
     )
     parser_qwat.add_argument(
-        "--recreate_schema", action="store_true", help="drops schema and reruns ili2pg importschema"
+        "--recreate_schema",
+        action="store_true",
+        help="drops schema and reruns ili2pg importschema",
     )
     parser_qwat.add_argument(
         "--skip_validation",
@@ -126,7 +135,9 @@ def main(args):
     )
 
     parser_tpl = subparsers.add_parser(
-        "tpl", help="generate code templates [dev]", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "tpl",
+        help="generate code templates [dev]",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser_tpl.add_argument("model", choices=["qgep", "qwat"])
     parser_tpl.add_argument(
@@ -229,14 +240,22 @@ def main(args):
                 )
 
             utils.ili2db.export_xtf_data(
-                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+                SCHEMA,
+                ILI_MODEL_NAME,
+                ILI_EXPORT_MODEL_NAME,
+                args.path,
+                make_log_path(log_path, "iliexport"),
             )
 
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                    utils.ili2db.validate_xtf_data(
+                        args.path, make_log_path(log_path, "ilivalidate")
+                    )
                 except utils.various.CmdException:
-                    print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
+                    print(
+                        "Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore"
+                    )
                     exit(1)
 
         elif args.direction == "import":
@@ -248,9 +267,13 @@ def main(args):
                 exit(1)
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                    utils.ili2db.validate_xtf_data(
+                        args.path, make_log_path(log_path, "ilivalidate")
+                    )
                 except utils.various.CmdException:
-                    print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
+                    print(
+                        "Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore"
+                    )
                     exit(1)
 
             # add model dependency, as in __init_.py
@@ -269,6 +292,10 @@ def main(args):
                     create_basket_col=True,
                 )
                 utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                )
+                utils.ili2db.import_xtf_data(
+                    SCHEMA, args.path, make_log_path(log_path, "iliimport")
+                )
                 print("qgep_import: " + SCHEMA + "/" + ILI_MODEL)
                 qgep_import()
             elif impmodel == "SIA405_ABWASSER_2015_LV95":
@@ -281,8 +308,15 @@ def main(args):
                     recreate_schema=args.recreate_schema,
                     create_basket_col=True,
                 )
-                utils.ili2db.import_xtf_data(ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
-                print("qgepsia405_import: " + ABWASSER_SIA405_SCHEMA + "/" + ABWASSER_SIA405_ILI_MODEL)
+                utils.ili2db.import_xtf_data(
+                    ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport")
+                )
+                print(
+                    "qgepsia405_import: "
+                    + ABWASSER_SIA405_SCHEMA
+                    + "/"
+                    + ABWASSER_SIA405_ILI_MODEL
+                )
                 qgepsia405_import()
 
             elif impmodel == "DSS_2015_LV95":
@@ -295,7 +329,9 @@ def main(args):
                     recreate_schema=args.recreate_schema,
                     create_basket_col=True,
                 )
-                utils.ili2db.import_xtf_data(ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport"))
+                utils.ili2db.import_xtf_data(
+                    ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport")
+                )
                 print("qgepdss_import: " + ABWASSER_DSS_SCHEMA + "/" + ABWASSER_DSS_ILI_MODEL)
                 qgepdss_import()
 
@@ -323,13 +359,21 @@ def main(args):
             )
             qwat_export(include_hydraulics=args.include_hydraulics)
             utils.ili2db.export_xtf_data(
-                SCHEMA, ILI_MODEL_NAME, ILI_EXPORT_MODEL_NAME, args.path, make_log_path(log_path, "iliexport")
+                SCHEMA,
+                ILI_MODEL_NAME,
+                ILI_EXPORT_MODEL_NAME,
+                args.path,
+                make_log_path(log_path, "iliexport"),
             )
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                    utils.ili2db.validate_xtf_data(
+                        args.path, make_log_path(log_path, "ilivalidate")
+                    )
                 except utils.various.CmdException:
-                    print("Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore")
+                    print(
+                        "Ilivalidator doesn't recognize output as valid ! Run with --skip_validation to ignore"
+                    )
                     exit(1)
 
         elif args.direction == "import":
@@ -338,9 +382,13 @@ def main(args):
                 exit(1)
             if not args.skip_validation:
                 try:
-                    utils.ili2db.validate_xtf_data(args.path, make_log_path(log_path, "ilivalidate"))
+                    utils.ili2db.validate_xtf_data(
+                        args.path, make_log_path(log_path, "ilivalidate")
+                    )
                 except utils.various.CmdException:
-                    print("Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore")
+                    print(
+                        "Ilivalidator doesn't recognize input as valid ! Run with --skip_validation to ignore"
+                    )
                     exit(1)
             utils.ili2db.create_ili_schema(
                 SCHEMA,
@@ -363,7 +411,9 @@ def main(args):
                 config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, create_basket_col=True
             )
             QGEPMAPPING = get_qgep_mapping()
-            utils.templates.generate_template("qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING)
+            utils.templates.generate_template(
+                "qgep", "abwasser", BaseQgep, BaseAbwasser, QGEPMAPPING
+            )
 
         elif args.model == "qwat":
             if config.PGSERVICE is None:

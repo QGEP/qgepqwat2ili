@@ -8,6 +8,9 @@ from sqlalchemy.sql import text
 from .. import utils
 from ..utils.basket_utils import BasketUtils
 from ..utils.qgep_export_utils import QgepExportUtils
+
+# 4.10.2024
+from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -49,6 +52,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # Logging for debugging
     logger.info(f"print subset_ids '{subset_ids}'")
+    # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
+
+    wastewater_structure_id_sia405abwasser_list = None
+    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+
+    logger.info(
+        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    )
 
     # Orientation
     oriented = orientation is not None
@@ -223,7 +234,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.special_structure)
     if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
@@ -244,7 +257,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
         logger.warning(
-            f"QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
@@ -266,7 +279,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.infiltration_installation)
     if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
@@ -288,7 +303,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
         logger.warning(
-            f"QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         versickerungsanlage = ABWASSER.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
@@ -321,7 +336,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.pipe_profile -> ABWASSER.rohrprofil, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.pipe_profile)
     if filtered:
-        query = query.join(QGEP.reach).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.reach).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.pipe_profile
@@ -400,7 +417,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.wastewater_node)
     if filtered:
         query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
@@ -419,7 +438,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
         logger.warning(
-            f"QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
+            "QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
         )
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
@@ -460,7 +479,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
         logger.warning(
-            f"QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
+            "QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
         )
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
@@ -497,7 +516,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.dryweather_downspout)
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
@@ -571,7 +592,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.dryweather_flume)
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
@@ -715,7 +738,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
         logger.warning(
-            f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
+            "QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
         )
 
         untersuchung = ABWASSER.untersuchung(
@@ -757,7 +780,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.damage_manhole)
     if filtered:
         query = (
@@ -900,7 +925,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             query.outerjoin(QGEP.damage, QGEP.file.object == QGEP.damage.obj_id)
             .join(
                 QGEP.examination,
-                or_(QGEP.file.object == QGEP.damage.obj_id, QGEP.file.object == QGEP.examination.obj_id),
+                or_(
+                    QGEP.file.object == QGEP.damage.obj_id,
+                    QGEP.file.object == QGEP.examination.obj_id,
+                ),
             )
             .join(QGEP.re_maintenance_event_wastewater_structure)
             .join(QGEP.wastewater_structure)
@@ -930,7 +958,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             klasse=qgep_export_utils.get_vl(row.class__REL),
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
             # objekt=qgep_export_utils.null_to_emptystr(row.object),
-            objekt=qgep_export_utils.truncate(qgep_export_utils.null_to_emptystr(row.object), 16),
+            objekt=qgep_export_utils.truncate(
+              .null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
         abwasser_session.add(datei)
@@ -954,7 +983,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
             tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
 
-        with open(labels_file, "r") as labels_file_handle:
+        with open(labels_file) as labels_file_handle:
             labels = json.load(labels_file_handle)
 
         geojson_crs_def = labels["crs"]
@@ -973,7 +1002,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
             if layer_name == "vw_qgep_reach":
                 if obj_id not in tid_for_obj_id["haltung"]:
-                    logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
+                    logger.warning(
+                        f"Label for haltung `{obj_id}` exists, but that object is not part of the export"
+                    )
                     continue
                 ili_label = ABWASSER.haltung_text(
                     **qgep_export_utils.textpos_common(label, "haltung_text", geojson_crs_def),

@@ -8,7 +8,10 @@ def get_qgep_mapping():
 
     return {
         # VSA-DSS 2015
-        QGEP.re_maintenance_event_wastewater_structure: [ABWASSER.erhaltungsereignis_abwasserbauwerk, ABWASSER.metaattribute],
+        QGEP.re_maintenance_event_wastewater_structure: [
+            ABWASSER.erhaltungsereignis_abwasserbauwerk,
+            ABWASSER.metaattribute,
+        ],
         QGEP.mutation: [ABWASSER.mutation, ABWASSER.metaattribute],
         QGEP.aquifier: [ABWASSER.grundwasserleiter, ABWASSER.metaattribute],
         QGEP.river: [ABWASSER.fliessgewaesser, ABWASSER.metaattribute],
@@ -23,7 +26,10 @@ def get_qgep_mapping():
         QGEP.canton: [ABWASSER.kanton, ABWASSER.metaattribute],
         QGEP.waste_water_association: [ABWASSER.abwasserverband, ABWASSER.metaattribute],
         QGEP.municipality: [ABWASSER.gemeinde, ABWASSER.metaattribute],
-        QGEP.waste_water_treatment_plant: [ABWASSER.abwasserreinigungsanlage, ABWASSER.metaattribute],
+        QGEP.waste_water_treatment_plant: [
+            ABWASSER.abwasserreinigungsanlage,
+            ABWASSER.metaattribute,
+        ],
         QGEP.private: [ABWASSER.privat, ABWASSER.metaattribute],
         QGEP.channel: [ABWASSER.kanal, ABWASSER.metaattribute],
         QGEP.manhole: [ABWASSER.normschacht, ABWASSER.metaattribute],
@@ -34,8 +40,14 @@ def get_qgep_mapping():
         QGEP.planning_zone: [ABWASSER.planungszone, ABWASSER.metaattribute],
         QGEP.infiltration_zone: [ABWASSER.versickerungsbereich, ABWASSER.metaattribute],
         QGEP.drainage_system: [ABWASSER.entwaesserungssystem, ABWASSER.metaattribute],
-        QGEP.water_body_protection_sector: [ABWASSER.gewaesserschutzbereich, ABWASSER.metaattribute],
-        QGEP.ground_water_protection_perimeter: [ABWASSER.grundwasserschutzareal, ABWASSER.metaattribute],
+        QGEP.water_body_protection_sector: [
+            ABWASSER.gewaesserschutzbereich,
+            ABWASSER.metaattribute,
+        ],
+        QGEP.ground_water_protection_perimeter: [
+            ABWASSER.grundwasserschutzareal,
+            ABWASSER.metaattribute,
+        ],
         QGEP.groundwater_protection_zone: [ABWASSER.grundwasserschutzzone, ABWASSER.metaattribute],
         QGEP.pipe_profile: [ABWASSER.rohrprofil, ABWASSER.metaattribute],
         QGEP.wwtp_energy_use: [ABWASSER.araenergienutzung, ABWASSER.metaattribute],
@@ -66,7 +78,10 @@ def get_qgep_mapping():
         QGEP.dryweather_flume: [ABWASSER.trockenwetterrinne, ABWASSER.metaattribute],
         QGEP.cover: [ABWASSER.deckel, ABWASSER.metaattribute],
         QGEP.electric_equipment: [ABWASSER.elektrischeeinrichtung, ABWASSER.metaattribute],
-        QGEP.electromechanical_equipment: [ABWASSER.elektromechanischeausruestung, ABWASSER.metaattribute],
+        QGEP.electromechanical_equipment: [
+            ABWASSER.elektromechanischeausruestung,
+            ABWASSER.metaattribute,
+        ],
         QGEP.benching: [ABWASSER.bankett, ABWASSER.metaattribute],
         QGEP.building: [ABWASSER.gebaeude, ABWASSER.metaattribute],
         QGEP.reservoir: [ABWASSER.reservoir, ABWASSER.metaattribute],
@@ -91,4 +106,4 @@ def get_qgep_mapping():
         QGEP.tank_emptying: [ABWASSER.beckenentleerung, ABWASSER.metaattribute],
         QGEP.param_ca_general: [ABWASSER.ezg_parameter_allg, ABWASSER.metaattribute],
         QGEP.param_ca_mouse1: [ABWASSER.ezg_parameter_mouse1, ABWASSER.metaattribute],
-     }
+    }

@@ -5,6 +5,7 @@ import uuid
 from functools import partial
 
 from PyQt5.QtCore import QCoreApplication
+from qgepplugin.processing_provider.qgep_algorithm import QgepAlgorithm
 from qgis import processing
 from qgis.core import (
     QgsProcessingContext,
@@ -15,8 +16,6 @@ from qgis.core import (
     QgsProcessingParameterVectorLayer,
     QgsWkbTypes,
 )
-
-from qgepplugin.processing_provider.qgep_algorithm import QgepAlgorithm
 
 from ....utils.qgeplayermanager import QgepLayerManager
 
@@ -31,7 +30,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
     AVAILABLE_SCALES = [
         # ili key, display name, scale value
         ("Leitungskataster", tr("Leitungskataster"), 1000),  # TODO: check scale ?
-        #("Werkplan", tr("Werkplan"), 500),  # TODO: check scale ?
+        # ("Werkplan", tr("Werkplan"), 500),  # TODO: check scale ?
         ("Werkplan", tr("Werkplan"), 250),  # adjusted scale from 500 to 250
         ("Uebersichtsplan.UeP10", tr("Uebersichtsplan 1:10000"), 10000),
         ("Uebersichtsplan.UeP5", tr("Uebersichtsplan 1:5000"), 5000),
@@ -102,15 +101,27 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             )
         )
 
-
-    def processAlgorithm(self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback):
+    def processAlgorithm(
+        self, parameters, context: QgsProcessingContext, feedback: QgsProcessingFeedback
+    ):
 
         labels_file_path = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
-        restrict_to_selection = self.parameterAsBoolean(parameters, self.INPUT_RESTRICT_TO_SELECTION, context)
-        structure_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_STRUCTURE_VIEW_LAYER, context)
-        reach_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_REACH_VIEW_LAYER, context)
-        catchment_area_view_layer = self.parameterAsVectorLayer(parameters, self.INPUT_CATCHMENT_AREA_VIEW_LAYER, context)
-        scales = [self.AVAILABLE_SCALES[i] for i in self.parameterAsEnums(parameters, self.INPUT_SCALES, context)]
+        restrict_to_selection = self.parameterAsBoolean(
+            parameters, self.INPUT_RESTRICT_TO_SELECTION, context
+        )
+        structure_view_layer = self.parameterAsVectorLayer(
+            parameters, self.INPUT_STRUCTURE_VIEW_LAYER, context
+        )
+        reach_view_layer = self.parameterAsVectorLayer(
+            parameters, self.INPUT_REACH_VIEW_LAYER, context
+        )
+        catchment_area_view_layer = self.parameterAsVectorLayer(
+            parameters, self.INPUT_CATCHMENT_AREA_VIEW_LAYER, context
+        )
+        scales = [
+            self.AVAILABLE_SCALES[i]
+            for i in self.parameterAsEnums(parameters, self.INPUT_SCALES, context)
+        ]
 
         # Clear the output file if it exists
         if os.path.isfile(labels_file_path):
@@ -132,7 +143,9 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
         catchment_feats = catchment_area_view_layer.getFeatures()
         rowid_to_obj_id = {
             "vw_qgep_reach": {f.id(): f.attribute("obj_id") for f in reach_feats},
-            "vw_qgep_wastewater_structure": {f.id(): f.attribute("obj_id") for f in structure_feats},
+            "vw_qgep_wastewater_structure": {
+                f.id(): f.attribute("obj_id") for f in structure_feats
+            },
             "catchment_area": {f.id(): f.attribute("obj_id") for f in catchment_feats},
         }
 
@@ -143,7 +156,9 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
 
             # Make an unique temporary name
             unique = uuid.uuid4().hex
-            extract_path = os.path.join(tempfile.gettempdir(), f"labels-{scale_id}_{unique}.geojson")
+            extract_path = os.path.join(
+                tempfile.gettempdir(), f"labels-{scale_id}_{unique}.geojson"
+            )
 
             # Extract the labels
             feedback.pushInfo(f"Extracting labels for scale {scale_display} [1:{scale_value}]")
@@ -164,7 +179,7 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
             )
 
             # Load the extracted labels
-            with open(extract_path, "r") as extract_path_handle:
+            with open(extract_path) as extract_path_handle:
                 geojson = json.load(extract_path_handle)
 
             # Check that labels were generated
@@ -175,7 +190,9 @@ class ExtractlabelsInterlisAlgorithm(QgepAlgorithm):
 
             # Annotate features with qgep_obj_id and scal
             lyr_name_to_key = {
-                QgepLayerManager.layer("vw_qgep_wastewater_structure").name(): "vw_qgep_wastewater_structure",
+                QgepLayerManager.layer(
+                    "vw_qgep_wastewater_structure"
+                ).name(): "vw_qgep_wastewater_structure",
                 QgepLayerManager.layer("vw_qgep_reach").name(): "vw_qgep_reach",
                 QgepLayerManager.layer("catchment_area").name(): "catchment_area",
             }
