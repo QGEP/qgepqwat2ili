@@ -9,12 +9,6 @@ from sqlalchemy.ext.automap import AutomapBase
 from .. import config
 from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
 
-<<<<<<< HEAD
-=======
-
-# Checking if subclass entries of organisation are set and match number of organisation entries
-def check_organisation_subclass_data():
->>>>>>> 9dfe0ea (Make baskets optional)
 
 def check_organisation_subclass_data():
     """
@@ -26,11 +20,7 @@ def check_organisation_subclass_data():
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
-<<<<<<< HEAD
     cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
-=======
-    cursor.execute(f"SELECT obj_id FROM qgep_od.organisation;")
->>>>>>> 9dfe0ea (Make baskets optional)
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
@@ -49,7 +39,6 @@ def check_organisation_subclass_data():
 
         if organisation_count == 0:
             organisation_subclass_check = True
-<<<<<<< HEAD
             logger.info(
                 "OK: number of subclass elements of class organisation OK in schema qgep_od!"
             )
@@ -57,26 +46,10 @@ def check_organisation_subclass_data():
             organisation_subclass_check = False
             logger.info(
                 f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
-=======
-            logger.info(f"OK: number of subclass elements of class organisation OK in schema qgep_od!")
-        else:
-            organisation_subclass_check = False
-            logger.info(
-                f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
-            )
-            print(
-                f"ERROR: number of subclass elements of organisation NOT CORRECT in schmea qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
->>>>>>> 9dfe0ea (Make baskets optional)
             )
 
     return organisation_subclass_check
 
-<<<<<<< HEAD
-=======
-
-# Checking if subclass entries of wastewater_structure are set and match number of wastewater_structure entries
-def check_wastewater_structure_subclass_data():
->>>>>>> 9dfe0ea (Make baskets optional)
 
 def check_wastewater_structure_subclass_data():
     """
@@ -87,12 +60,8 @@ def check_wastewater_structure_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
-<<<<<<< HEAD
     cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
-=======
-    cursor.execute(f"SELECT obj_id FROM qgep_od.wastewater_structure;")
->>>>>>> 9dfe0ea (Make baskets optional)
+
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -110,7 +79,6 @@ def check_wastewater_structure_subclass_data():
 
         if wastewater_structure_count == 0:
             wastewater_structure_subclass_check = True
-<<<<<<< HEAD
             logger.info(
                 "OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
             )
@@ -118,16 +86,6 @@ def check_wastewater_structure_subclass_data():
             wastewater_structure_subclass_check = False
             logger.info(
                 f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
-=======
-            logger.info(f"OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!")
-        else:
-            wastewater_structure_subclass_check = False
-            logger.info(
-                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
-            )
-            print(
-                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
->>>>>>> 9dfe0ea (Make baskets optional)
             )
 
     return wastewater_structure_subclass_check
@@ -142,55 +100,6 @@ def check_identifier_null():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-<<<<<<< HEAD
-=======
-
-    missing_identifier_count = 0
-    for notsubclass in [
-        # VSA-KEK
-        ("file"),
-        ("data_media"),
-        ("maintenance_event"),
-        # SIA405 Abwasser
-        ("organisation"),
-        ("wastewater_structure"),
-        ("wastewater_networkelement"),
-        ("structure_part"),
-        ("reach_point"),
-        ("pipe_profile"),
-        # VSA-DSS
-        ("catchment_area"),
-        ("connection_object"),
-        ("control_center"),
-        ("hazard_source"),
-        ("hydr_geometry"),
-        ("hydraulic_char_data"),
-        ("measurement_result"),
-        ("measurement_series"),
-        ("measuring_device"),
-        ("measuring_point"),
-        ("mechanical_pretreatment"),
-        ("overflow"),
-        ("overflow_char"),
-        ("retention_body"),
-        ("river_bank"),
-        ("river_bed"),
-        ("sector_water_body"),
-        ("substance"),
-        ("surface_runoff_parameters"),
-        ("surface_water_bodies"),
-        ("throttle_shut_off_unit"),
-        ("waste_water_treatment"),
-        ("water_catchment"),
-        ("water_control_structure"),
-        ("water_course_segment"),
-        ("wwtp_energy_use"),
-        ("zone"),
-    ]:
-        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;")
-        # use cursor.fetchone()[0] instead of cursor.rowcount
-        logger.info(f"Number of datasets in {notsubclass} without identifier : {cursor.fetchone()[0]}")
->>>>>>> 9dfe0ea (Make baskets optional)
 
     missing_identifier_count = 0
     # add classes to be checked
@@ -265,7 +174,6 @@ def check_identifier_null():
 
     if missing_identifier_count == 0:
         identifier_null_check = True
-<<<<<<< HEAD
         logger.info("OK: all identifiers set in qgep_od!")
     else:
         identifier_null_check = False
@@ -585,18 +493,6 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
     """
     Create schema for INTERLIS import
     """
-=======
-        logger.info(f"OK: all identifiers set in qgep_od!")
-    else:
-        identifier_null_check = False
-        logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
-        print(f"ERROR: Missing identifiers: {missing_identifier_count}")
-
-    return identifier_null_check
-
-
-def create_ili_schema(schema, model, log_path, recreate_schema=False, create_basket_col=False):
->>>>>>> 9dfe0ea (Make baskets optional)
     logger.info("CONNECTING TO DATABASE...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -694,10 +590,14 @@ def get_xtf_model(xtf_file):
     impmodel = "not found"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     with open(xtf_file, encoding="utf-8") as f:
 =======
     with open(xtf_file, mode="r", encoding="utf-8") as f:
 >>>>>>> 9dfe0ea (Make baskets optional)
+=======
+    with open(xtf_file, encoding="utf-8") as f:
+>>>>>>> e42e65e ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         while True:
             # if checkdatasection == -1:
             if checkmodelssection == -1:

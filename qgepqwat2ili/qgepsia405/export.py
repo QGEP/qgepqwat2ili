@@ -318,7 +318,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **qgep_export_utils.base_common(row, "organisation"),
             # --- organisation ---
             auid=row.uid,
-            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bemerkung=qgep_export_utils.truncate(
+                qgep_export_utils.emptystr_to_null(row.remark), 80
+            ),
             bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
         )
         abwasser_session.add(organisation)
@@ -577,7 +579,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             **qgep_export_utils.base_common(row, "rohrprofil"),
             # --- rohrprofil ---
-            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bemerkung=qgep_export_utils.truncate(
+                qgep_export_utils.emptystr_to_null(row.remark), 80
+            ),
             bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             hoehenbreitenverhaeltnis=row.height_width_ratio,
             profiltyp=qgep_export_utils.get_vl(row.profile_type__REL),
@@ -623,7 +627,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 subset_ids, row.fk_wastewater_networkelement__REL
             ),
             auslaufform=qgep_export_utils.get_vl(row.outlet_shape__REL),
-            bemerkung=qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            bemerkung=qgep_export_utils.truncate(
+                qgep_export_utils.emptystr_to_null(row.remark), 80
+            ),
             bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
             hoehengenauigkeit=qgep_export_utils.get_vl(row.elevation_accuracy__REL),
             kote=row.level,
@@ -981,7 +987,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                     )
                     continue
                 ili_label = ABWASSER.abwasserbauwerk_text(
-                    **qgep_export_utils.textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
+                    **qgep_export_utils.textpos_common(
+                        label, "abwasserbauwerk_text", geojson_crs_def
+                    ),
                     abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
                 )
 
