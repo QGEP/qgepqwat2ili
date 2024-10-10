@@ -3,7 +3,6 @@ import os
 import tempfile
 
 # 12.7.2022 for testing import time
-import time
 import webbrowser
 from types import SimpleNamespace
 
@@ -27,6 +26,10 @@ from ..qgepdss.import_ import qgep_import as qgepdss_import
 from ..qgepsia405.export import qgep_export as qgepsia405_export
 from ..qgepsia405.import_ import qgep_import as qgepsia405_import
 from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
+    check_fk_dataowner_null,
+    check_fk_operator_null,
+    check_fk_owner_null,
+    check_fk_provider_null,
     check_identifier_null,
     check_organisation_subclass_data,
     check_wastewater_structure_subclass_data,
@@ -98,7 +101,7 @@ def action_importc(plugin):
         progress_dialog.show()
         progress_dialog.setLabelText("waiting...")
         # delays the execution for 5.5 secs.
-        time.sleep(5.5)
+        # time.sleep(5.5)
         progress_dialog.close
         # end action_do_importc
 
@@ -356,7 +359,7 @@ def action_import(plugin):
     # 31.5.2024 should not be needed anymore
     # progress_dialog.setLabelText("Set main_cover manually after import if vw_qgep_wastewater_structure does not display correctly!")
 
-    time.sleep(2)
+    # time.sleep(2)
     # to add option to run main_cover.sql manually - see postimport.py
 
     # 24.7.2022 / moved to end
@@ -462,26 +465,117 @@ def action_export(plugin):
                 return
 
         # 3. identifier check check_identifier_null
-        check_identifier = False
-        check_identifier = check_identifier_null()
-        if check_identifier:
-            print("OK: Integrity checks identifiers not isNull")
-            show_success(
-                "Sucess",
-                "OK: Integrity checks identifiers not isNull",
-                None,
-            )
+        if flag_test:
+            check_identifier = False
+            check_identifier = check_identifier_null()
+            if check_identifier:
+                print("OK: Integrity checks identifiers not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks identifiers not isNull",
+                    None,
+                )
 
-        else:
-            progress_dialog.close()
-            print("INFO: missing identifiers")
-            show_hint(
-                "INFO: Missing identifiers in schema qgep_od",
-                "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
-                None,
-            )
-            # just show hint, but continue
-            # return
+            else:
+                progress_dialog.close()
+                print("INFO: missing identifiers")
+                show_hint(
+                    "INFO: Missing identifiers in schema qgep_od",
+                    "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
+
+        # 4. relation check check_fk_owner_null
+        if flag_test:
+            check_fk_owner = False
+            check_fk_owner = check_fk_owner_null()
+            if check_fk_owner:
+                print("OK: Integrity checks fk_owner not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_owner not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("ERROR: missing MANDATORY fk_owner")
+                show_failure(
+                    "ERROR: Missing MANDATORY fk_owner in schema qgep_od",
+                    "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # make mandatory
+                return
+
+            # 5. relation check check_fk_operator_null
+            check_fk_operator = False
+            check_fk_operator = check_fk_operator_null()
+            if check_fk_operator:
+                print("OK: Integrity checks fk_operator not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_operator not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("ERROR: missing MANDATORY fk_operator")
+                show_failure(
+                    "ERROR: Missing MANDATORY fk_operator in schema qgep_od",
+                    "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # make mandatory
+                return
+
+        # 6. relation check check_fk_dataowner_null
+        if flag_test:
+            check_fk_dataowner = False
+            check_fk_dataowner = check_fk_dataowner_null()
+            if check_fk_dataowner:
+                print("OK: Integrity checks fk_dataowner not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_dataowner not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("INFO: missing fk_dataowner")
+                show_hint(
+                    "INFO: Missing fk_dataowner in schema qgep_od",
+                    "Add missing fk_dataowner to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
+
+            # 6. relation check check_fk_provider_null
+            check_fk_provider = False
+            check_fk_provider = check_fk_provider_null()
+            if check_fk_provider:
+                print("OK: Integrity checks fk_provider not isNull")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks fk_provider not isNull",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                print("INFO: missing fk_provider")
+                show_hint(
+                    "INFO: Missing fk_provider in schema qgep_od",
+                    "Add missing fk_provider to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
 
         # Prepare the temporary ili2pg model
         progress_dialog.setLabelText("Creating ili schema..." + emodel)
