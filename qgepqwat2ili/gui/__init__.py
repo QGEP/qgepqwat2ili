@@ -3,6 +3,7 @@ import os
 import tempfile
 
 # 12.7.2022 for testing import time
+# import time
 import webbrowser
 from types import SimpleNamespace
 
@@ -593,6 +594,7 @@ def action_export(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=True,
             )
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -600,6 +602,7 @@ def action_export(plugin):
                 config.ABWASSER_SIA405_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=True,
             )
         elif emodel == "DSS_2015_LV95":
             create_ili_schema(
@@ -607,6 +610,7 @@ def action_export(plugin):
                 config.ABWASSER_DSS_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=True,
             )
 
         # to do 27.3.2023 else instead of except? discuss with OD
