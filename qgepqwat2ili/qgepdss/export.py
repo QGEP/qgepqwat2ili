@@ -253,7 +253,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "baujahr": row.year_of_construction,
             "baulicherzustand": qgep_export_utils.get_vl(row.structure_condition__REL),
             "baulos": row.contract_section,
-            "bemerkung": qgep_export_utils.truncate(qgep_export_utils.emptystr_to_null(row.remark), 80),
+            "bemerkung": qgep_export_utils.truncate(
+                qgep_export_utils.emptystr_to_null(row.remark), 80
+            ),
             "betreiberref": qgep_export_utils.get_tid(row.fk_operator__REL),
             "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
             "bruttokosten": row.gross_costs,
