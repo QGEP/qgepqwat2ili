@@ -221,6 +221,7 @@ class GuiImport(QDialog):
         self.session.rollback()
 
         iface.messageBar().pushMessage("Error", "An error occurred: rollback_session activated!", level=Qgis.Warning)
+
         iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
         self.session.close()
 
