@@ -958,8 +958,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             klasse=qgep_export_utils.get_vl(row.class__REL),
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
             # objekt=qgep_export_utils.null_to_emptystr(row.object),
-            objekt=qgep_export_utils.truncate(
-              .null_to_emptystr(row.object), 16),
+            objekt=qgep_export_utils.truncate(qgep_export_utils.null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
         abwasser_session.add(datei)

@@ -39,7 +39,7 @@ class QgepExportUtils:
         """
         if val is None:
             logger.warning(
-                f"A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
+                "A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
             )
             val = ""
         return val
@@ -52,7 +52,7 @@ class QgepExportUtils:
         """
         if val == "":
             logger.warning(
-                f"An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+                "An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
             )
             val = None
         return val
@@ -157,7 +157,7 @@ class QgepExportUtils:
         Returns common attributes for wastewater_structure
         """
         logger.warning(
-            f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
+            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
         )
         return {
             # --- abwasserbauwerk ---
