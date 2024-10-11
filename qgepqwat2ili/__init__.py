@@ -402,7 +402,10 @@ def main(args):
                 config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
             # to do add model dependency
             utils.ili2db.create_ili_schema(
-                config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True, create_basket_col=True
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL,
+                recreate_schema=True,
+                create_basket_col=True,
             )
             QGEPMAPPING = get_qgep_mapping()
             utils.templates.generate_template(
@@ -413,7 +416,10 @@ def main(args):
             if config.PGSERVICE is None:
                 config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
             utils.ili2db.create_ili_schema(
-                config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True, create_basket_col=False
+                config.WASSER_SCHEMA,
+                config.WASSER_ILI_MODEL,
+                recreate_schema=True,
+                create_basket_col=False,
             )
             QWATMAPPING = get_qwat_mapping()
             utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
