@@ -246,8 +246,7 @@ class GuiImport(QDialog):
             self.session.commit()
         except Exception as e:
             self.rollback_session(e)
-            iface.messageBar().pushMessage("Error", f"An error occurred: {e}", level=Qgis.Warning)
-            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+
         finally:
             self.session.close()
 
