@@ -217,14 +217,19 @@ class GuiImport(QDialog):
         self.stackedWidget.addWidget(editor.widget)
         self.stackedWidget.setCurrentWidget(editor.widget)
 
-    def rollback_session(self):
+    def rollback_session(self, emessage):
         self.session.rollback()
 
         iface.messageBar().pushMessage(
             "Error", "An error occurred: rollback_session activated!", level=Qgis.Warning
         )
 
-        iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+        if not emessage is None:
+            iface.messageBar().pushMessage("Error", f"An error occurred: {emessage}", level=Qgis.Warning)
+            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+        else:    
+            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+
         self.session.close()
 
     def commit_session(self):
@@ -240,7 +245,7 @@ class GuiImport(QDialog):
         try:
             self.session.commit()
         except Exception as e:
-            self.session.rollback_session()
+            self.rollback_session(e)
             iface.messageBar().pushMessage("Error", f"An error occurred: {e}", level=Qgis.Warning)
             iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
         finally:
