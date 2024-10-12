@@ -225,9 +225,11 @@ class GuiImport(QDialog):
         )
 
         if not emessage is None:
-            iface.messageBar().pushMessage("Error", f"An error occurred: {emessage}", level=Qgis.Warning)
+            iface.messageBar().pushMessage(
+                "Error", f"An error occurred: {emessage}", level=Qgis.Warning
+            )
             iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
-        else:    
+        else:
             iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
 
         self.session.close()
