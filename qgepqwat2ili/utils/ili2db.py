@@ -19,7 +19,6 @@ def check_organisation_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
     cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
@@ -63,8 +62,8 @@ def check_wastewater_structure_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
     cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
+
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -88,10 +87,10 @@ def check_wastewater_structure_subclass_data():
         else:
             wastewater_structure_subclass_check = False
             logger.info(
-                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
+                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
             print(
-                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
+                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schmea qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
 
     return wastewater_structure_subclass_check
@@ -496,7 +495,7 @@ def skip_wwtp_structure_ids():
     return not_wwtp_structure_ids
 
 
-def create_ili_schema(schema, model, log_path, recreate_schema=False):
+def create_ili_schema(schema, model, log_path, recreate_schema=False, create_basket_col=False):
     logger.info("CONNECTING TO DATABASE...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -524,6 +523,10 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
     connection.commit()
     connection.close()
 
+    create_basket_col_args = ""
+    if create_basket_col:
+        create_basket_col_args = "--createBasketCol"
+
     logger.info(f"ILIDB SCHEMAIMPORT INTO {schema}...")
     exec_(
         " ".join(
@@ -541,6 +544,7 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
                 "--createFkIdx",
                 "--createTidCol",
                 "--importTid",
+                f"{create_basket_col_args}",
                 "--noSmartMapping",
                 "--defaultSrsCode",
                 "2056",
