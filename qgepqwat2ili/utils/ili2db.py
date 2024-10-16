@@ -10,11 +10,11 @@ from .. import config
 from .various import exec_, get_pgconf_as_ili_args, get_pgconf_as_psycopg2_dsn, logger
 
 
-# Checking if subclass entries of organisation are set and match number of organisation entries
 def check_organisation_subclass_data():
-
+    """
+    Check if subclass entries of organisation are set and match number of organisation entries
+    """
     logger.info("INTEGRITY CHECK organisations subclass data...")
-    print("INTEGRITY CHECK organisations subclass data...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -54,11 +54,11 @@ def check_organisation_subclass_data():
     return organisation_subclass_check
 
 
-# Checking if subclass entries of wastewater_structure are set and match number of wastewater_structure entries
 def check_wastewater_structure_subclass_data():
-
+    """
+    Check if subclass entries of wastewater_structure are set and match number of wastewater_structure entries
+    """
     logger.info("INTEGRITY CHECK wastewater_structures subclass data...")
-    print("INTEGRITY CHECK wastewater_structures subclass data...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -97,11 +97,11 @@ def check_wastewater_structure_subclass_data():
     return wastewater_structure_subclass_check
 
 
-# Checking if attribute identifier is Null
 def check_identifier_null():
-
-    logger.info("INTEGRITY CHECK missing idientifiers...")
-    print("INTEGRITY CHECK missing idientifiers...")
+    """
+    Check if attribute identifier is Null
+    """
+    logger.info("INTEGRITY CHECK missing identifiers...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -165,9 +165,7 @@ def check_identifier_null():
             missing_identifier_count = missing_identifier_count
         else:
             # missing_identifier_count = missing_identifier_count + int(cursor.fetchone()[0])
-            missing_identifier_count = missing_identifier_count + class_identifier_count(
-                cursor.fetchone()[0]
-            )
+            missing_identifier_count = missing_identifier_count + class_identifier_count
 
         # add for testing
         logger.info(f"missing_identifier_count : {missing_identifier_count}")
@@ -178,16 +176,14 @@ def check_identifier_null():
     else:
         identifier_null_check = False
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
-        print(f"ERROR: Missing identifiers: {missing_identifier_count}")
-
     return identifier_null_check
 
 
-# Checking if MAMDATORY eigentuemerref not is Null
 def check_fk_owner_null():
-
+    """
+    Check if MAMDATORY fk_owner is Null
+    """
     logger.info("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
-    print("INTEGRITY CHECK missing MAMDATORY owner references fk_owner...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -226,16 +222,14 @@ def check_fk_owner_null():
     else:
         check_fk_owner_null = False
         logger.info(f"ERROR: Missing mandatory fk_owner in qgep_od: {missing_fk_owner_count}")
-        print(f"ERROR: Missing mandatory fk_owner: {missing_fk_owner_count}")
-
     return check_fk_owner_null
 
 
-# Checking if MAMDATORY betreiberref not is Null
 def check_fk_operator_null():
-
+    """
+    Check if MAMDATORY fk_operator is Null
+    """
     logger.info("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
-    print("INTEGRITY CHECK missing MAMDATORY operator references fk_operator...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -276,11 +270,11 @@ def check_fk_operator_null():
     return check_fk_operator_null
 
 
-# Checking if MAMDATORY datenherrref not is Null
 def check_fk_dataowner_null():
-
+    """
+    Check if MAMDATORY fk_dataowner is Null
+    """
     logger.info("INTEGRITY CHECK missing dataowner references fk_dataowner...")
-    print("INTEGRITY CHECK missing dataowner references fk_dataowner...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -366,11 +360,11 @@ def check_fk_dataowner_null():
     return check_fk_dataowner_null
 
 
-# Checking if MAMDATORY datenlieferantref not is Null
 def check_fk_provider_null():
-
+    """
+    Check if MAMDATORY fk_provider is Null
+    """
     logger.info("INTEGRITY CHECK missing provider references fk_provider...")
-    print("INTEGRITY CHECK missing provider references fk_provider...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -456,10 +450,10 @@ def check_fk_provider_null():
 
 
 def skip_wwtp_structure_ids():
-    # get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
-
+    """
+    Get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
+    """
     logger.info("get list of id's of class wwtp_structure (ARABauwerk)...")
-    print("get list of id's of class wwtp_structure (ARABauwerk)...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
@@ -497,6 +491,9 @@ def skip_wwtp_structure_ids():
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
+    """
+    Create schema for INTERLIS import
+    """
     logger.info("CONNECTING TO DATABASE...")
 
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -555,6 +552,9 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
 
 
 def validate_xtf_data(xtf_file, log_path):
+    """
+    Run XTF validation using ilivalidator
+    """
     logger.info("VALIDATING XTF DATA...")
     exec_(
         f'"{config.JAVA}" -jar "{config.ILIVALIDATOR}" --modeldir "{config.ILI_FOLDER}" --log "{log_path}" "{xtf_file}"'
@@ -563,6 +563,9 @@ def validate_xtf_data(xtf_file, log_path):
 
 # 22.7.2022 sb
 def get_xtf_model(xtf_file):
+    """
+    Get XTF model from file
+    """
     logger.info("GET XTF MODEL... ")
     print("xtf_file: " + xtf_file)
     # logger.info("vorher" + imodel)
