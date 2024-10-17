@@ -3797,7 +3797,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         try:
             geojson_crs_def = labels["crs"]
-        except:
+        except geojson_crs_defError:
             logger.warning("No labels available - no labels will be exported")
         else:
             for label in labels["features"]:
@@ -3854,8 +3854,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 abwasser_session.add(ili_label)
 
             print(".", end="")
-        logger.info("done")
-        abwasser_session.flush()
+        
+        finally:
+            logger.info("done")
+            abwasser_session.flush()
 
     # -- extra commit
     abwasser_session.commit()
