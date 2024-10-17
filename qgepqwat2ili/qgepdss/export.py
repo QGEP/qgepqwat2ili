@@ -3854,7 +3854,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 abwasser_session.add(ili_label)
 
             print(".", end="")
-        
+
         finally:
             logger.info("done")
             abwasser_session.flush()
