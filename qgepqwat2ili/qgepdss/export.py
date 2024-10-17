@@ -3797,7 +3797,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         try:
             geojson_crs_def = labels["crs"]
-        except geojson_crs_defError:
+        except:
             logger.warning("No labels available - no labels will be exported")
         else:
             for label in labels["features"]:
