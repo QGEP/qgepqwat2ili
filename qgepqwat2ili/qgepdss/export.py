@@ -3795,60 +3795,67 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         with open(labels_file) as labels_file_handle:
             labels = json.load(labels_file_handle)
 
-        geojson_crs_def = labels["crs"]
 
-        for label in labels["features"]:
-            layer_name = label["properties"]["Layer"]
-            obj_id = label["properties"]["qgep_obj_id"]
+        try:
+            geojson_crs_def = labels["crs"]
+        except:
+            logger.warning(
+                f"No labels available - no labels will be exported"
+            )
+        else:
+            for label in labels["features"]:
+                layer_name = label["properties"]["Layer"]
+                obj_id = label["properties"]["qgep_obj_id"]
 
-            print(f"label[properties]: {label['properties']}")
+                print(f"label[properties]: {label['properties']}")
 
-            if not label["properties"]["LabelText"]:
-                logger.warning(
-                    f"Label of object '{obj_id}' from layer '{layer_name}' is empty and will not be exported"
-                )
-                continue
-
-            if layer_name == "vw_qgep_reach":
-                if obj_id not in tid_for_obj_id["haltung"]:
+                if not label["properties"]["LabelText"]:
                     logger.warning(
-                        f"Label for haltung `{obj_id}` exists, but that object is not part of the export"
+                        f"Label of object '{obj_id}' from layer '{layer_name}' is empty and will not be exported"
                     )
                     continue
-                ili_label = ABWASSER.haltung_text(
-                    **textpos_common(label, "haltung_text", geojson_crs_def),
-                    haltungref=tid_for_obj_id["haltung"][obj_id],
-                )
 
-            elif layer_name == "vw_qgep_wastewater_structure":
-                if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
+                if layer_name == "vw_qgep_reach":
+                    if obj_id not in tid_for_obj_id["haltung"]:
+                        logger.warning(
+                            f"Label for haltung `{obj_id}` exists, but that object is not part of the export"
+                        )
+                        continue
+                    ili_label = ABWASSER.haltung_text(
+                        **textpos_common(label, "haltung_text", geojson_crs_def),
+                        haltungref=tid_for_obj_id["haltung"][obj_id],
+                    )
+
+                elif layer_name == "vw_qgep_wastewater_structure":
+                    if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
+                        logger.warning(
+                            f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
+                        )
+                        continue
+                    ili_label = ABWASSER.abwasserbauwerk_text(
+                        **textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
+                        abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
+                    )
+
+                elif layer_name == "catchment_area":
+                    if obj_id not in tid_for_obj_id["einzugsgebiet"]:
+                        logger.warning(
+                            f"Label for einzugsgebiet `{obj_id}` exists, but that object is not part of the export"
+                        )
+                        continue
+                    ili_label = ABWASSER.einzugsgebiet_text(
+                        **textpos_common(label, "einzugsgebiet_text", geojson_crs_def),
+                        einzugsgebietref=tid_for_obj_id["einzugsgebiet"][obj_id],
+                    )
+
+                else:
                     logger.warning(
-                        f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
+                        f"Unknown layer for label `{layer_name}`. Label will be ignored",
                     )
                     continue
-                ili_label = ABWASSER.abwasserbauwerk_text(
-                    **textpos_common(label, "abwasserbauwerk_text", geojson_crs_def),
-                    abwasserbauwerkref=tid_for_obj_id["abwasserbauwerk"][obj_id],
-                )
 
-            elif layer_name == "catchment_area":
-                if obj_id not in tid_for_obj_id["einzugsgebiet"]:
-                    logger.warning(
-                        f"Label for einzugsgebiet `{obj_id}` exists, but that object is not part of the export"
-                    )
-                    continue
-                ili_label = ABWASSER.einzugsgebiet_text(
-                    **textpos_common(label, "einzugsgebiet_text", geojson_crs_def),
-                    einzugsgebietref=tid_for_obj_id["einzugsgebiet"][obj_id],
-                )
+                abwasser_session.add(ili_label)
 
-            else:
-                logger.warning(
-                    f"Unknown layer for label `{layer_name}`. Label will be ignored",
-                )
-                continue
-
-            abwasser_session.add(ili_label)
             print(".", end="")
         logger.info("done")
         abwasser_session.flush()
