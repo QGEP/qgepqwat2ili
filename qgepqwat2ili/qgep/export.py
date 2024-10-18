@@ -190,10 +190,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     def wastewater_structure_common(row):
         """
         Returns common attributes for wastewater_structure
+        ATTENTION : Mapping of 3D wastewater_structure->abwasserbauerk
+        is not fully implemented.
         """
-        logger.warning(
-            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
-        )
         return {
             # --- abwasserbauwerk ---
             "akten": row.records,
@@ -420,9 +419,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
-        logger.warning(
-            "QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
-        )
+
+        # QGEP field special_structure.upper_elevation is a 3D attribute and has no equivalent in the INTERLIS 2D model release used. It will be ignored for now and not supported with QGEP.
+
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
             # --- baseclass ---
@@ -603,9 +602,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
-        logger.warning(
-            "QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
-        )
+        # QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.
+
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
             # --- baseclass ---
@@ -645,9 +643,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
-        logger.warning(
-            "QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
-        )
+        # QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored.
+
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
             # --- baseclass ---
