@@ -602,9 +602,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
-        logger.warning(
-            "QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
-        )
+        # QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.
+
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
             # --- baseclass ---
