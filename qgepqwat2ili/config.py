@@ -26,7 +26,7 @@ ABWASSER_ILI_MODEL_NAME_SIA405 = "SIA405_ABWASSER_2015_LV95"
 ABWASSER_ILI_EXPORT_MODEL = os.path.join(ILI_FOLDER, "SIA405_Abwasser_2015_2_d-20180417.ili")
 
 
-# neu 12.7.2022 weitere Modelle ergänzt                                  
+# neu 12.7.2022 weitere Modelle ergänzt
 # to add for only SIA405 Abwasser
 ABWASSER_SIA405_SCHEMA = "pg2ili_sia405abwasser"
 # copy from ABWASSER_ILI_MODEL_NAME_SIA405 as has to be the same
@@ -36,7 +36,7 @@ ABWASSER_SIA405_ILI_MODEL = ABWASSER_ILI_EXPORT_MODEL
 
 ABWASSER_DSS_SCHEMA = "pg2ili_dss"
 ABWASSER_DSS_ILI_MODEL = os.path.join(ILI_FOLDER, "VSA_DSS_2015_2_d-20200330.ili")
-ABWASSER_DSS_ILI_MODEL_NAME = "DSS_2015_LV95"                                                                                  
+ABWASSER_DSS_ILI_MODEL_NAME = "DSS_2015_LV95"
 
 
 QWAT_DEFAULT_PGSERVICE = "qwat"

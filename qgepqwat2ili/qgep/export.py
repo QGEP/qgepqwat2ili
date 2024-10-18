@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
+
+# 4.10.2024
+from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -36,6 +39,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
+    # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
+
+    wastewater_structure_id_sia405abwasser_list = None
+    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+
+    logger.info(
+        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    )
+
     # Orientation
     oriented = orientation is not None
     if oriented:
@@ -65,7 +77,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if val is None:
             logger.warning(
-                f"A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
+                "A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
             )
             val = ""
         return val
@@ -78,7 +90,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         if val == "":
             logger.warning(
-                f"An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+                "An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
             )
             val = None
         return val
@@ -90,7 +102,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
         if len(val) > max_length:
-            logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            # _log() got an unexpected keyword argument 'stacklevel'
+            #    logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
         return val[0:max_length]
 
     def modulo_angle(val):
@@ -100,19 +114,19 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if val is None:
             return None
 
-        # add orientation 
-        val = val +  float(labelorientation)
-        
+        # add orientation
+        val = val + float(labelorientation)
+
         val = val % 360.0
         if val > 359.9:
             val = 0
 
         logger.info(f"modulo_angle - added orientation: {labelorientation}")
         print("modulo_angle - added orientation: ", str(labelorientation))
-        
+
         return val
 
-    def check_fk_in_subsetid (subset, relation):
+    def check_fk_in_subsetid(subset, relation):
         """
         checks, whether foreignkey is in the subset_ids - if yes it return the tid of the foreignkey, if no it will return None
         """
@@ -120,18 +134,23 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if relation is None:
             return None
 
-        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        logger.debug(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
-        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
-        
+        logger.debug(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+
         if fremdschluesselstr in subset:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
-            logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
+            logger.debug(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+            logger.debug(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
             return tid_maker.tid_for_row(relation)
         else:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!")
-            return None
+            if filtered:
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                )
+                return None
+            else:
+                return tid_maker.tid_for_row(relation)
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
@@ -140,14 +159,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # 31.3.2023 identifier instead of name
             # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
-            
             # datenherr=getattr(row.fk_dataowner__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
             # datenlieferant=getattr(row.fk_provider__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
-            
             # 31.3.2023 obj_id instead of name
-            datenherr=getattr(row.fk_dataowner__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            datenlieferant=getattr(row.fk_provider__REL, "obj_id", "unknown"),  # TODO : is unknown ok ?
-            
+            datenherr=getattr(
+                row.fk_dataowner__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
+            datenlieferant=getattr(
+                row.fk_provider__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
             letzte_aenderung=row.last_modification,
             sia405_baseclass_metaattribute=get_tid(row),
             # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
@@ -171,7 +191,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
         Returns common attributes for wastewater_structure
         """
-        logger.warning(f"Mapping of wastewater_structure->abwasserbauwerk is not fully implemented.")
+        logger.warning(
+            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
+        )
         return {
             # --- abwasserbauwerk ---
             "akten": row.records,
@@ -203,7 +225,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
 
         return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
@@ -372,7 +397,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.special_structure -> ABWASSER.spezialbauwerk, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.special_structure)
     if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
@@ -394,7 +421,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
         logger.warning(
-            f"QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
@@ -416,7 +443,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.infiltration_installation -> ABWASSER.versickerungsanlage, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.infiltration_installation)
     if filtered:
         query = query.join(QGEP.wastewater_networkelement).filter(
@@ -439,7 +468,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
         logger.warning(
-            f"QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
+            "QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
         )
         versickerungsanlage = ABWASSER.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
@@ -472,7 +501,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.pipe_profile -> ABWASSER.rohrprofil, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.pipe_profile)
     if filtered:
-        query = query.join(QGEP.reach).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.join(QGEP.reach).filter(
+            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.pipe_profile
@@ -512,9 +543,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_from,
                 QGEP.reach_point.obj_id == QGEP.reach.fk_reach_point_to,
             ),
-        ).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.reach_point
@@ -534,10 +563,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
-
             # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
-            #abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
-            abwassernetzelementref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_networkelement__REL),
+            # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
+            abwassernetzelementref=check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_networkelement__REL
+            ),
             auslaufform=get_vl(row.outlet_shape__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
@@ -552,7 +582,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.wastewater_node)
     if filtered:
         query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
@@ -572,7 +604,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
 
         logger.warning(
-            f"QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
+            "QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored."
         )
         abwasserknoten = ABWASSER.abwasserknoten(
             # FIELDS TO MAP TO ABWASSER.abwasserknoten
@@ -614,7 +646,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
         logger.warning(
-            f"QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
+            "QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
         )
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
@@ -649,7 +681,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.dryweather_downspout)
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
@@ -725,7 +759,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.dryweather_flume)
     if filtered:
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
@@ -872,7 +908,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # fk_dataowner__REL, fk_operating_company__REL, fk_provider__REL, fk_reach_point__REL, kind__REL, recording_type__REL, status__REL, weather__REL
         logger.warning(
-            f"QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
+            "QGEP field maintenance_event.active_zone has no equivalent in the interlis model. It will be ignored."
         )
 
         untersuchung = ABWASSER.untersuchung(
@@ -889,7 +925,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             # model difference qgep (unlimited text) and vsa-dss 2015 / 2020 / vsa-kek 2019 / 2020 TEXT*50
-            #datengrundlage=row.base_data,
+            # datengrundlage=row.base_data,
             datengrundlage=truncate(row.base_data, 50),
             dauer=row.duration,
             detaildaten=row.data_details,
@@ -914,7 +950,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("done")
     abwasser_session.flush()
 
-    logger.info("Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute")
+    logger.info(
+        "Exporting QGEP.damage_manhole -> ABWASSER.normschachtschaden, ABWASSER.metaattribute"
+    )
     query = qgep_session.query(QGEP.damage_manhole)
     if filtered:
         query = (
@@ -1057,7 +1095,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             query.outerjoin(QGEP.damage, QGEP.file.object == QGEP.damage.obj_id)
             .join(
                 QGEP.examination,
-                or_(QGEP.file.object == QGEP.damage.obj_id, QGEP.file.object == QGEP.examination.obj_id),
+                or_(
+                    QGEP.file.object == QGEP.damage.obj_id,
+                    QGEP.file.object == QGEP.examination.obj_id,
+                ),
             )
             .join(QGEP.re_maintenance_event_wastewater_structure)
             .join(QGEP.wastewater_structure)
@@ -1086,7 +1127,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             datentraegerref=get_tid(row.fk_data_media__REL),
             klasse=get_vl(row.class__REL),
             # model difference qgep TEXT*41 and vsa-kek 2019 / 2020 TEXT*16 (length of obj_id)
-            #objekt=null_to_emptystr(row.object),
+            # objekt=null_to_emptystr(row.object),
             objekt=truncate(null_to_emptystr(row.object), 16),
             relativpfad=row.path_relative,
         )
@@ -1111,7 +1152,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         for row in abwasser_session.query(ABWASSER.abwasserbauwerk):
             tid_for_obj_id["abwasserbauwerk"][row.obj_id] = row.t_id
 
-        with open(labels_file, "r") as labels_file_handle:
+        with open(labels_file) as labels_file_handle:
             labels = json.load(labels_file_handle)
 
         geojson_crs_def = labels["crs"]
@@ -1128,10 +1169,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 )
                 continue
 
-
             if layer_name == "vw_qgep_reach":
                 if obj_id not in tid_for_obj_id["haltung"]:
-                    logger.warning(f"Label for haltung `{obj_id}` exists, but that object is not part of the export")
+                    logger.warning(
+                        f"Label for haltung `{obj_id}` exists, but that object is not part of the export"
+                    )
                     continue
                 ili_label = ABWASSER.haltung_text(
                     **textpos_common(label, "haltung_text", geojson_crs_def),
