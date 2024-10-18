@@ -190,7 +190,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     def wastewater_structure_common(row):
         """
         Returns common attributes for wastewater_structure
-        ATTENTION : Mapping of 3D wastewater_structure->abwasserbauerk 
+        ATTENTION : Mapping of 3D wastewater_structure->abwasserbauerk
         is not fully implemented.
         """
         return {
