@@ -3815,18 +3815,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 if layer_name == "vw_qgep_reach":
                     if obj_id not in tid_for_obj_id["haltung"]:
                         logger.warning(
-                            f"Label for haltung `{obj_id}` exists, but that object is not part of the export"
+                            f"Label for haltung (reach) `{obj_id}` exists, but that object is not part of the export"
                         )
                         continue
                     ili_label = ABWASSER.haltung_text(
-                        **textpos_common(label, "haltung_text", geojson_crs_def),
+                        **textpos_common(label, "haltung_text (reach_text)", geojson_crs_def),
                         haltungref=tid_for_obj_id["haltung"][obj_id],
                     )
 
                 elif layer_name == "vw_qgep_wastewater_structure":
                     if obj_id not in tid_for_obj_id["abwasserbauwerk"]:
                         logger.warning(
-                            f"Label for abwasserbauwerk `{obj_id}` exists, but that object is not part of the export"
+                            f"Label for abwasserbauwerk (wastewater_structure) `{obj_id}` exists, but that object is not part of the export"
                         )
                         continue
                     ili_label = ABWASSER.abwasserbauwerk_text(
@@ -3837,11 +3837,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 elif layer_name == "catchment_area":
                     if obj_id not in tid_for_obj_id["einzugsgebiet"]:
                         logger.warning(
-                            f"Label for einzugsgebiet `{obj_id}` exists, but that object is not part of the export"
+                            f"Label for einzugsgebiet (catchment_area) `{obj_id}` exists, but that object is not part of the export"
                         )
                         continue
                     ili_label = ABWASSER.einzugsgebiet_text(
-                        **textpos_common(label, "einzugsgebiet_text", geojson_crs_def),
+                        **textpos_common(label, "einzugsgebiet_text (catchment_area_text)", geojson_crs_def),
                         einzugsgebietref=tid_for_obj_id["einzugsgebiet"][obj_id],
                     )
 
