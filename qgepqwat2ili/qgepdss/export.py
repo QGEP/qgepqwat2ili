@@ -3820,7 +3820,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                         continue
                     ili_label = ABWASSER.haltung_text(
                         **textpos_common(label, "haltung_text (reach_text)", geojson_crs_def),
-
                         haltungref=tid_for_obj_id["haltung"][obj_id],
                     )
 
@@ -3842,7 +3841,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                         )
                         continue
                     ili_label = ABWASSER.einzugsgebiet_text(
-                        **textpos_common(label, "einzugsgebiet_text (catchment_area_text)", geojson_crs_def),
+                        **textpos_common(
+                            label, "einzugsgebiet_text (catchment_area_text)", geojson_crs_def
+                        ),
                         einzugsgebietref=tid_for_obj_id["einzugsgebiet"][obj_id],
                     )
 
