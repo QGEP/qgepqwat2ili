@@ -341,7 +341,7 @@ def qwat_export(include_hydraulics=False):
         # _rel_ --- leak.label_2_visible__REL, leak.label_1_visible__REL, leak.fk_cause__REL, leak.fk_pipe__REL
 
         if row.fk_pipe__REL is None:
-            logger.warning(
+            logger.debug(
                 f"Cannot export QWAT.leak {row.id} as it has no related pipe, which are mandatory in SIA405."
             )
             continue
