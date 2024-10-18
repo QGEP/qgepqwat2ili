@@ -47,9 +47,6 @@ def check_organisation_subclass_data():
             logger.info(
                 f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
-            print(
-                f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
-            )
 
     return organisation_subclass_check
 
@@ -88,9 +85,6 @@ def check_wastewater_structure_subclass_data():
         else:
             wastewater_structure_subclass_check = False
             logger.info(
-                f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
-            )
-            print(
                 f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
 
@@ -265,7 +259,6 @@ def check_fk_operator_null():
         logger.info(
             f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}"
         )
-        print(f"ERROR: Missing mandatory fk_operator: {missing_fk_operator_count}")
 
     return check_fk_operator_null
 
@@ -355,7 +348,6 @@ def check_fk_dataowner_null():
         logger.info(
             f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}"
         )
-        print(f"ERROR: Missing mandatory fk_dataowner: {missing_fk_dataowner_count}")
 
     return check_fk_dataowner_null
 
@@ -444,7 +436,6 @@ def check_fk_provider_null():
         logger.info(
             f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}"
         )
-        print(f"ERROR: Missing mandatory fk_provider: {missing_fk_provider_count}")
 
     return check_fk_provider_null
 
@@ -566,8 +557,7 @@ def get_xtf_model(xtf_file):
     """
     Get XTF model from file
     """
-    logger.info("GET XTF MODEL... ")
-    print("xtf_file: " + xtf_file)
+    logger.info(f"GET XTF MODEL {xtf_file} ... ")
     # logger.info("vorher" + imodel)
     # funktioniert nicht
     # global imodel # define imodel as global variable for import model name
@@ -597,12 +587,9 @@ def get_xtf_model(xtf_file):
                 else:
                     # checkdatasection = line.find('<DATASECTION>')
                     # logger.info(str(checkdatasection))
-                    # print("checkdatasection (ili2db): " + str(checkdatasection))
                     checkmodelssection = line.find("<MODELS>")
-                    logger.info(str(checkmodelssection))
-                    print("checkmodelssection (ili2db): " + str(checkmodelssection))
+                    logger.info("checkmodelssection " + str(checkmodelssection))
                     logger.info(str(line))
-                    print(line)
             else:
                 line2 = f.readline()
                 if not line2:
@@ -610,29 +597,21 @@ def get_xtf_model(xtf_file):
                 else:
                     logger.info(str(line2))
                     logger.info("line2: ", str(line2))
-                    print(line2)
                     # logger.info(str(checkdatasection))
-                    # print("checkdatasection (ili2db): " + str(checkdatasection))
                     logger.info("checkmodelssection2 " + str(checkmodelssection))
-                    print("checkmodelssection2 (ili2db): " + str(checkmodelssection))
                     # strmodel = str(line2.strip())
                     strmodel = str(line2)
                     strmodel = strmodel.strip()
-                    print("strmodel (ili2db): " + strmodel)
-                    print(f"strmodel (ili2db): {strmodel}")
                     logger.info("strmodel: " + strmodel)
                     logger.info("strmodel: ", strmodel)
                     logger.info(f"strmodel: {strmodel}")
                     a = strmodel.find("</MODELS>")
                     logger.info("strmodel.find a </MODELS>: " + str(a))
-                    print("strmodel.find a </MODELS>: " + str(a))
                     # if strmodel.find("</MODELS>") > -1:
                     if a == -1:
                         b = strmodel.find("<MODEL>")
                         logger.info(r"strmodel.find b \<MODEL: " + str(b))
-                        print(r"strmodel.find b \<MODEL: " + str(b))
                         if strmodel.find("<MODEL") > -1:
-                            print("strmodel (ili2db): " + strmodel)
                             logger.info("MODELS definition found in xtf: " + strmodel)
                             # <VSA_KEK_2019_LV95.KEK BID="VSA_KEK_2019_LV95.KEK">
                             # read string between < and . -> eg. VSA_KEK_2019_LV95
@@ -659,15 +638,12 @@ def get_xtf_model(xtf_file):
                             result = result.strip('"')
                             logger.info("MODEL found: " + str(result))
                             logger.info(result)
-                            print("MODEL found: " + str(result) + "*")
                             model_list.append(result)
                         else:
-                            print("goto next line")
+                            logger.info("goto next line")
                     else:
-                        print(r"<\/MODEL> found - stop checking!")
                         logger.info("</MODEL> found - stop checking!")
                         break
-    print(model_list)
     logger.info("model_list:")
     logger.info(str(model_list))
 
@@ -694,7 +670,6 @@ def get_xtf_model(xtf_file):
     f.close()
 
     logger.info("MODEL found: " + str(impmodel))
-    print("MODEL found: ", str(impmodel))
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
@@ -702,7 +677,6 @@ def get_xtf_model(xtf_file):
 
 def get_xtf_model2(xtf_file):
     logger.info("GET XTF MODEL xml version... ")
-    print("xtf_file: " + xtf_file)
     # logger.info("vorher" + imodel)
     # funktioniert nicht
     # global imodel # define imodel as global variable for import model name
@@ -722,7 +696,6 @@ def get_xtf_model2(xtf_file):
     # from xml file
     tree = ET.parse(xtf_file)
     rootinterlis = tree.getroot()
-    print("rootinterlis.findall:", rootinterlis.findall("."))
     logger.info("rootinterlis.findall:", rootinterlis.findall("."))
 
     i = 0
