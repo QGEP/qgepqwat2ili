@@ -420,7 +420,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
 
-        # QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored.
+        # QGEP field special_structure.upper_elevation is a 3D attribute and has no equivalent in the INTERLIS 2D model release used. It will be ignored for now and not supported with QGEP.
 
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
