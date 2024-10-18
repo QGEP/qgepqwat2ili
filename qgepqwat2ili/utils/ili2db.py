@@ -155,10 +155,18 @@ def check_identifier_null():
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-        class_identifier_count = int(cursor.fetchone()[0])
-        logger.info(
+        
+        try:
+            class_identifier_count = int(cursor.fetchone()[0])
+        except Exception:
+            class_identifier_count = 0
+            logger.debug(
+            f"Number of datasets in class '{notsubclass}' without identifier could not be identified (TypeError: 'NoneType' object is not subscriptable). Automatically set class_identifier_count = 0"
+            )
+        else:
+            logger.info(
             f"Number of datasets in class '{notsubclass}' without identifier : {class_identifier_count}"
-        )
+            )
 
         # if cursor.fetchone() is None:
         if class_identifier_count == 0:
