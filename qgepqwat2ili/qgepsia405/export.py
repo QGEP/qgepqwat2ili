@@ -188,7 +188,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     def wastewater_structure_common(row):
         """
         Returns common attributes for wastewater_structure
-        ATTENTION : Mapping of wastewater_structure->abwasserbauerk 
+        ATTENTION : Mapping of wastewater_structure->abwasserbauerk
         is not fully implemented.
         """
         return {
@@ -417,9 +417,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         # --- _rel_ ---
         # accessibility__REL, bypass__REL, emergency_spillway__REL, financing__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, function__REL, renovation_necessity__REL, rv_construction_type__REL, status__REL, stormwater_tank_arrangement__REL, structure_condition__REL
-        
+
         # QGEP field special_structure.upper_elevation has no equivalent in the interlis model. It will be ignored."
-        
+
         spezialbauwerk = ABWASSER.spezialbauwerk(
             # FIELDS TO MAP TO ABWASSER.spezialbauwerk
             # --- baseclass ---
