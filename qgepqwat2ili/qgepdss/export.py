@@ -3797,7 +3797,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         try:
             geojson_crs_def = labels["crs"]
-        except:
+        except Exception:
             logger.warning("No labels available - no labels will be exported")
         else:
             for label in labels["features"]:
@@ -3820,6 +3820,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                         continue
                     ili_label = ABWASSER.haltung_text(
                         **textpos_common(label, "haltung_text (reach_text)", geojson_crs_def),
+
                         haltungref=tid_for_obj_id["haltung"][obj_id],
                     )
 
