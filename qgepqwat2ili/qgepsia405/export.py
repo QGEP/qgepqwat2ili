@@ -642,9 +642,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # --- _rel_ ---
         # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
 
-        logger.warning(
-            "QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored."
-        )
+        # QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored.
+        
         haltung = ABWASSER.haltung(
             # FIELDS TO MAP TO ABWASSER.haltung
             # --- baseclass ---
