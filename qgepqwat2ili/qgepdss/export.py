@@ -142,18 +142,18 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if relation is None:
             return None
 
-        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        logger.debug(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
-        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+        logger.debug(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
 
         if fremdschluesselstr in subset:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
-            logger.info(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
+            logger.debug(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+            logger.debug(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
             return tid_maker.tid_for_row(relation)
         else:
             if filtered:
-                logger.info(
+                logger.warning(
                     f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
                 )
                 return None
