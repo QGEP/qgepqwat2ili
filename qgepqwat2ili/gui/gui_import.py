@@ -11,28 +11,26 @@ from qgis.utils import iface
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
+# 31.5.2024 pfad angepasst, neu in gui_import.py statt _init_.py
+from ..postimport import qgep_postimport
 from ..qgep.model_qgep import get_qgep_model
 from .editors.base import Editor
 
 # neu 27.4.2023
-import time
-import logging
-from qgis.PyQt.QtCore import pyqtSlot
+
 
 # Required for loadUi to find the custom widget
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
-
 class GuiImport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
-        
+
         a = True
         if a:
             loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
-        
             self.accepted.connect(self.commit_session)
             self.rejected.connect(self.rollback_session)
 
@@ -85,7 +83,9 @@ class GuiImport(QDialog):
             if cls not in self.category_items:
                 self.category_items[cls].setText(0, cls.__name__)
                 # self.category_items[cls].setCheckState(0, Qt.Checked)  # for now we remove per class checkboxes
-                self.category_items[cls].setFont(0, QFont(QFont().defaultFamily(), weight=QFont.Weight.Bold))
+                self.category_items[cls].setFont(
+                    0, QFont(QFont().defaultFamily(), weight=QFont.Weight.Bold)
+                )
                 self.treeWidget.addTopLevelItem(self.category_items[cls])
 
             editor.update_listitem()
@@ -185,7 +185,15 @@ class GuiImport(QDialog):
             self.debugTextEdit.append(f"{c.key}: {val}")
         #   Show sqlalchemy state in the debug text edit
         self.debugTextEdit.append("-- SQLALCHEMY STATUS --")
-        for status_name in ["transient", "pending", "persistent", "deleted", "detached", "modified", "expired"]:
+        for status_name in [
+            "transient",
+            "pending",
+            "persistent",
+            "deleted",
+            "detached",
+            "modified",
+            "expired",
+        ]:
             if getattr(inspect(editor.obj), status_name):
                 self.debugTextEdit.append(f"{status_name} ")
         self.debugTextEdit.append("-- DEBUG --")
@@ -209,18 +217,48 @@ class GuiImport(QDialog):
         self.stackedWidget.addWidget(editor.widget)
         self.stackedWidget.setCurrentWidget(editor.widget)
 
+    def rollback_session(self, emessage):
+        self.session.rollback()
+
+        iface.messageBar().pushMessage(
+            "Error", "An error occurred: rollback_session activated!", level=Qgis.Warning
+        )
+
+        if emessage is None:
+            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+        else:
+            iface.messageBar().pushMessage(
+                "Error", f"An error occurred: {emessage}", level=Qgis.Warning
+            )
+            iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+
+        self.session.close()
+
     def commit_session(self):
         # TODO : rollback to pre-commit state, allowing user to try to fix issues
         # probably a matter of creating a savepoint before saving with
         # session.begin_nested() and one additionnal self.session.commit()
-        self.session.commit()
-        self.session.close()
+
+        # add info in message bar
+        iface.messageBar().pushMessage(
+            "Please be patient!", "Importing data in qgep - working ...", level=Qgis.Info
+        )
+
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.rollback_session(e)
+
+        finally:
+            self.session.close()
+
         iface.messageBar().pushMessage("Sucess", "Data successfully imported", level=Qgis.Success)
 
-    def rollback_session(self):
-        self.session.rollback()
-        self.session.close()
-        iface.messageBar().pushMessage("Error", "Import was canceled", level=Qgis.Warning)
+        # add post session - in postimport.py
+        iface.messageBar().pushMessage("Info", "Start postimport", level=Qgis.Info)
+        qgep_postimport()
+
+        iface.messageBar().pushMessage("Sucess", "Finished postimport", level=Qgis.Success)
 
     def get_obj_from_listitem(self, listitem):
         for obj, editor in self.editors.items():
