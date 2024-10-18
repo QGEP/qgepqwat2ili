@@ -478,14 +478,14 @@ def skip_wwtp_structure_ids():
     else:
         records = cursor.fetchall()
         for row in records:
-            logger.info(f" row[0] = {row[0]}")
+            logger.debug(f" row[0] = {row[0]}")
             # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
             # not_wwtp_structure_ids = not_wwtp_structure_ids + str(row[0]) + ","
             strrow = str(row[0])
             # not_wwtp_structure_ids = ','.join([not_wwtp_structure_ids, strrow])
             # not_wwtp_structure_ids = not_wwtp_structure_ids + row[0]
             not_wwtp_structure_ids.append(strrow)
-            logger.info(f" building up '{not_wwtp_structure_ids}' ...")
+            logger.debug(f" building up '{not_wwtp_structure_ids}' ...")
 
     return not_wwtp_structure_ids
 

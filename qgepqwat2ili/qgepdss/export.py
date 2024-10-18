@@ -39,12 +39,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
 
     # Logging for debugging
-    logger.info(f"print filtered '{filtered}'")
+    logger.debug(f"print filtered '{filtered}'")
 
     subset_ids = selection if selection is not None else []
 
     # Logging for debugging
-    logger.info(f"print subset_ids '{subset_ids}'")
+    logger.debug(f"print subset_ids '{subset_ids}'")
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
 
