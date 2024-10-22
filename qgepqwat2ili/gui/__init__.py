@@ -234,7 +234,7 @@ def action_import(plugin):
                 recreate_schema=True,
             )
         else:
-            # # print(imodel)
+            # print(imodel)
             # breakpoint()
             progress_dialog.close()
             show_failure(
