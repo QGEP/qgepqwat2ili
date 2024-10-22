@@ -80,10 +80,10 @@ def qwat_export(include_hydraulics=False):
         if val is None and accept_none:
             return None
         if (val is None) or (min_val is not None and val < min_val):
-            logger.warning(f"Value '{val}' was clamped to {min_val}")
+            logger.debug(f"Value '{val}' was clamped to {min_val}")
             val = min_val
         elif max_val is not None and val > max_val:
-            logger.warning(f"Value '{val}' was clamped to {max_val}")
+            logger.debug(f"Value '{val}' was clamped to {max_val}")
             val = max_val
         return val
 
@@ -100,11 +100,9 @@ def qwat_export(include_hydraulics=False):
         return ST_RemoveRepeatedPoints(ST_Force2D(ST_Transform(val, 2056)), 0.002)
 
     def create_metaattributes(instance):
-        logger.warning(
-            "QWAT doesn't define meta attributes. Dummy metaattributes will be created with an arbitrary date."
-        )
-
-        # NOTE : QWAT doesn't define meta attributes, so we create a dummy metattribute
+        """
+        Create dummy meta attributes since QWAT doesn't define these yet
+        """
         metaattribute = WASSER.metaattribute(
             # FIELDS TO MAP TO WASSER.metaattribute
             # --- metaattribute ---
@@ -343,7 +341,7 @@ def qwat_export(include_hydraulics=False):
         # _rel_ --- leak.label_2_visible__REL, leak.label_1_visible__REL, leak.fk_cause__REL, leak.fk_pipe__REL
 
         if row.fk_pipe__REL is None:
-            logger.warning(
+            logger.debug(
                 f"Cannot export QWAT.leak {row.id} as it has no related pipe, which are mandatory in SIA405."
             )
             continue
@@ -757,9 +755,7 @@ def qwat_export(include_hydraulics=False):
         leitung_b.t_ili_tid = leitung_b.obj_id
 
         # We split the geometry
-        logger.warning(
-            "Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position"
-        )
+        # Pipe will be split at valve to accomodate SIA405's representation. However, split will occur at the middle of the pipe, not taking into account the actual valve's position
         # TODO the geometry of the new node does not necessarily lie in the middle (nor on the segment)
         leitung_a.geometrie = ST_ForceCurve(
             sanitize_geom(ST_LineSubstring(ST_CurveToLine(leitung_a.geometrie), 0, 0.5))

@@ -84,7 +84,7 @@ def setup_test_db(template="full"):
     def dexec_(cmd, check=True):
         return exec_(f"docker exec qgepqwat {cmd}", check)
 
-    docker_image = os.getenv("QGEPQWAT2ILI_TESTDB_IMAGE", "postgis/postgis:13-3.2")
+    docker_image = os.getenv("QGEPQWAT2ILI_TESTDB_IMAGE", "postgis/postgis:13-3.4")
 
     logger.info(f"SETTING UP QGEP/QWAT DATABASE [{docker_image}]...")
 
@@ -123,10 +123,10 @@ def setup_test_db(template="full"):
 
         # Getting data
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.6.0/qgep_1.6.0_structure_and_demo_data.backup"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.6.2/qgep_1.6.2_structure_and_demo_data.backup"
         )
         dexec_(
-            "wget https://github.com/QGEP/datamodel/releases/download/1.6.0/qgep_1.6.0_structure_with_value_lists.sql"
+            "wget https://github.com/QGEP/datamodel/releases/download/1.6.2/qgep_1.6.2_structure_with_value_lists.sql"
         )
         dexec_(
             "wget https://github.com/qwat/qwat-data-model/releases/download/1.4.0/qwat_v1.4.0_data_and_structure_sample.backup"
@@ -139,7 +139,7 @@ def setup_test_db(template="full"):
         )
 
         # Creating the template DB with empty structure
-        dexec_("psql -f qgep_1.6.0_structure_with_value_lists.sql qgep_prod postgres")
+        dexec_("psql -f qgep_1.6.2_structure_with_value_lists.sql qgep_prod postgres")
         dexec_("psql -f qwat_v1.4.0_structure_only.sql qgep_prod postgres")
         dexec_("psql -f qwat_v1.4.0_value_list_data_only.sql qgep_prod postgres")
         dexec_("createdb -U postgres --template=qgep_prod tpl_empty")
@@ -151,7 +151,7 @@ def setup_test_db(template="full"):
         dexec_("dropdb -U postgres qgep_prod --if-exists")
         dexec_("createdb -U postgres qgep_prod")
         dexec_(
-            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.6.0_structure_and_demo_data.backup"
+            "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qgep_1.6.2_structure_and_demo_data.backup"
         )
         dexec_(
             "pg_restore -U postgres --dbname qgep_prod --verbose --no-privileges --exit-on-error qwat_v1.4.0_data_and_structure_sample.backup"

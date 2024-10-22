@@ -83,7 +83,7 @@ def action_importc(plugin):
     # neu 26.7.2023 analog action_import
     global importc_dialog  # avoid garbage collection
 
-    print("set flagskipvalidation_import")
+    # print("set flagskipvalidation_import")
 
     iface.messageBar().pushMessage("Info", "action import", level=Qgis.Info)
 
@@ -91,7 +91,7 @@ def action_importc(plugin):
 
     # # 19.4.2023 add option for additional import configuration
     def action_do_importc():
-        print("Open import dialog config")
+        # print("Open import dialog config")
         if importc_dialog.skipvalidation_import:
             importc_dialog.skipvalidation_import
 
@@ -149,7 +149,7 @@ def action_import(plugin):
 
     # Check if validating is selected
     if flagskipvalidation_import:
-        print("Validation will be skipped!")
+        # print("Validation will be skipped!")
         progress_dialog.setLabelText("No validation of input file...")
     else:
         # Validating the input file
@@ -199,7 +199,7 @@ def action_import(plugin):
     # 23.7.2022 rausgenommen - da in ili2db gesetzt
     # imodel = import_dialog.label_importmodelname.text()
     tmplabeltext = "Creating ili schema..." + imodel
-    print(tmplabeltext)
+    # print(tmplabeltext)
     # breakpoint()
     progress_dialog.setLabelText(tmplabeltext)
 
@@ -292,7 +292,7 @@ def action_import(plugin):
                 # imodel,
             )
         else:
-            # print(imodel)
+            # # print(imodel)
             # breakpoint()
             progress_dialog.close()
             show_failure(
@@ -381,11 +381,11 @@ def action_export(plugin):
 
         # neu 12.7.2022
         emodel = export_dialog.comboBox_modelselection.currentText()
-        print(emodel)
+        # print(emodel)
 
         # neu 3.4.2023 added float()
         eorientation = float(export_dialog.comboBox_orientation.currentText())
-        print(eorientation)
+        # print(eorientation)
 
         # Prepare file dialog
         default_folder = QgsSettings().value(
@@ -425,7 +425,7 @@ def action_export(plugin):
             check_organisation = False
             check_organisation = check_organisation_subclass_data()
             if check_organisation:
-                print("OK: Integrity checks organisation")
+                # print("OK: Integrity checks organisation")
                 show_success(
                     "Sucess",
                     "OK: Integrity checks organisation",
@@ -433,7 +433,7 @@ def action_export(plugin):
                 )
             else:
                 progress_dialog.close()
-                print("number of subclass elements of organisation NOT CORRECT")
+                # print("number of subclass elements of organisation NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od",
                     "Add missing obj_id in organisation subclasses so that number of subclass elements match organisation elements. See qgep logs tab for details.",
@@ -448,7 +448,7 @@ def action_export(plugin):
             check_wastewater_structure = False
             check_wastewater_structure = check_wastewater_structure_subclass_data()
             if check_wastewater_structure:
-                print("OK: Integrity checks wastewater_structure")
+                # print("OK: Integrity checks wastewater_structure")
                 show_success(
                     "Sucess",
                     "OK: Integrity checks wastewater_structure",
@@ -456,7 +456,7 @@ def action_export(plugin):
                 )
             else:
                 progress_dialog.close()
-                print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
+                # print("ERROR: number of subclass elements of wastewater_structure NOT CORRECT")
                 show_failure(
                     "ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od",
                     "Add missing obj_id in wastewater_structure subclasses so that number of subclass elements match wastewater_structure elements. See qgep logs tab for details.",
@@ -469,16 +469,16 @@ def action_export(plugin):
             check_identifier = False
             check_identifier = check_identifier_null()
             if check_identifier:
-                print("OK: Integrity checks identifiers not isNull")
+                # print("OK: Integrity checks identifiers is not NULL")
                 show_success(
                     "Sucess",
-                    "OK: Integrity checks identifiers not isNull",
+                    "OK: Integrity checks identifiers is not NULL",
                     None,
                 )
 
             else:
                 progress_dialog.close()
-                print("INFO: missing identifiers")
+                # print("INFO: missing identifiers")
                 show_hint(
                     "INFO: Missing identifiers in schema qgep_od",
                     "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
@@ -492,16 +492,16 @@ def action_export(plugin):
             check_fk_owner = False
             check_fk_owner = check_fk_owner_null()
             if check_fk_owner:
-                print("OK: Integrity checks fk_owner not isNull")
+                # print("OK: Integrity checks fk_owner is not NULL")
                 show_success(
                     "Sucess",
-                    "OK: Integrity checks fk_owner not isNull",
+                    "OK: Integrity checks fk_owner is not NULL",
                     None,
                 )
 
             else:
                 progress_dialog.close()
-                print("ERROR: missing MANDATORY fk_owner")
+                # print("ERROR: missing MANDATORY fk_owner")
                 show_failure(
                     "ERROR: Missing MANDATORY fk_owner in schema qgep_od",
                     "Add missing MANDATORY fk_owner to get a valid INTERLIS export file. See qgep logs tab for details.",
@@ -514,16 +514,16 @@ def action_export(plugin):
             check_fk_operator = False
             check_fk_operator = check_fk_operator_null()
             if check_fk_operator:
-                print("OK: Integrity checks fk_operator not isNull")
+                # print("OK: Integrity checks fk_operator is not NULL")
                 show_success(
                     "Sucess",
-                    "OK: Integrity checks fk_operator not isNull",
+                    "OK: Integrity checks fk_operator is not NULL",
                     None,
                 )
 
             else:
                 progress_dialog.close()
-                print("ERROR: missing MANDATORY fk_operator")
+                # print("ERROR: missing MANDATORY fk_operator")
                 show_failure(
                     "ERROR: Missing MANDATORY fk_operator in schema qgep_od",
                     "Add missing MANDATORY fk_operator to get a valid INTERLIS export file. See qgep logs tab for details.",
@@ -537,16 +537,16 @@ def action_export(plugin):
             check_fk_dataowner = False
             check_fk_dataowner = check_fk_dataowner_null()
             if check_fk_dataowner:
-                print("OK: Integrity checks fk_dataowner not isNull")
+                # print("OK: Integrity checks fk_dataowner is not NULL")
                 show_success(
                     "Sucess",
-                    "OK: Integrity checks fk_dataowner not isNull",
+                    "OK: Integrity checks fk_dataowner is not NULL",
                     None,
                 )
 
             else:
                 progress_dialog.close()
-                print("INFO: missing fk_dataowner")
+                # print("INFO: missing fk_dataowner")
                 show_hint(
                     "INFO: Missing fk_dataowner in schema qgep_od",
                     "Add missing fk_dataowner to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
@@ -559,16 +559,16 @@ def action_export(plugin):
             check_fk_provider = False
             check_fk_provider = check_fk_provider_null()
             if check_fk_provider:
-                print("OK: Integrity checks fk_provider not isNull")
+                # print("OK: Integrity checks fk_provider is not NULL")
                 show_success(
                     "Sucess",
-                    "OK: Integrity checks fk_provider not isNull",
+                    "OK: Integrity checks fk_provider is not NULL",
                     None,
                 )
 
             else:
                 progress_dialog.close()
-                print("INFO: missing fk_provider")
+                # print("INFO: missing fk_provider")
                 show_hint(
                     "INFO: Missing fk_provider in schema qgep_od",
                     "Add missing fk_provider to get a valid INTERLIS export file when converting to Release 2020 (will bei MANDATORY). See qgep logs tab for details.",
@@ -635,12 +635,12 @@ def action_export(plugin):
         # neu 12.7.2022
         progress_dialog.setLabelText(emodel)
 
-        # print("GFG printed immediately.")
+        # # print("GFG # printed immediately.")
         # time.sleep(5.5)
 
         # delays the execution
         # for 5.5 secs.
-        # print("GFG printed after 5.5 secs.")
+        # # print("GFG # printed after 5.5 secs.")
 
         progress_dialog.setValue(25)
 
