@@ -147,11 +147,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         else:
             if filtered:
                 logger.warning(
-                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in filtered subset - replaced with None instead!"
                 )
                 return None
             else:
-                return tid_maker.tid_for_row(relation)
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in datamodel - replaced with None instead!"
+                )
+                return None
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
