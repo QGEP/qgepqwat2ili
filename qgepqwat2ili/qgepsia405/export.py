@@ -8,7 +8,7 @@ from sqlalchemy.sql import text
 from .. import utils
 
 # 4.10.2024
-#from ..utils.ili2db import skip_wwtp_structure_ids
+# from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
 from ..utils.ili2db import (
     add_to_selection,
@@ -42,14 +42,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
-
     # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
     # 2. check if wwtp_structures exist
     wwt_structures_id_sia405abwasser_list = None
-    wwt_structures_id_sia405abwasser_list = get_ws_wn_ids('wwtp_structures')
+    wwt_structures_id_sia405abwasser_list = get_ws_wn_ids("wwtp_structures")
 
     # 3. Show wwt_structures_id_sia405abwasser_list
     logger.debug(
@@ -60,16 +59,16 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     if filtered:
         if wwt_structures_id_sia405abwasser_list:
             # take out wwt_structures_id_sia405abwasser_list from selection
-            subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
+            subset_ids = remove_from_selection(subset_ids, wwt_structures_id_sia405abwasser_list)
         # else do nothing
     else:
         if wwt_structures_id_sia405abwasser_list:
             # add all data of wastewater_structures to selection
-            subset_ids = add_to_selection (subset_ids, get_ws_wn_ids('wastewater_structure'))
+            subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
             # take out wwt_structures_id_sia405abwasser_list from selection
-            subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
+            subset_ids = remove_from_selection(subset_ids, wwt_structures_id_sia405abwasser_list)
             # add reach_ids
-            subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel'))
+            subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
             # treat export as with a selection
             filtered = True
 
@@ -81,7 +80,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         labelorientation = orientation
     else:
         labelorientation = 0
-
 
     def get_tid(relation):
         """
