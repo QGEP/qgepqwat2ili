@@ -495,7 +495,7 @@ def get_cl_re_ids(classname):
     """
 
     # define classes that this is allowed to use - adapt for TWW to include model changes
-    if classname IN ('channel'):
+    if classname == 'channel':
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
 
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())

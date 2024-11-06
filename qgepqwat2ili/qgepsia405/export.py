@@ -61,8 +61,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         if wwt_structures_id_sia405abwasser_list:
             # take out wwt_structures_id_sia405abwasser_list from selection
             subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
-        else:
-            # do nothing
+        # else do nothing
     else:
         if wwt_structures_id_sia405abwasser_list:
             # add all data of wastewater_structures to selection
@@ -73,8 +72,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel')
             # treat export as with a selection
             filtered = True
-        else:
-            # do nothing
+            
+        # else do nothing
 
     # Orientation
     oriented = orientation is not None
