@@ -524,7 +524,7 @@ def get_cl_re_ids(classname):
                 logger.debug(f" building up '{cl_re_ids}' ...")
 
         return cl_re_ids
-    else
+    else:
         logger.warning(f"Do not use this function with {classname} !")
         return None
 

@@ -65,11 +65,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     else:
         if wwt_structures_id_sia405abwasser_list:
             # add all data of wastewater_structures to selection
-            subset_ids = add_to_selection (subset_ids, get_ws_wn_ids('wastewater_structure')
+            subset_ids = add_to_selection (subset_ids, get_ws_wn_ids('wastewater_structure'))
             # take out wwt_structures_id_sia405abwasser_list from selection
             subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
             # add reach_ids
-            subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel')
+            subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel'))
             # treat export as with a selection
             filtered = True
             
