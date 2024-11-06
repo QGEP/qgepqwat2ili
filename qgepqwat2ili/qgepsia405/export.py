@@ -252,6 +252,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return {
             # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a seperate subset - call it ws_subset_id
             "abwasserbauwerkref": check_fk_in_subsetid(
                 wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL
             ),
