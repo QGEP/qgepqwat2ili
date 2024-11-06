@@ -8,7 +8,12 @@ from sqlalchemy.sql import text
 from .. import utils
 
 # 4.10.2024
-from ..utils.ili2db import skip_wwtp_structure_ids
+#from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
+from ..utils.ili2db import get_cl_re_ids
+from ..utils.ili2db import get_ws_wn_ids
+from ..utils.ili2db import add_to_selection 
+from ..utils.ili2db import remove_from_selection
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -35,18 +40,39 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
-    # Filtering
+
+    # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
-    # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
+    # 2. check if wwtp_structures exist
 
-    wastewater_structure_id_sia405abwasser_list = None
-    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+    wwt_structures_id_sia405abwasser_list = None
+    wwt_structures_id_sia405abwasser_list = get_ws_wn_ids('wwtp_structures')
 
-    logger.info(
-        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    # 3. Show wwt_structures_id_sia405abwasser_list
+    logger.debug(
+        f"wwt_structures_id_sia405abwasser_list : {wwt_structures_id_sia405abwasser_list}",
     )
+
+    # 4. check if filtered
+    if filtered then:
+        if wwt_structures_id_sia405abwasser_list then:
+            # take out wwt_structures_id_sia405abwasser_list from selection
+            subset_ids = remove_from_selection (subset_ids, get_ws_wn_ids('wwt_structures')
+        else:
+            # do nothing
+    else:
+                if wwt_structures_id_sia405abwasser_list then:
+            # add all data except wwt_structures to selection
+            subset_ids = add_to_selection (subset_ids, get_ws_wn_ids('wastewater_structure')
+            # take out wwt_structures_id_sia405abwasser_list from selection
+            subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
+            # add reach_ids
+            subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel')
+            filtered = True
+        else:
+            # do nothing
 
     # Orientation
     oriented = orientation is not None

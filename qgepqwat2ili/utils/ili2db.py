@@ -448,7 +448,7 @@ def check_fk_provider_null():
     return check_fk_provider_null
 
 
-def skip_wwtp_structure_ids():
+def skip_wwtp_structure_ids_old():
     """
     Get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
     """
@@ -487,6 +487,106 @@ def skip_wwtp_structure_ids():
             logger.debug(f" building up '{not_wwtp_structure_ids}' ...")
 
     return not_wwtp_structure_ids
+
+
+def get_cl_re_ids(classname):
+    """
+    Get list of id's of reaches of the channels provided
+    """
+
+    # define classes that this is allowed to use - adapt for TWW to include model changes
+    if classname IN ('channel')
+        logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
+        
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        cl_re_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(
+            "SELECT wn.obj_id FROM qgep_od.channel LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = channel.obj_id;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # cl_re_ids_count = int(cursor.fetchone()[0])
+        # if cl_re_ids_count == 0:
+        if cursor.fetchone() is None:
+            cl_re_ids = None
+        else:
+            records = cursor.fetchall()
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                cl_re_ids.append(strrow)
+                logger.debug(f" building up '{cl_re_ids}' ...")
+
+        return cl_re_ids
+    else
+        logger.warning(f"Do not use this function with {classname} !")
+        return None
+
+def get_ws_wn_ids(classname):
+    """
+    Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does not work for channel
+    """
+
+    # define classes that this is allowed to use - adapt for TWW to include model changes
+    if classname IN ('discharge_point', 'manhole', 'infiltration_installation', 'wastewater_structure')
+        logger.info(f"get list of id's of wastewater_nodes of {classname} ..."):
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        ws_wn_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(
+            "SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            ws_wn_ids = None
+        else:
+            records = cursor.fetchall()
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                ws_wn_ids.append(strrow)
+                logger.debug(f" building up '{ws_wn_ids}' ...")
+
+        return ws_wn_ids
+    else
+        logger.warning(f"Do not use this function with {classname} !")
+        return None
+
+
+def remove_from_selection (selected_ids, remove_ids)
+    """
+    Remove ids from selected_ids
+    """
+
+    for list_item in remove_ids:
+        selected_ids = selected_ids.append(list_item)
+
+    return selected_ids
+
+
+def add_to_selection (selected_ids, add_ids)
+    """
+    Remove ids from selected_ids
+    """
+    
+    for list_item in add_ids:
+        selected_ids = selected_ids.add(list_item)
+
+    return selected_ids
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
