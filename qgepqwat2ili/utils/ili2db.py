@@ -497,7 +497,7 @@ def get_cl_re_ids(classname):
     # define classes that this is allowed to use - adapt for TWW to include model changes
     if classname IN ('channel')
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
-        
+
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
         cursor = connection.cursor()
@@ -582,7 +582,7 @@ def add_to_selection (selected_ids, add_ids)
     """
     Remove ids from selected_ids
     """
-    
+
     for list_item in add_ids:
         selected_ids = selected_ids.add(list_item)
 
