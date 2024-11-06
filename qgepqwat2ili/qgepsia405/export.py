@@ -72,7 +72,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             subset_ids = add_to_selection (subset_ids, get_cl_re_ids('channel')
             # treat export as with a selection
             filtered = True
-            
+
         # else do nothing
 
     # Orientation
