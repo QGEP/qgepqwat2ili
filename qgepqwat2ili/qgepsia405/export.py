@@ -48,7 +48,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     subset_ids = selection if selection is not None else []
 
     # 2. check if wwtp_structures exist
-
     wwt_structures_id_sia405abwasser_list = None
     wwt_structures_id_sia405abwasser_list = get_ws_wn_ids('wwtp_structures')
 
@@ -58,15 +57,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
 
     # 4. check if filtered
-    if filtered then:
+    if filtered:
         if wwt_structures_id_sia405abwasser_list then:
             # take out wwt_structures_id_sia405abwasser_list from selection
-            subset_ids = remove_from_selection (subset_ids, get_ws_wn_ids('wwt_structures')
+            subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
         else:
             # do nothing
     else:
-                if wwt_structures_id_sia405abwasser_list then:
-            # add all data except wwt_structures to selection
+        if wwt_structures_id_sia405abwasser_list then:
+            # add all data of wastewater_structures to selection
             subset_ids = add_to_selection (subset_ids, get_ws_wn_ids('wastewater_structure')
             # take out wwt_structures_id_sia405abwasser_list from selection
             subset_ids = remove_from_selection (subset_ids, wwt_structures_id_sia405abwasser_list)
@@ -82,6 +81,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         labelorientation = orientation
     else:
         labelorientation = 0
+
 
     def get_tid(relation):
         """
