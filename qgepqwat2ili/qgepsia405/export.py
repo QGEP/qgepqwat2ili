@@ -46,27 +46,27 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
-    # 2. check if wwtp_structures exist
-    wwt_structures_id_sia405abwasser_list = None
-    wwt_structures_id_sia405abwasser_list = get_ws_wn_ids("wwtp_structures")
+    # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+    ws_off_sia405abwasser_list = None
+    ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structures")
 
-    # 3. Show wwt_structures_id_sia405abwasser_list
+    # 3. Show ws_off_sia405abwasser_list
     logger.debug(
-        f"wwt_structures_id_sia405abwasser_list : {wwt_structures_id_sia405abwasser_list}",
+        f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
     )
 
     # 4. check if filtered
     if filtered:
-        if wwt_structures_id_sia405abwasser_list:
-            # take out wwt_structures_id_sia405abwasser_list from selection
-            subset_ids = remove_from_selection(subset_ids, wwt_structures_id_sia405abwasser_list)
+        if ws_off_sia405abwasser_list:
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
         # else do nothing
     else:
-        if wwt_structures_id_sia405abwasser_list:
+        if ws_off_sia405abwasser_list:
             # add all data of wastewater_structures to selection
             subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
-            # take out wwt_structures_id_sia405abwasser_list from selection
-            subset_ids = remove_from_selection(subset_ids, wwt_structures_id_sia405abwasser_list)
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
             # add reach_ids
             subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
             # treat export as with a selection
