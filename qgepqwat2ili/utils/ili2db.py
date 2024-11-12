@@ -495,7 +495,7 @@ def get_cl_re_ids(classname):
     """
 
     # define classes that this is allowed to use - adapt for TWW to include model changes
-    if classname == 'channel':
+    if classname == "channel":
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
 
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -528,6 +528,7 @@ def get_cl_re_ids(classname):
         logger.warning(f"Do not use this function with {classname} !")
         return None
 
+
 def get_ws_wn_ids(classname):
     """
     Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does not work for channel
@@ -535,7 +536,12 @@ def get_ws_wn_ids(classname):
 
     # define classes that this is allowed to use - adapt for TWW to include model changes
 
-    allowed_classnames = ['discharge_point', 'manhole', 'infiltration_installation', 'wastewater_structure']
+    allowed_classnames = [
+        "discharge_point",
+        "manhole",
+        "infiltration_installation",
+        "wastewater_structure",
+    ]
     if classname in allowed_classnames:
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
