@@ -579,7 +579,7 @@ def add_to_selection(selected_ids, add_ids):
     Append ids to selected_ids
     """
 
-    if selected_id = None:
+    if selected_id is None:
         selected_id = []
 
     for list_item in add_ids:
