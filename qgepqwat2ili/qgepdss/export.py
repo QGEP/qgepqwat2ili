@@ -8,7 +8,14 @@ from sqlalchemy.sql import text
 from .. import utils
 
 # 4.10.2024
-from ..utils.ili2db import skip_wwtp_structure_ids
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
+from ..utils.ili2db import (
+    add_to_selection,
+    get_cl_re_ids,
+    get_ws_wn_ids,
+    remove_from_selection,
+)
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -46,10 +53,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # Logging for debugging
     logger.debug(f"print subset_ids '{subset_ids}'")
 
-    # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
-
-    wastewater_structure_id_sia405abwasser_list = None
-    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+    # ws_off_sia405abwasser_list and selection process not needed for VSA-DSS Export
 
     logger.info(
         f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
