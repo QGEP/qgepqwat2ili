@@ -534,7 +534,7 @@ def get_ws_wn_ids(classname):
     """
 
     # define classes that this is allowed to use - adapt for TWW to include model changes
-    
+
     allowed_classnames = ['discharge_point', 'manhole', 'infiltration_installation', 'wastewater_structure']
     if classname in allowed_classnames:
         logger.info(f"get list of id's of wastewater_nodes of {classname} ..."):
