@@ -49,7 +49,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # ws_off_sia405abwasser_list and selection process not needed for VSA-DSS Export
 
-
     # Orientation
     oriented = orientation is not None
     if oriented:
