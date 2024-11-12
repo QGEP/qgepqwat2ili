@@ -534,45 +534,33 @@ def get_ws_wn_ids(classname):
     Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does not work for channel
     """
 
-    # define classes that this is allowed to use - adapt for TWW to include model changes
+    logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
 
-    allowed_classnames = [
-        "discharge_point",
-        "manhole",
-        "infiltration_installation",
-        "wastewater_structure",
-    ]
-    if classname in allowed_classnames:
-        logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
-        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
-        connection.set_session(autocommit=True)
-        cursor = connection.cursor()
+    ws_wn_ids = []
 
-        ws_wn_ids = []
+    # select all obj_id of the wastewater_nodes of wwtp_structure
+    cursor.execute(
+        "SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
+    )
 
-        # select all obj_id of the wastewater_nodes of wwtp_structure
-        cursor.execute(
-            "SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
-        )
-
-        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-        # ws_wn_ids_count = int(cursor.fetchone()[0])
-        # if ws_wn_ids_count == 0:
-        if cursor.fetchone() is None:
-            ws_wn_ids = None
-        else:
-            records = cursor.fetchall()
-            for row in records:
-                logger.debug(f" row[0] = {row[0]}")
-                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
-                strrow = str(row[0])
-                ws_wn_ids.append(strrow)
-                logger.debug(f" building up '{ws_wn_ids}' ...")
-
-        return ws_wn_ids
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        ws_wn_ids = None
     else:
-        logger.warning(f"Do not use this function with {classname} !")
-        return None
+        records = cursor.fetchall()
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            ws_wn_ids.append(strrow)
+            logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_wn_ids
 
 
 def remove_from_selection(selected_ids, remove_ids):

@@ -49,9 +49,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # ws_off_sia405abwasser_list and selection process not needed for VSA-DSS Export
 
-    logger.info(
-        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
-    )
 
     # Orientation
     oriented = orientation is not None
