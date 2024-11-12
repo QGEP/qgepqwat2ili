@@ -543,7 +543,7 @@ def get_ws_wn_ids(classname):
 
     # select all obj_id of the wastewater_nodes of wwtp_structure
     cursor.execute(
-        "SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
+        f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
