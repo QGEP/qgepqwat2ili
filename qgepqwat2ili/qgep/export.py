@@ -11,16 +11,25 @@ from .. import utils
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
 from ..utils.ili2db import (
+    ..utils.various,
+    .model_abwasser,
+    .model_qgep,
+    :,
     add_to_selection,
+    def,
+    from,
+    get_abwasser_model,
     get_cl_re_ids,
+    get_qgep_model,
     get_ws_wn_ids,
+    import,
+    labels_file=None,
+    logger,
+    orientation=None,
+    qgep_export,
     remove_from_selection,
-)from ..utils.various import logger
-from .model_abwasser import get_abwasser_model
-from .model_qgep import get_qgep_model
-
-
-def qgep_export(selection=None, labels_file=None, orientation=None):
+    selection=None,
+)
     """
     Export data from the QGEP model into the ili2pg model.
 
