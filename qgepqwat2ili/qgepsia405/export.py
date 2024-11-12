@@ -10,12 +10,7 @@ from .. import utils
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
-from ..utils.ili2db import (
-    add_to_selection,
-    get_cl_re_ids,
-    get_ws_wn_ids,
-    remove_from_selection,
-)
+from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -259,9 +254,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         return {
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
             # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id
-            #"abwasserbauwerkref": check_fk_in_subsetid(
+            # "abwasserbauwerkref": check_fk_in_subsetid(
             #    subset_ids, row.fk_wastewater_structure__REL
-            #),
+            # ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
@@ -718,9 +713,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     query = qgep_session.query(QGEP.dryweather_downspout)
     if filtered:
-        logger.info(
-        f"filtered: subset_ids = {subset_ids}"
-        )
+        logger.info(f"filtered: subset_ids = {subset_ids}")
         query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
