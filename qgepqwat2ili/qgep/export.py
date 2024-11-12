@@ -15,7 +15,8 @@ from ..utils.ili2db import (
     get_cl_re_ids,
     get_ws_wn_ids,
     remove_from_selection,
-)from ..utils.various import logger
+)
+from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
