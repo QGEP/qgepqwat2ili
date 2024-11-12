@@ -488,6 +488,7 @@ def skip_wwtp_structure_ids_old():
 
     return not_wwtp_structure_ids
 
+
 # 12.11.2024 to clean up - get_ws_wn_ids kann das auch
 def get_cl_re_ids(classname):
     """
@@ -570,7 +571,7 @@ def remove_from_selection(selected_ids, remove_ids):
     """
 
     for list_item in remove_ids:
-        #selected_ids = selected_ids.remove(list_item)
+        # selected_ids = selected_ids.remove(list_item)
         selected_ids.remove(list_item)
 
     return selected_ids
@@ -585,7 +586,7 @@ def add_to_selection(selected_ids, add_ids):
         selected_ids = []
 
     for list_item in add_ids:
-        #selected_ids = selected_ids.append(list_item)
+        # selected_ids = selected_ids.append(list_item)
         selected_ids.append(list_item)
 
     return selected_ids
