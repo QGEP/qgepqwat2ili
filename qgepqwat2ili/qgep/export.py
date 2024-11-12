@@ -10,6 +10,11 @@ from .. import utils
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
+from .. import utils
+
+# 4.10.2024
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
 from ..utils.ili2db import (
     add_to_selection,
     get_cl_re_ids,
