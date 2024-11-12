@@ -557,8 +557,9 @@ def get_ws_wn_ids(classname):
             logger.debug(f" row[0] = {row[0]}")
             # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
             strrow = str(row[0])
-            ws_wn_ids.append(strrow)
-            logger.debug(f" building up '{ws_wn_ids}' ...")
+            if strrow not is None:
+                ws_wn_ids.append(strrow)
+                # logger.debug(f" building up '{ws_wn_ids}' ...")
 
     return ws_wn_ids
 
@@ -569,7 +570,8 @@ def remove_from_selection(selected_ids, remove_ids):
     """
 
     for list_item in remove_ids:
-        selected_ids = selected_ids.remove(list_item)
+        #selected_ids = selected_ids.remove(list_item)
+        selected_ids.remove(list_item)
 
     return selected_ids
 
@@ -579,11 +581,12 @@ def add_to_selection(selected_ids, add_ids):
     Append ids to selected_ids
     """
 
-    if selected_id is None:
-        selected_id = []
+    if selected_ids is None:
+        selected_ids = []
 
     for list_item in add_ids:
-        selected_ids = selected_ids.append(list_item)
+        #selected_ids = selected_ids.append(list_item)
+        selected_ids.append(list_item)
 
     return selected_ids
 
