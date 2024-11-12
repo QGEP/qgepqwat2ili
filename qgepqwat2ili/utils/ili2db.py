@@ -569,7 +569,7 @@ def get_ws_wn_ids(classname):
         return None
 
 
-def remove_from_selection (selected_ids, remove_ids)
+def remove_from_selection(selected_ids, remove_ids)
     """
     Remove ids from selected_ids
     """
@@ -580,7 +580,7 @@ def remove_from_selection (selected_ids, remove_ids)
     return selected_ids
 
 
-def add_to_selection (selected_ids, add_ids)
+def add_to_selection(selected_ids, add_ids)
     """
     Add ids to selected_ids
     """
