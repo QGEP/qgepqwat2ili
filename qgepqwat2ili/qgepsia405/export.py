@@ -252,9 +252,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return {
             # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a seperate subset - call it ws_subset_id
+            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id
             "abwasserbauwerkref": check_fk_in_subsetid(
-                wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL
+                subset_ids, row.fk_wastewater_structure__REL
             ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
@@ -590,7 +590,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             **base_common(row, "haltungspunkt"),
             # --- haltungspunkt ---
-            # changed call from get_tid to check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
+            # changed call from get_tid to check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
             # abwassernetzelementref=get_tid(row.fk_wastewater_networkelement__REL),
             abwassernetzelementref=check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_networkelement__REL
