@@ -488,7 +488,7 @@ def skip_wwtp_structure_ids_old():
 
     return not_wwtp_structure_ids
 
-
+# 12.11.2024 to clean up - get_ws_wn_ids kann das auch
 def get_cl_re_ids(classname):
     """
     Get list of id's of reaches of the channels provided
@@ -531,7 +531,7 @@ def get_cl_re_ids(classname):
 
 def get_ws_wn_ids(classname):
     """
-    Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does not work for channel
+    Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
     """
 
     logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
@@ -576,11 +576,14 @@ def remove_from_selection(selected_ids, remove_ids):
 
 def add_to_selection(selected_ids, add_ids):
     """
-    Add ids to selected_ids
+    Append ids to selected_ids
     """
 
+    if selected_id = None:
+        selected_id = []
+
     for list_item in add_ids:
-        selected_ids = selected_ids.add(list_item)
+        selected_ids = selected_ids.append(list_item)
 
     return selected_ids
 
