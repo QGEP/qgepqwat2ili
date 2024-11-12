@@ -564,7 +564,7 @@ def get_ws_wn_ids(classname):
                 logger.debug(f" building up '{ws_wn_ids}' ...")
 
         return ws_wn_ids
-    else
+    else:
         logger.warning(f"Do not use this function with {classname} !")
         return None
 
