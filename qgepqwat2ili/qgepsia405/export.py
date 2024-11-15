@@ -260,11 +260,11 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         """
 
         return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id
-            # "abwasserbauwerkref": check_fk_in_subsetid(
-            #    subset_ids, row.fk_wastewater_structure__REL
-            # ),
+            # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id / 15.11.2024 integrated wws in subset_ids
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
@@ -274,7 +274,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for structure_part
         """
         return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            #"abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
