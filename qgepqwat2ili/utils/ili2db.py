@@ -558,7 +558,7 @@ def get_ws_wn_ids(classname):
             logger.debug(f" row[0] = {row[0]}")
             # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
             strrow = str(row[0])
-            if not strrow is None:
+            if strrow is not None:
                 ws_wn_ids.append(strrow)
                 # logger.debug(f" building up '{ws_wn_ids}' ...")
 
