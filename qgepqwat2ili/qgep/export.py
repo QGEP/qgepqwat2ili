@@ -39,18 +39,45 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
-    # Filtering
+    # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
 
-    wastewater_structure_id_sia405abwasser_list = None
-    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+    # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+    ws_off_sia405abwasser_list = None
+    ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
 
-    logger.info(
-        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    # 3. Show ws_off_sia405abwasser_list
+    logger.debug(
+        f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
     )
+
+    # 4. check if filtered
+    if filtered:
+        if ws_off_sia405abwasser_list:
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+        # else do nothing
+    else:
+        if ws_off_sia405abwasser_list:
+            # add all data of wastewater_structures to selection
+            subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
+            logger.debug(
+                f"subset_ids of all wws : {subset_ids}",
+            )
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+            logger.debug(
+                f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
+            )
+            # add reach_ids
+            # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
+            # treat export as with a selection
+            filtered = True
+
+        # else do nothing
 
     # Orientation
     oriented = orientation is not None
