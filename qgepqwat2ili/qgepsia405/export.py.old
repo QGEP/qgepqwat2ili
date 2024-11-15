@@ -82,7 +82,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
     subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
     subset_ids = add_to_selection(subset_ids, subset_wws_ids)
- 
+
     logger.debug(
         f"subset_ids with wws : {subset_ids}",
     )
