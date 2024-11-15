@@ -550,12 +550,12 @@ def get_ws_wn_ids(classname):
         ws_wn_ids = None
     else:
         # added cursor.execute again to see if with this all records will be available
-        #15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
         cursor.execute(
             f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
         )
         records = cursor.fetchall()
-        
+
         # 15.11.2024 - does not get all records, but only n-1
         for row in records:
             logger.debug(f" row[0] = {row[0]}")
@@ -580,8 +580,8 @@ def get_ws_selected_ww_networkelements(selected_wwn):
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
 
-    selection_text = ''
-    
+    selection_text = ""
+
     for list_item in selected_wwn:
         selection_text += "'"
         selection_text += list_item
@@ -590,9 +590,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
     # remove last komma to make it a correct IN statement
     selection_text = selection_text[:-1]
 
-    logger.debug(
-        f"selection_text = {selection_text} ..."
-    )
+    logger.debug(f"selection_text = {selection_text} ...")
 
     ws_ids = []
 
@@ -600,7 +598,6 @@ def get_ws_selected_ww_networkelements(selected_wwn):
     cursor.execute(
         f"SELECT ws.obj_id FROM qgep_od.wastewater_structure ws LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = ws.obj_id WHERE wn.obj_id IN ({selection_text});"
     )
-
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # ws_wn_ids_count = int(cursor.fetchone()[0])
