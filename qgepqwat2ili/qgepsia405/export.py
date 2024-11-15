@@ -8,9 +8,9 @@ from sqlalchemy.sql import text
 from .. import utils
 
 # 4.10.2024
-# from ..utils.ili2db import skip_wwtp_structure_ids
-# 6.11.2024 replaced with
-from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
+from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
+from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection, get_ws_selected_ww_networkelements
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -74,6 +74,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             filtered = True
 
         # else do nothing
+
+    # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
+    subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
+    subset_ids = add_to_selection(subset_ids, subset_wws_ids)
+
+    logger.debug(
+        f"subset_ids with wws : {subset_ids}",
+            )
 
     # Orientation
     oriented = orientation is not None

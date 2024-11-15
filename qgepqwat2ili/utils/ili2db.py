@@ -464,10 +464,6 @@ def skip_wwtp_structure_ids_old():
     cursor.execute(
         "SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
     )
-    # remove - only for testing
-    # cursor.execute(
-    #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
-    # )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # wwtp_structure_count = int(cursor.fetchone()[0])
@@ -507,7 +503,7 @@ def get_cl_re_ids(classname):
 
         # select all obj_id of the wastewater_nodes of wwtp_structure
         cursor.execute(
-            "SELECT wn.obj_id FROM qgep_od.channel LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = channel.obj_id;"
+            "SELECT wn.obj_id FROM qgep_od.channel LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = channel.obj_id WHERE wn.obj_id is not NULL;"
         )
 
         # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -544,7 +540,7 @@ def get_ws_wn_ids(classname):
 
     # select all obj_id of the wastewater_nodes of wwtp_structure
     cursor.execute(
-        f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id;"
+        f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -563,6 +559,41 @@ def get_ws_wn_ids(classname):
                 # logger.debug(f" building up '{ws_wn_ids}' ...")
 
     return ws_wn_ids
+
+
+def get_ws_selected_ww_networkelements(selection):
+    """
+    Get list of id's of wastewater_structure from selected wastewater_network_elements
+    """
+
+    logger.info(f"get list of id's of wastewater_structure of selected wastewater_network_elements {selection} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    ws_ids = []
+
+    # select all obj_id of the wastewater_nodes of wwtp_structure
+    cursor.execute(
+        f"SELECT ws.obj_id FROM qgep_od.wastewater_structure ws LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = ws.obj_id WHERE wn.obj_id IN {selection}"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        ws_ids = None
+    else:
+        records = cursor.fetchall()
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                ws_ids.append(strrow)
+                # logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_ids
 
 
 def remove_from_selection(selected_ids, remove_ids):
