@@ -10,6 +10,7 @@ from .. import utils
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with - to check if really necessary here (as no sia405 abwasser exceptions needed)
+from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -1459,10 +1460,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.pipe_profile -> ABWASSER.rohrprofil, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.pipe_profile)
-    if filtered:
-        query = query.join(QGEP.reach).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.pipe_profile
@@ -1608,10 +1606,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         "Exporting QGEP.control_center -> ABWASSER.steuerungszentrale, ABWASSER.metaattribute"
     )
     query = qgep_session.query(QGEP.control_center)
-    if filtered:
-        query = query.join(QGEP.throttle_shut_off_unit, QGEP.wastewater_node).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+    # Always export all, no filtering
+
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.control_center
@@ -1938,10 +1934,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.info("Exporting QGEP.hydr_geometry -> ABWASSER.hydr_geometrie, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.hydr_geometry)
-    if filtered:
-        query = query.join(QGEP.wastewater_node).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geometry
@@ -2119,10 +2112,6 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         "Exporting QGEP.profile_geometry -> ABWASSER.rohrprofil_geometrie, ABWASSER.metaattribute"
     )
     query = qgep_session.query(QGEP.profile_geometry)
-    if filtered:
-        query = query.join(QGEP.pipe_profile, QGEP.reach).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.profile_geometry
@@ -2156,10 +2145,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         "Exporting QGEP.hydr_geom_relation -> ABWASSER.hydr_geomrelation, ABWASSER.metaattribute"
     )
     query = qgep_session.query(QGEP.hydr_geom_relation)
-    if filtered:
-        query = query.join(QGEP.hydr_geometry, QGEP.wastewater_node).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geom_relation
@@ -2194,7 +2180,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.mechanical_pretreatment)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        query = query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            ).join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
     for row in query:
