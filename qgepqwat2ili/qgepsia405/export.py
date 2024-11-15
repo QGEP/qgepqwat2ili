@@ -278,7 +278,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for structure_part
         """
         return {
-            #"abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
             "abwasserbauwerkref": check_fk_in_subsetid(
                 subset_ids, row.fk_wastewater_structure__REL
             ),
