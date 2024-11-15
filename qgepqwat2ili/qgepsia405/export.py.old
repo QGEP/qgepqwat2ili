@@ -81,10 +81,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
     subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
-    logger.debug(
-        f"subset_wws_ids: {subset_wws_ids}",
-    )
     subset_ids = add_to_selection(subset_ids, subset_wws_ids)
+ 
     logger.debug(
         f"subset_ids with wws : {subset_ids}",
     )
@@ -280,11 +278,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for structure_part
         """
         return {
-            # abwasserbauwerkref is MANDATORY, so it cannot be set to NULL
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            #"abwasserbauwerkref": check_fk_in_subsetid(
-            #    subset_ids, row.fk_wastewater_structure__REL
-            #),
+            #"abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
