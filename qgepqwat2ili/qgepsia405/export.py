@@ -282,9 +282,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         return {
             # abwasserbauwerkref is MANDATORY, so it cannot be set to NULL
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
-            #"abwasserbauwerkref": check_fk_in_subsetid(
+            # "abwasserbauwerkref": check_fk_in_subsetid(
             #    subset_ids, row.fk_wastewater_structure__REL
-            #),
+            # ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
