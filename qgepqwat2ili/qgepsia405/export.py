@@ -8,9 +8,13 @@ from sqlalchemy.sql import text
 from .. import utils
 
 # 4.10.2024
-from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
-from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection, get_ws_selected_ww_networkelements
+from ..utils.ili2db import (
+    add_to_selection,
+    get_ws_selected_ww_networkelements,
+    get_ws_wn_ids,
+    remove_from_selection,
+)
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -81,7 +85,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
     logger.debug(
         f"subset_ids with wws : {subset_ids}",
-            )
+    )
 
     # Orientation
     oriented = orientation is not None
@@ -775,10 +779,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.access_aid)
     if filtered:
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
-        query = query.join(QGEP.wastewater_structure,QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
@@ -821,10 +830,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.dryweather_flume)
     if filtered:
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
-        query = query.join(QGEP.wastewater_structure,QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
@@ -865,10 +879,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.cover)
     if filtered:
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
-        query = query.join(QGEP.wastewater_structure,QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
@@ -918,10 +937,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.benching)
     if filtered:
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
-        query = query.join(QGEP.wastewater_structure,QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
