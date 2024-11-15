@@ -717,7 +717,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         #query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
         #    QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         #)
-        query = query.join(QGEP.wastewater_structure,structure_part.fk_wastewater_structure == wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
+        query = query.join(QGEP.wastewater_structure,QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id).join(QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
         # add sql statement to logger
