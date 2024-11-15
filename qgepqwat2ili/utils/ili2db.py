@@ -566,7 +566,9 @@ def get_ws_selected_ww_networkelements(selection):
     Get list of id's of wastewater_structure from selected wastewater_network_elements
     """
 
-    logger.info(f"get list of id's of wastewater_structure of selected wastewater_network_elements {selection} ...")
+    logger.info(
+        f"get list of id's of wastewater_structure of selected wastewater_network_elements {selection} ..."
+    )
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
