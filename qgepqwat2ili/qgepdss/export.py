@@ -10,7 +10,6 @@ from .. import utils
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with - to check if really necessary here (as no sia405 abwasser exceptions needed)
-from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -2180,11 +2179,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.mechanical_pretreatment)
     if filtered:
-        query = query.join(
+        query = (
+            query.join(
                 QGEP.wastewater_structure,
                 QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
-            ).join(QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
     for row in query:
 
