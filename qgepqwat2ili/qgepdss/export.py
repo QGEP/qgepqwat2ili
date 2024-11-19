@@ -3384,10 +3384,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.measurement_result)
     if filtered:
         # query = query.join(
-            # QGEP.measurement_series,
-            # QGEP.measuring_point,
-            # QGEP.wastewater_structure,
-            # QGEP.wastewater_networkelement,
+        # QGEP.measurement_series,
+        # QGEP.measuring_point,
+        # QGEP.wastewater_structure,
+        # QGEP.wastewater_networkelement,
         # ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         query1 = (
             query.join(
