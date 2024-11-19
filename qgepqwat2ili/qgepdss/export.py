@@ -4060,10 +4060,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     if filtered:
         query = (
             query.join(
-                QGEP.re_maintenance_event_wastewater_structure, re_maintenance_event_wastewater_structure.fk_maintenance_event == fk_maintenance_event.obj_id,
+                QGEP.re_maintenance_event_wastewater_structure, QGEP.re_maintenance_event_wastewater_structure.fk_maintenance_event == QGEP.maintenance_event.obj_id,
             )
             .join(
-                QGEP.wastewater_structure, re_maintenance_event_wastewater_structure.fk_wastewater_structure == wastewater_structure.obj_id,
+                QGEP.wastewater_structure, QGEP.re_maintenance_event_wastewater_structure.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
             )
             .join(QGEP.wastewater_networkelement)
             .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
