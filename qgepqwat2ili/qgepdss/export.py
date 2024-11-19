@@ -3290,7 +3290,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query1 = (
             query.join(
                 QGEP.measuring_point,
-                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.wastewater_structure,
@@ -3302,7 +3302,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query2 = (
             query.join(
                 QGEP.measuring_point,
-                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.waste_water_treatment_plant,
@@ -3319,7 +3319,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query3 = (
             query.join(
                 QGEP.measuring_point,
-                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.water_course_segment,
