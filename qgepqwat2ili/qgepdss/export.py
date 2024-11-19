@@ -2919,6 +2919,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             )
             .join(QGEP.wastewater_networkelement)
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.accident
@@ -3106,12 +3109,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # query2 via waste_water_treatment_plant TODO : Fix Mapping
         query2 = (
             query.join(
-                QGEP.model_classes_tww_od.waste_water_treatment_plant,
+                QGEP.waste_water_treatment_plant,
                 QGEP.measuring_point.fk_waste_water_treatment_plant
                 == QGEP.waste_water_treatment_plant.obj_id,
             )
-            .join(QGEP.model_classes_tww_od.wwtp_structure)
-            .join(QGEP.model_classes_tww_od.wastewater_networkelement)
+            .join(QGEP.wwtp_structure)
+            .join(QGEP.wastewater_networkelement)
         )
         # only until VSA-DSS Release 2015
         query3 = (
@@ -3127,6 +3130,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query = query.union(query1, query2, query3)
         # query = query.union(query1, query3)
         query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.measuring_point
