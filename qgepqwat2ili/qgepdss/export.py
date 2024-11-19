@@ -2190,7 +2190,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mechanical_pretreatment
@@ -2226,9 +2226,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.retention_body)
     if filtered:
-        query = query.join(QGEP.infiltration_installation, QGEP.wastewater_networkelement).filter(
+        # explicit join on added
+        query = query.join(
+            QGEP.infiltration_installation, QGEP.retention_body.fk_infiltration_installation
+                == QGEP.infiltration_installation.obj_id,).join( QGEP.wastewater_networkelement).filter(
             QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.retention_body
@@ -2267,7 +2273,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     if filtered:
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" always export all overflow_char datasets query = {statement}")
+        logger.debug(f" always export all overflow_char datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.overflow_char
@@ -2306,7 +2312,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hq_relation
