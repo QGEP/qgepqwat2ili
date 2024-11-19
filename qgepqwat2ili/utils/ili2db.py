@@ -489,7 +489,7 @@ def skip_wwtp_structure_ids():
     return not_wwtp_structure_ids
 
 
-def create_ili_schema(schema, model, log_path, recreate_schema=False):
+def create_ili_schema(schema, model, log_path, recreate_schema=False, create_basket_col=False):
     """
     Create schema for INTERLIS import
     """
@@ -589,17 +589,8 @@ def get_xtf_model(xtf_file):
     checkmodelssection = -1
     impmodel = "not found"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     with open(xtf_file, encoding="utf-8") as f:
-=======
-    with open(xtf_file, mode="r", encoding="utf-8") as f:
->>>>>>> 9dfe0ea (Make baskets optional)
-=======
-    with open(xtf_file, encoding="utf-8") as f:
->>>>>>> e42e65e ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         while True:
-            # if checkdatasection == -1:
             if checkmodelssection == -1:
 
                 line = f.readline()
@@ -608,15 +599,10 @@ def get_xtf_model(xtf_file):
                 else:
                     # checkdatasection = line.find('<DATASECTION>')
                     # logger.info(str(checkdatasection))
-<<<<<<< HEAD
-                    checkmodelssection = line.find("<MODELS>")
-                    logger.info("checkmodelssection " + str(checkmodelssection))
-=======
                     # print("checkdatasection (ili2db): " + str(checkdatasection))
                     checkmodelssection = line.find("<MODELS>")
                     logger.info(str(checkmodelssection))
                     print("checkmodelssection (ili2db): " + str(checkmodelssection))
->>>>>>> 9dfe0ea (Make baskets optional)
                     logger.info(str(line))
             else:
                 line2 = f.readline()
@@ -627,10 +613,6 @@ def get_xtf_model(xtf_file):
                     logger.info("line2: ", str(line2))
                     # logger.info(str(checkdatasection))
                     logger.info("checkmodelssection2 " + str(checkmodelssection))
-<<<<<<< HEAD
-=======
-                    print("checkmodelssection2 (ili2db): " + str(checkmodelssection))
->>>>>>> 9dfe0ea (Make baskets optional)
                     # strmodel = str(line2.strip())
                     strmodel = str(line2)
                     strmodel = strmodel.strip()
@@ -639,10 +621,6 @@ def get_xtf_model(xtf_file):
                     logger.info(f"strmodel: {strmodel}")
                     a = strmodel.find("</MODELS>")
                     logger.info("strmodel.find a </MODELS>: " + str(a))
-<<<<<<< HEAD
-=======
-                    print("strmodel.find a </MODELS>: " + str(a))
->>>>>>> 9dfe0ea (Make baskets optional)
                     # if strmodel.find("</MODELS>") > -1:
                     if a == -1:
                         b = strmodel.find("<MODEL>")
@@ -706,10 +684,6 @@ def get_xtf_model(xtf_file):
     f.close()
 
     logger.info("MODEL found: " + str(impmodel))
-<<<<<<< HEAD
-=======
-    print("MODEL found: ", str(impmodel))
->>>>>>> 9dfe0ea (Make baskets optional)
 
     # neu 23.7.2022 return imodel from get_xtf_model so it can be called in _init_.py
     return impmodel
@@ -748,11 +722,7 @@ def get_xtf_model2(xtf_file):
             model_list.append(rootinterlis[0][0][j].get("NAME"))
             model_found = True
         # except utils.various.CmdException:
-<<<<<<< HEAD
         except Exception:
-=======
-        except:
->>>>>>> 9dfe0ea (Make baskets optional)
             if model_found:
                 logger.info(f"{i - 1} times MODEL information was found!")
                 break
