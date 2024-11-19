@@ -4065,8 +4065,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             .join(
                 QGEP.wastewater_structure, re_maintenance_event_wastewater_structure.fk_wastewater_structure == wastewater_structure.obj_id,
             )
-            QGEP.wastewater_networkelement,
-        ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event
