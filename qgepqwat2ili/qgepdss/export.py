@@ -2954,8 +2954,13 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.substance -> ABWASSER.stoff, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.substance)
     if filtered:
-        query = query.join(
-            QGEP.hazard_source, QGEP.connection_object, QGEP.wastewater_networkelement
+        query = (
+            query.join(QGEP.hazard_source)
+            .join(
+                QGEP.connection_object,
+                QGEP.hazard_source.fk_connection_object == QGEP.connection_object.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
