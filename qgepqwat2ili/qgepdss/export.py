@@ -3106,15 +3106,17 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # QGEP.wastewater_networkelement,
 
         # )
-        # query2 via waste_water_treatment_plant Release 2015 where waste_water_treatment_plant is subclass of organisation 
+        # query2 via waste_water_treatment_plant Release 2015 where waste_water_treatment_plant is subclass of organisation
         query2 = (
             query.join(
                 QGEP.waste_water_treatment_plant,
                 QGEP.measuring_point.fk_waste_water_treatment_plant
                 == QGEP.waste_water_treatment_plant.obj_id,
             )
-            .join(QGEP.wastewater_structure, QGEP.wastewater_structure.fk_owner
-                == QGEP.waste_water_treatment_plant.obj_id,)
+            .join(
+                QGEP.wastewater_structure,
+                QGEP.wastewater_structure.fk_owner == QGEP.waste_water_treatment_plant.obj_id,
+            )
             .join(QGEP.wastewater_networkelement)
         )
         # only until VSA-DSS Release 2015
