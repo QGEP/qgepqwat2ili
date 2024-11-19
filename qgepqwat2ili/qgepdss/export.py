@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
-
-from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.basket_utils import BasketUtils
+from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -206,6 +205,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             "t_id": get_tid(row),
             "t_basket": current_basket.t_id,
         }
+
     qgep_export_utils = QgepExportUtils(
         tid_maker=tid_maker,
         current_basket=current_basket,
