@@ -627,7 +627,7 @@ def remove_from_selection(selected_ids, remove_ids):
         try:
             selected_ids.remove(list_item)
         except Exception:
-            logger.debug logger.debug(f" remove_from_selection: '{list_item}' not in selected_ids - could not be removed!")
+            logger.debug(f" remove_from_selection: '{list_item}' not in selected_ids - could not be removed!")
 
     return selected_ids
 
