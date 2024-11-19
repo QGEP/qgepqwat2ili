@@ -2227,10 +2227,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.retention_body)
     if filtered:
         # explicit join on added
-        query = query.join(
-            QGEP.infiltration_installation, QGEP.retention_body.fk_infiltration_installation
-                == QGEP.infiltration_installation.obj_id,).join( QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(
+                QGEP.infiltration_installation,
+                QGEP.retention_body.fk_infiltration_installation
+                == QGEP.infiltration_installation.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
