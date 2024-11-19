@@ -3285,22 +3285,24 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.measurement_series)
     if filtered:
         # query = query.join(
-            # QGEP.measuring_point, QGEP.wastewater_structure, QGEP.wastewater_networkelement
+        # QGEP.measuring_point, QGEP.wastewater_structure, QGEP.wastewater_networkelement
         # ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         query1 = (
             query.join(
-                QGEP.measuring_point, QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measuring_point,
+                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.wastewater_structure,
                 QGEP.measuring_point.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
-            ).
-            join(QGEP.wastewater_networkelement)
+            )
+            .join(QGEP.wastewater_networkelement)
         )
         # query2 via waste_water_treatment_plant Release 2015 where waste_water_treatment_plant is subclass of organisation
         query2 = (
             query.join(
-                QGEP.measuring_point, QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measuring_point,
+                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.waste_water_treatment_plant,
@@ -3316,7 +3318,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # only until VSA-DSS Release 2015
         query3 = (
             query.join(
-                QGEP.measuring_point, QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
+                QGEP.measuring_point,
+                QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
             .join(
                 QGEP.water_course_segment,
