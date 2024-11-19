@@ -3122,7 +3122,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
                 QGEP.water_course_segment,
                 QGEP.measuring_point.fk_water_course_segment == QGEP.water_course_segment.obj_id,
             )
-            .join(QGEP.river, QGEP.water_course_segment.fk_water_course == QGEP.river.obj_id,)
+            .join(QGEP.river, QGEP.water_course_segment.fk_watercourse == QGEP.river.obj_id,)
             .join(QGEP.sector_water_body, QGEP.sector_water_body.fk_surface_water_bodies == QGEP.sector_water_body.obj_id,)
             .join(QGEP.discharge_point, QGEP.measuring_point.fk_sector_water_body == QGEP.discharge_point.obj_id,)
             .join(QGEP.wastewater_networkelement)
