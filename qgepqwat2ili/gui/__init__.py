@@ -43,9 +43,6 @@ from ..utils.various import CmdException, LoggingHandlerContext, logger, make_lo
 from .gui_export import GuiExport
 from .gui_import import GuiImport
 
-# 19.4.2023 / 25.4.2023 ohne Bindestrich / neu aus gui_import - Gui
-from .gui_importc import GuiImportc
-
 
 def _show_results(title, message, log_path, level):
     widget = iface.messageBar().createMessage(title, message)
@@ -71,46 +68,9 @@ def show_success(title, message, log_path):
 
 import_dialog = None
 
-
 flagskipvalidation_import = False
 
-# 19.4.2023 / 26.7.2023 wieder gesetzt
-importc_dialog = None
 
-
-def action_importc(plugin):
-
-    # neu 26.7.2023 analog action_import
-    global importc_dialog  # avoid garbage collection
-
-    # print("set flagskipvalidation_import")
-
-    iface.messageBar().pushMessage("Info", "action import", level=Qgis.Info)
-
-    importc_dialog = GuiImportc(plugin.iface.mainWindow())
-
-    # # 19.4.2023 add option for additional import configuration
-    def action_do_importc():
-        # print("Open import dialog config")
-        if importc_dialog.skipvalidation_import:
-            importc_dialog.skipvalidation_import
-
-        progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
-        progress_dialog.setCancelButton(None)
-        progress_dialog.setModal(True)
-        progress_dialog.show()
-        progress_dialog.setLabelText("waiting...")
-        # delays the execution for 5.5 secs.
-        # time.sleep(5.5)
-        progress_dialog.close
-        # end action_do_importc
-
-    importc_dialog.accepted.connect(action_do_importc)
-    importc_dialog.adjustSize()
-    importc_dialog.show()
-
-
-# def action_import(plugin):
 def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
