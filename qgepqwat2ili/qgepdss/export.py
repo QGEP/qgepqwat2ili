@@ -280,7 +280,10 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for wastewater_networkelement
         """
         return {
-            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
         }
