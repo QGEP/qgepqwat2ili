@@ -5,10 +5,15 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
+# 4.10.2024
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
 from .. import utils
 
 # 4.10.2024
-from ..utils.ili2db import skip_wwtp_structure_ids
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
+from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -35,18 +40,45 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     # backport from tww https://github.com/teksi/wastewater/blob/3acfba249866d299f8a22e249d9f1e475fe7b88d/plugin/teksi_wastewater/interlis/interlis_model_mapping/interlis_exporter_to_intermediate_schema.py#L83
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
-    # Filtering
+    # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
 
-    wastewater_structure_id_sia405abwasser_list = None
-    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+    # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+    ws_off_sia405abwasser_list = None
+    ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
 
-    logger.info(
-        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    # 3. Show ws_off_sia405abwasser_list
+    logger.debug(
+        f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
     )
+
+    # 4. check if filtered
+    if filtered:
+        if ws_off_sia405abwasser_list:
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+        # else do nothing
+    else:
+        if ws_off_sia405abwasser_list:
+            # add all data of wastewater_structures to selection
+            subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
+            logger.debug(
+                f"subset_ids of all wws : {subset_ids}",
+            )
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+            logger.debug(
+                f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
+            )
+            # add reach_ids
+            # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
+            # treat export as with a selection
+            filtered = True
+
+        # else do nothing
 
     # Orientation
     oriented = orientation is not None
@@ -146,11 +178,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         else:
             if filtered:
                 logger.warning(
-                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in filtered subset - replaced with None instead!"
                 )
                 return None
             else:
-                return tid_maker.tid_for_row(relation)
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in datamodel - replaced with None instead!"
+                )
+                return None
 
     def create_metaattributes(row):
         metaattribute = ABWASSER.metaattribute(
@@ -225,8 +260,12 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
 
         return {
             # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id
+            # "abwasserbauwerkref": check_fk_in_subsetid(
+            #    subset_ids, row.fk_wastewater_structure__REL
+            # ),
             "abwasserbauwerkref": check_fk_in_subsetid(
-                wastewater_structure_id_sia405abwasser_list, row.fk_wastewater_structure__REL
+                subset_ids, row.fk_wastewater_structure__REL
             ),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
@@ -237,6 +276,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         Returns common attributes for structure_part
         """
         return {
+            # abwasserbauwerkref is MANDATORY, so it cannot be set to NULL
             "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
             "bemerkung": truncate(emptystr_to_null(row.remark), 80),
             "bezeichnung": null_to_emptystr(row.identifier),
@@ -683,9 +723,21 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.dryweather_downspout)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        logger.info(f"filtered: subset_ids = {subset_ids}")
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_downspout
@@ -721,9 +773,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.access_aid)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.access_aid
@@ -761,9 +824,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.dryweather_flume)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_flume
@@ -799,9 +873,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.cover)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.cover
@@ -846,9 +931,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.benching)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.benching

@@ -448,7 +448,7 @@ def check_fk_provider_null():
     return check_fk_provider_null
 
 
-def skip_wwtp_structure_ids():
+def skip_wwtp_structure_ids_old():
     """
     Get list of id's of class wastewater_structure without wwtp_structure (ARABauwerk)
     """
@@ -464,10 +464,6 @@ def skip_wwtp_structure_ids():
     cursor.execute(
         "SELECT * FROM qgep_od.wastewater_structure WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.wwtp_structure);"
     )
-    # remove - only for testing
-    # cursor.execute(
-    #   f"SELECT * FROM qgep_od.organisation WHERE obj_id NOT IN (SELECT obj_id FROM qgep_od.private);"
-    # )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # wwtp_structure_count = int(cursor.fetchone()[0])
@@ -487,6 +483,170 @@ def skip_wwtp_structure_ids():
             logger.debug(f" building up '{not_wwtp_structure_ids}' ...")
 
     return not_wwtp_structure_ids
+
+
+# 12.11.2024 to clean up - get_ws_wn_ids kann das auch
+def get_cl_re_ids(classname):
+    """
+    Get list of id's of reaches of the channels provided
+    """
+
+    # define classes that this is allowed to use - adapt for TWW to include model changes
+    if classname == "channel":
+        logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
+
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        cl_re_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(
+            "SELECT wn.obj_id FROM qgep_od.channel LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = channel.obj_id WHERE wn.obj_id is not NULL;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # cl_re_ids_count = int(cursor.fetchone()[0])
+        # if cl_re_ids_count == 0:
+        if cursor.fetchone() is None:
+            cl_re_ids = None
+        else:
+            records = cursor.fetchall()
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                cl_re_ids.append(strrow)
+                logger.debug(f" building up '{cl_re_ids}' ...")
+
+        return cl_re_ids
+    else:
+        logger.warning(f"Do not use this function with {classname} !")
+        return None
+
+
+def get_ws_wn_ids(classname):
+    """
+    Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
+    """
+
+    logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    ws_wn_ids = []
+
+    # select all obj_id of the wastewater_nodes of wwtp_structure
+    cursor.execute(
+        f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        ws_wn_ids = None
+    else:
+        # added cursor.execute again to see if with this all records will be available
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        cursor.execute(
+            f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
+        )
+        records = cursor.fetchall()
+
+        # 15.11.2024 - does not get all records, but only n-1
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                ws_wn_ids.append(strrow)
+                # logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_wn_ids
+
+
+def get_ws_selected_ww_networkelements(selected_wwn):
+    """
+    Get list of id's of wastewater_structure from selected wastewater_network_elements
+    """
+
+    logger.debug(
+        f"get list of id's of wastewater_structure of selected wastewater_network_elements {selected_wwn} ..."
+    )
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    selection_text = ""
+
+    for list_item in selected_wwn:
+        selection_text += "'"
+        selection_text += list_item
+        selection_text += "',"
+
+    # remove last komma to make it a correct IN statement
+    selection_text = selection_text[:-1]
+
+    logger.debug(f"selection_text = {selection_text} ...")
+
+    ws_ids = []
+
+    # select all obj_id of the wastewater_nodes of wwtp_structure
+    cursor.execute(
+        f"SELECT ws.obj_id FROM qgep_od.wastewater_structure ws LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = ws.obj_id WHERE wn.obj_id IN ({selection_text});"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        ws_ids = None
+    else:
+        records = cursor.fetchall()
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                ws_ids.append(strrow)
+                # logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_ids
+
+
+def remove_from_selection(selected_ids, remove_ids):
+    """
+    Remove ids from selected_ids if they are in selected_ids
+    """
+
+    for list_item in remove_ids:
+        # selected_ids = selected_ids.remove(list_item)
+        try:
+            selected_ids.remove(list_item)
+        except Exception:
+            logger.debug(
+                f" remove_from_selection: '{list_item}' not in selected_ids - could not be removed!"
+            )
+
+    return selected_ids
+
+
+def add_to_selection(selected_ids, add_ids):
+    """
+    Append ids to selected_ids
+    """
+
+    if selected_ids is None:
+        selected_ids = []
+
+    for list_item in add_ids:
+        # selected_ids = selected_ids.append(list_item)
+        selected_ids.append(list_item)
+
+    return selected_ids
 
 
 def create_ili_schema(schema, model, log_path, recreate_schema=False):
