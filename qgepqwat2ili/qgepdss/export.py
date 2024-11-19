@@ -2913,7 +2913,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     if filtered:
         query = (
             query.join(QGEP.hazard_source)
-            .join(QGEP.connection_object,
+            .join(
+                QGEP.connection_object,
                 QGEP.hazard_source.fk_connection_object == QGEP.connection_object.obj_id,
             )
             .join(QGEP.wastewater_networkelement)
