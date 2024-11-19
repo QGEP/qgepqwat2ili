@@ -3124,7 +3124,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             )
             .join(
                 QGEP.river,
-                QGEP.water_course_segment.fk_surface_water_bodies == QGEP.river.obj_id,
+                # Fehler im Datenmodell fk_water_course should be name fk_surface_water_bodies (resp. fk_surface_water_body - class should be renamed to single)
+                QGEP.water_course_segment.fk_water_course == QGEP.river.obj_id,
             )
             .join(
                 QGEP.sector_water_body,
