@@ -2182,7 +2182,8 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query = (
             query.join(
                 QGEP.wastewater_structure,
-                QGEP.mechanical_pretreatment.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+                QGEP.mechanical_pretreatment.fk_wastewater_structure
+                == QGEP.wastewater_structure.obj_id,
             )
             .join(QGEP.wastewater_networkelement)
             .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
