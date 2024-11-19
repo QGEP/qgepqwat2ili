@@ -4056,11 +4056,15 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         "Exporting QGEP.maintenance_event -> ABWASSER.maintenance_event, ABWASSER.metaattribute"
     )
     query = qgep_session.query(QGEP.maintenance_event)
-    # to check if join is correct like this n:m re_maintenance_event_wastewater_structure
+    # explicit join for n:m re_maintenance_event_wastewater_structure
     if filtered:
-        query = query.join(
-            QGEP.re_maintenance_event_wastewater_structure,
-            QGEP.wastewater_structure,
+        query = (
+            query.join(
+                QGEP.re_maintenance_event_wastewater_structure, re_maintenance_event_wastewater_structure.fk_maintenance_event == fk_maintenance_event.obj_id,
+            )
+            .join(
+                QGEP.wastewater_structure, re_maintenance_event_wastewater_structure.fk_wastewater_structure == wastewater_structure.obj_id,
+            )
             QGEP.wastewater_networkelement,
         ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
