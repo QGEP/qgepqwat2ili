@@ -2182,11 +2182,14 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query = (
             query.join(
                 QGEP.wastewater_structure,
-                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+                QGEP.mechanical_pretreatment.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
             )
             .join(QGEP.wastewater_networkelement)
             .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mechanical_pretreatment
