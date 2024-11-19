@@ -3190,7 +3190,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # QGEP.measuring_point, QGEP.wastewater_structure, QGEP.wastewater_networkelement
         # ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
 
-         query1 = (
+        query1 = (
             query.join(
                 QGEP.measuring_point, QGEP.measuring_device.fk_measuring_point == QGEP.measuring_point.obj_id,
             )
