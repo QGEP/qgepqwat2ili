@@ -2350,6 +2350,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
     )
     query = qgep_session.query(QGEP.dryweather_downspout)
+    if filtered:
         logger.info(f"filtered: subset_ids = {subset_ids}")
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
         #    QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
