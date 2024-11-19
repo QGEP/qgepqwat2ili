@@ -3392,7 +3392,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query1 = (
             query.join(
                 QGEP.measurement_series,
-                QGEP.measurement_result.measurement_series == QGEP.measurement_series.obj_id,
+                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
             )
             .join(
                 QGEP.measuring_point,
@@ -3408,7 +3408,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query2 = (
             query.join(
                 QGEP.measurement_series,
-                QGEP.measurement_result.measurement_series == QGEP.measurement_series.obj_id,
+                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
             )
             .join(
                 QGEP.measuring_point,
@@ -3429,7 +3429,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         query3 = (
             query.join(
                 QGEP.measurement_series,
-                QGEP.measurement_result.measurement_series == QGEP.measurement_series.obj_id,
+                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
             )
             .join(
                 QGEP.measuring_point,
