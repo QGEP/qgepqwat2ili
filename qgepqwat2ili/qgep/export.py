@@ -721,7 +721,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     if filtered:
         logger.info(f"filtered: subset_ids = {subset_ids}")
         # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
         query = (
             query.join(
@@ -769,7 +769,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.access_aid)
     if filtered:
-       # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
         # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
         # )
         query = (
