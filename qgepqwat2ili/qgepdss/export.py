@@ -2214,9 +2214,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "mechanischevorreinigung"),
             # --- mechanischevorreinigung ---
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            abwasserbauwerkref=check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_structure__REL
-            ),
+            abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             art=get_vl(row.kind__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
@@ -3172,9 +3170,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             **base_common(row, "messstelle"),
             # --- messstelle ---
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            abwasserbauwerkref=check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_structure__REL
-            ),
+            abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
             art=row.kind,
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
@@ -4252,9 +4248,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
             # --- sia405_baseclass ---
             # --- erhaltungsereignis_abwasserbauwerk ---
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
-            abwasserbauwerkref=check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_structure__REL
-            ),
+            abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             erhaltungsereignis_abwasserbauwerkassocref=get_tid(row.fk_maintenance_event__REL),
         )
 
