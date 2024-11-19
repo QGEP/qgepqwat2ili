@@ -3116,7 +3116,9 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         # only until VSA-DSS Release 2015
         query3 = (
             query.join(
-                QGEP.water_course_segment, QGEP.measuring_point.fk_water_course_segment == QGEP.water_course_segment.obj_id,)
+                QGEP.water_course_segment,
+                QGEP.measuring_point.fk_water_course_segment == QGEP.water_course_segment.obj_id,
+            )
             .join(QGEP.river)
             .join(QGEP.sector_water_body)
             .join(QGEP.discharge_point)
