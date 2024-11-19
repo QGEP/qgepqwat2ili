@@ -3755,9 +3755,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.backflow_prevention)
     # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.backflow_prevention
 
@@ -3798,9 +3809,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     )
     query = qgep_session.query(QGEP.solids_retention)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.solids_retention
 
@@ -3839,9 +3861,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     logger.info("Exporting QGEP.tank_cleaning -> ABWASSER.beckenreinigung, ABWASSER.metaattribute")
     query = qgep_session.query(QGEP.tank_cleaning)
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.tank_cleaning
 
@@ -3881,9 +3914,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     query = qgep_session.query(QGEP.tank_emptying)
     # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
-        query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
-            QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+            # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.tank_emptying
 
