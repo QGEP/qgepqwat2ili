@@ -619,12 +619,15 @@ def get_ws_selected_ww_networkelements(selected_wwn):
 
 def remove_from_selection(selected_ids, remove_ids):
     """
-    Remove ids from selected_ids
+    Remove ids from selected_ids if they are in selected_ids
     """
 
     for list_item in remove_ids:
         # selected_ids = selected_ids.remove(list_item)
-        selected_ids.remove(list_item)
+        try:
+            selected_ids.remove(list_item)
+        except Exception:
+            logger.debug logger.debug(f" remove_from_selection: '{list_item}' not in selected_ids - could not be removed!")
 
     return selected_ids
 
