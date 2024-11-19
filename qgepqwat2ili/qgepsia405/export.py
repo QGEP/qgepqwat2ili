@@ -745,7 +745,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_downspout
@@ -794,7 +794,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.access_aid
@@ -845,7 +845,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.dryweather_flume
@@ -894,7 +894,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.cover
@@ -952,7 +952,7 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         )
         # add sql statement to logger
         statement = query.statement
-        logger.info(f" selection query = {statement}")
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.benching
