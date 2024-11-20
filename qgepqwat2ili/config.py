@@ -47,7 +47,7 @@ WASSER_SCHEMA = "pg2ili_wasser"
 # TODO Once https://github.com/claeis/ili2db/issues/397#issuecomment-821342568 is fixed
 # use the normal file instad
 WASSER_ILI_MODEL = os.path.join(ILI_FOLDER, "SIA405_Wasser_2015_2_d-20181005.ili")
-#WASSER_ILI_MODEL = os.path.join(ILI_FOLDER, "SIA405_Wasser_2015_2_d-20181005-WITHOUT_VIEWS.ili")
+# WASSER_ILI_MODEL = os.path.join(ILI_FOLDER, "SIA405_Wasser_2015_2_d-20181005-WITHOUT_VIEWS.ili")
 WASSER_ILI_MODEL_NAME = "SIA405_WASSER_2015_LV95"
 
 TOPIC_NAME_SIA405_ADMINISTRATION = "SIA405_Base_Abwasser_LV95.Administration"
