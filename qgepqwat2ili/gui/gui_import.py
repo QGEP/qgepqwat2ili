@@ -27,21 +27,17 @@ class GuiImport(QDialog):
     def __init__(self, parent):
         super().__init__(parent)
 
-        a = True
-        if a:
-            loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
+        loadUi(os.path.join(os.path.dirname(__file__), "gui_import.ui"), self)
 
-            self.accepted.connect(self.commit_session)
-            self.rejected.connect(self.rollback_session)
+        self.accepted.connect(self.commit_session)
+        self.rejected.connect(self.rollback_session)
 
-            header = self.treeWidget.header()
-            header.setSectionResizeMode(QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header = self.treeWidget.header()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
 
-            # Not required here, but this way we load before opening the dialog
-            get_qgep_model()
-        else:
-            loadUi(os.path.join(os.path.dirname(__file__), "gui_importc.ui"), self)
+        # Not required here, but this way we load before opening the dialog
+        get_qgep_model()
 
     def init_with_session(self, session: Session):
         """
