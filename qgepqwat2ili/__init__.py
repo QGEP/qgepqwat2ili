@@ -3,15 +3,15 @@ import sys
 from logging import INFO, FileHandler, Formatter
 
 from . import config, utils
-from .qgep.export import qgep_export
-from .qgep.import_ import qgep_import
+from .qgep.export import qgep_export as qgep_export_kek
+from .qgep.import_ import qgep_import as qgep_import_kek
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
-from .qgepdss.export import qgep_export as qgepdss_export
-from .qgepdss.import_ import qgep_import as qgepdss_import
-from .qgepsia405.export import qgep_export as qgepsia405_export
-from .qgepsia405.import_ import qgep_import as qgepsia405_import
+from .qgepdss.export import qgep_export as qgep_export_dss
+from .qgepdss.import_ import qgep_import as qgep_import_dss
+from .qgepsia405.export import qgep_export as qgep_export_sia405
+from .qgepsia405.import_ import qgep_import as qgep_import_sia405
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
 from .qwat.mapping import get_qwat_mapping
@@ -211,25 +211,21 @@ def main(args):
             # add model dependency
             if args.export_sia405:
                 # SIA405_ABWASSER_2015_LV95
-                qgepsia405_export(
+                qgep_export_sia405(
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
                 )
             elif args.export_dss:
                 # DSS_2015_LV95 expor5t
-                qgepdss_export(
+                qgep_export_dss(
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
                 )
             else:
                 # VSA_KEK_2019_LV95 export
-
-                # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file)
-                # 4.4.2023 with labels_orientation
-                # qgep_export(selection=args.selection.split(",") if args.selection else None, labels_file=args.labels_file, orientation=args.labels_orientation if args.labels_orientation else 0)
-                qgep_export(
+                qgep_export_kek(
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
@@ -290,8 +286,8 @@ def main(args):
                 utils.ili2db.import_xtf_data(
                     SCHEMA, args.path, make_log_path(log_path, "iliimport")
                 )
-                print("qgep_import: " + SCHEMA + "/" + ILI_MODEL)
-                qgep_import()
+                print("qgep_import_kek: " + SCHEMA + "/" + ILI_MODEL)
+                qgep_import_kek()
             elif impmodel == "SIA405_ABWASSER_2015_LV95":
                 ABWASSER_SIA405_SCHEMA = config.ABWASSER_SIA405_SCHEMA
                 ABWASSER_SIA405_ILI_MODEL = config.ABWASSER_SIA405_ILI_MODEL
@@ -311,7 +307,7 @@ def main(args):
                     + "/"
                     + ABWASSER_SIA405_ILI_MODEL
                 )
-                qgepsia405_import()
+                qgep_import_sia405()
 
             elif impmodel == "DSS_2015_LV95":
                 ABWASSER_DSS_SCHEMA = config.ABWASSER_DSS_SCHEMA
@@ -327,7 +323,7 @@ def main(args):
                     ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport")
                 )
                 print("qgepdss_import: " + ABWASSER_DSS_SCHEMA + "/" + ABWASSER_DSS_ILI_MODEL)
-                qgepdss_import()
+                qgep_import_dss()
 
             else:
                 print(
