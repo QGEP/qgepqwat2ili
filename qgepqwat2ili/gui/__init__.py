@@ -593,6 +593,7 @@ def action_export(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -600,6 +601,7 @@ def action_export(plugin):
                 config.ABWASSER_SIA405_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         elif emodel == "DSS_2015_LV95":
             create_ili_schema(
@@ -607,6 +609,7 @@ def action_export(plugin):
                 config.ABWASSER_DSS_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
 
         # to do 27.3.2023 else instead of except? discuss with OD

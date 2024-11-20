@@ -10,11 +10,7 @@ from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
 from .qgepdss.export import qgep_export as qgepdss_export
 from .qgepdss.import_ import qgep_import as qgepdss_import
-
-# 4.4.2023
 from .qgepsia405.export import qgep_export as qgepsia405_export
-
-# 5.4.2023
 from .qgepsia405.import_ import qgep_import as qgepsia405_import
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
@@ -210,6 +206,7 @@ def main(args):
                 ILI_MODEL,
                 make_log_path(log_path, "ilicreate"),
                 recreate_schema=args.recreate_schema,
+                create_basket_col=False,
             )
             # add model dependency
             if args.export_sia405:
@@ -288,6 +285,7 @@ def main(args):
                     ILI_MODEL,
                     make_log_path(log_path, "ilicreate"),
                     recreate_schema=args.recreate_schema,
+                    create_basket_col=False,
                 )
                 utils.ili2db.import_xtf_data(
                     SCHEMA, args.path, make_log_path(log_path, "iliimport")
@@ -302,6 +300,7 @@ def main(args):
                     ABWASSER_SIA405_ILI_MODEL,
                     make_log_path(log_path, "ilicreate"),
                     recreate_schema=args.recreate_schema,
+                    create_basket_col=False,
                 )
                 utils.ili2db.import_xtf_data(
                     ABWASSER_SIA405_SCHEMA, args.path, make_log_path(log_path, "iliimport")
@@ -322,6 +321,7 @@ def main(args):
                     ABWASSER_DSS_ILI_MODEL,
                     make_log_path(log_path, "ilicreate"),
                     recreate_schema=args.recreate_schema,
+                    create_basket_col=True,
                 )
                 utils.ili2db.import_xtf_data(
                     ABWASSER_DSS_SCHEMA, args.path, make_log_path(log_path, "iliimport")
@@ -349,6 +349,7 @@ def main(args):
                 ILI_MODEL,
                 make_log_path(log_path, "ilicreate"),
                 recreate_schema=args.recreate_schema,
+                create_basket_col=False,
             )
             qwat_export(include_hydraulics=args.include_hydraulics)
             utils.ili2db.export_xtf_data(
@@ -388,6 +389,7 @@ def main(args):
                 ILI_MODEL,
                 make_log_path(log_path, "ilicreate"),
                 recreate_schema=args.recreate_schema,
+                create_basket_col=False,
             )
             utils.ili2db.import_xtf_data(SCHEMA, args.path, make_log_path(log_path, "iliimport"))
             qwat_import()
@@ -400,7 +402,10 @@ def main(args):
                 config.PGSERVICE = config.QGEP_DEFAULT_PGSERVICE
             # to do add model dependency
             utils.ili2db.create_ili_schema(
-                config.ABWASSER_SCHEMA, config.ABWASSER_ILI_MODEL, recreate_schema=True
+                config.ABWASSER_SCHEMA,
+                config.ABWASSER_ILI_MODEL,
+                recreate_schema=True,
+                create_basket_col=False,
             )
             QGEPMAPPING = get_qgep_mapping()
             utils.templates.generate_template(
@@ -411,7 +416,10 @@ def main(args):
             if config.PGSERVICE is None:
                 config.PGSERVICE = config.QWAT_DEFAULT_PGSERVICE
             utils.ili2db.create_ili_schema(
-                config.WASSER_SCHEMA, config.WASSER_ILI_MODEL, recreate_schema=True
+                config.WASSER_SCHEMA,
+                config.WASSER_ILI_MODEL,
+                recreate_schema=True,
+                create_basket_col=False,
             )
             QWATMAPPING = get_qwat_mapping()
             utils.templates.generate_template("qwat", "wasser", BaseQwat, BaseWasser, QWATMAPPING)
