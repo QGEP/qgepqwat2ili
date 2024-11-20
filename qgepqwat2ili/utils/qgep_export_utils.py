@@ -149,7 +149,7 @@ class QgepExportUtils:
         )
 
         if self.current_basket is not None:
-            metaattribute["t_basket"] = self.current_basket.t_id
+            metaattribute.t_basket = self.current_basket.t_id
 
         self.abwasser_session.add(metaattribute)
 
