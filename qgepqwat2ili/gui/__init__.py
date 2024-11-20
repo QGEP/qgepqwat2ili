@@ -15,16 +15,16 @@ from QgisModelBaker.libs.modelbaker.iliwrapper import globals, ili2dbconfig, ili
 
 from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
-from ..qgep.export import qgep_export as qgep_export_kek
-from ..qgep.import_ import qgep_import as qgep_import_kek
+from ..qgep.export import qgep_export_kek
+from ..qgep.import_ import qgep_import_kek
 
 # 12.7.2022 additional models
-from ..qgepdss.export import qgep_export as qgep_export_dss
-from ..qgepdss.import_ import qgep_import as qgep_import_dss
+from ..qgepdss.export import qgep_export_dss
+from ..qgepdss.import_ import qgep_import_dss
 
 # 28.3.2023 additional import for sia405, export to be discussed further
-from ..qgepsia405.export import qgep_export as qgep_export_sia405
-from ..qgepsia405.import_ import qgep_import as qgep_import_sia405
+from ..qgepsia405.export import qgep_export_sia405
+from ..qgepsia405.import_ import qgep_import_sia405
 from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
     check_fk_dataowner_null,
     check_fk_operator_null,

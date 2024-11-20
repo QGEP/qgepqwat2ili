@@ -14,7 +14,7 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_export(selection=None, labels_file=None, orientation=None, basket_enabled=False):
+def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_enabled=False):
     """
     Export data from the QGEP model into the ili2pg model.
 

@@ -3,15 +3,15 @@ import sys
 from logging import INFO, FileHandler, Formatter
 
 from . import config, utils
-from .qgep.export import qgep_export as qgep_export_kek
-from .qgep.import_ import qgep_import as qgep_import_kek
+from .qgep.export import qgep_export_kek
+from .qgep.import_ import qgep_import_kek
 from .qgep.mapping import get_qgep_mapping
 from .qgep.model_abwasser import Base as BaseAbwasser
 from .qgep.model_qgep import Base as BaseQgep
-from .qgepdss.export import qgep_export as qgep_export_dss
-from .qgepdss.import_ import qgep_import as qgep_import_dss
-from .qgepsia405.export import qgep_export as qgep_export_sia405
-from .qgepsia405.import_ import qgep_import as qgep_import_sia405
+from .qgepdss.export import qgep_export_dss
+from .qgepdss.import_ import qgep_import_dss
+from .qgepsia405.export import qgep_export_sia405
+from .qgepsia405.import_ import qgep_import_sia405
 from .qwat.export import qwat_export
 from .qwat.import_ import qwat_import
 from .qwat.mapping import get_qwat_mapping
