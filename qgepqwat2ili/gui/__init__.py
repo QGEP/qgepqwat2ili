@@ -549,7 +549,7 @@ def action_export(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
-                create_basket_col=False,
+                create_basket_col=True,
             )
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -663,6 +663,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=True,
                 )
             # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
             elif emodel == "SIA405_ABWASSER_2015_LV95":
@@ -673,6 +674,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=False,
                 )
             elif emodel == "DSS_2015_LV95":
                 logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
@@ -682,6 +684,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=False,
                 )
             else:
                 progress_dialog.close()
