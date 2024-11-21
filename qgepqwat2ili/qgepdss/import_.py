@@ -13,7 +13,7 @@ from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
 
-def qgep_import(precommit_callback=None):
+def qgep_import_dss(precommit_callback=None):
     """
     Imports data from the ili2pg model into the QGEP model.
 
