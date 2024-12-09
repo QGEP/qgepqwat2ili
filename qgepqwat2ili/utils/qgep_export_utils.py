@@ -282,6 +282,7 @@ class QgepExportUtils:
                 bezeichnung=self.null_to_emptystr(row.identifier),
             )
 
+            print(f"Current basket id: {self.current_basket.t_id}")
             if self.current_basket is not None:
                 organisation.t_basket = self.current_basket.t_id
 
