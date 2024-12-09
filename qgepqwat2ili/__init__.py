@@ -201,20 +201,25 @@ def main(args):
             ILI_EXPORT_MODEL_NAME = None
 
         if args.direction == "export":
+            basket_enabled = True
+            if args.export_sia405 or args.export_dss:
+                basket_enabled = False
+
             utils.ili2db.create_ili_schema(
                 SCHEMA,
                 ILI_MODEL,
                 make_log_path(log_path, "ilicreate"),
                 recreate_schema=args.recreate_schema,
-                create_basket_col=False,
+                create_basket_col=basket_enabled,
             )
-            # add model dependency
+
             if args.export_sia405:
                 # SIA405_ABWASSER_2015_LV95
                 qgep_export_sia405(
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
+                    basket_enabled=basket_enabled,
                 )
             elif args.export_dss:
                 # DSS_2015_LV95 expor5t
@@ -222,6 +227,7 @@ def main(args):
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
+                    basket_enabled=basket_enabled,
                 )
             else:
                 # VSA_KEK_2019_LV95 export
@@ -229,6 +235,7 @@ def main(args):
                     selection=args.selection.split(",") if args.selection else None,
                     labels_file=args.labels_file,
                     orientation=args.labels_orientation,
+                    basket_enabled=basket_enabled,
                 )
 
             utils.ili2db.export_xtf_data(
