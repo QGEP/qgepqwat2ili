@@ -484,7 +484,8 @@ def skip_wwtp_structure_ids_old():
 
     return not_wwtp_structure_ids
 
-#10.12.2024
+
+# 10.12.2024
 def get_selection_text_for_in_statement(selection_list):
     """
     convert selection_list to selection_text to fit SQL IN statement
@@ -543,13 +544,16 @@ def get_cl_re_ids(classname):
         logger.warning(f"Do not use this function with {classname} !")
         return None
 
-#10.12.2024
-def get_connected_we_from_re (subset_reaches):
+
+# 10.12.2024
+def get_connected_we_from_re(subset_reaches):
     """
     Get connected wastewater_networkelements (wastewater_nodes and reaches) from subset of reaches
     """
 
-    logger.info(f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ...")
+    logger.info(
+        f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
+    )
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
@@ -588,13 +592,15 @@ def get_connected_we_from_re (subset_reaches):
     return connected_wn_from_re_ids
 
 
-#10.12.2024
-def get_connected_we_to_re (subset_reaches):
+# 10.12.2024
+def get_connected_we_to_re(subset_reaches):
     """
     Get connected wastewater_networkelements (wastewater_nodes and reaches) to subset of reaches
     """
 
-    logger.info(f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ...")
+    logger.info(
+        f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
+    )
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
@@ -723,6 +729,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
 
     return ws_ids
 
+
 # 10.1.2024
 def filter_reaches(selected_ids):
     """
@@ -740,12 +747,10 @@ def filter_reaches(selected_ids):
 
         subset_reaches_ids = []
 
-        subset_text = get_selection_text_for_in_statement(selected_ids)
+        get_selection_text_for_in_statement(selected_ids)
 
         # select all reaches
-        cursor.execute(
-            f"SELECT obj_id FROM qgep_od.reach;"
-        )
+        cursor.execute(f"SELECT obj_id FROM qgep_od.reach;")
 
         # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
         # ws_wn_ids_count = int(cursor.fetchone()[0])
@@ -755,9 +760,7 @@ def filter_reaches(selected_ids):
         else:
             # added cursor.execute again to see if with this all records will be available
             # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
-            cursor.execute(
-                f"SELECT obj_id FROM qgep_od.reach;"
-            )
+            cursor.execute(f"SELECT obj_id FROM qgep_od.reach;")
             records = cursor.fetchall()
 
             # 15.11.2024 - does not get all records, but only n-1
@@ -769,11 +772,12 @@ def filter_reaches(selected_ids):
                     all_reaches_ids.append(strrow)
                     logger.debug(f" building up '{all_reaches_ids}' ...")
 
-
             for list_item in selected_ids:
                 if list_item in all_reaches_ids:
                     subset_reaches_ids.append(list_item)
-                    logger.debug(f"'filter_reaches: {list_item}' is a reach id - added to subset_reaches_ids")
+                    logger.debug(
+                        f"'filter_reaches: {list_item}' is a reach id - added to subset_reaches_ids"
+                    )
                 else:
                     logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
 
