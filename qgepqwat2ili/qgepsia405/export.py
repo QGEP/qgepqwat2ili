@@ -45,49 +45,66 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
-    # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
-    ws_off_sia405abwasser_list = None
-    ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
+    flag_approach_urs = true
 
-    # 3. Show ws_off_sia405abwasser_list
-    logger.debug(
-        f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
-    )
-
-    # 4. check if filtered
-    if filtered:
-        if ws_off_sia405abwasser_list:
-            # take out ws_off_sia405abwasser_list from selection
-            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
-        # else do nothing
+    if flag_approach_urs:
+        # 2. Get all connected from wastewater_nodes of selected reaches
+        connected_from_wn_ids = get_connected_we_from_re(subset_ids)
+        # 3. Get all connected to wastewater_nodes of selected reaches
+        connected_to_wn_ids = get_connected_we_to_re(subset_ids)
+        # 4. Get all connected wastewater_nodes from overflows.fk_overflow_to
+        connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(subset_ids)
+        # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
+        adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
+        adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
+        adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
+        # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        
+        
     else:
-        if ws_off_sia405abwasser_list:
-            # add all data of wastewater_structures to selection
-            subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
-            logger.debug(
-                f"subset_ids of all wws : {subset_ids}",
-            )
-            # take out ws_off_sia405abwasser_list from selection
-            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
-            logger.debug(
-                f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
-            )
-            # add reach_ids
-            # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
-            # treat export as with a selection
-            filtered = True
+        # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+        ws_off_sia405abwasser_list = None
+        ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
 
-        # else do nothing
+        # 3. Show ws_off_sia405abwasser_list
+        logger.debug(
+            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        )
 
-    # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
-    subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
-    logger.debug(
-        f"subset_wws_ids: {subset_wws_ids}",
-    )
-    subset_ids = add_to_selection(subset_ids, subset_wws_ids)
-    logger.debug(
-        f"subset_ids with wws : {subset_ids}",
-    )
+        # 4. check if filtered
+        if filtered:
+            if ws_off_sia405abwasser_list:
+                # take out ws_off_sia405abwasser_list from selection
+                subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+            # else do nothing
+        else:
+            if ws_off_sia405abwasser_list:
+                # add all data of wastewater_structures to selection
+                subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
+                logger.debug(
+                    f"subset_ids of all wws : {subset_ids}",
+                )
+                # take out ws_off_sia405abwasser_list from selection
+                subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+                logger.debug(
+                    f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
+                )
+                # add reach_ids
+                # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
+                # treat export as with a selection
+                filtered = True
+
+            # else do nothing
+
+        # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
+        subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
+        logger.debug(
+            f"subset_wws_ids: {subset_wws_ids}",
+        )
+        subset_ids = add_to_selection(subset_ids, subset_wws_ids)
+        logger.debug(
+            f"subset_ids with wws : {subset_ids}",
+        )
 
     # Orientation
     oriented = orientation is not None
