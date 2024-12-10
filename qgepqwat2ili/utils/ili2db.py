@@ -591,6 +591,53 @@ def get_connected_we_from_re(subset_reaches):
 
     return connected_wn_from_re_ids
 
+# 10.12.2024
+def get_connected_overflow_to_wn_ids(selected_ids):
+
+    """
+    Get all connected wastewater_nodes from overflows.fk_overflow_to
+    """
+
+    logger.info(
+        f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids} ..."
+    )
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    connected_overflow_to_wn_ids = []
+
+    subset_text = get_selection_text_for_in_statement(selected_ids)
+
+    # select all connected to wastewater_nodes from provided subset of reaches
+    cursor.execute(
+        f"SELECT ov.fk_overflow_to FROM tww_od.wastewater_node wn LEFT JOIN tww_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        connected_overflow_to_wn_ids = None
+    else:
+        # added cursor.execute again to see if with this all records will be available
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        cursor.execute(
+            f"SELECT ov.fk_overflow_to FROM tww_od.wastewater_node wn LEFT JOIN tww_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+        )
+        records = cursor.fetchall()
+
+        # 15.11.2024 - does not get all records, but only n-1
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                connected_overflow_to_wn_ids.append(strrow)
+                logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
+
+    return connected_overflow_to_wn_ids
+
 
 # 10.12.2024
 def get_connected_we_to_re(subset_reaches):
