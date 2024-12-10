@@ -59,7 +59,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
-    flag_approach_urs == true
+    flag_approach_urs = True
 
     if flag_approach_urs:
         # 2. Get all connected from wastewater_nodes of selected reaches
