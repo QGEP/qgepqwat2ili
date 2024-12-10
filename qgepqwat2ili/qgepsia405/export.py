@@ -156,7 +156,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     else:
         labelorientation = 0
 
-
     def get_tid(relation):
         """
         Makes a tid for a relation
@@ -391,7 +390,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         subset_ids=subset_ids,
     )
 
-
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
     logger.info("Exporting QGEP.organisation -> ABWASSER.organisation, ABWASSER.metaattribute")
     qgep_export_utils.export_organisation()
@@ -557,7 +555,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     # qgep_export_utils.export_reach_point()
 
-
     logger.info(
         "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
     )
@@ -605,7 +602,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     logger.info(
         "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
     )
-
 
     query = qgep_session.query(QGEP.dryweather_downspout)
     if filtered:
@@ -709,7 +705,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
     # qgep_export_utils.export_access_aid()
-
 
     logger.info(
         "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
@@ -1123,7 +1118,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     # logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
     # qgep_export_utils.export_benching()
-
 
     # Labels
     # Note: these are extracted from the optional labels file (not exported from the QGEP database)
