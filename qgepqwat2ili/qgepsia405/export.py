@@ -80,6 +80,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 7. If extra_reaches then remove from adapted_subset_ids
         if not extra_reaches_ids:
             # list is empty - no need for adaption
+            logger.debug(
+                f"no extra reaches - so nothing to remove from adapted_subset_ids",
+            )
         else:
             # if len(extra_reaches_ids) > 0:
             adapted_subset_ids = remove_from_selection(adapted_subset_ids, extra_reaches_ids)
