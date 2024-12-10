@@ -484,6 +484,24 @@ def skip_wwtp_structure_ids_old():
 
     return not_wwtp_structure_ids
 
+#10.12.2024
+def get_selection_text_for_in_statement(selection_list)
+    """
+    convert selection_list to selection_text to fit SQL IN statement
+    """
+    selection_text = ""
+
+    for list_item in selection_list:
+        selection_text += "'"
+        selection_text += list_item
+        selection_text += "',"
+
+    # remove last komma to make it a correct IN statement
+    selection_text = selection_text[:-1]
+
+    logger.debug(f"selection_text = {selection_text} ...")
+    return selection_text
+
 
 # 12.11.2024 to clean up - get_ws_wn_ids kann das auch
 def get_cl_re_ids(classname):
@@ -525,6 +543,50 @@ def get_cl_re_ids(classname):
         logger.warning(f"Do not use this function with {classname} !")
         return None
 
+#10.12.2024
+def get_connected_wn_from_re (subset_reaches):
+    """
+    Get connected wastewater_nodes from subset of reaches
+    """
+
+    logger.info(f"get list of id's of connected wastewater_nodes of {provides subset of reaches {subset_reaches} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    connected_wn_from_re_ids = []
+
+    # select all connected from wastewater_nodes from subset of reaches
+    cursor.execute(
+        f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({selection_text}) AND NOT wef.obj_id isNull;"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        connected_wn_from_re_ids = None
+    else:
+        # added cursor.execute again to see if with this all records will be available
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        cursor.execute(
+            f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({selection_text}) AND NOT wef.obj_id isNull;"
+        )
+        records = cursor.fetchall()
+
+        # 15.11.2024 - does not get all records, but only n-1
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                connected_wn_from_re_ids.append(strrow)
+                logger.debug(f" building up '{connected_wn_from_re_ids}' ...")
+
+    return connected_wn_from_re_ids
+
+#10.12.2024
+# to do def get_connected_wn_to_re (subset_reaches):
 
 def get_ws_wn_ids(classname):
     """
