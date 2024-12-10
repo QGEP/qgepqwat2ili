@@ -178,7 +178,7 @@ def action_import(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
-                create_basket_col=True,
+                create_basket_col=False,
             )
         elif imodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
