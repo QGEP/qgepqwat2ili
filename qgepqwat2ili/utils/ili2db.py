@@ -687,7 +687,7 @@ def filter_reaches(selected_ids)
     """
 
     logger.info(f"Filter out reaches from selected_ids {selected_ids} ...")
-    
+
     if selected_ids is None:
         subset_reaches_ids = None
     else:

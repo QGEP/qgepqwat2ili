@@ -9,15 +9,13 @@ from sqlalchemy.sql import text
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
 from .. import utils
+from ..utils.basket_utils import BasketUtils
 
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with
 from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
-
-from ..utils.basket_utils import BasketUtils
 from ..utils.qgep_export_utils import QgepExportUtils
-
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -98,7 +96,6 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         labelorientation = orientation
     else:
         labelorientation = 0
-
 
     def get_tid(relation):
         """
@@ -335,7 +332,6 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         filtered=filtered,
         subset_ids=subset_ids,
     )
-
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
     logger.info("Exporting QGEP.organisation -> ABWASSER.organisation, ABWASSER.metaattribute")
@@ -600,7 +596,6 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("done")
     abwasser_session.flush()
 
-
     logger.info(
         "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
     )
@@ -759,7 +754,6 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
-
 
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.examination)

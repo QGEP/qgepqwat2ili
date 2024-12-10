@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
-
+from ..utils.basket_utils import BasketUtils
 
 # 4.10.2024
 # 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
@@ -15,11 +15,7 @@ from ..utils.ili2db import (
     get_ws_wn_ids,
     remove_from_selection,
 )
-
-from ..utils.basket_utils import BasketUtils
-
 from ..utils.qgep_export_utils import QgepExportUtils
-
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
@@ -79,7 +75,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # https://www.w3schools.com/python/ref_set_difference.asp
         # x = {"apple", "banana", "cherry"}
         # y = {"google", "microsoft", "apple"}
-        # z = x.difference(y) 
+        # z = x.difference(y)
         extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
         # 7. If extra_reaches then remove from adapted_subset_ids
         if not extra_reaches_ids:

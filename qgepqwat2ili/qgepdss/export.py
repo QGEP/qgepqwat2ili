@@ -7,15 +7,12 @@ from sqlalchemy.sql import text
 
 from .. import utils
 
-
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with - to check if really necessary here (as no sia405 abwasser exceptions needed)
 =======
 from ..utils.basket_utils import BasketUtils
-
 from ..utils.qgep_export_utils import QgepExportUtils
-
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
