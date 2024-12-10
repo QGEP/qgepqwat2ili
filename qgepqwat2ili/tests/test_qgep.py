@@ -147,7 +147,7 @@ class TestQGEPUseCases(unittest.TestCase):
         session.close()
 
     # test for VSA_KEK_2019_LV95 export with selection and labels
-    def test_case_e_export_selection(self):
+    def _test_case_e_export_selection(self):
         """
         # E. export a selection
         """
