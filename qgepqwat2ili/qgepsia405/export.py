@@ -11,6 +11,10 @@ from ..utils.basket_utils import BasketUtils
 # 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
 from ..utils.ili2db import (
     add_to_selection,
+    filter_reaches,
+    get_connected_overflow_to_wn_ids,
+    get_connected_we_from_re,
+    get_connected_we_to_re,
     get_ws_selected_ww_networkelements,
     get_ws_wn_ids,
     remove_from_selection,
@@ -55,7 +59,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
-    flag_approach_urs = true
+    flag_approach_urs == true
 
     if flag_approach_urs:
         # 2. Get all connected from wastewater_nodes of selected reaches
@@ -81,7 +85,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         if not extra_reaches_ids:
             # list is empty - no need for adaption
             logger.debug(
-                f"no extra reaches - so nothing to remove from adapted_subset_ids",
+                "no extra reaches - so nothing to remove from adapted_subset_ids",
             )
         else:
             # if len(extra_reaches_ids) > 0:

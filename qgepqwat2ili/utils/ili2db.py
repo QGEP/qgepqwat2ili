@@ -587,8 +587,51 @@ def get_connected_we_from_re (subset_reaches):
 
     return connected_wn_from_re_ids
 
+
 #10.12.2024
-# to do def get_connected_wn_to_re (subset_reaches):
+def get_connected_we_to_re (subset_reaches):
+    """
+    Get connected wastewater_networkelements (wastewater_nodes and reaches) to subset of reaches
+    """
+
+    logger.info(f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    connected_wn_to_re_ids = []
+
+    subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
+
+    # select all connected to wastewater_nodes from provided subset of reaches
+    cursor.execute(
+        f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        connected_wn_to_re_ids = None
+    else:
+        # added cursor.execute again to see if with this all records will be available
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        cursor.execute(
+            f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+        )
+        records = cursor.fetchall()
+
+        # 15.11.2024 - does not get all records, but only n-1
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                connected_wn_to_re_ids.append(strrow)
+                logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
+
+    return connected_wn_to_re_ids
+
 
 def get_ws_wn_ids(classname):
     """
@@ -681,7 +724,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
     return ws_ids
 
 # 10.1.2024
-def filter_reaches(selected_ids)
+def filter_reaches(selected_ids):
     """
     Filter out reaches from selected_ids
     """
