@@ -15,16 +15,16 @@ from QgisModelBaker.libs.modelbaker.iliwrapper import globals, ili2dbconfig, ili
 
 from ....utils.qgeplayermanager import QgepLayerManager
 from .. import config
-from ..qgep.export import qgep_export
-from ..qgep.import_ import qgep_import
+from ..qgep.export import qgep_export_kek
+from ..qgep.import_ import qgep_import_kek
 
 # 12.7.2022 additional models
-from ..qgepdss.export import qgep_export as qgepdss_export
-from ..qgepdss.import_ import qgep_import as qgepdss_import
+from ..qgepdss.export import qgep_export_dss
+from ..qgepdss.import_ import qgep_import_dss
 
 # 28.3.2023 additional import for sia405, export to be discussed further
-from ..qgepsia405.export import qgep_export as qgepsia405_export
-from ..qgepsia405.import_ import qgep_import as qgepsia405_import
+from ..qgepsia405.export import qgep_export_sia405
+from ..qgepsia405.import_ import qgep_import_sia405
 from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; neu 12.4.2023
     check_fk_dataowner_null,
     check_fk_operator_null,
@@ -42,9 +42,6 @@ from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; ne
 from ..utils.various import CmdException, LoggingHandlerContext, logger, make_log_path
 from .gui_export import GuiExport
 from .gui_import import GuiImport
-
-# 19.4.2023 / 25.4.2023 ohne Bindestrich / neu aus gui_import - Gui
-from .gui_importc import GuiImportc
 
 
 def _show_results(title, message, log_path, level):
@@ -71,46 +68,9 @@ def show_success(title, message, log_path):
 
 import_dialog = None
 
-
 flagskipvalidation_import = False
 
-# 19.4.2023 / 26.7.2023 wieder gesetzt
-importc_dialog = None
 
-
-def action_importc(plugin):
-
-    # neu 26.7.2023 analog action_import
-    global importc_dialog  # avoid garbage collection
-
-    # print("set flagskipvalidation_import")
-
-    iface.messageBar().pushMessage("Info", "action import", level=Qgis.Info)
-
-    importc_dialog = GuiImportc(plugin.iface.mainWindow())
-
-    # # 19.4.2023 add option for additional import configuration
-    def action_do_importc():
-        # print("Open import dialog config")
-        if importc_dialog.skipvalidation_import:
-            importc_dialog.skipvalidation_import
-
-        progress_dialog = QProgressDialog("", "", 0, 100, plugin.iface.mainWindow())
-        progress_dialog.setCancelButton(None)
-        progress_dialog.setModal(True)
-        progress_dialog.show()
-        progress_dialog.setLabelText("waiting...")
-        # delays the execution for 5.5 secs.
-        # time.sleep(5.5)
-        progress_dialog.close
-        # end action_do_importc
-
-    importc_dialog.accepted.connect(action_do_importc)
-    importc_dialog.adjustSize()
-    importc_dialog.show()
-
-
-# def action_import(plugin):
 def action_import(plugin):
     """
     Is executed when the user clicks the importAction tool
@@ -328,22 +288,18 @@ def action_import(plugin):
     log_handler.setLevel(logging.INFO)
     log_handler.setFormatter(logging.Formatter("%(levelname)-8s %(message)s"))
     with LoggingHandlerContext(log_handler):
-        #        qgep_import(
-        #        precommit_callback=import_dialog.init_with_session,
-        #        )
-
         progress_dialog.setLabelText("Loading import wizard - please be patient...")
         # 24.3.2023 added model dependency
         if imodel == "VSA_KEK_2019_LV95":
-            qgep_import(
+            qgep_import_kek(
                 precommit_callback=import_dialog.init_with_session,
             )
         elif imodel == "SIA405_ABWASSER_2015_LV95":
-            qgepsia405_import(
+            qgep_import_sia405(
                 precommit_callback=import_dialog.init_with_session,
             )
         elif imodel == "DSS_2015_LV95":
-            qgepdss_import(
+            qgep_import_dss(
                 precommit_callback=import_dialog.init_with_session,
             )
         else:
@@ -593,6 +549,7 @@ def action_export(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -600,6 +557,7 @@ def action_export(plugin):
                 config.ABWASSER_SIA405_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         elif emodel == "DSS_2015_LV95":
             create_ili_schema(
@@ -607,6 +565,7 @@ def action_export(plugin):
                 config.ABWASSER_DSS_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
 
         # to do 27.3.2023 else instead of except? discuss with OD
@@ -699,10 +658,8 @@ def action_export(plugin):
             logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
 
             if emodel == "VSA_KEK_2019_LV95":
-                logger.info("Start Exporting VSA_KEK_2019_LV95 - qgep_export")
-                # qgep_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
-                # 3.4.2023 neu mit eorientation
-                qgep_export(
+                logger.info("Start Exporting VSA_KEK_2019_LV95")
+                qgep_export_kek(
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
@@ -712,7 +669,7 @@ def action_export(plugin):
                 logger.info("Start Exporting SIA405_ABWASSER_2015_LV95 - qgepsia405_export")
                 # qgepsia405_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 # 3.4.2023 neu mit eorientation
-                qgepsia405_export(
+                qgep_export_sia405(
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
@@ -721,7 +678,7 @@ def action_export(plugin):
                 logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
                 # qgepdss_export(selection=export_dialog.selected_ids, labels_file=labels_file_path)
                 # 3.4.2023 neu mit eorientation
-                qgepdss_export(
+                qgep_export_dss(
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,

@@ -60,8 +60,8 @@ def check_wastewater_structure_subclass_data():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
-
     cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
+
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -769,7 +769,7 @@ def add_to_selection(selected_ids, add_ids):
     return selected_ids
 
 
-def create_ili_schema(schema, model, log_path, recreate_schema=False):
+def create_ili_schema(schema, model, log_path, recreate_schema=False, create_basket_col=False):
     """
     Create schema for INTERLIS import
     """
@@ -800,6 +800,10 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
     connection.commit()
     connection.close()
 
+    create_basket_col_args = ""
+    if create_basket_col:
+        create_basket_col_args = "--createBasketCol"
+
     logger.info(f"ILIDB SCHEMAIMPORT INTO {schema}...")
     exec_(
         " ".join(
@@ -817,6 +821,7 @@ def create_ili_schema(schema, model, log_path, recreate_schema=False):
                 "--createFkIdx",
                 "--createTidCol",
                 "--importTid",
+                f"{create_basket_col_args}",
                 "--noSmartMapping",
                 "--defaultSrsCode",
                 "2056",
@@ -866,17 +871,14 @@ def get_xtf_model(xtf_file):
 
     with open(xtf_file, encoding="utf-8") as f:
         while True:
-            # if checkdatasection == -1:
             if checkmodelssection == -1:
 
                 line = f.readline()
                 if not line:
                     break
                 else:
-                    # checkdatasection = line.find('<DATASECTION>')
-                    # logger.info(str(checkdatasection))
                     checkmodelssection = line.find("<MODELS>")
-                    logger.info("checkmodelssection " + str(checkmodelssection))
+                    logger.info("checkmodelssection (ili2db): " + str(checkmodelssection))
                     logger.info(str(line))
             else:
                 line2 = f.readline()
