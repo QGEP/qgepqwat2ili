@@ -680,6 +680,61 @@ def get_ws_selected_ww_networkelements(selected_wwn):
 
     return ws_ids
 
+# 10.1.2024
+def filter_reaches(selected_ids)
+    """
+    Filter out reaches from selected_ids
+    """
+
+    logger.info(f"Filter out reaches from selected_ids {selected_ids} ...")
+    
+    if selected_ids is None:
+        subset_reaches_ids = None
+    else:
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        subset_reaches_ids = []
+
+        subset_text = get_selection_text_for_in_statement(selected_ids)
+
+        # select all reaches
+        cursor.execute(
+            f"SELECT obj_id FROM qgep_od.reach;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            all_reaches_ids = None
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute(
+                f"SELECT obj_id FROM qgep_od.reach;"
+            )
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    all_reaches_ids.append(strrow)
+                    logger.debug(f" building up '{all_reaches_ids}' ...")
+
+
+            for list_item in selected_ids:
+                if list_item in all_reaches_ids:
+                    subset_reaches_ids.append(list_item)
+                else:
+                    logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
+
+    return subset_reaches_ids
+
 
 def remove_from_selection(selected_ids, remove_ids):
     """

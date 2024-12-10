@@ -59,6 +59,20 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        subset_ids_reaches = filter_reaches(subset_ids)
+        adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
+
+        # https://www.w3schools.com/python/ref_set_difference.asp
+        # x = {"apple", "banana", "cherry"}
+        # y = {"google", "microsoft", "apple"}
+        # z = x.difference(y) 
+        extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
+        # 7. If extra_reaches then remove from adapted_subset_ids
+        if not extra_reaches_ids:
+            # list is empty - no need for adaption
+        else:
+            # if len(extra_reaches_ids) > 0:
+            adapted_subset_ids = remove_from_selection(adapted_subset_ids, extra_reaches_ids)
         
         
     else:
