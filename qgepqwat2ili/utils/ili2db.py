@@ -591,9 +591,9 @@ def get_connected_we_from_re(subset_reaches):
 
     return connected_wn_from_re_ids
 
+
 # 10.12.2024
 def get_connected_overflow_to_wn_ids(selected_ids):
-
     """
     Get all connected wastewater_nodes from overflows.fk_overflow_to
     """
