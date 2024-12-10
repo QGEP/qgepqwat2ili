@@ -6,16 +6,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
+from ..utils.basket_utils import BasketUtils
+from ..utils.various import logger
+from .model_abwasser import get_abwasser_model
+from .model_qgep import get_qgep_model
 
 # 4.10.2024
 # from ..utils.ili2db import skip_wwtp_structure_ids
 # 6.11.2024 replaced with - to check if really necessary here (as no sia405 abwasser exceptions needed)
-
-from ..utils.basket_utils import BasketUtils
-from ..utils.qgep_export_utils import QgepExportUtils
-from ..utils.various import logger
-from .model_abwasser import get_abwasser_model
-from .model_qgep import get_qgep_model
 
 
 def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_enabled=False):
@@ -40,12 +38,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     abwasser_session.execute(text("SET CONSTRAINTS ALL DEFERRED;"))
 
     basket_utils = None
-    current_basket = None
     if basket_enabled:
         basket_utils = BasketUtils(abwasser_model, abwasser_session)
         basket_utils.create_basket()
 
-        current_basket = basket_utils.basket_topic_sia405_abwasser
+        basket_utils.basket_topic_sia405_abwasser
 
     # Filtering
     filtered = selection is not None
@@ -66,7 +63,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         labelorientation = orientation
     else:
         labelorientation = 0
-
 
     def get_tid(relation):
         """
@@ -201,7 +197,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             "t_id": get_tid(row),
         }
 
-
     def organisation_common(row):
         """
         Returns common attributes for organisation
@@ -253,7 +248,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             "lage": ST_Force2D(row.situation_geometry),
         }
 
-
     def wastewater_networkelement_common(row):
         """
         Returns common attributes for wastewater_networkelement
@@ -278,7 +272,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             "bezeichnung": null_to_emptystr(row.identifier),
             "instandstellung": get_vl(row.renovation_demand__REL),
         }
-
 
     def connection_object_common(row):
         """
@@ -1345,7 +1338,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("done")
     abwasser_session.flush()
 
-
     logger.info(
         "Exporting QGEP.wwtp_energy_use -> ABWASSER.araenergienutzung, ABWASSER.metaattribute"
     )
@@ -1476,7 +1468,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
     query = qgep_session.query(QGEP.control_center)
     # Always export all, no filtering
-
 
     for row in query:
 
@@ -1810,7 +1801,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
     query = qgep_session.query(QGEP.hydr_geometry)
 
-
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geometry
@@ -1996,14 +1986,12 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             # --- sia405_baseclass ---
             **qgep_export_utils.base_common(row, "mechanischevorreinigung"),
             # --- mechanischevorreinigung ---
-
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
             abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             art=get_vl(row.kind__REL),
             bemerkung=truncate(emptystr_to_null(row.remark), 80),
             bezeichnung=null_to_emptystr(row.identifier),
             versickerungsanlageref=get_tid(row.fk_infiltration_installation__REL),
-
         )
         abwasser_session.add(mechanischevorreinigung)
         qgep_export_utils.create_metaattributes(row)
@@ -2244,7 +2232,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("done")
     abwasser_session.flush()
 
-
     logger.info(
         "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
     )
@@ -2354,7 +2341,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
-
 
     logger.info(
         "Exporting QGEP.electric_equipment -> ABWASSER.elektrischeeinrichtung, ABWASSER.metaattribute"
@@ -2912,7 +2898,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.measuring_point)
     if filtered:
         query1 = query.join(
-
             QGEP.wastewater_structure,
             QGEP.measuring_point.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
         ).join(QGEP.wastewater_networkelement)
@@ -2994,11 +2979,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             # --- sia405_baseclass ---
             **qgep_export_utils.base_common(row, "messstelle"),
             # --- messstelle ---
-
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
             abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             abwasserreinigungsanlageref=get_tid(row.fk_waste_water_treatment_plant__REL),
-
             art=row.kind,
             bemerkung=qgep_export_utils.truncate(
                 qgep_export_utils.emptystr_to_null(row.remark), 80
@@ -3085,7 +3068,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
-
 
     for row in query:
 
@@ -3305,7 +3287,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
-
 
     for row in query:
 
@@ -4112,11 +4093,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             # --- baseclass ---
             # --- sia405_baseclass ---
             # --- erhaltungsereignis_abwasserbauwerk ---
-
             # abwasserbauwerkref=get_tid(row.fk_wastewater_structure__REL),
             abwasserbauwerkref=check_fk_in_subsetid(subset_ids, row.fk_wastewater_structure__REL),
             erhaltungsereignis_abwasserbauwerkassocref=get_tid(row.fk_maintenance_event__REL),
-
         )
 
         abwasser_session2.add(erhaltungsereignis_abwasserbauwerk)
