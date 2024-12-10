@@ -21,6 +21,8 @@ def check_organisation_subclass_data():
     cursor = connection.cursor()
 
     cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
+
+    organisation_subclass_check = True
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
@@ -62,6 +64,7 @@ def check_wastewater_structure_subclass_data():
     cursor = connection.cursor()
     cursor.execute("SELECT obj_id FROM qgep_od.wastewater_structure;")
 
+    wastewater_structure_subclass_check = True
     if cursor.rowcount > 0:
         wastewater_structure_count = cursor.rowcount
         logger.info(f"Number of wastewater_structure datasets: {wastewater_structure_count}")
@@ -240,6 +243,7 @@ def check_fk_operator_null():
     missing_fk_operator_count = 0
 
     # add MANDATORY classes to be checked
+    check_fk_operator_null = True
     for notsubclass in [
         # SIA405 Abwasser
         ("wastewater_structure"),
@@ -280,6 +284,8 @@ def check_fk_dataowner_null():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
+
+    check_fk_dataowner_null = True
 
     missing_fk_dataowner_count = 0
     # add MANDATORY classes to be checked
@@ -369,6 +375,8 @@ def check_fk_provider_null():
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
+
+    check_fk_provider_null = True
 
     missing_fk_provider_count = 0
     # add MANDATORY classes to be checked

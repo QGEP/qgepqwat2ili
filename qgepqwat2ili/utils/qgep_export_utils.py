@@ -282,8 +282,9 @@ class QgepExportUtils:
                 bezeichnung=self.null_to_emptystr(row.identifier),
             )
 
-            print(f"Current basket id: {self.current_basket.t_id}")
+            print(f"Current basket: {self.current_basket}")
             if self.current_basket is not None:
+                print(f"Current basket id: {self.current_basket.t_id}")
                 organisation.t_basket = self.current_basket.t_id
 
             self.abwasser_session.add(organisation)
