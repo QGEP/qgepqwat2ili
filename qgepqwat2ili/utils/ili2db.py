@@ -485,7 +485,7 @@ def skip_wwtp_structure_ids_old():
     return not_wwtp_structure_ids
 
 #10.12.2024
-def get_selection_text_for_in_statement(selection_list)
+def get_selection_text_for_in_statement(selection_list):
     """
     convert selection_list to selection_text to fit SQL IN statement
     """
