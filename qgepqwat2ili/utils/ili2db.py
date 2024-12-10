@@ -556,9 +556,11 @@ def get_connected_wn_from_re (subset_reaches):
 
     connected_wn_from_re_ids = []
 
+    subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
+
     # select all connected from wastewater_nodes from subset of reaches
     cursor.execute(
-        f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({selection_text}) AND NOT wef.obj_id isNull;"
+        f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -570,7 +572,7 @@ def get_connected_wn_from_re (subset_reaches):
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
         cursor.execute(
-            f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({selection_text}) AND NOT wef.obj_id isNull;"
+            f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
         )
         records = cursor.fetchall()
 
