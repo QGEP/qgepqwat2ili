@@ -730,6 +730,7 @@ def filter_reaches(selected_ids)
             for list_item in selected_ids:
                 if list_item in all_reaches_ids:
                     subset_reaches_ids.append(list_item)
+                    logger.debug(f"'filter_reaches: {list_item}' is a reach id - added to subset_reaches_ids")
                 else:
                     logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
 

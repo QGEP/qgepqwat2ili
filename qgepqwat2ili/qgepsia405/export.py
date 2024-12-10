@@ -73,8 +73,24 @@ def qgep_export(selection=None, labels_file=None, orientation=None):
         else:
             # if len(extra_reaches_ids) > 0:
             adapted_subset_ids = remove_from_selection(adapted_subset_ids, extra_reaches_ids)
-        
-        
+        # 8. get all id's of connected wastewater_structures
+        subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
+        logger.debug(
+            f"subset_wws_ids: {subset_wws_ids}",
+        )
+        # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+        ws_off_sia405abwasser_list = None
+        ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
+
+        # 10. Show ws_off_sia405abwasser_list
+        logger.debug(
+            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        )
+        # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
+        subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
+        logger.debug(
+            f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+        )
     else:
         # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
