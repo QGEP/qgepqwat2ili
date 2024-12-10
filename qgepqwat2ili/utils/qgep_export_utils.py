@@ -281,14 +281,6 @@ class QgepExportUtils:
                 bemerkung=self.truncate(self.emptystr_to_null(row.remark), 80),
                 bezeichnung=self.null_to_emptystr(row.identifier),
             )
-
-            print(f"Org t_ili_tid: {organisation.t_ili_tid}")
-            print(f"Current basket: {self.current_basket}")
-
-            if self.current_basket is not None:
-                print(f"Current basket id: {self.current_basket.t_id}")
-                # organisation.t_basket = self.current_basket.t_id
-
             self.abwasser_session.add(organisation)
             self.create_metaattributes(row)
             print(".", end="")
