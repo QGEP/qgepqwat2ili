@@ -165,7 +165,7 @@ class QgepExportUtils:
             "t_id": self.get_tid(row),
         }
 
-        if self.current_basket is not None and type_name != "organisation":
+        if self.current_basket is not None:
             base["t_basket"] = self.current_basket.t_id
 
         return base
@@ -284,9 +284,10 @@ class QgepExportUtils:
 
             print(f"Org t_ili_tid: {organisation.t_ili_tid}")
             print(f"Current basket: {self.current_basket}")
+
             if self.current_basket is not None:
                 print(f"Current basket id: {self.current_basket.t_id}")
-                organisation.t_basket = self.current_basket.t_id
+                # organisation.t_basket = self.current_basket.t_id
 
             self.abwasser_session.add(organisation)
             self.create_metaattributes(row)
