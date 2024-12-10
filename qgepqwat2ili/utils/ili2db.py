@@ -549,7 +549,7 @@ def get_connected_we_from_re (subset_reaches):
     Get connected wastewater_networkelements (wastewater_nodes and reaches) from subset of reaches
     """
 
-    logger.info(f"get list of id's of connected wastewater_nodes of {provides subset of reaches {subset_reaches} ...")
+    logger.info(f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ...")
     connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
     connection.set_session(autocommit=True)
     cursor = connection.cursor()
