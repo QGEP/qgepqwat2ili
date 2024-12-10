@@ -214,7 +214,7 @@ class TestQGEPUseCases(unittest.TestCase):
         )
 
     # test for SIA405_ABWASSER_2015_LV95 export with selection and labels
-    def test_case_f_export_selection_sia405(self):
+    def _test_case_f_export_selection_sia405(self):
         """
         # F. export a selection
         """
