@@ -147,7 +147,7 @@ class TestQGEPUseCases(unittest.TestCase):
         session.close()
 
     # test for VSA_KEK_2019_LV95 export with selection and labels
-    @pytest.mark.skip(reason="Selection export broken with baskets")
+    @unittest.skip("Selection export broken with baskets")
     def test_case_e_export_selection(self):
         """
         # E. export a selection
@@ -215,7 +215,7 @@ class TestQGEPUseCases(unittest.TestCase):
         )
 
     # test for SIA405_ABWASSER_2015_LV95 export with selection and labels
-    @pytest.mark.skip(reason="Selection export broken with baskets")
+    @unittest.skip("Selection export broken with baskets")
     def test_case_f_export_selection_sia405(self):
         """
         # F. export a selection
