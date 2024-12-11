@@ -1,4 +1,5 @@
 import json
+
 import psycopg2
 from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
