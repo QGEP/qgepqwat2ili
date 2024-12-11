@@ -4,7 +4,8 @@ import psycopg2
 from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
 
-from .various import logger, get_pgconf_as_psycopg2_dsn
+from .various import get_pgconf_as_psycopg2_dsn, logger
+
 
 class QgepExportUtils:
 
