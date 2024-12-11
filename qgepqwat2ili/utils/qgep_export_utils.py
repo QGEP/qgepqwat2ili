@@ -125,6 +125,7 @@ class QgepExportUtils:
             else:
                 return self.tid_maker.tid_for_row(relation)
 
+
 # 10.12.2024
 def get_selection_text_for_in_statement(selection_list):
     """
@@ -501,7 +502,6 @@ def add_to_selection(selected_ids, add_ids):
         selected_ids.append(list_item)
 
     return selected_ids
-
 
     def create_metaattributes(self, row):
         metaattribute = self.abwasser_model.metaattribute(

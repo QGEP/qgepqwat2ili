@@ -6,7 +6,6 @@ from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-from ..utils.ili2db import skip_wwtp_structure_ids
 
 # 4.10.2024
 # 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
@@ -20,7 +19,6 @@ from ..utils.ili2db import (
     get_ws_wn_ids,
     remove_from_selection,
 )
-
 from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -75,7 +73,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
-# https://www.w3schools.com/python/ref_set_difference.asp
+        # https://www.w3schools.com/python/ref_set_difference.asp
         # x = {"apple", "banana", "cherry"}
         # y = {"google", "microsoft", "apple"}
         # z = x.difference(y)
@@ -107,7 +105,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.debug(
             f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         )
-    else: # flag_approach_urs = False
+    else:  # flag_approach_urs = False
         # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
         ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
@@ -151,7 +149,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.debug(
             f"subset_ids with wws : {subset_ids}",
         )
-
 
     # Orientation
     oriented = orientation is not None
