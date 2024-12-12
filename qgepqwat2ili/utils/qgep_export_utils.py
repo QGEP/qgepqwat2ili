@@ -802,7 +802,8 @@ def get_connected_we_from_re(subset_reaches):
     if subset_reaches is None:
         connected_wn_from_re_ids = None
     else:
-        if not subset_reaches
+        # check if list is empty https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty
+        if not subset_reaches:
             connected_wn_from_re_ids = None
         else:
             logger.info(
