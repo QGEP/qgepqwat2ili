@@ -73,6 +73,7 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         labelorientation=labelorientation,
         filtered=filtered,
         subset_ids=subset_ids,
+        subset_wws_ids=subset_wws_ids,
     )
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql

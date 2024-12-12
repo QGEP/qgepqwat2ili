@@ -80,6 +80,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         labelorientation=labelorientation,
         filtered=filtered,
         subset_ids=subset_ids,
+        subset_wws_ids=subset_wws_ids,
     )
 
     def organisation_common(row):
