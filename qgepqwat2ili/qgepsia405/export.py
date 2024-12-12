@@ -187,7 +187,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.info(
             f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
         )
-        
+
         # 22. Get list of all wastewater_structures
         subset_wws_ids = get_ws_ids("wastewater_structure")
         logger.info(
