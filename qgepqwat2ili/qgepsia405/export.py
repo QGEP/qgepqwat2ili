@@ -173,6 +173,25 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                 f"subset_ids with wws : {subset_ids}",
             )
 
+    # also if not filtered we have to take out references to wwtp_structures
+    else:
+        # 20. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+        ws_off_sia405abwasser_list = None
+        ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
+
+        # 21. Show ws_off_sia405abwasser_list
+        logger.info(
+            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        )
+        
+        # 22. Get list of all wastewater_structures
+        subset_wws_ids = get_ws_ids("wastewater_structure")
+        # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
+        subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
+        logger.info(
+            f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+        )
+
     # Orientation
     oriented = orientation is not None
     if oriented:
