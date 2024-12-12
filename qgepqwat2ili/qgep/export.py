@@ -7,8 +7,19 @@ from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-from ..utils.ili2db import skip_wwtp_structure_ids
-from ..utils.qgep_export_utils import QgepExportUtils
+from ..utils.qgep_export_utils import (
+    QgepExportUtils,
+    add_to_selection,
+    filter_reaches,
+    get_connected_overflow_to_wn_ids,
+    get_connected_we_from_re,
+    get_connected_we_to_re,
+    get_ws_ids,
+    get_ws_selected_ww_networkelements,
+    get_ws_wn_ids,
+    remove_from_selection,
+)
+
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
