@@ -9,7 +9,7 @@ from ..utils.basket_utils import BasketUtils
 
 # 12.12.2024 - verschoben
 # )
-from ..utils.qgep_export_utils import (  
+from ..utils.qgep_export_utils import (
     QgepExportUtils,
     add_to_selection,
     filter_reaches,
