@@ -899,7 +899,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
 
     # select all connected to wastewater_nodes from provided subset of reaches
     cursor.execute(
-        f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+        f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -911,7 +911,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
         cursor.execute(
-            f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+            f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
         )
         records = cursor.fetchall()
 
@@ -946,7 +946,7 @@ def get_connected_we_to_re(subset_reaches):
 
     # select all connected to wastewater_nodes from provided subset of reaches
     cursor.execute(
-        f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+        f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -958,7 +958,7 @@ def get_connected_we_to_re(subset_reaches):
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
         cursor.execute(
-            f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+            f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
         )
         records = cursor.fetchall()
 
@@ -1015,6 +1015,47 @@ def get_ws_wn_ids(classname):
 
     return ws_wn_ids
 
+#12.12.2024
+def get_ws_ids(classname):
+    """
+    Get list of id's of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
+    """
+
+    logger.info(f"get list of id's of subclass {classname} ...")
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    ws_ids = []
+
+    # select all obj_id of the wastewater_nodes of wwtp_structure
+    cursor.execute(
+        f"SELECT ws.obj_id FROM qgep_od.{classname};"
+    )
+
+    # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+    # ws_wn_ids_count = int(cursor.fetchone()[0])
+    # if ws_wn_ids_count == 0:
+    if cursor.fetchone() is None:
+        ws_wn_ids = None
+    else:
+        # added cursor.execute again to see if with this all records will be available
+        # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+        cursor.execute(
+            f"SELECT ws.obj_id FROM qgep_od.{classname};"
+        )
+        records = cursor.fetchall()
+
+        # 15.11.2024 - does not get all records, but only n-1
+        for row in records:
+            logger.debug(f" row[0] = {row[0]}")
+            # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+            strrow = str(row[0])
+            if strrow is not None:
+                ws_ids.append(strrow)
+                # logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_ids
 
 def get_ws_selected_ww_networkelements(selected_wwn):
     """

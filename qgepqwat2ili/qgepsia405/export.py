@@ -116,7 +116,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         )
         # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
-        ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
+        ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
         # 10. Show ws_off_sia405abwasser_list
         logger.info(
