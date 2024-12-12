@@ -106,7 +106,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                         f"extra_reaches_ids: {extra_reaches_ids} found!",
                     )
                     # if len(extra_reaches_ids) > 0:
-                    adapted_subset_ids = remove_from_selection(adapted_subset_ids, extra_reaches_ids)
+                    adapted_subset_ids = remove_from_selection(
+                        adapted_subset_ids, extra_reaches_ids
+                    )
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
