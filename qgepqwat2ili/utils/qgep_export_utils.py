@@ -857,48 +857,48 @@ def get_connected_we_to_re(subset_reaches):
     Get connected wastewater_networkelements (wastewater_nodes and reaches) to subset of reaches
     """
     if subset_reaches is None:
-        connected_wn_to_re_ids = None
-        if not subset_reaches:
+        return None
+    if not subset_reaches:
+        return None
+    else:
+        logger.info(
+            f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
+        )
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        connected_wn_to_re_ids = []
+
+        subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
+
+        # select all connected to wastewater_nodes from provided subset of reaches
+        cursor.execute(
+            f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
             connected_wn_to_re_ids = None
         else:
-            logger.info(
-                f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
-            )
-            connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
-            connection.set_session(autocommit=True)
-            cursor = connection.cursor()
-
-            connected_wn_to_re_ids = []
-
-            subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
-
-            # select all connected to wastewater_nodes from provided subset of reaches
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
             cursor.execute(
                 f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
             )
+            records = cursor.fetchall()
 
-            # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-            # ws_wn_ids_count = int(cursor.fetchone()[0])
-            # if ws_wn_ids_count == 0:
-            if cursor.fetchone() is None:
-                connected_wn_to_re_ids = None
-            else:
-                # added cursor.execute again to see if with this all records will be available
-                # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
-                cursor.execute(
-                    f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
-                )
-                records = cursor.fetchall()
-
-                # 15.11.2024 - does not get all records, but only n-1
-                for row in records:
-                    logger.debug(f" row[0] = {row[0]}")
-                    # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
-                    strrow = str(row[0])
-                    if strrow is not None:
-                        connected_wn_to_re_ids.append(strrow)
-                        # logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
-        logger.info(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    connected_wn_to_re_ids.append(strrow)
+                    # logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
+    logger.info(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
     return connected_wn_to_re_ids
 
 # 10.12.2024
@@ -907,47 +907,47 @@ def get_connected_overflow_to_wn_ids(selected_ids):
     Get all connected wastewater_nodes from overflows.fk_overflow_to
     """
     if selected_ids is None:
-        connected_overflow_to_wn_ids = None
-        if not selected_ids:
+        return None
+    if not selected_ids:
+        return None
+    else:
+        logger.info(
+            f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids} ..."
+        )
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        connected_overflow_to_wn_ids = []
+
+        subset_text = get_selection_text_for_in_statement(selected_ids)
+
+        # select all connected to wastewater_nodes from provided subset of reaches
+        cursor.execute(
+            f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
             connected_overflow_to_wn_ids = None
         else:
-            logger.info(
-                f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids} ..."
-            )
-            connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
-            connection.set_session(autocommit=True)
-            cursor = connection.cursor()
-
-            connected_overflow_to_wn_ids = []
-
-            subset_text = get_selection_text_for_in_statement(selected_ids)
-
-            # select all connected to wastewater_nodes from provided subset of reaches
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
             cursor.execute(
                 f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
             )
+            records = cursor.fetchall()
 
-            # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
-            # ws_wn_ids_count = int(cursor.fetchone()[0])
-            # if ws_wn_ids_count == 0:
-            if cursor.fetchone() is None:
-                connected_overflow_to_wn_ids = None
-            else:
-                # added cursor.execute again to see if with this all records will be available
-                # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
-                cursor.execute(
-                    f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
-                )
-                records = cursor.fetchall()
-
-                # 15.11.2024 - does not get all records, but only n-1
-                for row in records:
-                    logger.debug(f" row[0] = {row[0]}")
-                    # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
-                    strrow = str(row[0])
-                    if strrow is not None:
-                        connected_overflow_to_wn_ids.append(strrow)
-                        # logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    connected_overflow_to_wn_ids.append(strrow)
+                    # logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
         logger.info(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
     return connected_overflow_to_wn_ids
 
@@ -957,7 +957,7 @@ def get_ws_wn_ids(classname):
     Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
     """
     if classname is None:
-        ws_wn_ids = None
+        return None
     else:
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -1003,7 +1003,7 @@ def get_ws_ids(classname):
     """
 
     if classname is None:
-        ws_ids = None
+        return None
     else:
         logger.info(f"get list of id's of subclass {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -1044,7 +1044,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
     """
 
     if selected_wwn is None:
-        ws_ids = None
+        return None
     else:
 
         logger.debug(
@@ -1098,7 +1098,7 @@ def filter_reaches(selected_ids):
     """
 
     if selected_ids is None:
-        subset_reaches_ids = None
+        return None
     else:
         logger.info(f"Filter out reaches from selected_ids {selected_ids} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -1141,7 +1141,7 @@ def filter_reaches(selected_ids):
                     )
                 else:
                     logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
-    logger.info(f"'subset_reaches_ids: {subset_reaches_ids}'")
+        logger.info(f"'subset_reaches_ids: {subset_reaches_ids}'")
     return subset_reaches_ids
 
 
@@ -1151,7 +1151,7 @@ def remove_from_selection(selected_ids, remove_ids):
     """
 
     if remove_ids is None:
-        return selected_ids
+        return None
     else:
         for list_item in remove_ids:
             # selected_ids = selected_ids.remove(list_item)
@@ -1170,7 +1170,7 @@ def add_to_selection(selected_ids, add_ids):
     Append ids to selected_ids
     """
     if add_ids is None:
-        return add_to_selection
+        return None
     else:
         if selected_ids is None:
             selected_ids = []
