@@ -561,9 +561,9 @@ class QgepExportUtils:
     def export_dryweather_downspout(self):
         query = self.qgep_session.query(self.qgep_model.dryweather_downspout)
         if self.filtered:
-            query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.join(self.qgep_model.wastewater_structure)
+                .join(self.qgep_model.wastewater_networkelement)
+            .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_downspout
 
