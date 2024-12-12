@@ -14,9 +14,7 @@ from ..utils.qgep_export_utils import (
     get_connected_overflow_to_wn_ids,
     get_connected_we_from_re,
     get_connected_we_to_re,
-    get_ws_ids,
     get_ws_selected_ww_networkelements,
-    get_ws_wn_ids,
     remove_from_selection,
 )
 from ..utils.various import logger
@@ -129,12 +127,12 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
-            # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-            # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+        # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         # )
 
     # Orientation
