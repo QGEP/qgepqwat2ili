@@ -179,8 +179,9 @@ def get_cl_re_ids(classname):
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 cl_re_ids.append(strrow)
-                logger.debug(f" building up '{cl_re_ids}' ...")
+                # logger.debug(f" building up '{cl_re_ids}' ...")
 
+        logger.info(f" cl_re_ids: '{cl_re_ids}'")
         return cl_re_ids
     else:
         logger.warning(f"Do not use this function with {classname} !")
@@ -230,7 +231,7 @@ def get_connected_we_from_re(subset_reaches):
             if strrow is not None:
                 connected_wn_from_re_ids.append(strrow)
                 logger.debug(f" building up '{connected_wn_from_re_ids}' ...")
-
+    logger.info(f" connected_wn_from_re_ids: '{connected_wn_from_re_ids}'")
     return connected_wn_from_re_ids
 
 
@@ -277,7 +278,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
             if strrow is not None:
                 connected_overflow_to_wn_ids.append(strrow)
                 logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
-
+    logger.info(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
     return connected_overflow_to_wn_ids
 
 
@@ -324,7 +325,7 @@ def get_connected_we_to_re(subset_reaches):
             if strrow is not None:
                 connected_wn_to_re_ids.append(strrow)
                 logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
-
+    logger.info(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
     return connected_wn_to_re_ids
 
 

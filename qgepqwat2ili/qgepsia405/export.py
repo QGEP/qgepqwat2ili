@@ -9,7 +9,19 @@ from ..utils.basket_utils import BasketUtils
 
 # 4.10.2024
 # 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
-from ..utils.ili2db import (
+# from ..utils.ili2db import (
+    # add_to_selection,
+    # filter_reaches,
+    # get_connected_overflow_to_wn_ids,
+    # get_connected_we_from_re,
+    # get_connected_we_to_re,
+    # get_ws_selected_ww_networkelements,
+    # get_ws_wn_ids,
+    # remove_from_selection,
+# )
+from ..utils.qgep_export_utils import QgepExportUtils
+# 12.12.2024 - verschoben
+from ..utils.qgep_export_utils import (
     add_to_selection,
     filter_reaches,
     get_connected_overflow_to_wn_ids,
@@ -19,7 +31,6 @@ from ..utils.ili2db import (
     get_ws_wn_ids,
     remove_from_selection,
 )
-from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
