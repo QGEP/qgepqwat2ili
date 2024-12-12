@@ -20,6 +20,7 @@ class QgepExportUtils:
         labelorientation,
         filtered,
         subset_ids,
+        subset_wws_ids,
     ):
         self.tid_maker = tid_maker
         self.current_basket = current_basket
@@ -30,6 +31,7 @@ class QgepExportUtils:
         self.labelorientation = labelorientation
         self.filtered = filtered
         self.subset_ids = subset_ids
+        self.subset_wws_ids = subset_wws_ids
 
     def get_tid(self, relation):
         """
@@ -208,7 +210,11 @@ class QgepExportUtils:
         Returns common attributes for wastewater_networkelement
         """
         return {
+            # 12.12.2024
             "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                self.subset_wws_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
             "bezeichnung": self.null_to_emptystr(row.identifier),
         }
