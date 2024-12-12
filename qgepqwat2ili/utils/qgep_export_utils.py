@@ -752,7 +752,9 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
-#end class QgepExportUtils
+
+# end class QgepExportUtils
+
 
 # 10.12.2024
 def get_selection_text_for_in_statement(selection_list):
@@ -771,6 +773,7 @@ def get_selection_text_for_in_statement(selection_list):
 
     logger.debug(f"selection_text = {selection_text} ...")
     return selection_text
+
 
 # 12.11.2024 to clean up - get_ws_wn_ids kann das auch
 def get_cl_re_ids(classname):
@@ -812,6 +815,7 @@ def get_cl_re_ids(classname):
     else:
         logger.warning(f"Do not use this function with {classname} !")
         return None
+
 
 # 10.12.2024
 def get_connected_we_from_re(subset_reaches):
@@ -859,6 +863,7 @@ def get_connected_we_from_re(subset_reaches):
     logger.info(f" connected_wn_from_re_ids: '{connected_wn_from_re_ids}'")
     return connected_wn_from_re_ids
 
+
 # 10.12.2024
 def get_connected_overflow_to_wn_ids(selected_ids):
     """
@@ -904,6 +909,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
                 logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
     logger.info(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
     return connected_overflow_to_wn_ids
+
 
 # 10.12.2024
 def get_connected_we_to_re(subset_reaches):
@@ -951,6 +957,7 @@ def get_connected_we_to_re(subset_reaches):
     logger.info(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
     return connected_wn_to_re_ids
 
+
 def get_ws_wn_ids(classname):
     """
     Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
@@ -991,6 +998,7 @@ def get_ws_wn_ids(classname):
                 # logger.debug(f" building up '{ws_wn_ids}' ...")
 
     return ws_wn_ids
+
 
 def get_ws_selected_ww_networkelements(selected_wwn):
     """
@@ -1039,6 +1047,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
                 # logger.debug(f" building up '{ws_wn_ids}' ...")
 
     return ws_ids
+
 
 # 10.1.2024
 def filter_reaches(selected_ids):
@@ -1094,6 +1103,7 @@ def filter_reaches(selected_ids):
     logger.info(f"'subset_reaches_ids: {subset_reaches_ids}'")
     return subset_reaches_ids
 
+
 def remove_from_selection(selected_ids, remove_ids):
     """
     Remove ids from selected_ids if they are in selected_ids
@@ -1113,6 +1123,7 @@ def remove_from_selection(selected_ids, remove_ids):
 
         return selected_ids
 
+
 def add_to_selection(selected_ids, add_ids):
     """
     Append ids to selected_ids
@@ -1126,4 +1137,3 @@ def add_to_selection(selected_ids, add_ids):
         selected_ids.append(list_item)
 
     return selected_ids
-
