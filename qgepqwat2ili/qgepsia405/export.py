@@ -74,9 +74,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 3. Get all connected to wastewater_nodes of selected reaches
         connected_to_wn_ids = get_connected_we_to_re(subset_ids)
         # 4. Get all connected wastewater_nodes from overflows.fk_overflow_to
-        connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(
-            subset_ids
-        )
+        connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(subset_ids)
         # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
