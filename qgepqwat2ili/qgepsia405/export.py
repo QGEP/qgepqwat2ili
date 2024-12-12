@@ -74,6 +74,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         subset_ids_reaches = filter_reaches(subset_ids)
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
         if adapted_subset_ids_reaches is None:
+            extra_reaches_ids = []
             if not adapted_subset_ids_reaches:
                 logger.debug(
                     "no adapted_subset_ids_reaches - so nothing to remove",
