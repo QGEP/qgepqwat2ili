@@ -69,6 +69,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
+    subset_wws_ids = []
 
     flag_approach_urs = True
     if flag_approach_urs:
@@ -188,6 +189,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         labelorientation=labelorientation,
         filtered=filtered,
         subset_ids=subset_ids,
+        subset_wws_ids=subset_wws_ids,
     )
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
