@@ -437,7 +437,7 @@ def filter_reaches(selected_ids):
 
         subset_reaches_ids = []
         all_reaches_ids = []
-        
+
         get_selection_text_for_in_statement(selected_ids)
 
         # select all reaches
