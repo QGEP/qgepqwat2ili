@@ -94,7 +94,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                     # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
                     # Convert lists to sets and use the difference method
                     # c = list(set(a) - set(b))
-                    extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
+                    extra_reaches_ids = list(
+                        set(subset_ids_reaches) - set(adapted_subset_ids_reaches)
+                    )
                 # 7. If extra_reaches then remove from adapted_subset_ids
                 if extra_reaches_ids is None:
                     if not extra_reaches_ids:
@@ -147,7 +149,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
             else:
                 if ws_off_sia405abwasser_list:
                     # add all data of wastewater_structures to selection
-                    subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
+                    subset_ids = add_to_selection(
+                        subset_ids, get_ws_wn_ids("wastewater_structure")
+                    )
                     logger.debug(
                         f"subset_ids of all wws : {subset_ids}",
                     )
