@@ -79,6 +79,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                     "no adapted_subset_ids_reaches - so nothing to remove",
                 )
             else:
+                logger.debug(
+                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                )
                 # https://www.geeksforgeeks.org/python-difference-two-lists/
                 # First convert lists to sets
                 # https://www.w3schools.com/python/ref_set_difference.asp
