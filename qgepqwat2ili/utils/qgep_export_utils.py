@@ -1030,7 +1030,7 @@ def get_ws_ids(classname):
     ws_ids = []
 
     # select all obj_id of the wastewater_nodes of wwtp_structure
-    cursor.execute(f"SELECT ws.obj_id FROM qgep_od.{classname};")
+    cursor.execute(f"SELECT obj_id FROM qgep_od.{classname};")
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # ws_wn_ids_count = int(cursor.fetchone()[0])
@@ -1040,7 +1040,7 @@ def get_ws_ids(classname):
     else:
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
-        cursor.execute(f"SELECT ws.obj_id FROM qgep_od.{classname};")
+        cursor.execute(f"SELECT obj_id FROM qgep_od.{classname};")
         records = cursor.fetchall()
 
         # 15.11.2024 - does not get all records, but only n-1
