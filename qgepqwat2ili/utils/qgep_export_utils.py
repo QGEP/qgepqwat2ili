@@ -254,7 +254,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
 
     # select all connected to wastewater_nodes from provided subset of reaches
     cursor.execute(
-        f"SELECT ov.fk_overflow_to FROM tww_od.wastewater_node wn LEFT JOIN tww_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+        f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
     )
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -266,7 +266,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
         cursor.execute(
-            f"SELECT ov.fk_overflow_to FROM tww_od.wastewater_node wn LEFT JOIN tww_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
+            f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text});"
         )
         records = cursor.fetchall()
 
