@@ -73,17 +73,22 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
-        # https://www.geeksforgeeks.org/python-difference-two-lists/
-        # First convert lists to sets
-        # https://www.w3schools.com/python/ref_set_difference.asp
-        # x = {"apple", "banana", "cherry"}
-        # y = {"google", "microsoft", "apple"}
-        # z = x.difference(y)
-        # replaced with code that first converts to sets
-        # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
-        # Convert lists to sets and use the difference method
-        # c = list(set(a) - set(b))
-        extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
+        if not adapted_subset_ids_reaches:
+            logger.debug(
+                "no adapted_subset_ids_reaches - so nothing to remove",
+            )
+        else:
+            # https://www.geeksforgeeks.org/python-difference-two-lists/
+            # First convert lists to sets
+            # https://www.w3schools.com/python/ref_set_difference.asp
+            # x = {"apple", "banana", "cherry"}
+            # y = {"google", "microsoft", "apple"}
+            # z = x.difference(y)
+            # replaced with code that first converts to sets
+            # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
+            # Convert lists to sets and use the difference method
+            # c = list(set(a) - set(b))
+            extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
         # 7. If extra_reaches then remove from adapted_subset_ids
         if not extra_reaches_ids:
             # list is empty - no need for adaption
