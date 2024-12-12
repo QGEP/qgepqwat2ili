@@ -436,7 +436,8 @@ def filter_reaches(selected_ids):
         cursor = connection.cursor()
 
         subset_reaches_ids = []
-
+        all_reaches_ids = []
+        
         get_selection_text_for_in_statement(selected_ids)
 
         # select all reaches
@@ -470,7 +471,7 @@ def filter_reaches(selected_ids):
                     )
                 else:
                     logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
-
+    logger.info(f"'subset_reaches_ids: {subset_reaches_ids}'")
     return subset_reaches_ids
 
 
