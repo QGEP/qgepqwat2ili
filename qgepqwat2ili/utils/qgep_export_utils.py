@@ -780,17 +780,21 @@ def get_selection_text_for_in_statement(selection_list):
     if selection_list is None:
         selection_text = None
     else:
-        selection_text = ""
+        if not selection_list:
+            # list is empty - no need for adaption
+            selection_text = None
+        else:
+            selection_text = ""
 
-        for list_item in selection_list:
-            selection_text += "'"
-            selection_text += list_item
-            selection_text += "',"
+            for list_item in selection_list:
+                selection_text += "'"
+                selection_text += list_item
+                selection_text += "',"
 
-        # remove last komma to make it a correct IN statement
-        selection_text = selection_text[:-1]
+            # remove last komma to make it a correct IN statement
+            selection_text = selection_text[:-1]
 
-        logger.debug(f"selection_text = {selection_text} ...")
+    logger.debug(f"selection_text = {selection_text} ...")
     return selection_text
 
 
