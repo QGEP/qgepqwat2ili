@@ -210,8 +210,8 @@ class QgepExportUtils:
         Returns common attributes for wastewater_networkelement
         """
         return {
-            # 12.12.2024
-            "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            # added check_fk_in_subsetid with subset_wws_ids (only needed for SIA405 Abwasser export wwtp_structure - but as now in qgep_export_utils done for all export - might slow donw export
+            #"abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
             "abwasserbauwerkref": check_fk_in_subsetid(
                 self.subset_wws_ids, row.fk_wastewater_structure__REL
             ),
