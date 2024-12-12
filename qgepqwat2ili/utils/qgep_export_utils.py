@@ -115,18 +115,22 @@ class QgepExportUtils:
         fremdschluesselstr = getattr(relation, "obj_id")
         logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
 
-        if fremdschluesselstr in subset:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
-            logger.info(f"check_fk_in_subsetid - tid = '{self.tid_maker.tid_for_row(relation)}' ")
+        # if no selection subset will be None
+        if subset is None:
             return self.tid_maker.tid_for_row(relation)
         else:
-            if self.filtered:
-                logger.warning(
-                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
-                )
-                return None
-            else:
+            if fremdschluesselstr in subset:
+                logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+                logger.info(f"check_fk_in_subsetid - tid = '{self.tid_maker.tid_for_row(relation)}' ")
                 return self.tid_maker.tid_for_row(relation)
+            else:
+                if self.filtered:
+                    logger.warning(
+                        f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                    )
+                    return None
+                else:
+                    return self.tid_maker.tid_for_row(relation)
 
     def create_metaattributes(self, row):
         metaattribute = self.abwasser_model.metaattribute(
