@@ -1,13 +1,11 @@
 import json
 
 from geoalchemy2.functions import ST_Force2D
-from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-
 from ..utils.qgep_export_utils import (
     QgepExportUtils,
     add_to_selection,
@@ -23,8 +21,6 @@ from ..utils.qgep_export_utils import (
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
-
-
 
 
 def qgep_export_sia405(selection=None, labels_file=None, orientation=None, basket_enabled=False):
