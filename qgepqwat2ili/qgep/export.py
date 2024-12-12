@@ -7,7 +7,6 @@ from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -43,7 +42,7 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
 
         current_basket = basket_utils.basket_topic_sia405_abwasser
 
-   # 1. Filtering - check if selection
+    # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
     subset_wws_ids = []
