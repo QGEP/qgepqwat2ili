@@ -14,7 +14,9 @@ from ..utils.qgep_export_utils import (
     get_connected_overflow_to_wn_ids,
     get_connected_we_from_re,
     get_connected_we_to_re,
+    get_ws_ids,
     get_ws_selected_ww_networkelements,
+    get_ws_wn_ids,
     remove_from_selection,
 )
 from ..utils.various import logger
@@ -73,35 +75,49 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # 4. Get all connected wastewater_nodes from overflows.fk_overflow_to
         connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(subset_ids)
         # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
+        adapted_subset_ids = []
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
-        # https://www.geeksforgeeks.org/python-difference-two-lists/
-        # First convert lists to sets
-        # https://www.w3schools.com/python/ref_set_difference.asp
-        # x = {"apple", "banana", "cherry"}
-        # y = {"google", "microsoft", "apple"}
-        # z = x.difference(y)
-        # replaced with code that first converts to sets
-        # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
-        # Convert lists to sets and use the difference method
-        # c = list(set(a) - set(b))
-        extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
-        # 7. If extra_reaches then remove from adapted_subset_ids
-        if not extra_reaches_ids:
-            # list is empty - no need for adaption
-            logger.debug(
-                "no extra reaches - so nothing to remove from adapted_subset_ids",
-            )
-        else:
-            logger.debug(
-                f"extra_reaches_ids: {extra_reaches_ids} found!",
-            )
-            # if len(extra_reaches_ids) > 0:
-            adapted_subset_ids = remove_from_selection(adapted_subset_ids, extra_reaches_ids)
+        if adapted_subset_ids_reaches is None:
+            extra_reaches_ids = []
+            if not adapted_subset_ids_reaches:
+                logger.debug(
+                    "no adapted_subset_ids_reaches - so nothing to remove",
+                )
+            else:
+                logger.debug(
+                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                )
+                # https://www.geeksforgeeks.org/python-difference-two-lists/
+                # First convert lists to sets
+                # https://www.w3schools.com/python/ref_set_difference.asp
+                # x = {"apple", "banana", "cherry"}
+                # y = {"google", "microsoft", "apple"}
+                # z = x.difference(y)
+                # replaced with code that first converts to sets
+                # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
+                # Convert lists to sets and use the difference method
+                # c = list(set(a) - set(b))
+                extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
+            # 7. If extra_reaches then remove from adapted_subset_ids
+            if extra_reaches_ids is None:
+                if not extra_reaches_ids:
+                    # list is empty - no need for adaption
+                    logger.debug(
+                        "no extra reaches - so nothing to remove from adapted_subset_ids",
+                    )
+                else:
+                    logger.debug(
+                        f"extra_reaches_ids: {extra_reaches_ids} found!",
+                    )
+                    # if len(extra_reaches_ids) > 0:
+                    adapted_subset_ids = remove_from_selection(
+                        adapted_subset_ids, extra_reaches_ids
+                    )
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
@@ -113,12 +129,12 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
-        #    f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+            # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-        #    f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+            # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         # )
 
     # Orientation
