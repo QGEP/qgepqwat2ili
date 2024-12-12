@@ -1015,7 +1015,8 @@ def get_ws_wn_ids(classname):
 
     return ws_wn_ids
 
-#12.12.2024
+
+# 12.12.2024
 def get_ws_ids(classname):
     """
     Get list of id's of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
@@ -1029,21 +1030,17 @@ def get_ws_ids(classname):
     ws_ids = []
 
     # select all obj_id of the wastewater_nodes of wwtp_structure
-    cursor.execute(
-        f"SELECT ws.obj_id FROM qgep_od.{classname};"
-    )
+    cursor.execute(f"SELECT ws.obj_id FROM qgep_od.{classname};")
 
     # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
     # ws_wn_ids_count = int(cursor.fetchone()[0])
     # if ws_wn_ids_count == 0:
     if cursor.fetchone() is None:
-        ws_wn_ids = None
+        pass
     else:
         # added cursor.execute again to see if with this all records will be available
         # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
-        cursor.execute(
-            f"SELECT ws.obj_id FROM qgep_od.{classname};"
-        )
+        cursor.execute(f"SELECT ws.obj_id FROM qgep_od.{classname};")
         records = cursor.fetchall()
 
         # 15.11.2024 - does not get all records, but only n-1
@@ -1056,6 +1053,7 @@ def get_ws_ids(classname):
                 # logger.debug(f" building up '{ws_wn_ids}' ...")
 
     return ws_ids
+
 
 def get_ws_selected_ww_networkelements(selected_wwn):
     """
