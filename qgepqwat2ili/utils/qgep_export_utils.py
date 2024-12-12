@@ -1183,12 +1183,14 @@ def add_to_selection(selected_ids, add_ids):
     """
     Append ids to selected_ids
     """
+    if add_ids is None:
+        return add_to_selection
+    else:
+        if selected_ids is None:
+            selected_ids = []
 
-    if selected_ids is None:
-        selected_ids = []
+        for list_item in add_ids:
+            # selected_ids = selected_ids.append(list_item)
+            selected_ids.append(list_item)
 
-    for list_item in add_ids:
-        # selected_ids = selected_ids.append(list_item)
-        selected_ids.append(list_item)
-
-    return selected_ids
+        return selected_ids
