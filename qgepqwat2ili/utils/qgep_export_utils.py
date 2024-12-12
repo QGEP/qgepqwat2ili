@@ -947,7 +947,7 @@ def get_ws_wn_ids(classname):
     """
     if classname is None:
         ws_wn_ids = None
-        else:
+    else:
         logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
