@@ -91,7 +91,8 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # x = {"apple", "banana", "cherry"}
         # y = {"google", "microsoft", "apple"}
         # z = x.difference(y)
-        extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
+        # replaced with code that first converts to sets
+        #extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
         # Convert lists to sets and use the difference method
         # c = list(set(a) - set(b))
         extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
