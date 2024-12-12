@@ -7,7 +7,6 @@ from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-from ..utils.ili2db import skip_wwtp_structure_ids
 from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -106,12 +105,12 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
         #    f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
-        #)
+        # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
-        #subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
-        #logger.info(
+        # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
+        # logger.info(
         #    f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
-        #)
+        # )
 
     # Orientation
     oriented = orientation is not None
