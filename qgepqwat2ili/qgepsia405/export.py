@@ -1,14 +1,13 @@
 import json
 
 from geoalchemy2.functions import ST_Force2D
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 from .. import utils
 from ..utils.basket_utils import BasketUtils
 
-# 12.12.2024 - verschoben
-# )
 from ..utils.qgep_export_utils import (
     QgepExportUtils,
     add_to_selection,
@@ -25,17 +24,7 @@ from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
 from .model_qgep import get_qgep_model
 
-# 4.10.2024
-# 6.11.2024 replaced with / 15.11.2024 get_ws_selected_ww_networkelements added
-# from ..utils.ili2db import (
-# add_to_selection,
-# filter_reaches,
-# get_connected_overflow_to_wn_ids,
-# get_connected_we_from_re,
-# get_connected_we_to_re,
-# get_ws_selected_ww_networkelements,
-# get_ws_wn_ids,
-# remove_from_selection,
+
 
 
 def qgep_export_sia405(selection=None, labels_file=None, orientation=None, basket_enabled=False):
