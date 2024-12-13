@@ -1856,8 +1856,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.hydr_geom_relation)
     # always export all hydr_geom_relation - does not work -> fk_errors
     if filtered:
-        query = query.join(qgep_model.hydr_geometry).join(qgep_model.wastewater_node).filter(
-            qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
+        query = (
+            query.join(qgep_model.hydr_geometry)
+            .join(qgep_model.wastewater_node)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
     for row in query:
 
