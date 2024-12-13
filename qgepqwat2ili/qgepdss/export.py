@@ -3463,9 +3463,17 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.tank_emptying)
     # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_structure, qgep_model.wastewater_networkelement
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_structure,
+                qgep_model.structure_part.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.tank_emptying
 
