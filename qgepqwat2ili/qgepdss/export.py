@@ -1818,10 +1818,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         "Exporting QGEP.profile_geometry -> ABWASSER.rohrprofil_geometrie, ABWASSER.metaattribute"
     )
     query = qgep_session.query(qgep_model.profile_geometry)
-    if filtered:
-        query = query.join(qgep_model.pipe_profile, qgep_model.reach).filter(
-            qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+    # always export all profile_geometry
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.profile_geometry
