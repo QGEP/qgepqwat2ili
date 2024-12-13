@@ -2592,7 +2592,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     if filtered:
         query1 = query.join(
             qgep_model.wastewater_structure,
-            qgep_model.measuring_point.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+            qgep_model.measuring_point.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
         ).join(qgep_model.wastewater_networkelement)
 
         # needs to add QGEP.wastewater_structure as waste_water_treatment_plant is a subclass of organisation that has a relation to wastewater_structure and then wastewater_networkelement
@@ -2622,7 +2623,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.wastewater_structure,
-                qgep_model.wastewater_structure.fk_owner == qgep_model.waste_water_treatment_plant.obj_id,
+                qgep_model.wastewater_structure.fk_owner
+                == qgep_model.waste_water_treatment_plant.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2630,7 +2632,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query3 = (
             query.join(
                 qgep_model.water_course_segment,
-                qgep_model.measuring_point.fk_water_course_segment == qgep_model.water_course_segment.obj_id,
+                qgep_model.measuring_point.fk_water_course_segment
+                == qgep_model.water_course_segment.obj_id,
             )
             .join(
                 qgep_model.river,
@@ -2639,11 +2642,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.sector_water_body,
-                qgep_model.sector_water_body.fk_surface_water_bodies == qgep_model.sector_water_body.obj_id,
+                qgep_model.sector_water_body.fk_surface_water_bodies
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(
                 qgep_model.discharge_point,
-                qgep_model.discharge_point.fk_sector_water_body == qgep_model.sector_water_body.obj_id,
+                qgep_model.discharge_point.fk_sector_water_body
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2704,11 +2709,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query1 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measuring_device.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measuring_device.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.wastewater_structure,
-                qgep_model.measuring_point.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+                qgep_model.measuring_point.fk_wastewater_structure
+                == qgep_model.wastewater_structure.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2716,7 +2723,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query2 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measuring_device.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measuring_device.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.waste_water_treatment_plant,
@@ -2725,7 +2733,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.wastewater_structure,
-                qgep_model.wastewater_structure.fk_owner == qgep_model.waste_water_treatment_plant.obj_id,
+                qgep_model.wastewater_structure.fk_owner
+                == qgep_model.waste_water_treatment_plant.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2733,11 +2742,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query3 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measuring_device.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measuring_device.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.water_course_segment,
-                qgep_model.measuring_point.fk_water_course_segment == qgep_model.water_course_segment.obj_id,
+                qgep_model.measuring_point.fk_water_course_segment
+                == qgep_model.water_course_segment.obj_id,
             )
             .join(
                 qgep_model.river,
@@ -2746,11 +2757,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.sector_water_body,
-                qgep_model.sector_water_body.fk_surface_water_bodies == qgep_model.sector_water_body.obj_id,
+                qgep_model.sector_water_body.fk_surface_water_bodies
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(
                 qgep_model.discharge_point,
-                qgep_model.discharge_point.fk_sector_water_body == qgep_model.sector_water_body.obj_id,
+                qgep_model.discharge_point.fk_sector_water_body
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2804,11 +2817,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query1 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measurement_series.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.wastewater_structure,
-                qgep_model.measuring_point.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+                qgep_model.measuring_point.fk_wastewater_structure
+                == qgep_model.wastewater_structure.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2816,7 +2831,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query2 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measurement_series.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.waste_water_treatment_plant,
@@ -2825,7 +2841,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.wastewater_structure,
-                qgep_model.wastewater_structure.fk_owner == qgep_model.waste_water_treatment_plant.obj_id,
+                qgep_model.wastewater_structure.fk_owner
+                == qgep_model.waste_water_treatment_plant.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
@@ -2833,11 +2850,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query3 = (
             query.join(
                 qgep_model.measuring_point,
-                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
+                qgep_model.measurement_series.fk_measuring_point
+                == qgep_model.measuring_point.obj_id,
             )
             .join(
                 qgep_model.water_course_segment,
-                qgep_model.measuring_point.fk_water_course_segment == qgep_model.water_course_segment.obj_id,
+                qgep_model.measuring_point.fk_water_course_segment
+                == qgep_model.water_course_segment.obj_id,
             )
             .join(
                 qgep_model.river,
@@ -2846,11 +2865,13 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.sector_water_body,
-                qgep_model.sector_water_body.fk_surface_water_bodies == qgep_model.sector_water_body.obj_id,
+                qgep_model.sector_water_body.fk_surface_water_bodies
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(
                 qgep_model.discharge_point,
-                qgep_model.discharge_point.fk_sector_water_body == qgep_model.sector_water_body.obj_id,
+                qgep_model.discharge_point.fk_sector_water_body
+                == qgep_model.sector_water_body.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         )
