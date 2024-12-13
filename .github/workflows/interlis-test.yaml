@@ -44,4 +44,5 @@ jobs:
             PGUSER: postgres
             PGPASS: postgres
 
-      - uses: mxschmitt/action-tmate@v3
+      - if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
