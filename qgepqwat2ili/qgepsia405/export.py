@@ -299,8 +299,8 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # --- _rel_ ---
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
-        logger.warning(
-            "QGEP field infiltration_installation.upper_elevation has no equivalent in the interlis model. It will be ignored."
+        logger.info(
+            "QGEP field infiltration_installation.upper_elevation is part of 3D extension. It will be ignored."
         )
         versickerungsanlage = abwasser_model.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
