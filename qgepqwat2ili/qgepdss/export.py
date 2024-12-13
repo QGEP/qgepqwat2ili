@@ -293,6 +293,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # only export explicitly specified mutation objects if filtered
     if filtered:
         query = query.filter(qgep_model.mutation.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mutation
@@ -912,7 +916,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
-    for row in query:
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
         # AVAILABLE FIELDS IN QGEP.discharge_point
 
         # --- wastewater_structure ---
@@ -964,6 +971,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.infiltration_installation
 
@@ -1017,6 +1027,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.wwtp_structure
 
@@ -1402,7 +1415,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
-        logger.info(f"Selection query: {query.statement}")
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.control_center
@@ -1737,6 +1752,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_node).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geometry
@@ -1780,6 +1798,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.wastewater_node)
     if filtered:
         query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.wastewater_node
 
@@ -1861,6 +1882,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             .join(qgep_model.wastewater_node)
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geom_relation
@@ -2202,6 +2226,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.building
 
@@ -2242,6 +2269,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.reservoir
 
@@ -2282,6 +2312,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.individual_surface
 
@@ -2322,6 +2355,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.wastewater_networkelement).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.fountain
 
@@ -2501,7 +2537,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.catchment_area -> ABWASSER.einzugsgebiet, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.catchment_area)
     if filtered:
-        query = query.join(
+        query = (
+            query.join(
             qgep_model.wastewater_networkelement,
             or_(
                 qgep_model.wastewater_networkelement.obj_id
@@ -2513,7 +2550,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 qgep_model.wastewater_networkelement.obj_id
                 == qgep_model.catchment_area.fk_wastewater_networkelement_ww_current,
             ),
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+            ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.catchment_area
@@ -3059,12 +3100,15 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # sqlalchemy.exc.InvalidRequestError: Don't know how to join to . Please use the .select_from() method to establish an explicit left side, as well as providing an explcit ON clause if not present already to help resolve the ambiguity.
     # fk_control_center has also to be NOT considered
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_node,
-            qgep_model.wastewater_node.obj_id
-            == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
-        logger.info(f"Selection query: {query.statement}")
+        query = (
+            query.join(
+                qgep_model.wastewater_node, qgep_model.wastewater_node.obj_id == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
+            )
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.throttle_shut_off_unit
@@ -3113,13 +3157,20 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.prank_weir)
     # to check if fk_overflow_char also has to be considered
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_node,
-            or_(
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
-            ),
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_node,
+                or_(
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
+                ),
+            )
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+
     for row in query:
         # AVAILABLE FIELDS IN QGEP.prank_weir
 
@@ -3159,13 +3210,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.pump)
     # to check if fk_overflow_char also has to be considered
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_node,
-            or_(
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
-            ),
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_node,
+                or_(
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
+                ),
+            )
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.pump
 
@@ -3209,13 +3266,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.leapingweir)
     # to check if fk_overflow_char also has to be considered
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_node,
-            or_(
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
-                qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
-            ),
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_node,
+                or_(
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_wastewater_node,
+                    qgep_model.wastewater_node.obj_id == qgep_model.prank_weir.fk_overflow_to,
+                ),
+            )
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.leapingweir
 
@@ -3255,14 +3318,20 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.hydraulic_char_data)
     # side fk_overflow_char not considered in filter query
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_node,
-            or_(
-                qgep_model.wastewater_node.obj_id
-                == qgep_model.hydraulic_char_data.fk_wastewater_node,
-                # fk_primary_direction only added with VSA-DSS 2020
-            ),
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_node,
+                or_(
+                    qgep_model.wastewater_node.obj_id
+                    == qgep_model.hydraulic_char_data.fk_wastewater_node,
+                    # fk_primary_direction only added with VSA-DSS 2020
+                ),
+            )
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydraulic_char_data
@@ -3526,6 +3595,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.catchment_area).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_general
 
@@ -3569,6 +3641,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         query = query.join(qgep_model.catchment_area).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.param_ca_mouse1
 
@@ -3799,6 +3874,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event_wastewater_structure
