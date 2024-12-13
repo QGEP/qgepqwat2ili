@@ -3784,6 +3784,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.re_maintenance_event_wastewater_structure)
     if filtered:
         query = (
+            .join(
+                qgep_model.maintenance_event,
+                qgep_model.re_maintenance_event_wastewater_structure.fk_maintenance_event
+                == qgep_model.maintenance_event.obj_id,
+            )
             query.join(
                 qgep_model.wastewater_structure,
                 qgep_model.re_maintenance_event_wastewater_structure.fk_wastewater_structure
@@ -3791,8 +3796,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             )
             .join(
                 qgep_model.wastewater_networkelement,
-                qgep_model.re_maintenance_event_wastewater_structure.fk_maintenance_event
-                == qgep_model.maintenance_event.obj_id,
             )
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
