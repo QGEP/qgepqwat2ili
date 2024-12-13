@@ -293,7 +293,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # only export explicitly specified mutation objects if filtered
     if filtered:
         query = query.filter(qgep_model.mutation.obj_id.in_(subset_ids))
-        )
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
