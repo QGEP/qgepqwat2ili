@@ -168,8 +168,8 @@ class QgepExportUtils:
         if self.current_basket is not None:
             base["t_basket"] = self.current_basket.t_id
 
-        if base["t_ili_tid"] == "00000000OG000000":
-            raise Exception("This should not happen")
+        # if base["t_ili_tid"] == "00000000OG000000":
+        #     raise Exception("This should not happen")
 
         return base
 
