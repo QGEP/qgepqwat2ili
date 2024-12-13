@@ -3313,11 +3313,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     if filtered:
         query = (
             query.join(
-                QGEP.wastewater_structure,
-                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+                qgep_model.wastewater_structure,
+                qgep_model.structure_part.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
             )
-            .join(QGEP.wastewater_networkelement)
-            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
