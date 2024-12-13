@@ -2929,73 +2929,73 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # ).filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
         query1 = (
             query.join(
-                QGEP.measurement_series,
-                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
+                qgep_model.measurement_series,
+                qgep_model.measurement_result.fk_measurement_series == qgep_model.measurement_series.obj_id,
             )
             .join(
-                QGEP.measuring_point,
-                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
+                qgep_model.measuring_point,
+                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
             )
             .join(
-                QGEP.wastewater_structure,
-                QGEP.measuring_point.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+                qgep_model.wastewater_structure,
+                qgep_model.measuring_point.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
             )
-            .join(QGEP.wastewater_networkelement)
+            .join(qgep_model.wastewater_networkelement)
         )
         # query2 via waste_water_treatment_plant Release 2015 where waste_water_treatment_plant is subclass of organisation
         query2 = (
             query.join(
-                QGEP.measurement_series,
-                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
+                qgep_model.measurement_series,
+                qgep_model.measurement_result.fk_measurement_series == qgep_model.measurement_series.obj_id,
             )
             .join(
-                QGEP.measuring_point,
-                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
+                qgep_model.measuring_point,
+                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
             )
             .join(
-                QGEP.waste_water_treatment_plant,
-                QGEP.measuring_point.fk_waste_water_treatment_plant
-                == QGEP.waste_water_treatment_plant.obj_id,
+                qgep_model.waste_water_treatment_plant,
+                qgep_model.measuring_point.fk_waste_water_treatment_plant
+                == qgep_model.waste_water_treatment_plant.obj_id,
             )
             .join(
-                QGEP.wastewater_structure,
-                QGEP.wastewater_structure.fk_owner == QGEP.waste_water_treatment_plant.obj_id,
+                qgep_model.wastewater_structure,
+                qgep_model.wastewater_structure.fk_owner == qgep_model.waste_water_treatment_plant.obj_id,
             )
-            .join(QGEP.wastewater_networkelement)
+            .join(qgep_model.wastewater_networkelement)
         )
         # only until VSA-DSS Release 2015
         query3 = (
             query.join(
-                QGEP.measurement_series,
-                QGEP.measurement_result.fk_measurement_series == QGEP.measurement_series.obj_id,
+                qgep_model.measurement_series,
+                qgep_model.measurement_result.fk_measurement_series == qgep_model.measurement_series.obj_id,
             )
             .join(
-                QGEP.measuring_point,
-                QGEP.measurement_series.fk_measuring_point == QGEP.measuring_point.obj_id,
+                qgep_model.measuring_point,
+                qgep_model.measurement_series.fk_measuring_point == qgep_model.measuring_point.obj_id,
             )
             .join(
-                QGEP.water_course_segment,
-                QGEP.measuring_point.fk_water_course_segment == QGEP.water_course_segment.obj_id,
+                qgep_model.water_course_segment,
+                qgep_model.measuring_point.fk_water_course_segment == qgep_model.water_course_segment.obj_id,
             )
             .join(
-                QGEP.river,
+                qgep_model.river,
                 # Fehler im Datenmodell fk_watercourse should be name fk_surface_water_bodies (resp. fk_surface_water_body - class should be renamed to single)
-                QGEP.water_course_segment.fk_watercourse == QGEP.river.obj_id,
+                qgep_model.water_course_segment.fk_watercourse == qgep_model.river.obj_id,
             )
             .join(
-                QGEP.sector_water_body,
-                QGEP.sector_water_body.fk_surface_water_bodies == QGEP.sector_water_body.obj_id,
+                qgep_model.sector_water_body,
+                qgep_model.sector_water_body.fk_surface_water_bodies == qgep_model.sector_water_body.obj_id,
             )
             .join(
-                QGEP.discharge_point,
-                QGEP.discharge_point.fk_sector_water_body == QGEP.sector_water_body.obj_id,
+                qgep_model.discharge_point,
+                qgep_model.discharge_point.fk_sector_water_body == qgep_model.sector_water_body.obj_id,
             )
-            .join(QGEP.wastewater_networkelement)
+            .join(qgep_model.wastewater_networkelement)
         )
         # query4 not implemented via measuring_device
         query = query.union(query1, query2, query3)
         # query = query.union(query1, query3)
-        query = query.filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
