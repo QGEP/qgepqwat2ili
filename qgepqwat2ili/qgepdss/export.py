@@ -1393,9 +1393,14 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.control_center)
     if filtered:
-        query = query.join(qgep_model.throttle_shut_off_unit, qgep_model.wastewater_node).filter(
+        query = query.join(qgep_model.throttle_shut_off_unit).join(
+            qgep_model.wastewater_node,
+            qgep_model.wastewater_node.obj_id
+            == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
+        ).filter(
             qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
         )
+        logger.info(f"Selection query: {query.statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.control_center
