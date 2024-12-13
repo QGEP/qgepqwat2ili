@@ -1940,7 +1940,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # specify relation key - only directly to wastewater_structure
     if filtered:
         query = (
-            query.join(qgep_model.infiltration_installation, qgep_model.retention_body.fk_wastewater_structure == qgep_model.infiltration_installation.obj_id)
+            query.join(
+                qgep_model.infiltration_installation,
+                qgep_model.retention_body.fk_wastewater_structure
+                == qgep_model.infiltration_installation.obj_id,
+            )
             .join(qgep_model.wastewater_networkelement)
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
