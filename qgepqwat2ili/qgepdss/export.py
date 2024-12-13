@@ -2763,10 +2763,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # fk_control_center has also to be NOT considered
     if filtered:
         query = query.join(
-            qgep_model.wastewater_node,
-            or_(
-                qgep_model.wastewater_node.obj_id
-                == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
+            qgep_model.wastewater_node, qgep_model.wastewater_node.obj_id == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
             ),
         ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
