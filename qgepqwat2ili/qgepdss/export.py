@@ -1890,10 +1890,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.mechanical_pretreatment)
     # specify relation key - only directly to wastewater_structure
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_structure, qgep_model.mechanical_pretreatment.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id)
+        query = (
+            query.join(qgep_model.wastewater_structure, qgep_model.mechanical_pretreatment.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id)
             .join(qgep_model.wastewater_networkelement)
-        .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mechanical_pretreatment
