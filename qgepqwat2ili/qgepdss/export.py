@@ -21,7 +21,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     Args:
         selection:      if provided, limits the export to networkelements that are provided in the selection
     """
-    logger.info(
+    logger.warning(
         f"Starting qgep_export_dss: selection={selection}, labels_file={labels_file}, orientation={orientation}, basket_enabled={basket_enabled}",
     )
 
