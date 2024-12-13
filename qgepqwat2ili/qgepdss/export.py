@@ -3604,13 +3604,25 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         "Exporting QGEP.maintenance_event -> ABWASSER.maintenance_event, ABWASSER.metaattribute"
     )
     query = qgep_session.query(qgep_model.maintenance_event)
-    # to check if join is correct like this n:m re_maintenance_event_wastewater_structure
+    # explicit join for n:m re_maintenance_event_wastewater_structure
     if filtered:
-        query = query.join(
-            qgep_model.re_maintenance_event_wastewater_structure,
-            qgep_model.wastewater_structure,
-            qgep_model.wastewater_networkelement,
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.re_maintenance_event_wastewater_structure,
+                qgep_model.re_maintenance_event_wastewater_structure.fk_maintenance_event
+                == qgep_model.maintenance_event.obj_id,
+            )
+            .join(
+                qgep_model.wastewater_structure,
+                qgep_model.re_maintenance_event_wastewater_structure.fk_wastewater_structure
+                == qgep_model.wastewater_structure.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.maintenance_event
