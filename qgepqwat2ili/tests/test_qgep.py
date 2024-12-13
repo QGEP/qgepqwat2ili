@@ -220,6 +220,9 @@ class TestQGEPUseCases(unittest.TestCase):
         # F. export a selection
         """
 
+        # Prepare db
+        main(["setupdb", "full"])
+
         path = os.path.join(tempfile.mkdtemp(), "export_selection_SIA405.xtf")
         selection = [
             # reach_id
