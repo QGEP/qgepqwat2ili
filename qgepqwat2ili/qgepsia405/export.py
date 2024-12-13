@@ -15,7 +15,6 @@ from ..utils.qgep_export_utils import (
     get_connected_we_to_re,
     get_ws_ids,
     get_ws_selected_ww_networkelements,
-    get_ws_wn_ids,
     remove_from_selection,
 )
 from ..utils.various import logger
@@ -92,9 +91,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                 # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
                 # Convert lists to sets and use the difference method
                 # c = list(set(a) - set(b))
-                extra_reaches_ids = list(
-                    set(subset_ids_reaches) - set(adapted_subset_ids_reaches)
-                )
+                extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
             # 7. If extra_reaches then remove from adapted_subset_ids
             if extra_reaches_ids is None:
                 if not extra_reaches_ids:
