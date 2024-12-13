@@ -2459,7 +2459,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
-        for row in query:
+    for row in query:
 
         # AVAILABLE FIELDS IN QGEP.substance
 
