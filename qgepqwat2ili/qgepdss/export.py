@@ -1899,6 +1899,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             .join(qgep_model.wastewater_networkelement)
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.mechanical_pretreatment
@@ -1948,6 +1951,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             .join(qgep_model.wastewater_networkelement)
             .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.retention_body
@@ -2082,9 +2088,17 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.electric_equipment)
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_structure, qgep_model.wastewater_networkelement
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.wastewater_structure,
+                qgep_model.structure_part.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.electric_equipment
 
@@ -2123,9 +2137,21 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.electromechanical_equipment)
     if filtered:
-        query = query.join(
-            qgep_model.wastewater_structure, qgep_model.wastewater_networkelement
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                qgep_model.wastewater_structure,
+                qgep_model.structure_part.fk_wastewater_structure == qgep_model.wastewater_structure.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.electromechanical_equipment
 
