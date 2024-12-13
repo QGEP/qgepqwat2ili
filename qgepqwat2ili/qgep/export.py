@@ -21,6 +21,9 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     Args:
         selection:      if provided, limits the export to networkelements that are provided in the selection
     """
+    logger.info(
+        f"Starting qgep_export_kek: selection={selection}, labels_file={labels_file}, orientation={orientation}, basket_enabled={basket_enabled}",
+    )
 
     qgep_model = get_qgep_model()
     abwasser_model = get_abwasser_model()
