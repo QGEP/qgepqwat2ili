@@ -110,18 +110,18 @@ class QgepExportUtils:
         if relation is None:
             return None
 
-        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        logger.debug(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
-        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+        logger.debug(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
 
         # if no selection subset will be None
         if subset is None:
             return self.tid_maker.tid_for_row(relation)
         else:
             if fremdschluesselstr in subset:
-                logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
-                logger.info(
+                logger.debug(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+                logger.debug(
                     f"check_fk_in_subsetid - tid = '{self.tid_maker.tid_for_row(relation)}' "
                 )
                 return self.tid_maker.tid_for_row(relation)
@@ -184,9 +184,9 @@ class QgepExportUtils:
         """
         Returns common attributes for wastewater_structure
         """
-        logger.warning(
-            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
-        )
+        # logger.warning(
+            # "Mapping of wastewater_structure->abwasserbauwerk is not yet implemented for 3D extensions of SIA405 Abwasser, VSA-KEK and VSA-DSS 2015."
+        # )
         return {
             # --- abwasserbauwerk ---
             "akten": row.records,
@@ -817,7 +817,7 @@ def get_connected_we_from_re(subset_reaches):
         if not subset_reaches:
             connected_wn_from_re_ids = None
         else:
-            logger.info(
+            logger.debug(
                 f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
             )
             connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -848,13 +848,13 @@ def get_connected_we_from_re(subset_reaches):
 
                 # 15.11.2024 - does not get all records, but only n-1
                 for row in records:
-                    logger.debug(f" row[0] = {row[0]}")
+                    # logger.debug(f" row[0] = {row[0]}")
                     # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                     strrow = str(row[0])
                     if strrow is not None:
                         connected_wn_from_re_ids.append(strrow)
                         # logger.debug(f" building up '{connected_wn_from_re_ids}' ...")
-            logger.info(f" connected_wn_from_re_ids: '{connected_wn_from_re_ids}'")
+            logger.debug(f" connected_wn_from_re_ids: '{connected_wn_from_re_ids}'")
     return connected_wn_from_re_ids
 
 
@@ -868,7 +868,7 @@ def get_connected_we_to_re(subset_reaches):
     if not subset_reaches:
         return None
     else:
-        logger.info(
+        logger.debug(
             f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
         )
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -899,13 +899,13 @@ def get_connected_we_to_re(subset_reaches):
 
             # 15.11.2024 - does not get all records, but only n-1
             for row in records:
-                logger.debug(f" row[0] = {row[0]}")
+                # logger.debug(f" row[0] = {row[0]}")
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
                     connected_wn_to_re_ids.append(strrow)
                     # logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
-    logger.info(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
+    logger.debug(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
     return connected_wn_to_re_ids
 
 
@@ -919,7 +919,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
     if not selected_ids:
         return None
     else:
-        logger.info(
+        logger.debug(
             f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids} ..."
         )
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
@@ -950,13 +950,13 @@ def get_connected_overflow_to_wn_ids(selected_ids):
 
             # 15.11.2024 - does not get all records, but only n-1
             for row in records:
-                logger.debug(f" row[0] = {row[0]}")
+                # logger.debug(f" row[0] = {row[0]}")
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
                     connected_overflow_to_wn_ids.append(strrow)
                     # logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
-        logger.info(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
+        logger.debug(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
     return connected_overflow_to_wn_ids
 
 
@@ -967,7 +967,7 @@ def get_ws_wn_ids(classname):
     if classname is None:
         return None
     else:
-        logger.info(f"get list of id's of wastewater_nodes of {classname} ...")
+        logger.debug(f"get list of id's of wastewater_nodes of {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
         cursor = connection.cursor()
@@ -994,7 +994,7 @@ def get_ws_wn_ids(classname):
 
             # 15.11.2024 - does not get all records, but only n-1
             for row in records:
-                logger.debug(f" row[0] = {row[0]}")
+                # logger.debug(f" row[0] = {row[0]}")
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
@@ -1013,7 +1013,7 @@ def get_ws_ids(classname):
     if classname is None:
         return None
     else:
-        logger.info(f"get list of id's of subclass {classname} ...")
+        logger.debug(f"get list of id's of subclass {classname} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
         cursor = connection.cursor()
@@ -1036,13 +1036,13 @@ def get_ws_ids(classname):
 
             # 15.11.2024 - does not get all records, but only n-1
             for row in records:
-                logger.debug(f" row[0] = {row[0]}")
+                # logger.debug(f" row[0] = {row[0]}")
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
                     ws_ids.append(strrow)
                     # logger.debug(f" building up '{ws_wn_ids}' ...")
-
+        logger.debug(f" ws_ids: '{ws_ids}' ...")
     return ws_ids
 
 
@@ -1074,7 +1074,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
 
         logger.debug(f"selection_text = {selection_text} ...")
 
-        ws_ids = []
+        ws_selected_ww_networkelements_ids = []
 
         # select all obj_id of the wastewater_nodes of wwtp_structure
         cursor.execute(
@@ -1085,7 +1085,7 @@ def get_ws_selected_ww_networkelements(selected_wwn):
         # ws_wn_ids_count = int(cursor.fetchone()[0])
         # if ws_wn_ids_count == 0:
         if cursor.fetchone() is None:
-            ws_ids = None
+            ws_selected_ww_networkelements_ids = None
         else:
             records = cursor.fetchall()
             for row in records:
@@ -1093,10 +1093,10 @@ def get_ws_selected_ww_networkelements(selected_wwn):
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
-                    ws_ids.append(strrow)
-                    # logger.debug(f" building up '{ws_wn_ids}' ...")
-
-    return ws_ids
+                    ws_selected_ww_networkelements_ids.append(strrow)
+                    # logger.debug(f" building up '{ws_selected_ww_networkelements_ids}' ...")
+        logger.debug(f" ws_selected_ww_networkelements_ids: '{ws_selected_ww_networkelements_ids}' ...")
+    return ws_selected_ww_networkelements_ids
 
 
 # 10.1.2024
@@ -1108,7 +1108,7 @@ def filter_reaches(selected_ids):
     if selected_ids is None:
         return None
     else:
-        logger.info(f"Filter out reaches from selected_ids {selected_ids} ...")
+        logger.debug(f"Filter out reaches from selected_ids {selected_ids} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
         cursor = connection.cursor()
@@ -1134,7 +1134,7 @@ def filter_reaches(selected_ids):
 
             # 15.11.2024 - does not get all records, but only n-1
             for row in records:
-                logger.debug(f" row[0] = {row[0]}")
+                # logger.debug(f" row[0] = {row[0]}")
                 # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
                 strrow = str(row[0])
                 if strrow is not None:
@@ -1149,7 +1149,7 @@ def filter_reaches(selected_ids):
                     )
                 else:
                     logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
-        logger.info(f"'subset_reaches_ids: {subset_reaches_ids}'")
+        logger.debug(f"'subset_reaches_ids: {subset_reaches_ids}'")
     return subset_reaches_ids
 
 
