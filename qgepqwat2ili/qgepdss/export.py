@@ -1888,9 +1888,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         "Exporting QGEP.mechanical_pretreatment -> ABWASSER.mechanischevorreinigung, ABWASSER.metaattribute"
     )
     query = qgep_session.query(qgep_model.mechanical_pretreatment)
+    # specify relation key - only directly to wastewater_structure
     if filtered:
         query = query.join(
-            qgep_model.wastewater_structure, qgep_model.wastewater_networkelement
+            qgep_model.wastewater_structure, qgep_model.wastewater_node.obj_id
+                == qgep_model.mechanical_pretreatment.fk_wastewater_structure).join(qgep_model.wastewater_networkelement)
         ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
     for row in query:
 
