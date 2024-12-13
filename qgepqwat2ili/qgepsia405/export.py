@@ -58,124 +58,76 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     subset_wws_ids = []
 
     if filtered:
-        flag_approach_urs = True
-        if flag_approach_urs:
-            # 2. Get all connected from wastewater_nodes of selected reaches
-            connected_from_wn_ids = get_connected_we_from_re(subset_ids)
-            # 3. Get all connected to wastewater_nodes of selected reaches
-            connected_to_wn_ids = get_connected_we_to_re(subset_ids)
-            # 4. Get all connected wastewater_nodes from overflows.fk_overflow_to
-            connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(subset_ids)
-            # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
-            adapted_subset_ids = []
-            adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
-            adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
-            adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
-            # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
-            subset_ids_reaches = filter_reaches(subset_ids)
-            adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
-            if adapted_subset_ids_reaches is None:
-                extra_reaches_ids = []
-                if not adapted_subset_ids_reaches:
+        # 2. Get all connected from wastewater_nodes of selected reaches
+        connected_from_wn_ids = get_connected_we_from_re(subset_ids)
+        # 3. Get all connected to wastewater_nodes of selected reaches
+        connected_to_wn_ids = get_connected_we_to_re(subset_ids)
+        # 4. Get all connected wastewater_nodes from overflows.fk_overflow_to
+        connected_overflow_to_wn_ids = get_connected_overflow_to_wn_ids(subset_ids)
+        # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
+        adapted_subset_ids = []
+        adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
+        adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
+        adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
+        # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        subset_ids_reaches = filter_reaches(subset_ids)
+        adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
+        if adapted_subset_ids_reaches is None:
+            extra_reaches_ids = []
+            if not adapted_subset_ids_reaches:
+                logger.debug(
+                    "no adapted_subset_ids_reaches - so nothing to remove",
+                )
+            else:
+                logger.debug(
+                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                )
+                # https://www.geeksforgeeks.org/python-difference-two-lists/
+                # First convert lists to sets
+                # https://www.w3schools.com/python/ref_set_difference.asp
+                # x = {"apple", "banana", "cherry"}
+                # y = {"google", "microsoft", "apple"}
+                # z = x.difference(y)
+                # replaced with code that first converts to sets
+                # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
+                # Convert lists to sets and use the difference method
+                # c = list(set(a) - set(b))
+                extra_reaches_ids = list(
+                    set(subset_ids_reaches) - set(adapted_subset_ids_reaches)
+                )
+            # 7. If extra_reaches then remove from adapted_subset_ids
+            if extra_reaches_ids is None:
+                if not extra_reaches_ids:
+                    # list is empty - no need for adaption
                     logger.debug(
-                        "no adapted_subset_ids_reaches - so nothing to remove",
+                        "no extra reaches - so nothing to remove from adapted_subset_ids",
                     )
                 else:
                     logger.debug(
-                        "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                        f"extra_reaches_ids: {extra_reaches_ids} found!",
                     )
-                    # https://www.geeksforgeeks.org/python-difference-two-lists/
-                    # First convert lists to sets
-                    # https://www.w3schools.com/python/ref_set_difference.asp
-                    # x = {"apple", "banana", "cherry"}
-                    # y = {"google", "microsoft", "apple"}
-                    # z = x.difference(y)
-                    # replaced with code that first converts to sets
-                    # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
-                    # Convert lists to sets and use the difference method
-                    # c = list(set(a) - set(b))
-                    extra_reaches_ids = list(
-                        set(subset_ids_reaches) - set(adapted_subset_ids_reaches)
+                    # if len(extra_reaches_ids) > 0:
+                    adapted_subset_ids = remove_from_selection(
+                        adapted_subset_ids, extra_reaches_ids
                     )
-                # 7. If extra_reaches then remove from adapted_subset_ids
-                if extra_reaches_ids is None:
-                    if not extra_reaches_ids:
-                        # list is empty - no need for adaption
-                        logger.debug(
-                            "no extra reaches - so nothing to remove from adapted_subset_ids",
-                        )
-                    else:
-                        logger.debug(
-                            f"extra_reaches_ids: {extra_reaches_ids} found!",
-                        )
-                        # if len(extra_reaches_ids) > 0:
-                        adapted_subset_ids = remove_from_selection(
-                            adapted_subset_ids, extra_reaches_ids
-                        )
-            # 8. get all id's of connected wastewater_structures
-            subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
-            logger.info(
-                f"subset_wws_ids: {subset_wws_ids}",
-            )
-            # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
-            ws_off_sia405abwasser_list = None
-            ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
+        # 8. get all id's of connected wastewater_structures
+        subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
+        logger.info(
+            f"subset_wws_ids: {subset_wws_ids}",
+        )
+        # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+        ws_off_sia405abwasser_list = None
+        ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
-            # 10. Show ws_off_sia405abwasser_list
-            logger.info(
-                f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
-            )
-            # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
-            subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
-            logger.info(
-                f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
-            )
-        else:  # flag_approach_urs = False
-            # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
-            ws_off_sia405abwasser_list = None
-            ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
-
-            # 3. Show ws_off_sia405abwasser_list
-            logger.debug(
-                f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
-            )
-
-            # 4. check if filtered
-            if filtered:
-                if ws_off_sia405abwasser_list:
-                    # take out ws_off_sia405abwasser_list from selection
-                    subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
-                # else do nothing
-            else:
-                if ws_off_sia405abwasser_list:
-                    # add all data of wastewater_structures to selection
-                    subset_ids = add_to_selection(
-                        subset_ids, get_ws_wn_ids("wastewater_structure")
-                    )
-                    logger.debug(
-                        f"subset_ids of all wws : {subset_ids}",
-                    )
-                    # take out ws_off_sia405abwasser_list from selection
-                    subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
-                    logger.debug(
-                        f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
-                    )
-                    # add reach_ids
-                    # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
-                    # treat export as with a selection
-                    filtered = True
-
-                # else do nothing
-
-            # 5. get and add all id's of connected wastewater_structures (not only of wastewater_network_element (reach, wwn)
-            subset_wws_ids = get_ws_selected_ww_networkelements(subset_ids)
-            logger.debug(
-                f"subset_wws_ids: {subset_wws_ids}",
-            )
-            subset_ids = add_to_selection(subset_ids, subset_wws_ids)
-            logger.debug(
-                f"subset_ids with wws : {subset_ids}",
-            )
+        # 10. Show ws_off_sia405abwasser_list
+        logger.info(
+            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        )
+        # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
+        subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
+        logger.info(
+            f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+        )
 
     # also if not filtered we have to take out references to wwtp_structures
     else:
