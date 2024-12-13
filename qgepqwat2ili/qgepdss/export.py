@@ -2349,9 +2349,17 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.hazard_source -> ABWASSER.gefahrenquelle, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.hazard_source)
     if filtered:
-        query = query.join(
-            qgep_model.connection_object, qgep_model.wastewater_networkelement
-        ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        query = (
+            query.join(
+                qgep_model.connection_object,
+                qgep_model.hazard_source.fk_connection_object == qgep_model.connection_object.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hazard_source
