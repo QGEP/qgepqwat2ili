@@ -185,7 +185,7 @@ class QgepExportUtils:
         Returns common attributes for wastewater_structure
         """
         # logger.warning(
-            # "Mapping of wastewater_structure->abwasserbauwerk is not yet implemented for 3D extensions of SIA405 Abwasser, VSA-KEK and VSA-DSS 2015."
+        # "Mapping of wastewater_structure->abwasserbauwerk is not yet implemented for 3D extensions of SIA405 Abwasser, VSA-KEK and VSA-DSS 2015."
         # )
         return {
             # --- abwasserbauwerk ---
@@ -1095,7 +1095,9 @@ def get_ws_selected_ww_networkelements(selected_wwn):
                 if strrow is not None:
                     ws_selected_ww_networkelements_ids.append(strrow)
                     # logger.debug(f" building up '{ws_selected_ww_networkelements_ids}' ...")
-        logger.debug(f" ws_selected_ww_networkelements_ids: '{ws_selected_ww_networkelements_ids}' ...")
+        logger.debug(
+            f" ws_selected_ww_networkelements_ids: '{ws_selected_ww_networkelements_ids}' ..."
+        )
     return ws_selected_ww_networkelements_ids
 
 
