@@ -127,12 +127,12 @@ class QgepExportUtils:
                 return self.tid_maker.tid_for_row(relation)
             else:
                 # take out - as it has to work also without filtered (SIA405 Abwasser)
-                #if self.filtered:
+                # if self.filtered:
                 logger.warning(
                     f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
                 )
                 return None
-                #else:
+                # else:
                 #    return self.tid_maker.tid_for_row(relation)
 
     def create_metaattributes(self, row):
