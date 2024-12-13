@@ -20,9 +20,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     Args:
         selection:      if provided, limits the export to networkelements that are provided in the selection
     """
-    logger.warning(
-        f"Starting qgep_export_sia405: selection={selection}, labels_file={labels_file}, orientation={orientation}, basket_enabled={basket_enabled}",
-    )
 
     qgep_model = get_qgep_model()
     abwasser_model = get_abwasser_model()
