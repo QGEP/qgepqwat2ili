@@ -2753,7 +2753,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             .join(
                 qgep_model.river,
                 # Fehler im Datenmodell fk_watercourse should be name fk_surface_water_bodies (resp. fk_surface_water_body - class should be renamed to single)
-                qgep_model.water_course_segment.fk_watercourse == QGEP.river.obj_id,
+                qgep_model.water_course_segment.fk_watercourse == qgep_model.river.obj_id,
             )
             .join(
                 qgep_model.sector_water_body,
