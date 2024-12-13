@@ -126,13 +126,14 @@ class QgepExportUtils:
                 )
                 return self.tid_maker.tid_for_row(relation)
             else:
-                if self.filtered:
-                    logger.warning(
-                        f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
-                    )
-                    return None
-                else:
-                    return self.tid_maker.tid_for_row(relation)
+                # take out - as it has to work also without filtered (SIA405 Abwasser)
+                #if self.filtered:
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
+                )
+                return None
+                #else:
+                #    return self.tid_maker.tid_for_row(relation)
 
     def create_metaattributes(self, row):
         metaattribute = self.abwasser_model.metaattribute(
