@@ -2445,12 +2445,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.substance -> ABWASSER.stoff, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.substance)
     if filtered:
-        query = query.join(
-            qgep_model.hazard_source,
-            qgep_model.connection_object,
-            qgep_model.wastewater_networkelement,
+
+        query = (
+            query.join(qgep_model.hazard_source)
+            .join(
+                qgep_model.connection_object,
+                qgep_model.hazard_source.fk_connection_object == qgep_model.connection_object.obj_id,
+            )
+            .join(qgep_model.wastewater_networkelement)
         ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
-    for row in query:
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
 
         # AVAILABLE FIELDS IN QGEP.substance
 
