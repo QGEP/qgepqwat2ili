@@ -1854,10 +1854,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         "Exporting QGEP.hydr_geom_relation -> ABWASSER.hydr_geomrelation, ABWASSER.metaattribute"
     )
     query = qgep_session.query(qgep_model.hydr_geom_relation)
-    if filtered:
-        query = query.join(qgep_model.hydr_geometry, qgep_model.wastewater_node).filter(
-            qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
-        )
+    # always export all hydr_geom_relation
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.hydr_geom_relation
