@@ -868,6 +868,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
     logger.info("Exporting QGEP.private -> ABWASSER.privat, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.private)
+    # always export all private
     for row in query:
         # AVAILABLE FIELDS IN QGEP.private
 
