@@ -918,7 +918,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
-        for row in query:
+    for row in query:
         # AVAILABLE FIELDS IN QGEP.discharge_point
 
         # --- wastewater_structure ---
@@ -3103,7 +3103,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             query.join(
                 qgep_model.wastewater_node, qgep_model.wastewater_node.obj_id == qgep_model.throttle_shut_off_unit.fk_wastewater_node,
             )
-            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids)
+            .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         )
         # add sql statement to logger
         statement = query.statement
