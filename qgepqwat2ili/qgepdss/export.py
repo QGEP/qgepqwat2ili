@@ -2452,7 +2452,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             query.join(qgep_model.hazard_source)
             .join(
                 qgep_model.connection_object,
-                qgep_model.hazard_source.fk_connection_object == qgep_model.connection_object.obj_id,
+                qgep_model.hazard_source.fk_connection_object
+                == qgep_model.connection_object.obj_id,
             )
             .join(qgep_model.wastewater_networkelement)
         ).filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
