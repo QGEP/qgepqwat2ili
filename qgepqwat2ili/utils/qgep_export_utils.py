@@ -148,6 +148,7 @@ class QgepExportUtils:
             t_seq=0,
         )
 
+        print(f"Create_metattributes, basket={self.current_basket}, row={row}")
         if self.current_basket is not None:
             metaattribute.t_basket = self.current_basket.t_id
 
@@ -165,6 +166,7 @@ class QgepExportUtils:
             "t_id": self.get_tid(row),
         }
 
+        print(f"base_common, basket={self.current_basket}, type_name={type_name} row={row}")
         if self.current_basket is not None:
             base["t_basket"] = self.current_basket.t_id
 

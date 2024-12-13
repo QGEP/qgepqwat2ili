@@ -288,7 +288,7 @@ def main(args):
                     ILI_MODEL,
                     make_log_path(log_path, "ilicreate"),
                     recreate_schema=args.recreate_schema,
-                    create_basket_col=False,
+                    create_basket_col=True,
                 )
                 utils.ili2db.import_xtf_data(
                     SCHEMA, args.path, make_log_path(log_path, "iliimport")
