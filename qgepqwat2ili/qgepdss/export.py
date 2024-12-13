@@ -64,8 +64,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
     subset_wws_ids = []
 
-    flag_approach_urs = True
-    if flag_approach_urs:
+    if filtered:
         # 2. Get all connected from wastewater_nodes of selected reaches
         connected_from_wn_ids = get_connected_we_from_re(subset_ids)
         # 3. Get all connected to wastewater_nodes of selected reaches
@@ -100,7 +99,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 # extra_reaches_ids = subset_ids_reaches.difference(adapted_subset_ids_reaches)
                 # Convert lists to sets and use the difference method
                 # c = list(set(a) - set(b))
-                extra_reaches_ids = list(set(subset_ids_reaches) - set(adapted_subset_ids_reaches))
+                extra_reaches_ids = list(
+                    set(subset_ids_reaches) - set(adapted_subset_ids_reaches)
+                )
             # 7. If extra_reaches then remove from adapted_subset_ids
             if extra_reaches_ids is None:
                 if not extra_reaches_ids:
@@ -127,13 +128,36 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
-        # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+            # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-        # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+            # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         # )
+
+    # also if not filtered we have to take out references to wwtp_structures
+    else:
+        # 20. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+        # ws_off_sia405abwasser_list = None
+        # ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
+
+        # 21. Show ws_off_sia405abwasser_list
+        # logger.info(
+            # f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
+        # )
+
+        # 22. Get list of all wastewater_structures
+        # subset_wws_ids = get_ws_ids("wastewater_structure")
+        # logger.info(
+            # f"subset_wws_ids (non filtered) : {subset_wws_ids}",
+        # )
+        # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
+        # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
+        # logger.info(
+            # f"subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
+        # )
+        logger.debug("Handling of wwtp_structures not needed with VSA-DSS")
 
     # Orientation
     oriented = orientation is not None
