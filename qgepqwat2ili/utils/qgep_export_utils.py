@@ -431,10 +431,9 @@ class QgepExportUtils:
     def export_pipe_profile(self):
         query = self.qgep_session.query(self.qgep_model.pipe_profile)
         # always export all pipe_profile
-        if filtered:
-            # add sql statement to logger
-            statement = query.statement
-            logger.info(f" always export all pipe_profile datasets query = {statement}")
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all pipe_profile datasets query = {statement}")
         for row in query:
 
             # AVAILABLE FIELDS IN QGEP.pipe_profile
