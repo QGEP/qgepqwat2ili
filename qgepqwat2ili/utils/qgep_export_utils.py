@@ -231,7 +231,10 @@ class QgepExportUtils:
         Returns common attributes for structure_part
         """
         return {
-            "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            # "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": self.check_fk_in_subsetid(
+                self.subset_wws_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
             "bezeichnung": self.null_to_emptystr(row.identifier),
             "instandstellung": self.get_vl(row.renovation_demand__REL),
