@@ -2182,23 +2182,20 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.electric_equipment)
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
+        # )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
         # )
         # filtering only on wastewater_structures that are in subset_wws_ids
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -2241,22 +2238,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.electromechanical_equipment)
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
         # )
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3448,22 +3442,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
         # )
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3508,22 +3499,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.solids_retention)
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
         # )
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3566,22 +3554,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.tank_cleaning)
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
         # )
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3625,22 +3610,19 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     # side fk_throttle_shut_off_unit and fk_overflow not considered in filter query - they are usually added only for log_cards and then the corresponding nodes exist anyway thru the direct relation.
     if filtered:
         # query = (
-            # query.join(
-                # qgep_model.wastewater_structure,
-                # qgep_model.structure_part.fk_wastewater_structure
-                # == qgep_model.wastewater_structure.obj_id,
-            # )
-            # .join(qgep_model.wastewater_networkelement)
-            # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # query.join(
+        # qgep_model.wastewater_structure,
+        # qgep_model.structure_part.fk_wastewater_structure
+        # == qgep_model.wastewater_structure.obj_id,
         # )
-        query = (
-            query.join(
-                qgep_model.wastewater_structure,
-                qgep_model.structure_part.fk_wastewater_structure
-                == qgep_model.wastewater_structure.obj_id,
-            )
-                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
-        )
+        # .join(qgep_model.wastewater_networkelement)
+        # .filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # )
+        query = query.join(
+            qgep_model.wastewater_structure,
+            qgep_model.structure_part.fk_wastewater_structure
+            == qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
