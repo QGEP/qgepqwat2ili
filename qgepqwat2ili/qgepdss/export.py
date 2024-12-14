@@ -2180,7 +2180,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         "Exporting QGEP.electric_equipment -> ABWASSER.elektrischeeinrichtung, ABWASSER.metaattribute"
     )
     query = qgep_session.query(qgep_model.electric_equipment)
-    # if filtered:
+    if filtered:
         # query = (
             # query.join(
                 # qgep_model.wastewater_structure,
