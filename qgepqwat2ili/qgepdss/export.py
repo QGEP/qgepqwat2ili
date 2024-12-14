@@ -338,6 +338,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.aquifier -> ABWASSER.grundwasserleiter, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.aquifier)
     # always export all aquifier
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all aquifier datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.aquifier
@@ -374,6 +378,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.river -> ABWASSER.fliessgewaesser, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.river)
     # always export all river
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all river datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.river
 
@@ -408,6 +416,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.lake -> ABWASSER.see, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.lake)
     # always export all lake
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all lake datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.lake
 
@@ -444,6 +456,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.water_course_segment)
     # always export all water_course_segment
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all water_course_segment datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.water_course_segment
@@ -495,6 +511,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.water_catchment -> ABWASSER.wasserfassung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.water_catchment)
     # always export all water_catchment
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all water_catchment datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.water_catchment
@@ -530,6 +550,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
     logger.info("Exporting QGEP.river_bank -> ABWASSER.ufer, ABWASSER.metaattribute")
     # always export all river_bank
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all river_bank datasets query = {statement}")
     query = qgep_session.query(qgep_model.river_bank)
     for row in query:
 
@@ -571,6 +595,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.river_bed -> ABWASSER.gewaessersohle, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.river_bed)
     # always export all river_bed
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all river_bed datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.river_bed
@@ -610,6 +638,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.sector_water_body)
     # always export all sector_water_body
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all sector_water_body datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.sector_water_body
@@ -651,6 +683,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.administrative_office -> ABWASSER.amt, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.administrative_office)
     # always export all administrative_office
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all administrative_office datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.administrative_office
 
@@ -686,6 +722,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.cooperative)
     # always export all cooperative
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all cooperative datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.cooperative
 
@@ -719,6 +759,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.canton -> ABWASSER.kanton, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.canton)
     # always export all canton
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all canton datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.canton
 
@@ -755,6 +799,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.waste_water_association)
     # always export all waste_water_association
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all waste_water_association datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.waste_water_association
 
@@ -788,6 +836,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.municipality -> ABWASSER.gemeinde, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.municipality)
     # always export all municipality
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all municipality datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.municipality
 
@@ -829,6 +881,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.waste_water_treatment_plant)
     # always export all waste_water_treatment_plant
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all waste_water_treatment_plant datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.waste_water_treatment_plant
 
@@ -872,6 +928,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.private -> ABWASSER.privat, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.private)
     # always export all private
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all private datasets query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.private
 
@@ -1841,6 +1901,10 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     )
     query = qgep_session.query(qgep_model.profile_geometry)
     # always export all profile_geometry
+    if filtered:
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all profile_geometry datasets query = {statement}")
     for row in query:
 
         # AVAILABLE FIELDS IN QGEP.profile_geometry
