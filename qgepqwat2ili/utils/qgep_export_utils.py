@@ -690,11 +690,17 @@ class QgepExportUtils:
 
     def export_cover(self):
         query = self.qgep_session.query(self.qgep_model.cover)
+        # if self.filtered:
+            # query = (
+                # query.join(self.qgep_model.wastewater_structure)
+                # .join(self.qgep_model.wastewater_networkelement)
+                # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
             query = (
                 query.join(self.qgep_model.wastewater_structure)
-                .join(self.qgep_model.wastewater_networkelement)
-                .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+                .filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
             )
         for row in query:
             # AVAILABLE FIELDS IN QGEP.cover
