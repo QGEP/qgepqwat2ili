@@ -2195,7 +2195,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -2250,7 +2250,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3454,7 +3454,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3511,7 +3511,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3566,7 +3566,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -3622,7 +3622,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             qgep_model.wastewater_structure,
             qgep_model.structure_part.fk_wastewater_structure
             == qgep_model.wastewater_structure.obj_id,
-        ).filter(qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        ).filter(qgep_model.wastewater_structure.obj_id.in_(subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
