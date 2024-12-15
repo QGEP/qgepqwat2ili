@@ -43,6 +43,3 @@ jobs:
             PGDATABASE: qgep_prod
             PGUSER: postgres
             PGPASS: postgres
-
-      - if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
