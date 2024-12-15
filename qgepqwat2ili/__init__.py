@@ -198,7 +198,7 @@ def main(args):
             SCHEMA = config.ABWASSER_SCHEMA
             ILI_MODEL = config.ABWASSER_ILI_MODEL
             ILI_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
-            ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL
+            ILI_EXPORT_MODEL_NAME = config.ABWASSER_ILI_MODEL_NAME
 
         if args.direction == "export":
             basket_enabled = True
