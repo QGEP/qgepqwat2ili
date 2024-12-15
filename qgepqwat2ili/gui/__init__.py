@@ -706,7 +706,7 @@ def action_export(plugin):
         # 12.7.2022 to do dependant on Model Selection
         if emodel == "VSA_KEK_2019_LV95":
             for model_name, export_model_name, progress in [
-                (config.ABWASSER_ILI_MODEL_NAME, None, 50),
+                (config.ABWASSER_ILI_MODEL_NAME, config.ABWASSER_ILI_MODEL_NAME, 50),
                 (config.ABWASSER_ILI_MODEL_NAME_SIA405, config.ABWASSER_ILI_MODEL_NAME_SIA405, 70),
             ]:
 
