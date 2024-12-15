@@ -182,6 +182,11 @@ class TestQGEPUseCases(unittest.TestCase):
         # Perform various checks
         logger.warning("Perform various checks VSA_KEK_2019_LV95 ...")
 
+        logger.warning("Exported file content:")
+        with open(path) as exported_file:
+            for line in exported_file:
+                logger.warning(line)
+
         root = ET.parse(path)
 
         self.assertEqual(
