@@ -716,8 +716,8 @@ class QgepExportUtils:
         query = self.qgep_session.query(self.qgep_model.access_aid)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(self.qgep_model.wastewater_structure).filter(
-                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
-            )
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
         for row in query:
             # AVAILABLE FIELDS IN QGEP.access_aid
 
@@ -887,8 +887,8 @@ class QgepExportUtils:
         query = self.qgep_session.query(self.qgep_model.cover)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(self.qgep_model.wastewater_structure).filter(
-                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
-            )
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
         for row in query:
             # AVAILABLE FIELDS IN QGEP.cover
 
@@ -928,7 +928,6 @@ class QgepExportUtils:
             print(".", end="")
         logger.info("done")
         self.abwasser_session.flush()
-
 
     def export_benching(self):
         query = self.qgep_session.query(self.qgep_model.benching)
@@ -978,8 +977,8 @@ class QgepExportUtils:
         query = self.qgep_session.query(self.qgep_model.benching)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(self.qgep_model.wastewater_structure).filter(
-                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
-            )
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
         for row in query:
             # AVAILABLE FIELDS IN QGEP.benching
 
@@ -1010,6 +1009,7 @@ class QgepExportUtils:
             print(".", end="")
         logger.info("done")
         self.abwasser_session.flush()
+
 
 # end class QgepExportUtils
 
