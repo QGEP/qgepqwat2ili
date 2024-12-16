@@ -175,6 +175,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         filtered=filtered,
         subset_ids=subset_ids,
         subset_wws_ids=subset_wws_ids,
+        ws_off_sia405abwasser=ws_off_sia405abwasser,
     )
 
     def organisation_common(row):
