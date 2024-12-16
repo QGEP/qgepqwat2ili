@@ -349,7 +349,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         )
         qgep_export_utils.export_dryweather_downspout_ws_off_sia405abwasser()
 
-        logger.info("Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_access_aid_ws_off_sia405abwasser()
 
         logger.info(
@@ -357,10 +359,14 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         )
         qgep_export_utils.export_dryweather_flume_ws_off_sia405abwasser()
 
-        logger.info("Exporting QGEP.cover (ws_off_sia405abwasser) (  -> ABWASSER.deckel, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.cover (ws_off_sia405abwasser) (  -> ABWASSER.deckel, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_coverws_off_sia405abwasser()
 
-        logger.info("Exporting QGEP.benching (ws_off_sia405abwasser) -> ABWASSER.bankett, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.benching (ws_off_sia405abwasser) -> ABWASSER.bankett, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_benchingws_off_sia405abwasser()
 
     else:
