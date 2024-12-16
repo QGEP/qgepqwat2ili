@@ -712,6 +712,43 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    def export_access_aid_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.access_aid)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.access_aid
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- access_aid ---
+            # kind, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+            einstiegshilfe = self.abwasser_model.einstiegshilfe(
+                # FIELDS TO MAP TO ABWASSER.einstiegshilfe
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "einstiegshilfe"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- einstiegshilfe ---
+                art=self.get_vl(row.kind__REL),
+            )
+            self.abwasser_session.add(einstiegshilfe)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
     def export_dryweather_flume(self):
         query = self.qgep_session.query(self.qgep_model.dryweather_flume)
         # if self.filtered:
@@ -846,6 +883,53 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    def export_cover_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.cover)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.cover
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- cover ---
+            # brand, cover_shape, diameter, fastening, level, material, obj_id, positional_accuracy, situation_geometry, sludge_bucket, venting
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id, wastewater_structure__BWREL_fk_main_cover
+
+            # --- _rel_ ---
+            # cover_shape__REL, fastening__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, positional_accuracy__REL, renovation_demand__REL, sludge_bucket__REL, venting__REL
+
+            deckel = self.abwasser_model.deckel(
+                # FIELDS TO MAP TO ABWASSER.deckel
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "deckel"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- deckel ---
+                deckelform=self.get_vl(row.cover_shape__REL),
+                durchmesser=row.diameter,
+                entlueftung=self.get_vl(row.venting__REL),
+                fabrikat=row.brand,
+                kote=row.level,
+                lage=ST_Force2D(row.situation_geometry),
+                lagegenauigkeit=self.get_vl(row.positional_accuracy__REL),
+                material=self.get_vl(row.material__REL),
+                schlammeimer=self.get_vl(row.sludge_bucket__REL),
+                verschluss=self.get_vl(row.fastening__REL),
+            )
+            self.abwasser_session.add(deckel)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+
     def export_benching(self):
         query = self.qgep_session.query(self.qgep_model.benching)
         # if self.filtered:
@@ -890,6 +974,42 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    def export_benching_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.benching)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.benching
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- benching ---
+            # kind, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+            bankett = self.abwasser_model.bankett(
+                # FIELDS TO MAP TO ABWASSER.bankett
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "bankett"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- bankett ---
+                art=self.get_vl(row.kind__REL),
+            )
+            self.abwasser_session.add(bankett)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
 
 # end class QgepExportUtils
 
