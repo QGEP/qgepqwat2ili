@@ -1395,8 +1395,10 @@ def remove_from_selection(selected_ids, remove_ids):
     Remove ids from selected_ids if they are in selected_ids
     """
 
-    if remove_ids is None:
+    if selected_ids is None:
         return None
+    if remove_ids is None:
+        return selected_ids
     else:
         for list_item in remove_ids:
             # selected_ids = selected_ids.remove(list_item)
@@ -1414,8 +1416,10 @@ def add_to_selection(selected_ids, add_ids):
     """
     Append ids to selected_ids
     """
-    if add_ids is None:
+    if selected_ids is None:
         return None
+    if add_ids is None:
+        return selected_ids
     else:
         if selected_ids is None:
             selected_ids = []

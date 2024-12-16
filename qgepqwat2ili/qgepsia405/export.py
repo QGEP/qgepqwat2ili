@@ -80,9 +80,10 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
             f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
         )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        subset_ids_reaches = []
         subset_ids_reaches = filter_reaches(subset_ids)
         logger.debug(
-            f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+            f"6. subset_ids_reaches: {subset_ids_reaches}",
         )
         adapted_subset_ids_reaches = []
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
