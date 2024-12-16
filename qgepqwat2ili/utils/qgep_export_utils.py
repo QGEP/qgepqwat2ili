@@ -239,6 +239,19 @@ class QgepExportUtils:
             "instandstellung": self.get_vl(row.renovation_demand__REL),
         }
 
+    def structure_part_common_check_fk_in_subset(self, row):
+        """
+        Returns common attributes for structure_part
+        """
+        return {
+            "abwasserbauwerkref": self.check_fk_in_subsetid(
+                self.subset_wws_ids, row.fk_wastewater_structure__REL
+            ),
+            "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
+            "bezeichnung": self.null_to_emptystr(row.identifier),
+            "instandstellung": self.get_vl(row.renovation_demand__REL),
+        }
+
     def textpos_common(self, row, t_type, geojson_crs_def):
         """
         Returns common attributes for textpos
@@ -617,6 +630,44 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    def export_dryweather_downspout_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.dryweather_downspout)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.dryweather_downspout
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- dryweather_downspout ---
+            # diameter, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, renovation_demand__REL
+
+            trockenwetterfallrohr = self.abwasser_model.trockenwetterfallrohr(
+                # FIELDS TO MAP TO ABWASSER.trockenwetterfallrohr
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "trockenwetterfallrohr"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- trockenwetterfallrohr ---
+                durchmesser=row.diameter,
+            )
+            self.abwasser_session.add(trockenwetterfallrohr)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
     def export_access_aid(self):
         query = self.qgep_session.query(self.qgep_model.access_aid)
         # if self.filtered:
@@ -672,6 +723,43 @@ class QgepExportUtils:
         # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
             query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.dryweather_flume
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- dryweather_flume ---
+            # material, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, renovation_demand__REL
+
+            trockenwetterrinne = self.abwasser_model.trockenwetterrinne(
+                # FIELDS TO MAP TO ABWASSER.trockenwetterrinne
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "trockenwetterrinne"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- trockenwetterrinne ---
+                material=self.get_vl(row.material__REL),
+            )
+            self.abwasser_session.add(trockenwetterrinne)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_dryweather_flume_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.dryweather_flume)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
         for row in query:

@@ -342,24 +342,46 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
     qgep_export_utils.export_reach()
 
-    logger.info(
-        "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
-    )
-    qgep_export_utils.export_dryweather_downspout()
+    if ws_off_sia405abwasser:
 
-    logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
-    qgep_export_utils.export_access_aid()
+        logger.info(
+            "Exporting QGEP.dryweather_downspout (ws_off_sia405abwasser) -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_downspout_ws_off_sia405abwasser()
 
-    logger.info(
-        "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
-    )
-    qgep_export_utils.export_dryweather_flume()
+        logger.info("Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
+        qgep_export_utils.export_access_aid_ws_off_sia405abwasser()
 
-    logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
-    qgep_export_utils.export_cover()
+        logger.info(
+            "Exporting QGEP.dryweather_flume (ws_off_sia405abwasser)-> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_flume_ws_off_sia405abwasser()
 
-    logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
-    qgep_export_utils.export_benching()
+        logger.info("Exporting QGEP.cover (ws_off_sia405abwasser) (  -> ABWASSER.deckel, ABWASSER.metaattribute")
+        qgep_export_utils.export_coverws_off_sia405abwasser()
+
+        logger.info("Exporting QGEP.benching (ws_off_sia405abwasser) -> ABWASSER.bankett, ABWASSER.metaattribute")
+        qgep_export_utils.export_benchingws_off_sia405abwasser()
+
+    else:
+        logger.info(
+            "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_downspout()
+
+        logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
+        qgep_export_utils.export_access_aid()
+
+        logger.info(
+            "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_flume()
+
+        logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
+        qgep_export_utils.export_cover()
+
+        logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
+        qgep_export_utils.export_benching()
 
     # Labels
     # Note: these are extracted from the optional labels file (not exported from the QGEP database)
