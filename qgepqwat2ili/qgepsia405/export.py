@@ -84,6 +84,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.debug(
             f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
         )
+        adapted_subset_ids_reaches = []
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
         logger.debug(
             f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
