@@ -178,6 +178,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         filtered=filtered,
         subset_ids=subset_ids,
         subset_wws_ids=subset_wws_ids,
+        ws_off_sia405abwasser=subset_wws_ids,
     )
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
