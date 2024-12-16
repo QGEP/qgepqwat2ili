@@ -80,6 +80,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
+        adapted_subset_ids_reaches = []
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
         if adapted_subset_ids_reaches is None:
             extra_reaches_ids = []
