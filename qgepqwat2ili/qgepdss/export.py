@@ -14,6 +14,7 @@ from ..utils.qgep_export_utils import (
     get_connected_overflow_to_wn_ids,
     get_connected_we_from_re,
     get_connected_we_to_re,
+    get_ws_ids,
     get_ws_selected_ww_networkelements,
     remove_from_selection,
 )

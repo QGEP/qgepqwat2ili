@@ -52,6 +52,8 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
 
         current_basket = basket_utils.basket_topic_sia405_abwasser
 
+    # 0. Initialize ws_off_sia405abwasser
+    ws_off_sia405abwasser = False
     # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
@@ -67,11 +69,28 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
         adapted_subset_ids = []
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
+        logger.debug(
+            f"5 + 2 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
+        logger.debug(
+            f"5 + 2 + 3 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
+        logger.debug(
+            f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
+        )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        subset_ids_reaches = []
         subset_ids_reaches = filter_reaches(subset_ids)
+        logger.debug(
+            f"6. subset_ids_reaches: {subset_ids_reaches}",
+        )
+        adapted_subset_ids_reaches = []
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
+        logger.debug(
+            f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+        )
         if adapted_subset_ids_reaches is None:
             extra_reaches_ids = []
             if not adapted_subset_ids_reaches:
@@ -80,7 +99,7 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
                 )
             else:
                 logger.debug(
-                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                    f"adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
                 )
                 # https://www.geeksforgeeks.org/python-difference-two-lists/
                 # First convert lists to sets
@@ -111,20 +130,25 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
-            f"subset_wws_ids: {subset_wws_ids}",
+            f"8. subset_wws_ids: {subset_wws_ids}",
         )
         # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
         ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        logger.info(
+            f"9. ws_off_sia405abwasser = {ws_off_sia405abwasser}",
+        )
         # 10. Show ws_off_sia405abwasser_list
         logger.info(
-            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+            f"10. ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         logger.info(
-            f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+            f"11. subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         )
 
     # also if not filtered we have to take out references to wwtp_structures
@@ -133,20 +157,25 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         ws_off_sia405abwasser_list = None
         ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        logger.info(
+            f"20. ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
+        )
         # 21. Show ws_off_sia405abwasser_list
         logger.info(
-            f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
+            f"21. ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
         )
 
         # 22. Get list of all wastewater_structures
         subset_wws_ids = get_ws_ids("wastewater_structure")
         logger.info(
-            f"subset_wws_ids (non filtered) : {subset_wws_ids}",
+            f"22. subset_wws_ids (non filtered) : {subset_wws_ids}",
         )
         # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
         subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         logger.info(
-            f"subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
+            f"23. subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
         )
 
     # Orientation
@@ -167,6 +196,7 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         filtered=filtered,
         subset_ids=subset_ids,
         subset_wws_ids=subset_wws_ids,
+        ws_off_sia405abwasser=ws_off_sia405abwasser,
     )
 
     # ADAPTED FROM 052a_sia405_abwasser_2015_2_d_interlisexport2.sql
@@ -292,6 +322,9 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     query = qgep_session.query(qgep_model.wastewater_node)
     if filtered:
         query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.wastewater_node
 
@@ -330,24 +363,50 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
     qgep_export_utils.export_reach()
 
-    logger.info(
-        "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
-    )
-    qgep_export_utils.export_dryweather_downspout()
+    if ws_off_sia405abwasser:
+        logger.info(
+            "Exporting QGEP.dryweather_downspout (ws_off_sia405abwasser) -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_downspout_ws_off_sia405abwasser()
 
-    logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
-    qgep_export_utils.export_access_aid()
+        logger.info(
+            "Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_access_aid_ws_off_sia405abwasser()
+        logger.info(
+            "Exporting QGEP.dryweather_flume (ws_off_sia405abwasser)-> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_flume_ws_off_sia405abwasser()
 
-    logger.info(
-        "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
-    )
-    qgep_export_utils.export_dryweather_flume()
+        logger.info(
+            "Exporting QGEP.cover (ws_off_sia405abwasser) (  -> ABWASSER.deckel, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_cover_ws_off_sia405abwasser()
 
-    logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
-    qgep_export_utils.export_cover()
+        logger.info(
+            "Exporting QGEP.benching (ws_off_sia405abwasser) -> ABWASSER.bankett, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_benching_ws_off_sia405abwasser()
 
-    logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
-    qgep_export_utils.export_benching()
+    else:
+        logger.info(
+            "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_downspout()
+
+        logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
+        qgep_export_utils.export_access_aid()
+
+        logger.info(
+            "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_dryweather_flume()
+
+        logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
+        qgep_export_utils.export_cover()
+
+        logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
+        qgep_export_utils.export_benching()
 
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.examination)
