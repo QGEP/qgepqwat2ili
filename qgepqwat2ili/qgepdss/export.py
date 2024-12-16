@@ -164,8 +164,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # ws_off_sia405abwasser_list = None
         # ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
-        # set flag if there are wwtp_structures
-        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        # set flag if there are wwtp_structures - with dss always false
+        ws_off_sia405abwasser = False
         logger.info(
             f"20. ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
         )
