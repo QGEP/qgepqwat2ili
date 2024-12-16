@@ -51,6 +51,8 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
         current_basket = basket_utils.basket_topic_sia405_abwasser
 
+    # 0. Initialize ws_off_sia405abwasser
+    ws_off_sia405abwasser = False
     # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
@@ -116,6 +118,11 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         ws_off_sia405abwasser_list = None
         ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        logger.info(
+            f"ws_off_sia405abwasser = {ws_off_sia405abwasser}",
+        )
         # 10. Show ws_off_sia405abwasser_list
         logger.info(
             f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
@@ -132,6 +139,11 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         ws_off_sia405abwasser_list = None
         ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        logger.info(
+            f"ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
+        )
         # 21. Show ws_off_sia405abwasser_list
         logger.info(
             f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",

@@ -21,6 +21,7 @@ class QgepExportUtils:
         filtered,
         subset_ids,
         subset_wws_ids,
+        ws_off_sia405abwasser,
     ):
         self.tid_maker = tid_maker
         self.current_basket = current_basket
@@ -32,6 +33,7 @@ class QgepExportUtils:
         self.filtered = filtered
         self.subset_ids = subset_ids
         self.subset_wws_ids = subset_wws_ids
+        self.ws_off_sia405abwasser = ws_off_sia405abwasser
 
     def get_tid(self, relation):
         """
