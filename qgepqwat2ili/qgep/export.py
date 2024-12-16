@@ -255,6 +255,10 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
     qgep_export_utils.export_benching()
 
+    # From here on its about KEK -> change current basket
+    current_basket = basket_utils.basket_topic_kek
+    qgep_export_utils.current_basket = current_basket
+
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.examination)
     if filtered:
