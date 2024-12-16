@@ -146,16 +146,16 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # set flag if there are wwtp_structures
         # ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
         # logger.info(
-            # f"9. ws_off_sia405abwasser = {ws_off_sia405abwasser}",
+        # f"9. ws_off_sia405abwasser = {ws_off_sia405abwasser}",
         # )
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
-            # f"10. ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+        # f"10. ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-            # f"11. subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+        # f"11. subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         # )
 
     # also if not filtered we have to take out references to wwtp_structures
@@ -171,18 +171,18 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         )
         # 21. Show ws_off_sia405abwasser_list
         # logger.info(
-            # f"21. ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
+        # f"21. ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
         # )
 
         # 22. Get list of all wastewater_structures
         # subset_wws_ids = get_ws_ids("wastewater_structure")
         # logger.info(
-            # f"22. subset_wws_ids (non filtered) : {subset_wws_ids}",
+        # f"22. subset_wws_ids (non filtered) : {subset_wws_ids}",
         # )
         # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-            # f"23. subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
+        # f"23. subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
         # )
         logger.debug("Handling of wwtp_structures not needed with VSA-DSS")
 
