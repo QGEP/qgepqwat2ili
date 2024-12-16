@@ -348,7 +348,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         )
         qgep_export_utils.export_dryweather_downspout_ws_off_sia405abwasser()
 
-        logger.info("Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.access_aid (ws_off_sia405abwasser) -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_access_aid_ws_off_sia405abwasser()
         logger.info(
             "Exporting QGEP.dryweather_flume (ws_off_sia405abwasser)-> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"

@@ -634,8 +634,8 @@ class QgepExportUtils:
         query = self.qgep_session.query(self.qgep_model.dryweather_downspout)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(self.qgep_model.wastewater_structure).filter(
-                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
-            )
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
 
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_downspout
@@ -797,8 +797,8 @@ class QgepExportUtils:
         query = self.qgep_session.query(self.qgep_model.dryweather_flume)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(self.qgep_model.wastewater_structure).filter(
-                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
-            )
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_flume
 
