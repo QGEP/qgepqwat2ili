@@ -69,24 +69,24 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         adapted_subset_ids = []
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
         logger.debug(
-            "f 5 + 2 adapted_subset_ids: {adapted_subset_ids}",
+            f"5 + 2 adapted_subset_ids: {adapted_subset_ids}",
         )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
         logger.debug(
-            "f 5 + 2 + 3 adapted_subset_ids: {adapted_subset_ids}",
+            f"5 + 2 + 3 adapted_subset_ids: {adapted_subset_ids}",
         )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
         logger.debug(
-            "f 5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
+            f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
         )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
         logger.debug(
-            "f 6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+            f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
         )
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
         logger.debug(
-            "f 6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+            f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
         )
         if adapted_subset_ids_reaches is None:
             extra_reaches_ids = []
@@ -96,7 +96,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                 )
             else:
                 logger.debug(
-                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                    f"adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
                 )
                 # https://www.geeksforgeeks.org/python-difference-two-lists/
                 # First convert lists to sets
@@ -127,7 +127,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
-            f" 8. subset_wws_ids: {subset_wws_ids}",
+            f"8. subset_wws_ids: {subset_wws_ids}",
         )
         # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
