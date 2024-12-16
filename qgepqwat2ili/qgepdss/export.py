@@ -76,12 +76,28 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
         adapted_subset_ids = []
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
+        logger.debug(
+            f"5 + 2 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
+        logger.debug(
+            f"5 + 2 + 3 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
+        logger.debug(
+            f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
+        )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+        subset_ids_reaches = []
         subset_ids_reaches = filter_reaches(subset_ids)
+        logger.debug(
+            f"6. subset_ids_reaches: {subset_ids_reaches}",
+        )
         adapted_subset_ids_reaches = []
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
+        logger.debug(
+            f"6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+        )
         if adapted_subset_ids_reaches is None:
             extra_reaches_ids = []
             if not adapted_subset_ids_reaches:
@@ -90,7 +106,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 )
             else:
                 logger.debug(
-                    "f adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+                    f"adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
                 )
                 # https://www.geeksforgeeks.org/python-difference-two-lists/
                 # First convert lists to sets
@@ -121,20 +137,25 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
-            f"subset_wws_ids: {subset_wws_ids}",
+            f"8. subset_wws_ids: {subset_wws_ids}",
         )
         # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         # ws_off_sia405abwasser_list = None
         # ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        # ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        # logger.info(
+            # f"9. ws_off_sia405abwasser = {ws_off_sia405abwasser}",
+        # )
         # 10. Show ws_off_sia405abwasser_list
         # logger.info(
-        # f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+            # f"10. ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         # )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-        # f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+            # f"11. subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         # )
 
     # also if not filtered we have to take out references to wwtp_structures
@@ -143,20 +164,25 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # ws_off_sia405abwasser_list = None
         # ws_off_sia405abwasser_list = get_ws_ids("wwtp_structure")
 
+        # set flag if there are wwtp_structures
+        ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
+        logger.info(
+            f"20. ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
+        )
         # 21. Show ws_off_sia405abwasser_list
         # logger.info(
-        # f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
+            # f"21. ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
         # )
 
         # 22. Get list of all wastewater_structures
         # subset_wws_ids = get_ws_ids("wastewater_structure")
         # logger.info(
-        # f"subset_wws_ids (non filtered) : {subset_wws_ids}",
+            # f"22. subset_wws_ids (non filtered) : {subset_wws_ids}",
         # )
         # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
         # subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         # logger.info(
-        # f"subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
+            # f"23. subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
         # )
         logger.debug("Handling of wwtp_structures not needed with VSA-DSS")
 
@@ -1052,6 +1078,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # accessibility__REL, defects__REL, emergency_spillway__REL, financing__REL, fk_aquifier__REL, fk_dataowner__REL, fk_main_cover__REL, fk_main_wastewater_node__REL, fk_operator__REL, fk_owner__REL, fk_provider__REL, kind__REL, labeling__REL, renovation_necessity__REL, rv_construction_type__REL, seepage_utilization__REL, status__REL, structure_condition__REL, vehicle_access__REL, watertightness__REL
 
+        logger.info(
+            "QGEP field infiltration_installation.upper_elevation is part of 3D extension. It will be ignored."
+        )
         versickerungsanlage = abwasser_model.versickerungsanlage(
             # FIELDS TO MAP TO ABWASSER.versickerungsanlage
             # --- baseclass ---

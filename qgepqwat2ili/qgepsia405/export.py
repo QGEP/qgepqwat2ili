@@ -321,6 +321,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     query = qgep_session.query(qgep_model.wastewater_node)
     if filtered:
         query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
     for row in query:
         # AVAILABLE FIELDS IN QGEP.wastewater_node
 
