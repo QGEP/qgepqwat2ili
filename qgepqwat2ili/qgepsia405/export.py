@@ -68,11 +68,26 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 5. Add results from 2., 3. and 4. to subset_ids -> adapted_subset_ids
         adapted_subset_ids = []
         adapted_subset_ids = add_to_selection(subset_ids, connected_from_wn_ids)
+        logger.debug(
+            "f 5 + 2 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_to_wn_ids)
+        logger.debug(
+            "f 5 + 2 + 3 adapted_subset_ids: {adapted_subset_ids}",
+        )
         adapted_subset_ids = add_to_selection(adapted_subset_ids, connected_overflow_to_wn_ids)
+        logger.debug(
+            "f 5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
+        )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
         subset_ids_reaches = filter_reaches(subset_ids)
+        logger.debug(
+            "f 6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+        )
         adapted_subset_ids_reaches = filter_reaches(adapted_subset_ids)
+        logger.debug(
+            "f 6. adapted_subset_ids_reaches: {adapted_subset_ids_reaches}",
+        )
         if adapted_subset_ids_reaches is None:
             extra_reaches_ids = []
             if not adapted_subset_ids_reaches:
@@ -112,7 +127,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # 8. get all id's of connected wastewater_structures
         subset_wws_ids = get_ws_selected_ww_networkelements(adapted_subset_ids)
         logger.info(
-            f"subset_wws_ids: {subset_wws_ids}",
+            f" 8. subset_wws_ids: {subset_wws_ids}",
         )
         # 9. if sia405 export: check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
         ws_off_sia405abwasser_list = None
@@ -121,16 +136,16 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # set flag if there are wwtp_structures
         ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
         logger.info(
-            f"ws_off_sia405abwasser = {ws_off_sia405abwasser}",
+            f"9. ws_off_sia405abwasser = {ws_off_sia405abwasser}",
         )
         # 10. Show ws_off_sia405abwasser_list
         logger.info(
-            f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
+            f"10. ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
         )
         # 11. take out ws_off_sia405abwasser_list from subset_wws_ids
         subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         logger.info(
-            f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
+            f"11. subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_wws_ids}",
         )
 
     # also if not filtered we have to take out references to wwtp_structures
@@ -142,22 +157,22 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         # set flag if there are wwtp_structures
         ws_off_sia405abwasser = ws_off_sia405abwasser_list is not None
         logger.info(
-            f"ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
+            f"20. ws_off_sia405abwasser (non filtered) = {ws_off_sia405abwasser}",
         )
         # 21. Show ws_off_sia405abwasser_list
         logger.info(
-            f"ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
+            f"21. ws_off_sia405abwasser_list (non filtered) : {ws_off_sia405abwasser_list}",
         )
 
         # 22. Get list of all wastewater_structures
         subset_wws_ids = get_ws_ids("wastewater_structure")
         logger.info(
-            f"subset_wws_ids (non filtered) : {subset_wws_ids}",
+            f"22. subset_wws_ids (non filtered) : {subset_wws_ids}",
         )
         # 23. take out ws_off_sia405abwasser_list from subset_wws_ids
         subset_wws_ids = remove_from_selection(subset_wws_ids, ws_off_sia405abwasser_list)
         logger.info(
-            f"subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
+            f"23. subset_ids of all wws minus ws_off_sia405abwasser_list (non filtered): {subset_wws_ids}",
         )
 
     # Orientation
