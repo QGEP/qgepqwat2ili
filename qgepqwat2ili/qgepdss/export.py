@@ -51,6 +51,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
 
         current_basket = basket_utils.basket_topic_sia405_abwasser
 
+    # 0. Initialize ws_off_sia405abwasser
+    ws_off_sia405abwasser = False
     # 1. Filtering - check if selection
     filtered = selection is not None
 
