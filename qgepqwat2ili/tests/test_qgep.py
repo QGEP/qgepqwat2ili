@@ -182,6 +182,11 @@ class TestQGEPUseCases(unittest.TestCase):
         # Perform various checks
         logger.warning("Perform various checks VSA_KEK_2019_LV95 ...")
 
+        logger.warning("Exported file content:")
+        with open(path) as exported_file:
+            for line in exported_file:
+                logger.warning(line)
+
         root = ET.parse(path)
 
         self.assertEqual(
@@ -222,7 +227,8 @@ class TestQGEPUseCases(unittest.TestCase):
         # Prepare db
         main(["setupdb", "full"])
 
-        path = os.path.join(tempfile.mkdtemp(), "export_VSA_KEK_2019_LV95.xtf")
+        path = os.path.join(tempfile.mkdtemp(), "export_selection_SIA405.xtf")
+
         selection = [
             # reach_id
             "ch13p7mzRE001221",
