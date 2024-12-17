@@ -515,17 +515,17 @@ class QgepExportUtils:
                 # FIELDS TO MAP TO ABWASSER.abwasserknoten
                 # --- baseclass ---
                 # --- sia405_baseclass ---
-                **self.qgep_export_utils.base_common(row, "abwasserknoten"),
+                **self.base_common(row, "abwasserknoten"),
                 # --- abwassernetzelement ---
-                **self.qgep_export_utils.wastewater_networkelement_common(row),
+                **self.wastewater_networkelement_common(row),
                 # --- abwasserknoten ---
-                hydr_geometrieref=self.qgep_export_utils.get_tid(row.fk_hydr_geometry__REL),
+                hydr_geometrieref=self.get_tid(row.fk_hydr_geometry__REL),
                 lage=ST_Force2D(row.situation_geometry),
                 rueckstaukote=row.backflow_level,
                 sohlenkote=row.bottom_level,
             )
             self.abwasser_session.add(abwasserknoten)
-            self.qgep_export_utils.create_metaattributes(row)
+            self.create_metaattributes(row)
             print(".", end="")
         logger.info("done")
         self.abwasser_session.flush()
