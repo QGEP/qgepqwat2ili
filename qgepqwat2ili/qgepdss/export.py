@@ -1934,7 +1934,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             print(".", end="")
         logger.info("done")
         abwasser_session.flush()
-        
+
         logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_check_fk_in_subset()
 
