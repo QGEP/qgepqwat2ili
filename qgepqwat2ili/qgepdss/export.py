@@ -2795,29 +2795,57 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
 
-        messstelle = abwasser_model.messstelle(
-            # FIELDS TO MAP TO ABWASSER.messstelle
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "messstelle"),
-            # --- messstelle ---
-            abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
-            abwasserreinigungsanlageref=qgep_export_utils.get_tid(
-                row.fk_waste_water_treatment_plant__REL
-            ),
-            art=row.kind,
-            bemerkung=qgep_export_utils.truncate(
-                qgep_export_utils.emptystr_to_null(row.remark), 80
-            ),
-            betreiberref=qgep_export_utils.get_tid(row.fk_operator__REL),
-            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
-            gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
-            lage=ST_Force2D(row.situation_geometry),
-            # not supported in qgep datamodel yet, reference on same class
-            # referenzstelleref=qgep_export_utils.get_tid(row.fk_reference_station__REL),
-            staukoerper=qgep_export_utils.get_vl(row.damming_device__REL),
-            zweck=qgep_export_utils.get_vl(row.purpose__REL),
-        )
+        if filtered:
+                messstelle = abwasser_model.messstelle(
+                # FIELDS TO MAP TO ABWASSER.messstelle
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "messstelle"),
+                # --- messstelle ---
+                #abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
+                "abwasserbauwerkref": check_fk_in_subsetid  (
+                subset_wws_ids, row.fk_wastewater_structure__REL
+                ),
+                abwasserreinigungsanlageref=qgep_export_utils.get_tid(
+                    row.fk_waste_water_treatment_plant__REL
+                ),
+                art=row.kind,
+                bemerkung=qgep_export_utils.truncate(
+                    qgep_export_utils.emptystr_to_null(row.remark), 80
+                ),
+                betreiberref=qgep_export_utils.get_tid(row.fk_operator__REL),
+                bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+                gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
+                lage=ST_Force2D(row.situation_geometry),
+                # not supported in qgep datamodel yet, reference on same class
+                # referenzstelleref=qgep_export_utils.get_tid(row.fk_reference_station__REL),
+                staukoerper=qgep_export_utils.get_vl(row.damming_device__REL),
+                zweck=qgep_export_utils.get_vl(row.purpose__REL),
+            )
+        else:
+            messstelle = abwasser_model.messstelle(
+                # FIELDS TO MAP TO ABWASSER.messstelle
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "messstelle"),
+                # --- messstelle ---
+                abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
+                abwasserreinigungsanlageref=qgep_export_utils.get_tid(
+                    row.fk_waste_water_treatment_plant__REL
+                ),
+                art=row.kind,
+                bemerkung=qgep_export_utils.truncate(
+                    qgep_export_utils.emptystr_to_null(row.remark), 80
+                ),
+                betreiberref=qgep_export_utils.get_tid(row.fk_operator__REL),
+                bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+                gewaesserabschnittref=qgep_export_utils.get_tid(row.fk_water_course_segment__REL),
+                lage=ST_Force2D(row.situation_geometry),
+                # not supported in qgep datamodel yet, reference on same class
+                # referenzstelleref=qgep_export_utils.get_tid(row.fk_reference_station__REL),
+                staukoerper=qgep_export_utils.get_vl(row.damming_device__REL),
+                zweck=qgep_export_utils.get_vl(row.purpose__REL),
+            )
         abwasser_session.add(messstelle)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
