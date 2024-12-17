@@ -1020,8 +1020,10 @@ class QgepExportUtils:
     def export_dryweather_flume_ws_off_sia405abwasser(self):
         query = self.qgep_session.query(self.qgep_model.dryweather_flume)
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
-        query = query.join(self.qgep_model.wastewater_structure).filter(
-            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        query = (
+            query.join(self.qgep_model.wastewater_structure)
+            .filter(
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         )
         # add sql statement to logger
         statement = query.statement
@@ -1070,6 +1072,9 @@ class QgepExportUtils:
             query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.cover
 
@@ -1116,6 +1121,9 @@ class QgepExportUtils:
         query = query.join(self.qgep_model.wastewater_structure).filter(
             self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.cover
 
@@ -1169,6 +1177,9 @@ class QgepExportUtils:
             query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.benching
 
@@ -1206,6 +1217,9 @@ class QgepExportUtils:
         query = query.join(self.qgep_model.wastewater_structure).filter(
             self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.benching
 
