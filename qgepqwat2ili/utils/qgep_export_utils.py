@@ -491,8 +491,8 @@ class QgepExportUtils:
 
 def export_wastewater_node(self):
     query = self.qgep_session.query(self.qgep_model.wastewater_node)
-    if filtered:
-        query = query.filter(self.qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+    if self.filtered:
+        query = query.filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
         # add sql statement to logger
         statement = query.statement
         logger.debug(f" selection query = {statement}")
@@ -516,9 +516,9 @@ def export_wastewater_node(self):
             # --- sia405_baseclass ---
             **self.qgep_export_utils.base_common(row, "abwasserknoten"),
             # --- abwassernetzelement ---
-            **qgep_export_utils.wastewater_networkelement_common(row),
+            **self.qgep_export_utils.wastewater_networkelement_common(row),
             # --- abwasserknoten ---
-            hydr_geometrieref=qgep_export_utils.get_tid(row.fk_hydr_geometry__REL),
+            hydr_geometrieref=self.qgep_export_utils.get_tid(row.fk_hydr_geometry__REL),
             lage=ST_Force2D(row.situation_geometry),
             rueckstaukote=row.backflow_level,
             sohlenkote=row.bottom_level,
