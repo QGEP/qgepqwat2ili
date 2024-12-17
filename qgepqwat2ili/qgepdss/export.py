@@ -1884,13 +1884,25 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
     qgep_export_utils.export_reach_point()
 
-    logger.info(
-        "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
-    )
-    qgep_export_utils.export_wastewater_node()
+    # with or without check_fk_in_subset
+    if filtered:
+        logger.info(
+            "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_wastewater_node_check_fk_in_subset()
 
-    logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
-    qgep_export_utils.export_reach()
+        logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
+        qgep_export_utils.export_reach_check_fk_in_subset()
+
+    else:
+        logger.info(
+            "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_wastewater_node()
+
+        logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
+        qgep_export_utils.export_reach()
+
 
     logger.info(
         "Exporting QGEP.profile_geometry -> ABWASSER.rohrprofil_geometrie, ABWASSER.metaattribute"
