@@ -1067,7 +1067,7 @@ class QgepExportUtils:
         # )
         # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
-            query = query.join(self.qgep_model.wastewater_structure, cover.fk_wastewater_structure = wastewater_structure.obj_id).filter(
+            query = query.join(self.qgep_model.wastewater_structure, cover.fk_wastewater_structure == wastewater_structure.obj_id).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
         # add sql statement to logger
