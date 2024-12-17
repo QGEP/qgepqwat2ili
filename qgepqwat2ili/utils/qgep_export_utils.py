@@ -216,7 +216,17 @@ class QgepExportUtils:
 
     def wastewater_networkelement_common(self, row):
         """
-        Returns common attributes for wastewater_networkelement
+        Returns common attributes for wastewater_networkelement - no check_fk_in_subsetid
+        """
+        return {
+            "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
+            "bezeichnung": self.null_to_emptystr(row.identifier),
+        }
+
+    def wastewater_networkelement_common_check_fk_in_subset(self, row):
+        """
+        Returns common attributes for wastewater_networkelement with check_fk_in_subsetid
         """
         return {
             # added check_fk_in_subsetid with subset_wws_ids (only needed for SIA405 Abwasser export wwtp_structure - but as now in qgep_export_utils done for all export - might slow donw export
@@ -558,6 +568,64 @@ class QgepExportUtils:
                 **self.base_common(row, "haltung"),
                 # --- abwassernetzelement ---
                 **self.wastewater_networkelement_common(row),
+                # --- haltung ---
+                # NOT MAPPED : elevation_determination
+                innenschutz=self.get_vl(row.inside_coating__REL),
+                laengeeffektiv=row.length_effective,
+                lagebestimmung=self.get_vl(row.horizontal_positioning__REL),
+                lichte_hoehe=row.clear_height,
+                material=self.get_vl(row.material__REL),
+                nachhaltungspunktref=self.get_tid(row.fk_reach_point_to__REL),
+                plangefaelle=row.slope_building_plan,  # TODO : check, does this need conversion ?
+                reibungsbeiwert=row.coefficient_of_friction,
+                reliner_art=self.get_vl(row.relining_kind__REL),
+                reliner_bautechnik=self.get_vl(row.relining_construction__REL),
+                reliner_material=self.get_vl(row.reliner_material__REL),
+                reliner_nennweite=row.reliner_nominal_size,
+                ringsteifigkeit=row.ring_stiffness,
+                rohrprofilref=self.get_tid(row.fk_pipe_profile__REL),
+                verlauf=ST_Force2D(row.progression_geometry),
+                # -- attribute 3D ---
+                # verlauf3d=row.progression3d,
+                vonhaltungspunktref=self.get_tid(row.fk_reach_point_from__REL),
+                wandrauhigkeit=row.wall_roughness,
+            )
+            self.abwasser_session.add(haltung)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_reach_check_fk_in_subset(self):
+        query = self.qgep_session.query(self.qgep_model.reach)
+        if self.filtered:
+            query = query.filter(
+                self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+            )
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.reach
+
+            # --- wastewater_networkelement ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+            # --- reach ---
+            # clear_height, coefficient_of_friction, elevation_determination, fk_pipe_profile, fk_reach_point_from, fk_reach_point_to, horizontal_positioning, inside_coating, length_effective, material, obj_id, progression_geometry, reliner_material, reliner_nominal_size, relining_construction, relining_kind, ring_stiffness, slope_building_plan, wall_roughness
+
+            # --- _bwrel_ ---
+            # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, reach_point__BWREL_fk_wastewater_networkelement, reach_text__BWREL_fk_reach, txt_text__BWREL_fk_reach
+
+            # --- _rel_ ---
+            # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
+
+            # QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored.
+
+            haltung = self.abwasser_model.haltung(
+                # FIELDS TO MAP TO ABWASSER.haltung
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "haltung"),
+                # --- abwassernetzelement ---
+                **self.wastewater_networkelement_common_check_fk_in_subset(row),
                 # --- haltung ---
                 # NOT MAPPED : elevation_determination
                 innenschutz=self.get_vl(row.inside_coating__REL),
