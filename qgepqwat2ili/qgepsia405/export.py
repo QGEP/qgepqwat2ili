@@ -350,7 +350,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                 # --- sia405_baseclass ---
                 **qgep_export_utils.base_common(row, "abwasserknoten"),
                 # --- abwassernetzelement ---
-                #**qgep_export_utils.wastewater_networkelement_common(row),
+                # **qgep_export_utils.wastewater_networkelement_common(row),
                 **qgep_export_utils.wastewater_networkelement_common_check_fk_in_subset(row),
                 # --- abwasserknoten ---
                 # TODO : WARNING : fk_hydr_geometry is not mapped
@@ -363,8 +363,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
             print(".", end="")
         logger.info("done")
         abwasser_session.flush()
-
-
 
         logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_check_fk_in_subset()
@@ -418,7 +416,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
             print(".", end="")
         logger.info("done")
         abwasser_session.flush()
-
 
         logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
         qgep_export_utils.export_reach()
