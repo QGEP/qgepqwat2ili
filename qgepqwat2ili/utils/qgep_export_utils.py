@@ -489,6 +489,7 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+
 def export_wastewater_node(self):
     query = self.qgep_session.query(self.qgep_model.wastewater_node)
     if self.filtered:
@@ -528,7 +529,6 @@ def export_wastewater_node(self):
         print(".", end="")
     logger.info("done")
     self.abwasser_session.flush()
-
 
     def export_reach_point(self):
         query = self.qgep_session.query(self.qgep_model.reach_point)
