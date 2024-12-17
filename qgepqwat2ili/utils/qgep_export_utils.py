@@ -1069,7 +1069,8 @@ class QgepExportUtils:
         if self.filtered:
             query = query.join(
                 self.qgep_model.wastewater_structure,
-                self.qgep_model.cover.fk_wastewater_structure == self.qgep_model.wastewater_structure.obj_id,
+                self.qgep_model.cover.fk_wastewater_structure
+                == self.qgep_model.wastewater_structure.obj_id,
             ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
@@ -1119,7 +1120,8 @@ class QgepExportUtils:
         # if ws_off_sia405abwasser always filter out with subset_wws_ids
         query = query.join(
             self.qgep_model.wastewater_structure,
-            self.qgep_model.cover.fk_wastewater_structure == self.qgep_model.wastewater_structure.obj_id,
+            self.qgep_model.cover.fk_wastewater_structure
+            == self.qgep_model.wastewater_structure.obj_id,
         ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
         # add sql statement to logger
         statement = query.statement
