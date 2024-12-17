@@ -2803,8 +2803,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 **qgep_export_utils.base_common(row, "messstelle"),
                 # --- messstelle ---
                 #abwasserbauwerkref=qgep_export_utils.get_tid(row.fk_wastewater_structure__REL),
-                "abwasserbauwerkref": check_fk_in_subsetid  (
-                subset_wws_ids, row.fk_wastewater_structure__REL
+                "abwasserbauwerkref": qgep_export_utils.check_fk_in_subsetid (
+                    subset_wws_ids, row.fk_wastewater_structure__REL
                 ),
                 abwasserreinigungsanlageref=qgep_export_utils.get_tid(
                     row.fk_waste_water_treatment_plant__REL
