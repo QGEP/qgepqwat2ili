@@ -1881,13 +1881,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("done")
     abwasser_session.flush()
 
-
-
     # with or without check_fk_in_subset
     if filtered:
         logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_point_check_fk_in_subset()
-    
+
         logger.info(
             "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
         )
@@ -1899,7 +1897,7 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
     else:
         logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_point()
-    
+
         logger.info(
             "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
         )
