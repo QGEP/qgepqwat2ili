@@ -495,9 +495,9 @@ class QgepExportUtils:
             query = query.filter(
                 self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
             )
-            # add sql statement to logger
-            statement = query.statement
-            logger.debug(f" selection query = {statement}")
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.wastewater_node
 
@@ -537,9 +537,9 @@ class QgepExportUtils:
             query = query.filter(
                 self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
             )
-            # add sql statement to logger
-            statement = query.statement
-            logger.debug(f" selection query = {statement}")
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.wastewater_node
 
@@ -584,6 +584,9 @@ class QgepExportUtils:
                     self.qgep_model.reach_point.obj_id == self.qgep_model.reach.fk_reach_point_to,
                 ),
             ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
 
             # AVAILABLE FIELDS IN QGEP.reach_point
@@ -629,6 +632,9 @@ class QgepExportUtils:
                     self.qgep_model.reach_point.obj_id == self.qgep_model.reach.fk_reach_point_to,
                 ),
             ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
 
             # AVAILABLE FIELDS IN QGEP.reach_point
@@ -673,6 +679,9 @@ class QgepExportUtils:
             query = query.filter(
                 self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.reach
 
@@ -731,6 +740,9 @@ class QgepExportUtils:
             query = query.filter(
                 self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.reach
 
@@ -796,6 +808,10 @@ class QgepExportUtils:
             query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
+
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_downspout
 
@@ -833,7 +849,9 @@ class QgepExportUtils:
         query = query.join(self.qgep_model.wastewater_structure).filter(
             self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
         )
-
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_downspout
 
@@ -878,6 +896,9 @@ class QgepExportUtils:
             query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.access_aid
 
@@ -915,6 +936,9 @@ class QgepExportUtils:
         query = query.join(self.qgep_model.wastewater_structure).filter(
             self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.access_aid
 
@@ -959,6 +983,9 @@ class QgepExportUtils:
             query = query.join(self.qgep_model.wastewater_structure).filter(
                 self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_flume
 
@@ -996,6 +1023,9 @@ class QgepExportUtils:
         query = query.join(self.qgep_model.wastewater_structure).filter(
             self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
         )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_flume
 
