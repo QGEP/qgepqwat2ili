@@ -228,6 +228,7 @@ class TestQGEPUseCases(unittest.TestCase):
         main(["setupdb", "full"])
 
         path = os.path.join(tempfile.mkdtemp(), "export_selection_SIA405.xtf")
+
         selection = [
             # reach_id
             "ch13p7mzRE001221",
