@@ -351,7 +351,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
                 **qgep_export_utils.base_common(row, "abwasserknoten"),
                 # --- abwassernetzelement ---
                 #**qgep_export_utils.wastewater_networkelement_common(row),
-                **qgep_export_utils.wastewater_networkelement_common_check_fk_in_subset
+                **qgep_export_utils.wastewater_networkelement_common_check_fk_in_subset(row),
                 # --- abwasserknoten ---
                 # TODO : WARNING : fk_hydr_geometry is not mapped
                 lage=ST_Force2D(row.situation_geometry),
