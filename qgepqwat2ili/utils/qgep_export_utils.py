@@ -489,11 +489,12 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
-
     def export_wastewater_node(self):
         query = self.qgep_session.query(self.qgep_model.wastewater_node)
         if self.filtered:
-            query = query.filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.filter(
+                self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+            )
             # add sql statement to logger
             statement = query.statement
             logger.debug(f" selection query = {statement}")
@@ -530,11 +531,12 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
-
     def export_wastewater_node_check_fk_in_subset(self):
         query = self.qgep_session.query(self.qgep_model.wastewater_node)
         if self.filtered:
-            query = query.filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.filter(
+                self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+            )
             # add sql statement to logger
             statement = query.statement
             logger.debug(f" selection query = {statement}")
