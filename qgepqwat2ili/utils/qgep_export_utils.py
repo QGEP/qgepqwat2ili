@@ -603,6 +603,51 @@ class QgepExportUtils:
                 # --- sia405_baseclass ---
                 **self.base_common(row, "haltungspunkt"),
                 # --- haltungspunkt ---
+                abwassernetzelementref=self.get_tid(row.fk_wastewater_networkelement__REL),
+                auslaufform=self.get_vl(row.outlet_shape__REL),
+                bemerkung=self.truncate(self.emptystr_to_null(row.remark), 80),
+                bezeichnung=self.null_to_emptystr(row.identifier),
+                hoehengenauigkeit=self.get_vl(row.elevation_accuracy__REL),
+                kote=row.level,
+                lage=ST_Force2D(row.situation_geometry),
+                lage_anschluss=row.position_of_connection,
+            )
+            self.abwasser_session.add(haltungspunkt)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_reach_point_check_fk_in_subset(self):
+        query = self.qgep_session.query(self.qgep_model.reach_point)
+        if self.filtered:
+            query = query.join(
+                self.qgep_model.reach,
+                or_(
+                    self.qgep_model.reach_point.obj_id
+                    == self.qgep_model.reach.fk_reach_point_from,
+                    self.qgep_model.reach_point.obj_id == self.qgep_model.reach.fk_reach_point_to,
+                ),
+            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        for row in query:
+
+            # AVAILABLE FIELDS IN QGEP.reach_point
+
+            # --- reach_point ---
+            # elevation_accuracy, fk_dataowner, fk_provider, fk_wastewater_networkelement, identifier, last_modification, level, obj_id, outlet_shape, position_of_connection, remark, situation_geometry
+
+            # --- _bwrel_ ---
+            # examination__BWREL_fk_reach_point, reach__BWREL_fk_reach_point_from, reach__BWREL_fk_reach_point_to
+
+            # --- _rel_ ---
+            # elevation_accuracy__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_networkelement__REL, outlet_shape__REL
+
+            haltungspunkt = self.abwasser_model.haltungspunkt(
+                # FIELDS TO MAP TO ABWASSER.haltungspunkt
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "haltungspunkt"),
+                # --- haltungspunkt ---
                 # changed call from self.get_tid to self.check_fk_in_subsetid so it does not wirte foreignkeys on elements that do not exist
                 # abwassernetzelementref=self.get_tid(row.fk_wastewater_networkelement__REL),
                 abwassernetzelementref=self.check_fk_in_subsetid(
