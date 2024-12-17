@@ -5,9 +5,16 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
+# 4.10.2024
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
 from .. import utils
 from ..utils.basket_utils import BasketUtils
-from ..utils.ili2db import skip_wwtp_structure_ids
+
+# 4.10.2024
+# from ..utils.ili2db import skip_wwtp_structure_ids
+# 6.11.2024 replaced with
+from ..utils.ili2db import add_to_selection, get_ws_wn_ids, remove_from_selection
 from ..utils.qgep_export_utils import QgepExportUtils
 from ..utils.various import logger
 from .model_abwasser import get_abwasser_model
@@ -43,18 +50,45 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
 
         current_basket = basket_utils.basket_topic_sia405_abwasser
 
-    # Filtering
+    # 1. Filtering - check if selection
     filtered = selection is not None
     subset_ids = selection if selection is not None else []
 
     # get list of id's of class wwtp_structure (ARABauwerk) to be able to check if fk_wastewater_structure references to wwtp_structure
 
-    wastewater_structure_id_sia405abwasser_list = None
-    wastewater_structure_id_sia405abwasser_list = skip_wwtp_structure_ids()
+    # 2. check if wastewater_structures exist that are not part of SIA 405 Abwasser (in Release 2015 this is the class wwtp_structures, in Release 2020 it will be more - to be extended in tww)
+    ws_off_sia405abwasser_list = None
+    ws_off_sia405abwasser_list = get_ws_wn_ids("wwtp_structure")
 
-    logger.info(
-        f"wastewater_structure_id_sia405abwasser_list : {wastewater_structure_id_sia405abwasser_list}",
+    # 3. Show ws_off_sia405abwasser_list
+    logger.debug(
+        f"ws_off_sia405abwasser_list : {ws_off_sia405abwasser_list}",
     )
+
+    # 4. check if filtered
+    if filtered:
+        if ws_off_sia405abwasser_list:
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+        # else do nothing
+    else:
+        if ws_off_sia405abwasser_list:
+            # add all data of wastewater_structures to selection
+            subset_ids = add_to_selection(subset_ids, get_ws_wn_ids("wastewater_structure"))
+            logger.debug(
+                f"subset_ids of all wws : {subset_ids}",
+            )
+            # take out ws_off_sia405abwasser_list from selection
+            subset_ids = remove_from_selection(subset_ids, ws_off_sia405abwasser_list)
+            logger.debug(
+                f"subset_ids of all wws minus ws_off_sia405abwasser_list: {subset_ids}",
+            )
+            # add reach_ids
+            # subset_ids = add_to_selection(subset_ids, get_cl_re_ids("channel"))
+            # treat export as with a selection
+            filtered = True
+
+        # else do nothing
 
     # Orientation
     oriented = orientation is not None
@@ -62,6 +96,230 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         labelorientation = orientation
     else:
         labelorientation = 0
+
+    def get_tid(relation):
+        """
+        Makes a tid for a relation
+        """
+        if relation is None:
+            return None
+        return tid_maker.tid_for_row(relation)
+
+    def get_vl(relation):
+        """
+        Gets a literal value from a value list relation
+        """
+        if relation is None:
+            return None
+        return relation.value_de
+
+    def null_to_emptystr(val):
+        """
+        Converts nulls to blank strings and raises a warning
+        """
+        if val is None:
+            logger.warning(
+                "A mandatory value was null. It will be cast to a blank string, and probably cause validation errors",
+            )
+            val = ""
+        return val
+
+    def emptystr_to_null(val):
+        """
+        Converts blank strings to nulls and raises a warning
+
+        This is needed as is seems ili2pg 4.4.6 crashes with emptystrings under certain circumstances (see https://github.com/QGEP/qgepqwat2ili/issues/33)
+        """
+        if val == "":
+            logger.warning(
+                "An empty string was converted to NULL, to workaround ili2pg issue. This should have no impact on output.",
+            )
+            val = None
+        return val
+
+    def truncate(val, max_length):
+        """
+        Raises a warning if values gets truncated
+        """
+        if val is None:
+            return None
+        if len(val) > max_length:
+            # _log() got an unexpected keyword argument 'stacklevel'
+            #    logger.warning(f"Value '{val}' exceeds expected length ({max_length})", stacklevel=2)
+            logger.warning(f"Value '{val}' exceeds expected length ({max_length})")
+        return val[0:max_length]
+
+    def modulo_angle(val):
+        """
+        Returns an angle between 0 and 359.9 (for Orientierung in Base_d-20181005.ili)
+        """
+        if val is None:
+            return None
+
+        # add orientation
+        val = val + float(labelorientation)
+
+        val = val % 360.0
+        if val > 359.9:
+            val = 0
+
+        logger.info(f"modulo_angle - added orientation: {labelorientation}")
+        print("modulo_angle - added orientation: ", str(labelorientation))
+
+        return val
+
+    def check_fk_in_subsetid(subset, relation):
+        """
+        checks, whether foreignkey is in the subset_ids - if yes it return the tid of the foreignkey, if no it will return None
+        """
+        # first check for None, as is get_tid
+        if relation is None:
+            return None
+
+        logger.debug(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
+        fremdschluesselstr = getattr(relation, "obj_id")
+        logger.debug(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+
+        if fremdschluesselstr in subset:
+            logger.debug(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+            logger.debug(f"check_fk_in_subsetid - tid = '{tid_maker.tid_for_row(relation)}' ")
+            return tid_maker.tid_for_row(relation)
+        else:
+            if filtered:
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in filtered subset - replaced with None instead!"
+                )
+                return None
+            else:
+                logger.warning(
+                    f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in datamodel - replaced with None instead!"
+                )
+                return None
+
+    def create_metaattributes(row):
+        metaattribute = ABWASSER.metaattribute(
+            # FIELDS TO MAP TO ABWASSER.metaattribute
+            # --- metaattribute ---
+            # 31.3.2023 identifier instead of name
+            # datenherr=getattr(row.fk_dataowner__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            # datenlieferant=getattr(row.fk_provider__REL, "name", "unknown"),  # TODO : is unknown ok ?
+            # datenherr=getattr(row.fk_dataowner__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
+            # datenlieferant=getattr(row.fk_provider__REL, "identifier", "unknown"),  # TODO : is unknown ok ?
+            # 31.3.2023 obj_id instead of name
+            datenherr=getattr(
+                row.fk_dataowner__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
+            datenlieferant=getattr(
+                row.fk_provider__REL, "obj_id", "unknown"
+            ),  # TODO : is unknown ok ?
+            letzte_aenderung=row.last_modification,
+            sia405_baseclass_metaattribute=get_tid(row),
+            # OD : is this OK ? Don't we need a different t_id from what inserted above in organisation ? if so, consider adding a "for_class" arg to tid_for_row
+            t_id=get_tid(row),
+            t_seq=0,
+        )
+        abwasser_session.add(metaattribute)
+
+    def base_common(row, type_name):
+        """
+        Returns common attributes for base
+        """
+        return {
+            "t_ili_tid": row.obj_id,
+            "t_type": type_name,
+            "obj_id": row.obj_id,
+            "t_id": get_tid(row),
+        }
+
+    def wastewater_structure_common(row):
+        """
+        Returns common attributes for wastewater_structure
+        ATTENTION : Mapping of 3D wastewater_structure->abwasserbauerk
+        is not fully implemented.
+        """
+        return {
+            # --- abwasserbauwerk ---
+            "akten": row.records,
+            "astatus": get_vl(row.status__REL),
+            "baujahr": row.year_of_construction,
+            "baulicherzustand": get_vl(row.structure_condition__REL),
+            "baulos": row.contract_section,
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
+            "betreiberref": get_tid(row.fk_operator__REL),
+            "bezeichnung": null_to_emptystr(row.identifier),
+            "bruttokosten": row.gross_costs,
+            "detailgeometrie": ST_Force2D(row.detail_geometry_geometry),
+            "eigentuemerref": get_tid(row.fk_owner__REL),
+            "ersatzjahr": row.year_of_replacement,
+            "finanzierung": get_vl(row.financing__REL),
+            "inspektionsintervall": row.inspection_interval,
+            "sanierungsbedarf": get_vl(row.renovation_necessity__REL),
+            "standortname": row.location_name,
+            "subventionen": row.subsidies,
+            "wbw_basisjahr": row.rv_base_year,
+            "wbw_bauart": get_vl(row.rv_construction_type__REL),
+            "wiederbeschaffungswert": row.replacement_value,
+            "zugaenglichkeit": get_vl(row.accessibility__REL),
+        }
+
+    def wastewater_networkelement_common(row):
+        """
+        Returns common attributes for network_element
+        """
+
+        return {
+            # "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            # 6.11.2024 Besides wn_id and re_id we also need ws_obj_ids in a separate subset - call it ws_subset_id
+            # "abwasserbauwerkref": check_fk_in_subsetid(
+            #    subset_ids, row.fk_wastewater_structure__REL
+            # ),
+            "abwasserbauwerkref": check_fk_in_subsetid(
+                subset_ids, row.fk_wastewater_structure__REL
+            ),
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
+            "bezeichnung": null_to_emptystr(row.identifier),
+        }
+
+    def structure_part_common(row):
+        """
+        Returns common attributes for structure_part
+        """
+        return {
+            # abwasserbauwerkref is MANDATORY, so it cannot be set to NULL
+            "abwasserbauwerkref": get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": truncate(emptystr_to_null(row.remark), 80),
+            "bezeichnung": null_to_emptystr(row.identifier),
+            "instandstellung": get_vl(row.renovation_demand__REL),
+        }
+
+    def textpos_common(row, t_type, geojson_crs_def):
+        """
+        Returns common attributes for textpos
+        """
+        t_id = tid_maker.next_tid()
+        return {
+            "t_id": t_id,
+            "t_type": t_type,
+            "t_ili_tid": t_id,
+            # --- TextPos ---
+            "textpos": ST_GeomFromGeoJSON(
+                json.dumps(
+                    {
+                        "type": "Point",
+                        "coordinates": row["geometry"]["coordinates"],
+                        "crs": geojson_crs_def,
+                    }
+                )
+            ),
+            "textori": modulo_angle(row["properties"]["LabelRotation"]),
+            "texthali": "Left",  # can be Left/Center/Right
+            "textvali": "Bottom",  # can be Top,Cap,Half,Base,Bottom
+            # --- SIA405_TextPos ---
+            "plantyp": row["properties"]["scale"],
+            "textinhalt": row["properties"]["LabelText"],
+            "bemerkung": None,
+        }
 
     qgep_export_utils = QgepExportUtils(
         tid_maker=tid_maker,
@@ -239,21 +497,263 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     logger.info(
         "Exporting QGEP.dryweather_downspout -> ABWASSER.trockenwetterfallrohr, ABWASSER.metaattribute"
     )
-    qgep_export_utils.export_dryweather_downspout()
+
+    query = qgep_session.query(QGEP.dryweather_downspout)
+    if filtered:
+        logger.info(f"filtered: subset_ids = {subset_ids}")
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.dryweather_downspout
+
+        # --- structure_part ---
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+        # --- dryweather_downspout ---
+        # diameter, obj_id
+
+        # --- _bwrel_ ---
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+        # --- _rel_ ---
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, renovation_demand__REL
+
+        trockenwetterfallrohr = ABWASSER.trockenwetterfallrohr(
+            # FIELDS TO MAP TO ABWASSER.trockenwetterfallrohr
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "trockenwetterfallrohr"),
+            # --- bauwerksteil ---
+            **structure_part_common(row),
+            # --- trockenwetterfallrohr ---
+            durchmesser=row.diameter,
+        )
+        abwasser_session.add(trockenwetterfallrohr)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
 
     logger.info("Exporting QGEP.access_aid -> ABWASSER.einstiegshilfe, ABWASSER.metaattribute")
-    qgep_export_utils.export_access_aid()
+    query = qgep_session.query(QGEP.access_aid)
+    if filtered:
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.access_aid
+
+        # --- structure_part ---
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+        # --- access_aid ---
+        # kind, obj_id
+
+        # --- _bwrel_ ---
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+        # --- _rel_ ---
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+        einstiegshilfe = ABWASSER.einstiegshilfe(
+            # FIELDS TO MAP TO ABWASSER.einstiegshilfe
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "einstiegshilfe"),
+            # --- bauwerksteil ---
+            **structure_part_common(row),
+            # --- einstiegshilfe ---
+            art=get_vl(row.kind__REL),
+        )
+        abwasser_session.add(einstiegshilfe)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
 
     logger.info(
         "Exporting QGEP.dryweather_flume -> ABWASSER.trockenwetterrinne, ABWASSER.metaattribute"
     )
-    qgep_export_utils.export_dryweather_flume()
+
+    query = qgep_session.query(QGEP.dryweather_flume)
+    if filtered:
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.dryweather_flume
+
+        # --- structure_part ---
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+        # --- dryweather_flume ---
+        # material, obj_id
+
+        # --- _bwrel_ ---
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+        # --- _rel_ ---
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, renovation_demand__REL
+
+        trockenwetterrinne = ABWASSER.trockenwetterrinne(
+            # FIELDS TO MAP TO ABWASSER.trockenwetterrinne
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "trockenwetterrinne"),
+            # --- bauwerksteil ---
+            **structure_part_common(row),
+            # --- trockenwetterrinne ---
+            material=get_vl(row.material__REL),
+        )
+        abwasser_session.add(trockenwetterrinne)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
 
     logger.info("Exporting QGEP.cover -> ABWASSER.deckel, ABWASSER.metaattribute")
-    qgep_export_utils.export_cover()
+    query = qgep_session.query(QGEP.cover)
+    if filtered:
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.cover
+
+        # --- structure_part ---
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+        # --- cover ---
+        # brand, cover_shape, diameter, fastening, level, material, obj_id, positional_accuracy, situation_geometry, sludge_bucket, venting
+
+        # --- _bwrel_ ---
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id, wastewater_structure__BWREL_fk_main_cover
+
+        # --- _rel_ ---
+        # cover_shape__REL, fastening__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, positional_accuracy__REL, renovation_demand__REL, sludge_bucket__REL, venting__REL
+
+        deckel = ABWASSER.deckel(
+            # FIELDS TO MAP TO ABWASSER.deckel
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "deckel"),
+            # --- bauwerksteil ---
+            **structure_part_common(row),
+            # --- deckel ---
+            deckelform=get_vl(row.cover_shape__REL),
+            durchmesser=row.diameter,
+            entlueftung=get_vl(row.venting__REL),
+            fabrikat=row.brand,
+            kote=row.level,
+            lage=ST_Force2D(row.situation_geometry),
+            lagegenauigkeit=get_vl(row.positional_accuracy__REL),
+            material=get_vl(row.material__REL),
+            schlammeimer=get_vl(row.sludge_bucket__REL),
+            verschluss=get_vl(row.fastening__REL),
+        )
+        abwasser_session.add(deckel)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
 
     logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
-    qgep_export_utils.export_benching()
+    query = qgep_session.query(QGEP.benching)
+    if filtered:
+        # query = query.join(QGEP.wastewater_structure, QGEP.wastewater_networkelement).filter(
+        # QGEP.wastewater_networkelement.obj_id.in_(subset_ids)
+        # )
+        query = (
+            query.join(
+                QGEP.wastewater_structure,
+                QGEP.structure_part.fk_wastewater_structure == QGEP.wastewater_structure.obj_id,
+            )
+            .join(QGEP.wastewater_networkelement)
+            .filter(QGEP.wastewater_networkelement.obj_id.in_(subset_ids))
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+    for row in query:
+
+        # AVAILABLE FIELDS IN QGEP.benching
+
+        # --- structure_part ---
+        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+        # --- benching ---
+        # kind, obj_id
+
+        # --- _bwrel_ ---
+        # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+        # --- _rel_ ---
+        # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+        bankett = ABWASSER.bankett(
+            # FIELDS TO MAP TO ABWASSER.bankett
+            # --- baseclass ---
+            # --- sia405_baseclass ---
+            **base_common(row, "bankett"),
+            # --- bauwerksteil ---
+            **structure_part_common(row),
+            # --- bankett ---
+            art=get_vl(row.kind__REL),
+        )
+        abwasser_session.add(bankett)
+        create_metaattributes(row)
+        print(".", end="")
+    logger.info("done")
+    abwasser_session.flush()
 
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.examination)
