@@ -65,7 +65,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     # make a backup copy of subset_id - as it is beeing changed - don't know why
     subset_ids_original = subset_ids
-    
+
     subset_wws_ids = []
 
     if filtered:
@@ -94,7 +94,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.debug(
             f"reprint subset_ids: {subset_ids}",
         )
-        
+
         subset_ids_reaches = []
         subset_ids_reaches = filter_reaches(subset_ids)
         logger.debug(
