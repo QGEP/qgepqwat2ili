@@ -2731,67 +2731,125 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
 
-        einzugsgebiet = abwasser_model.einzugsgebiet(
-            # FIELDS TO MAP TO ABWASSER.einzugsgebiet
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "einzugsgebiet"),
-            # --- einzugsgebiet ---
-            abflussbegrenzung_geplant=row.runoff_limit_planned,
-            abflussbegrenzung_ist=row.runoff_limit_current,
-            abflussbeiwert_rw_geplant=row.discharge_coefficient_rw_planned,
-            abflussbeiwert_rw_ist=row.discharge_coefficient_rw_current,
-            abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
-            abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
-            # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
-            abwassernetzelement_rw_geplantref=qgep_export_utils.check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
-            ),
-            abwassernetzelement_rw_istref=qgep_export_utils.check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_networkelement_rw_current__REL
-            ),
-            abwassernetzelement_sw_geplantref=qgep_export_utils.check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_networkelement_ww_planned__REL
-            ),
-            abwassernetzelement_sw_istref=qgep_export_utils.check_fk_in_subsetid(
-                subset_ids, row.fk_wastewater_networkelement_ww_current__REL
-            ),
-            befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
-            befestigungsgrad_rw_ist=row.seal_factor_rw_current,
-            befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
-            befestigungsgrad_sw_ist=row.seal_factor_ww_current,
-            bemerkung=qgep_export_utils.truncate(
-                qgep_export_utils.emptystr_to_null(row.remark), 80
-            ),
-            bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
-            direkteinleitung_in_gewaesser_geplant=qgep_export_utils.get_vl(
-                row.direct_discharge_planned__REL
-            ),
-            direkteinleitung_in_gewaesser_ist=qgep_export_utils.get_vl(
-                row.direct_discharge_current__REL
-            ),
-            einwohnerdichte_geplant=row.population_density_planned,
-            einwohnerdichte_ist=row.population_density_current,
-            entwaesserungssystem_geplant=qgep_export_utils.get_vl(
-                row.drainage_system_planned__REL
-            ),
-            entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
-            flaeche=row.surface_area,
-            fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
-            fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
-            perimeter=ST_Force2D(row.perimeter_geometry),
-            retention_geplant=qgep_export_utils.get_vl(row.retention_planned__REL),
-            retention_ist=qgep_export_utils.get_vl(row.retention_current__REL),
-            # sbw_*ref will be added with release 2020
-            # sbw_rw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_rw_planned__REL),
-            # sbw_rw_istref=qgep_export_utils.get_tid(row.fk_special_building_rw_current__REL),
-            # sbw_sw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_ww_planned__REL),
-            # sbw_sw_istref=qgep_export_utils.get_tid(row.fk_special_building_ww_current__REL),
-            schmutzabwasseranfall_geplant=row.waste_water_production_planned,
-            schmutzabwasseranfall_ist=row.waste_water_production_current,
-            versickerung_geplant=qgep_export_utils.get_vl(row.infiltration_planned__REL),
-            versickerung_ist=qgep_export_utils.get_vl(row.infiltration_current__REL),
-        )
+
+        if filtered or ws_off_sia405abwasser:
+            einzugsgebiet = abwasser_model.einzugsgebiet(
+                # FIELDS TO MAP TO ABWASSER.einzugsgebiet
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "einzugsgebiet"),
+                # --- einzugsgebiet ---
+                abflussbegrenzung_geplant=row.runoff_limit_planned,
+                abflussbegrenzung_ist=row.runoff_limit_current,
+                abflussbeiwert_rw_geplant=row.discharge_coefficient_rw_planned,
+                abflussbeiwert_rw_ist=row.discharge_coefficient_rw_current,
+                abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
+                abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
+                # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
+                abwassernetzelement_rw_geplantref=qgep_export_utils.check_fk_in_subsetid(
+                    subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
+                ),
+                abwassernetzelement_rw_istref=qgep_export_utils.check_fk_in_subsetid(
+                    subset_ids, row.fk_wastewater_networkelement_rw_current__REL
+                ),
+                abwassernetzelement_sw_geplantref=qgep_export_utils.check_fk_in_subsetid(
+                    subset_ids, row.fk_wastewater_networkelement_ww_planned__REL
+                ),
+                abwassernetzelement_sw_istref=qgep_export_utils.check_fk_in_subsetid(
+                    subset_ids, row.fk_wastewater_networkelement_ww_current__REL
+                ),
+                befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
+                befestigungsgrad_rw_ist=row.seal_factor_rw_current,
+                befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
+                befestigungsgrad_sw_ist=row.seal_factor_ww_current,
+                bemerkung=qgep_export_utils.truncate(
+                    qgep_export_utils.emptystr_to_null(row.remark), 80
+                ),
+                bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+                direkteinleitung_in_gewaesser_geplant=qgep_export_utils.get_vl(
+                    row.direct_discharge_planned__REL
+                ),
+                direkteinleitung_in_gewaesser_ist=qgep_export_utils.get_vl(
+                    row.direct_discharge_current__REL
+                ),
+                einwohnerdichte_geplant=row.population_density_planned,
+                einwohnerdichte_ist=row.population_density_current,
+                entwaesserungssystem_geplant=qgep_export_utils.get_vl(
+                    row.drainage_system_planned__REL
+                ),
+                entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
+                flaeche=row.surface_area,
+                fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
+                fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+                retention_geplant=qgep_export_utils.get_vl(row.retention_planned__REL),
+                retention_ist=qgep_export_utils.get_vl(row.retention_current__REL),
+                # sbw_*ref will be added with release 2020
+                # sbw_rw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_rw_planned__REL),
+                # sbw_rw_istref=qgep_export_utils.get_tid(row.fk_special_building_rw_current__REL),
+                # sbw_sw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_ww_planned__REL),
+                # sbw_sw_istref=qgep_export_utils.get_tid(row.fk_special_building_ww_current__REL),
+                schmutzabwasseranfall_geplant=row.waste_water_production_planned,
+                schmutzabwasseranfall_ist=row.waste_water_production_current,
+                versickerung_geplant=qgep_export_utils.get_vl(row.infiltration_planned__REL),
+                versickerung_ist=qgep_export_utils.get_vl(row.infiltration_current__REL),
+            )
+        else:
+            einzugsgebiet = abwasser_model.einzugsgebiet(
+                # FIELDS TO MAP TO ABWASSER.einzugsgebiet
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "einzugsgebiet"),
+                # --- einzugsgebiet ---
+                abflussbegrenzung_geplant=row.runoff_limit_planned,
+                abflussbegrenzung_ist=row.runoff_limit_current,
+                abflussbeiwert_rw_geplant=row.discharge_coefficient_rw_planned,
+                abflussbeiwert_rw_ist=row.discharge_coefficient_rw_current,
+                abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
+                abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
+                # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
+                abwassernetzelement_rw_geplantref=
+                qgep_export_utils.get_tid(row.fk_wastewater_networkelement_rw_planned__REL),
+                abwassernetzelement_rw_istref=qgep_export_utils.get_tid(row. fk_wastewater_networkelement_rw_current__REL),
+                abwassernetzelement_sw_geplantref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement_ww_planned__REL),
+                abwassernetzelement_sw_istref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement_ww_current__REL                ),
+                befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
+                befestigungsgrad_rw_ist=row.seal_factor_rw_current,
+                befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
+                befestigungsgrad_sw_ist=row.seal_factor_ww_current,
+                bemerkung=qgep_export_utils.truncate(
+                    qgep_export_utils.emptystr_to_null(row.remark), 80
+                ),
+                bezeichnung=qgep_export_utils.null_to_emptystr(row.identifier),
+                direkteinleitung_in_gewaesser_geplant=qgep_export_utils.get_vl(
+                    row.direct_discharge_planned__REL
+                ),
+                direkteinleitung_in_gewaesser_ist=qgep_export_utils.get_vl(
+                    row.direct_discharge_current__REL
+                ),
+                einwohnerdichte_geplant=row.population_density_planned,
+                einwohnerdichte_ist=row.population_density_current,
+                entwaesserungssystem_geplant=qgep_export_utils.get_vl(
+                    row.drainage_system_planned__REL
+                ),
+                entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
+                flaeche=row.surface_area,
+                fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
+                fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+                retention_geplant=qgep_export_utils.get_vl(row.retention_planned__REL),
+                retention_ist=qgep_export_utils.get_vl(row.retention_current__REL),
+                # sbw_*ref will be added with release 2020
+                # sbw_rw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_rw_planned__REL),
+                # sbw_rw_istref=qgep_export_utils.get_tid(row.fk_special_building_rw_current__REL),
+                # sbw_sw_geplantref=qgep_export_utils.get_tid(row.fk_special_building_ww_planned__REL),
+                # sbw_sw_istref=qgep_export_utils.get_tid(row.fk_special_building_ww_current__REL),
+                schmutzabwasseranfall_geplant=row.waste_water_production_planned,
+                schmutzabwasseranfall_ist=row.waste_water_production_current,
+                versickerung_geplant=qgep_export_utils.get_vl(row.infiltration_planned__REL),
+                versickerung_ist=qgep_export_utils.get_vl(row.infiltration_current__REL),
+            )
+
         abwasser_session.add(einzugsgebiet)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
