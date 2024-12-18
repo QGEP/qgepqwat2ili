@@ -657,7 +657,7 @@ def action_export(plugin):
             # add logger info to check what selection is used
             #18.12.2024
             #logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
-            logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids(False) - without automatic extension of neigbouring wwn elements}")
+            logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids(False)} - without automatic extension of neigbouring wwn elements")
 
             if emodel == "VSA_KEK_2019_LV95":
                 logger.info("Start Exporting VSA_KEK_2019_LV95")
