@@ -658,7 +658,7 @@ def action_export(plugin):
             # 18.12.2024
             # logger.info(f"Start Exporting with selection {str(export_dialog.selected_ids)}")
             logger.info(
-                f"Start Exporting with selection {str(export_dialog.selected_ids(False))} - without automatic extension of neigbouring wwn elements"
+                f"Start Exporting with selection {str(export_dialog.selected_ids)} - without automatic extension of neigbouring wwn elements"
             )
 
             if emodel == "VSA_KEK_2019_LV95":

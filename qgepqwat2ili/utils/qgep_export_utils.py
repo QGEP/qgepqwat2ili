@@ -1388,17 +1388,17 @@ def get_connected_we_to_re(subset_reaches):
 
 
 # 10.12.2024
-def get_connected_overflow_to_wn_ids(selected_ids):
+def get_connected_overflow_to_wn_ids(selected_ids_ov):
     """
     Get all connected wastewater_nodes from overflows.fk_overflow_to
     """
-    if selected_ids is None:
+    if selected_ids_ov is None:
         return None
-    if not selected_ids:
+    if not selected_ids_ov:
         return None
     else:
         logger.debug(
-            f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids} ..."
+            f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids_ov} ..."
         )
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
@@ -1406,7 +1406,7 @@ def get_connected_overflow_to_wn_ids(selected_ids):
 
         connected_overflow_to_wn_ids = []
 
-        subset_text = get_selection_text_for_in_statement(selected_ids)
+        subset_text = get_selection_text_for_in_statement(selected_ids_ov)
 
         # select all connected to wastewater_nodes from provided subset of reaches
         cursor.execute(
@@ -1580,15 +1580,15 @@ def get_ws_selected_ww_networkelements(selected_wwn):
 
 
 # 10.1.2024
-def filter_reaches(selected_ids):
+def filter_reaches(selected_ids_to_filter):
     """
-    Filter out reaches from selected_ids
+    Filter out reaches from selected_ids_to_filter
     """
 
-    if selected_ids is None:
+    if selected_ids_to_filter is None:
         return None
     else:
-        logger.debug(f"Filter out reaches from selected_ids {selected_ids} ...")
+        logger.debug(f"Filter out reaches from selected_ids {selected_ids_to_filter} ...")
         connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
         connection.set_session(autocommit=True)
         cursor = connection.cursor()
@@ -1596,7 +1596,7 @@ def filter_reaches(selected_ids):
         subset_reaches_ids = []
         all_reaches_ids = []
 
-        get_selection_text_for_in_statement(selected_ids)
+        get_selection_text_for_in_statement(selected_ids_to_filter)
 
         # select all reaches
         cursor.execute("SELECT obj_id FROM qgep_od.reach;")
@@ -1621,7 +1621,7 @@ def filter_reaches(selected_ids):
                     all_reaches_ids.append(strrow)
                     # logger.debug(f" building up '{all_reaches_ids}' ...")
 
-            for list_item in selected_ids:
+            for list_item in selected_ids_to_filter:
                 if list_item in all_reaches_ids:
                     subset_reaches_ids.append(list_item)
                     logger.debug(
@@ -1655,20 +1655,20 @@ def remove_from_selection(selected_ids, remove_ids):
     return selected_ids
 
 
-def add_to_selection(selected_ids, add_ids):
+def add_to_selection(selected_ids2, add_ids):
     """
     Append ids to selected_ids
     """
-    if selected_ids is None:
+    if selected_ids2 is None:
         return None
     if add_ids is None:
-        return selected_ids
+        return selected_ids2
     else:
-        if selected_ids is None:
-            selected_ids = []
+        if selected_ids2 is None:
+            selected_ids2 = []
 
         for list_item in add_ids:
             # selected_ids = selected_ids.append(list_item)
-            selected_ids.append(list_item)
+            selected_ids2.append(list_item)
 
-    return selected_ids
+    return selected_ids2

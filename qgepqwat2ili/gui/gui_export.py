@@ -208,7 +208,9 @@ class GuiExport(QDialog):
         return self.save_logs_next_to_file_checkbox.isChecked()
 
     @property
-    def selected_ids(self, selection_extend=True):
+    def selected_ids(self):
+        selection_extend = False
+        
         if self.limit_checkbox.isChecked():
             ids = []
             for struct in self.structures:
