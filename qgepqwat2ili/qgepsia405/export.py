@@ -312,12 +312,13 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     qgep_export_utils.export_pipe_profile()
 
     # with or without check_fk_in_subset
-    if filtered:
-        logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
+    # if filtered
+    if filtered and ws_off_sia405abwasser:
+        logger.info("Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_point_check_fk_in_subset()
 
         logger.info(
-            "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+            "Exporting QGEP.wastewater_node (check_fk_in_subset) -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
         )
         # cannot be moved to qgep_export_utils because fk_hydr_geometry is only in VSA-DSS but not in SIA405 Abwasser and KEK
         # qgep_export_utils.export_wastewater_node_check_fk_in_subset()
@@ -364,9 +365,10 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.info("done")
         abwasser_session.flush()
 
-        logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
+        logger.info("Exporting QGEP.reach (check_fk_in_subset) -> ABWASSER.haltung, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_check_fk_in_subset()
 
+    # not filtered and not ws_off_sia405abwasser
     else:
         logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
         qgep_export_utils.export_reach_point()
