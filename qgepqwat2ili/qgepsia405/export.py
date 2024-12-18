@@ -315,7 +315,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     # with or without check_fk_in_subset
     # if filtered
     if filtered and ws_off_sia405abwasser:
-        logger.info("Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_reach_point_check_fk_in_subset()
 
         logger.info(
@@ -366,7 +368,9 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
         logger.info("done")
         abwasser_session.flush()
 
-        logger.info("Exporting QGEP.reach (check_fk_in_subset) -> ABWASSER.haltung, ABWASSER.metaattribute")
+        logger.info(
+            "Exporting QGEP.reach (check_fk_in_subset) -> ABWASSER.haltung, ABWASSER.metaattribute"
+        )
         qgep_export_utils.export_reach_check_fk_in_subset()
 
     # not filtered and not ws_off_sia405abwasser
