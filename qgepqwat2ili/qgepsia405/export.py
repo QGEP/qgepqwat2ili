@@ -55,7 +55,14 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     ws_off_sia405abwasser = False
     # 1. Filtering - check if selection
     filtered = selection is not None
+
+    # Logging for debugging
+    logger.debug(f"print filtered '{str(filtered)}'")
+    
     subset_ids = selection if selection is not None else []
+    # Logging for debugging
+    logger.debug(f"print subset_ids: '{str(subset_ids)}'")
+
     subset_wws_ids = []
 
     if filtered:
