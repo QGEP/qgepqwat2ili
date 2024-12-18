@@ -67,7 +67,6 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     subset_ids_original = selection if selection is not None else []
     logger.debug(f"print subset_ids_original: '{str(subset_ids_original)}'")
-    
 
     subset_wws_ids = []
 
