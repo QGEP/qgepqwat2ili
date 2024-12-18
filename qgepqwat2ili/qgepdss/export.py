@@ -284,8 +284,8 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             # row.fk_wastewater_networkelement__REL
             # ),
             "abwassernetzelementref": qgep_export_utils.check_fk_in_subsetid(
-                    subset_ids, row.fk_wastewater_networkelement__REL
-                ),
+                subset_ids, row.fk_wastewater_networkelement__REL
+            ),
             "bemerkung": qgep_export_utils.truncate(
                 qgep_export_utils.emptystr_to_null(row.remark), 80
             ),
