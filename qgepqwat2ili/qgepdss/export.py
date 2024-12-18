@@ -2807,7 +2807,6 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do add relations fk_dataowner__REL, fk_provider__REL, profile_type__REL
 
-
         if filtered or ws_off_sia405abwasser:
             einzugsgebiet = abwasser_model.einzugsgebiet(
                 # FIELDS TO MAP TO ABWASSER.einzugsgebiet
@@ -2853,7 +2852,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 entwaesserungssystem_geplant=qgep_export_utils.get_vl(
                     row.drainage_system_planned__REL
                 ),
-                entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
+                entwaesserungssystem_ist=qgep_export_utils.get_vl(
+                    row.drainage_system_current__REL
+                ),
                 flaeche=row.surface_area,
                 fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
                 fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
@@ -2884,11 +2885,18 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 abflussbeiwert_sw_geplant=row.discharge_coefficient_ww_planned,
                 abflussbeiwert_sw_ist=row.discharge_coefficient_ww_current,
                 # changed call from qgep_export_utils.get_tid to qgep_export_utils.check_fk_in_subsetid so it does not write foreignkeys on elements that do not exist
-                abwassernetzelement_rw_geplantref=
-                qgep_export_utils.get_tid(row.fk_wastewater_networkelement_rw_planned__REL),
-                abwassernetzelement_rw_istref=qgep_export_utils.get_tid(row. fk_wastewater_networkelement_rw_current__REL),
-                abwassernetzelement_sw_geplantref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement_ww_planned__REL),
-                abwassernetzelement_sw_istref=qgep_export_utils.get_tid(row.fk_wastewater_networkelement_ww_current__REL                ),
+                abwassernetzelement_rw_geplantref=qgep_export_utils.get_tid(
+                    row.fk_wastewater_networkelement_rw_planned__REL
+                ),
+                abwassernetzelement_rw_istref=qgep_export_utils.get_tid(
+                    row.fk_wastewater_networkelement_rw_current__REL
+                ),
+                abwassernetzelement_sw_geplantref=qgep_export_utils.get_tid(
+                    row.fk_wastewater_networkelement_ww_planned__REL
+                ),
+                abwassernetzelement_sw_istref=qgep_export_utils.get_tid(
+                    row.fk_wastewater_networkelement_ww_current__REL
+                ),
                 befestigungsgrad_rw_geplant=row.seal_factor_rw_planned,
                 befestigungsgrad_rw_ist=row.seal_factor_rw_current,
                 befestigungsgrad_sw_geplant=row.seal_factor_ww_planned,
@@ -2908,7 +2916,9 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
                 entwaesserungssystem_geplant=qgep_export_utils.get_vl(
                     row.drainage_system_planned__REL
                 ),
-                entwaesserungssystem_ist=qgep_export_utils.get_vl(row.drainage_system_current__REL),
+                entwaesserungssystem_ist=qgep_export_utils.get_vl(
+                    row.drainage_system_current__REL
+                ),
                 flaeche=row.surface_area,
                 fremdwasseranfall_geplant=row.sewer_infiltration_water_production_planned,
                 fremdwasseranfall_ist=row.sewer_infiltration_water_production_current,
