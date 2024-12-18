@@ -64,7 +64,8 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     logger.debug(f"print subset_ids: '{str(subset_ids)}'")
 
     # make a backup copy of subset_id - as it is beeing changed - don't know why
-    subset_ids_original = subset_ids
+    subset_ids_original = selection if selection is not None else []
+    logger.debug(f"print subset_ids_original: '{str(subset_ids_original)}'")
     
     subset_wws_ids = []
 
@@ -90,6 +91,10 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
             f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
         )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+
+        logger.debug(
+            f"reprint subset_ids_original: {subset_ids_original}",
+        )
         subset_ids = subset_ids_original
         logger.debug(
             f"reprint subset_ids: {subset_ids}",
