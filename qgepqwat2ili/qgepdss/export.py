@@ -281,11 +281,11 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         """
         return {
             # "abwassernetzelementref": qgep_export_utils.get_tid(
-                # row.fk_wastewater_networkelement__REL
+            # row.fk_wastewater_networkelement__REL
             # ),
             "abwassernetzelementref": qgep_export_utils.check_fk_in_subsetid(
-                    subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
-                ),
+                subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
+            ),
             "bemerkung": qgep_export_utils.truncate(
                 qgep_export_utils.emptystr_to_null(row.remark), 80
             ),
