@@ -314,7 +314,7 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
 
     # with or without check_fk_in_subset
     # if filtered
-    if filtered and ws_off_sia405abwasser:
+    if filtered or ws_off_sia405abwasser:
         logger.info(
             "Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
         )
