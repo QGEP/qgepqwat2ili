@@ -208,15 +208,16 @@ class GuiExport(QDialog):
         return self.save_logs_next_to_file_checkbox.isChecked()
 
     @property
-    def selected_ids(self):
+    def selected_ids(self, selection_extend=true):
         if self.limit_checkbox.isChecked():
             ids = []
             for struct in self.structures:
                 ids.append(str(struct["wn_obj_id"]))
             for reach in self.reaches:
                 ids.append(str(reach["obj_id"]))
-                ids.append(str(reach["rp_from_fk_wastewater_networkelement"]))
-                ids.append(str(reach["rp_to_fk_wastewater_networkelement"]))
+                if selection_extend:
+                    ids.append(str(reach["rp_from_fk_wastewater_networkelement"]))
+                    ids.append(str(reach["rp_to_fk_wastewater_networkelement"]))
             return ids
         else:
             return None
