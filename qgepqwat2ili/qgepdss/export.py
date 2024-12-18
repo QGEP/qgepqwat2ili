@@ -275,6 +275,26 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
             "fremdwasseranfall": row.sewer_infiltration_water_production,
         }
 
+    def connection_object_common_check_fk_in_subset(row):
+        """
+        Returns common attributes for connection_object
+        """
+        return {
+            # "abwassernetzelementref": qgep_export_utils.get_tid(
+                # row.fk_wastewater_networkelement__REL
+            # ),
+            "abwassernetzelementref": qgep_export_utils.check_fk_in_subsetid(
+                    subset_ids, row.fk_wastewater_networkelement_rw_planned__REL
+                ),
+            "bemerkung": qgep_export_utils.truncate(
+                qgep_export_utils.emptystr_to_null(row.remark), 80
+            ),
+            "betreiberref": qgep_export_utils.get_tid(row.fk_operator__REL),
+            "bezeichnung": qgep_export_utils.null_to_emptystr(row.identifier),
+            "eigentuemerref": qgep_export_utils.get_tid(row.fk_owner__REL),
+            "fremdwasseranfall": row.sewer_infiltration_water_production,
+        }
+
     def surface_runoff_parameters_common(row):
         """
         Returns common attributes for surface_runoff_parameters
@@ -2410,19 +2430,34 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
 
-        gebaeude = abwasser_model.gebaeude(
-            # FIELDS TO MAP TO ABWASSER.gebaeude
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "gebaeude"),
-            # --- anschlussobjekt ---
-            **connection_object_common(row),
-            # --- gebaeude ---
-            hausnummer=row.house_number,
-            perimeter=ST_Force2D(row.perimeter_geometry),
-            referenzpunkt=ST_Force2D(row.reference_point_geometry),
-            standortname=row.location_name,
-        )
+        if filtered or ws_off_sia405abwasser:
+            gebaeude = abwasser_model.gebaeude(
+                # FIELDS TO MAP TO ABWASSER.gebaeude
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "gebaeude"),
+                # --- anschlussobjekt ---
+                **connection_object_common_check_fk_in_subset(row),
+                # --- gebaeude ---
+                hausnummer=row.house_number,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+                referenzpunkt=ST_Force2D(row.reference_point_geometry),
+                standortname=row.location_name,
+            )
+        else:
+            gebaeude = abwasser_model.gebaeude(
+                # FIELDS TO MAP TO ABWASSER.gebaeude
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "gebaeude"),
+                # --- anschlussobjekt ---
+                **connection_object_common(row),
+                # --- gebaeude ---
+                hausnummer=row.house_number,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+                referenzpunkt=ST_Force2D(row.reference_point_geometry),
+                standortname=row.location_name,
+            )
         abwasser_session.add(gebaeude)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
@@ -2453,17 +2488,30 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
 
-        reservoir = abwasser_model.reservoir(
-            # FIELDS TO MAP TO ABWASSER.reservoir
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "reservoir"),
-            # --- anschlussobjekt ---
-            **connection_object_common(row),
-            # --- reservoir ---
-            lage=ST_Force2D(row.situation_geometry),
-            standortname=row.location_name,
-        )
+        if filtered or ws_off_sia405abwasser:
+            reservoir = abwasser_model.reservoir(
+                # FIELDS TO MAP TO ABWASSER.reservoir
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "reservoir"),
+                # --- anschlussobjekt ---
+                **connection_object_common_check_fk_in_subset(row),
+                # --- reservoir ---
+                lage=ST_Force2D(row.situation_geometry),
+                standortname=row.location_name,
+            )
+        else:
+            reservoir = abwasser_model.reservoir(
+                # FIELDS TO MAP TO ABWASSER.reservoir
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "reservoir"),
+                # --- anschlussobjekt ---
+                **connection_object_common(row),
+                # --- reservoir ---
+                lage=ST_Force2D(row.situation_geometry),
+                standortname=row.location_name,
+            )
         abwasser_session.add(reservoir)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
@@ -2496,19 +2544,34 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
 
-        einzelflaeche = abwasser_model.einzelflaeche(
-            # FIELDS TO MAP TO ABWASSER.einzelflaeche
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "einzelflaeche"),
-            # --- anschlussobjekt ---
-            **connection_object_common(row),
-            # --- einzelflaeche ---
-            befestigung=qgep_export_utils.get_vl(row.pavement__REL),
-            funktion=qgep_export_utils.get_vl(row.function__REL),
-            neigung=row.inclination,
-            perimeter=ST_Force2D(row.perimeter_geometry),
-        )
+        if filtered or ws_off_sia405abwasser:
+            einzelflaeche = abwasser_model.einzelflaeche(
+                # FIELDS TO MAP TO ABWASSER.einzelflaeche
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "einzelflaeche"),
+                # --- anschlussobjekt ---
+                **connection_object_common_check_fk_in_subset(row),
+                # --- einzelflaeche ---
+                befestigung=qgep_export_utils.get_vl(row.pavement__REL),
+                funktion=qgep_export_utils.get_vl(row.function__REL),
+                neigung=row.inclination,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+            )
+        else:
+            einzelflaeche = abwasser_model.einzelflaeche(
+                # FIELDS TO MAP TO ABWASSER.einzelflaeche
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "einzelflaeche"),
+                # --- anschlussobjekt ---
+                **connection_object_common(row),
+                # --- einzelflaeche ---
+                befestigung=qgep_export_utils.get_vl(row.pavement__REL),
+                funktion=qgep_export_utils.get_vl(row.function__REL),
+                neigung=row.inclination,
+                perimeter=ST_Force2D(row.perimeter_geometry),
+            )
         abwasser_session.add(einzelflaeche)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
@@ -2539,17 +2602,30 @@ def qgep_export_dss(selection=None, labels_file=None, orientation=None, basket_e
         # --- _rel_ ---
         # to do extra funktion schreiben wo alle fk auf diese klasse erzeugt werden z.B. # accessibility__REL, bedding_encasement__REL,
 
-        brunnen = abwasser_model.brunnen(
-            # FIELDS TO MAP TO ABWASSER.brunnen
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "brunnen"),
-            # --- anschlussobjekt ---
-            **connection_object_common(row),
-            # --- brunnen ---
-            lage=ST_Force2D(row.situation_geometry),
-            standortname=row.location_name,
-        )
+        if filtered or ws_off_sia405abwasser:
+            brunnen = abwasser_model.brunnen(
+                # FIELDS TO MAP TO ABWASSER.brunnen
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "brunnen"),
+                # --- anschlussobjekt ---
+                **connection_object_common_check_fk_in_subset(row),
+                # --- brunnen ---
+                lage=ST_Force2D(row.situation_geometry),
+                standortname=row.location_name,
+            )
+        else:
+            brunnen = abwasser_model.brunnen(
+                # FIELDS TO MAP TO ABWASSER.brunnen
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "brunnen"),
+                # --- anschlussobjekt ---
+                **connection_object_common(row),
+                # --- brunnen ---
+                lage=ST_Force2D(row.situation_geometry),
+                standortname=row.location_name,
+            )
         abwasser_session.add(brunnen)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
