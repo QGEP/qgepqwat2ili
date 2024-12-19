@@ -209,7 +209,8 @@ class GuiExport(QDialog):
 
     @property
     def selected_ids(self):
-        selection_extend = False
+        # Variable to choose if automatic selection_extend or not
+        selection_extend = True
 
         if self.limit_checkbox.isChecked():
             ids = []
