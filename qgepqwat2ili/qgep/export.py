@@ -56,7 +56,19 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     ws_off_sia405abwasser = False
     # 1. Filtering - check if selection
     filtered = selection is not None
+
+    # Logging for debugging
+    logger.debug(f"print filtered '{str(filtered)}'")
+
     subset_ids = selection if selection is not None else []
+    # Logging for debugging
+    logger.debug(f"print subset_ids: '{str(subset_ids)}'")
+
+    # make a backup copy of subset_id - as it is beeing changed - don't know why
+
+    subset_ids_original = selection if selection is not None else []
+    logger.debug(f"print subset_ids_original: '{str(subset_ids_original)}'")
+
     subset_wws_ids = []
 
     if filtered:
@@ -81,6 +93,15 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
             f"5 + 2 + 3 + 4 adapted_subset_ids: {adapted_subset_ids}",
         )
         # 6. check blind connections - are there reaches in adapted_subset_ids that have not been in subset_ids
+
+        logger.debug(
+            f"reprint subset_ids_original: {subset_ids_original}",
+        )
+        subset_ids = subset_ids_original
+        logger.debug(
+            f"reprint subset_ids: {subset_ids}",
+        )
+
         subset_ids_reaches = []
         subset_ids_reaches = filter_reaches(subset_ids)
         logger.debug(
@@ -313,55 +334,120 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
     logger.info("Exporting QGEP.pipe_profile -> ABWASSER.rohrprofil, ABWASSER.metaattribute")
     qgep_export_utils.export_pipe_profile()
 
-    logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
-    qgep_export_utils.export_reach_point()
-
-    logger.info(
-        "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
-    )
-    query = qgep_session.query(qgep_model.wastewater_node)
-    if filtered:
-        query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
-        # add sql statement to logger
-        statement = query.statement
-        logger.debug(f" selection query = {statement}")
-    for row in query:
-        # AVAILABLE FIELDS IN QGEP.wastewater_node
-
-        # --- wastewater_networkelement ---
-        # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
-
-        # --- wastewater_node ---
-
-        # --- _bwrel_ ---
-        # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
-
-        # --- _rel_ ---
-        # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
-
-        # QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.
-
-        abwasserknoten = abwasser_model.abwasserknoten(
-            # FIELDS TO MAP TO ABWASSER.abwasserknoten
-            # --- baseclass ---
-            # --- sia405_baseclass ---
-            **qgep_export_utils.base_common(row, "abwasserknoten"),
-            # --- abwassernetzelement ---
-            **qgep_export_utils.wastewater_networkelement_common(row),
-            # --- abwasserknoten ---
-            # TODO : WARNING : fk_hydr_geometry is not mapped
-            lage=ST_Force2D(row.situation_geometry),
-            rueckstaukote=row.backflow_level,
-            sohlenkote=row.bottom_level,
+    # with or without check_fk_in_subset
+    # if filtered
+    if filtered or ws_off_sia405abwasser:
+        logger.info(
+            "Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
         )
-        abwasser_session.add(abwasserknoten)
-        qgep_export_utils.create_metaattributes(row)
-        print(".", end="")
-    logger.info("done")
-    abwasser_session.flush()
+        qgep_export_utils.export_reach_point_check_fk_in_subset()
 
-    logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
-    qgep_export_utils.export_reach()
+        logger.info(
+            "Exporting QGEP.wastewater_node (check_fk_in_subset) -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+        )
+        # cannot be moved to qgep_export_utils because fk_hydr_geometry is only in VSA-DSS but not in SIA405 Abwasser and KEK
+        # qgep_export_utils.export_wastewater_node_check_fk_in_subset()
+
+        query = qgep_session.query(qgep_model.wastewater_node)
+        if filtered:
+            query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+            # add sql statement to logger
+            statement = query.statement
+            logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.wastewater_node
+
+            # --- wastewater_networkelement ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+            # --- wastewater_node ---
+
+            # --- _bwrel_ ---
+            # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
+
+            # QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.
+
+            abwasserknoten = abwasser_model.abwasserknoten(
+                # FIELDS TO MAP TO ABWASSER.abwasserknoten
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "abwasserknoten"),
+                # --- abwassernetzelement ---
+                # **qgep_export_utils.wastewater_networkelement_common(row),
+                **qgep_export_utils.wastewater_networkelement_common_check_fk_in_subset(row),
+                # --- abwasserknoten ---
+                # TODO : WARNING : fk_hydr_geometry is not mapped
+                lage=ST_Force2D(row.situation_geometry),
+                rueckstaukote=row.backflow_level,
+                sohlenkote=row.bottom_level,
+            )
+            abwasser_session.add(abwasserknoten)
+            qgep_export_utils.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        abwasser_session.flush()
+
+        logger.info(
+            "Exporting QGEP.reach (check_fk_in_subset) -> ABWASSER.haltung, ABWASSER.metaattribute"
+        )
+        qgep_export_utils.export_reach_check_fk_in_subset()
+
+    # not filtered and not ws_off_sia405abwasser
+    else:
+        logger.info("Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute")
+        qgep_export_utils.export_reach_point()
+
+        logger.info(
+            "Exporting QGEP.wastewater_node -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
+        )
+        # qgep_export_utils.export_wastewater_node()
+
+        query = qgep_session.query(qgep_model.wastewater_node)
+        if filtered:
+            query = query.filter(qgep_model.wastewater_networkelement.obj_id.in_(subset_ids))
+            # add sql statement to logger
+            statement = query.statement
+            logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.wastewater_node
+
+            # --- wastewater_networkelement ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+            # --- wastewater_node ---
+
+            # --- _bwrel_ ---
+            # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
+
+            # QGEP field wastewater_node.fk_hydr_geometry has no equivalent in the interlis model. It will be ignored.
+
+            abwasserknoten = abwasser_model.abwasserknoten(
+                # FIELDS TO MAP TO ABWASSER.abwasserknoten
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **qgep_export_utils.base_common(row, "abwasserknoten"),
+                # --- abwassernetzelement ---
+                **qgep_export_utils.wastewater_networkelement_common(row),
+                # --- abwasserknoten ---
+                # TODO : WARNING : fk_hydr_geometry is not mapped
+                lage=ST_Force2D(row.situation_geometry),
+                rueckstaukote=row.backflow_level,
+                sohlenkote=row.bottom_level,
+            )
+            abwasser_session.add(abwasserknoten)
+            qgep_export_utils.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        abwasser_session.flush()
+
+        logger.info("Exporting QGEP.reach -> ABWASSER.haltung, ABWASSER.metaattribute")
+        qgep_export_utils.export_reach()
 
     if ws_off_sia405abwasser:
         logger.info(
