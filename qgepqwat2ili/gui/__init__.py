@@ -178,6 +178,7 @@ def action_import(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=True,
             )
         elif imodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -185,6 +186,7 @@ def action_import(plugin):
                 config.ABWASSER_SIA405_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         elif imodel == "DSS_2015_LV95":
             create_ili_schema(
@@ -192,6 +194,7 @@ def action_import(plugin):
                 config.ABWASSER_DSS_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
+                create_basket_col=False,
             )
         else:
             # print(imodel)
@@ -549,7 +552,7 @@ def action_export(plugin):
                 config.ABWASSER_ILI_MODEL,
                 log_path,
                 recreate_schema=True,
-                create_basket_col=False,
+                create_basket_col=True,
             )
         elif emodel == "SIA405_ABWASSER_2015_LV95":
             create_ili_schema(
@@ -667,6 +670,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=True,
                 )
             # 22.3.2023 / 28.3.2023 adjusted to qgepsia405_export
             elif emodel == "SIA405_ABWASSER_2015_LV95":
@@ -677,6 +681,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=False,
                 )
             elif emodel == "DSS_2015_LV95":
                 logger.info("Start Exporting DSS_2015_LV95 - qgepdss_export")
@@ -686,6 +691,7 @@ def action_export(plugin):
                     selection=export_dialog.selected_ids,
                     labels_file=labels_file_path,
                     orientation=eorientation,
+                    basket_enabled=False,
                 )
             else:
                 progress_dialog.close()
@@ -704,7 +710,7 @@ def action_export(plugin):
         # 12.7.2022 to do dependant on Model Selection
         if emodel == "VSA_KEK_2019_LV95":
             for model_name, export_model_name, progress in [
-                (config.ABWASSER_ILI_MODEL_NAME, None, 50),
+                (config.ABWASSER_ILI_MODEL_NAME, config.ABWASSER_ILI_MODEL_NAME, 50),
                 (config.ABWASSER_ILI_MODEL_NAME_SIA405, config.ABWASSER_ILI_MODEL_NAME_SIA405, 70),
             ]:
 

@@ -494,6 +494,10 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         logger.info("Exporting QGEP.benching -> ABWASSER.bankett, ABWASSER.metaattribute")
         qgep_export_utils.export_benching()
 
+    # From here on its about KEK -> change current basket
+    current_basket = basket_utils.basket_topic_kek
+    qgep_export_utils.current_basket = current_basket
+
     logger.info("Exporting QGEP.examination -> ABWASSER.untersuchung, ABWASSER.metaattribute")
     query = qgep_session.query(qgep_model.examination)
     if filtered:
@@ -664,6 +668,9 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
             schadenlageanfang=row.damage_begin,
             schadenlageende=row.damage_end,
         )
+
+        print(f"Kanalschaden: {kanalschaden.t_basket}")
+
         abwasser_session.add(kanalschaden)
         qgep_export_utils.create_metaattributes(row)
         print(".", end="")
@@ -752,6 +759,9 @@ def qgep_export_kek(selection=None, labels_file=None, orientation=None, basket_e
         print(".", end="")
     logger.info("done")
     abwasser_session.flush()
+
+    current_basket = basket_utils.basket_topic_sia405_abwasser
+    qgep_export_utils.current_basket = current_basket
 
     # Labels
     # Note: these are extracted from the optional labels file (not exported from the QGEP database)

@@ -21,6 +21,7 @@ def check_organisation_subclass_data():
     cursor = connection.cursor()
 
     cursor.execute("SELECT obj_id FROM qgep_od.organisation;")
+
     if cursor.rowcount > 0:
         organisation_count = cursor.rowcount
         logger.info(f"Number of organisation datasets: {organisation_count}")
