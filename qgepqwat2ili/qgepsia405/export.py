@@ -334,12 +334,24 @@ def qgep_export_sia405(selection=None, labels_file=None, orientation=None, baske
     qgep_export_utils.export_pipe_profile()
 
     # with or without check_fk_in_subset
-    # if filtered
-    if filtered or ws_off_sia405abwasser:
-        logger.info(
-            "Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
+    if (filtered or ws_off_sia405abwasser):
+        logger.debug(
+            f"Filtered = {str(filtered)} and ws_off_sia405abwasser = {str(ws_off_sia405abwasser)}"
         )
-        qgep_export_utils.export_reach_point_check_fk_in_subset()
+        # new 20.12.24
+        # subset_id exists
+        if filtered:
+            logger.info(
+                "Exporting QGEP.reach_point (check_fk_in_subset) -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
+            )
+            qgep_export_utils.export_reach_point_check_fk_in_subset()
+        # subset_id = []
+        else:
+            logger.info(
+                "Exporting QGEP.reach_point -> ABWASSER.haltungspunkt, ABWASSER.metaattribute"
+            )
+            qgep_export_utils.export_reach_point()
+
 
         logger.info(
             "Exporting QGEP.wastewater_node (check_fk_in_subset) -> ABWASSER.abwasserknoten, ABWASSER.metaattribute"
