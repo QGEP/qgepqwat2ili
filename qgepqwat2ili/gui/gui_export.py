@@ -209,14 +209,18 @@ class GuiExport(QDialog):
 
     @property
     def selected_ids(self):
+        # Variable to choose if automatic selection_extend or not
+        selection_extend = True
+
         if self.limit_checkbox.isChecked():
             ids = []
             for struct in self.structures:
                 ids.append(str(struct["wn_obj_id"]))
             for reach in self.reaches:
                 ids.append(str(reach["obj_id"]))
-                ids.append(str(reach["rp_from_fk_wastewater_networkelement"]))
-                ids.append(str(reach["rp_to_fk_wastewater_networkelement"]))
+                if selection_extend:
+                    ids.append(str(reach["rp_from_fk_wastewater_networkelement"]))
+                    ids.append(str(reach["rp_to_fk_wastewater_networkelement"]))
             return ids
         else:
             return None

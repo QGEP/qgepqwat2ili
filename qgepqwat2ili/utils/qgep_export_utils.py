@@ -1,9 +1,10 @@
 import json
 
+import psycopg2
 from geoalchemy2.functions import ST_Force2D, ST_GeomFromGeoJSON
 from sqlalchemy import or_
 
-from .various import logger
+from .various import get_pgconf_as_psycopg2_dsn, logger
 
 
 class QgepExportUtils:
@@ -19,6 +20,8 @@ class QgepExportUtils:
         labelorientation,
         filtered,
         subset_ids,
+        subset_wws_ids,
+        ws_off_sia405abwasser,
     ):
         self.tid_maker = tid_maker
         self.current_basket = current_basket
@@ -29,6 +32,8 @@ class QgepExportUtils:
         self.labelorientation = labelorientation
         self.filtered = filtered
         self.subset_ids = subset_ids
+        self.subset_wws_ids = subset_wws_ids
+        self.ws_off_sia405abwasser = ws_off_sia405abwasser
 
     def get_tid(self, relation):
         """
@@ -107,23 +112,30 @@ class QgepExportUtils:
         if relation is None:
             return None
 
-        logger.info(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
+        logger.debug(f"check_fk_in_subsetid -  Subset ID's '{subset}'")
         # get the value of the fk_ attribute as str out of the relation to be able to check whether it is in the subset
         fremdschluesselstr = getattr(relation, "obj_id")
-        logger.info(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
+        logger.debug(f"check_fk_in_subsetid -  fremdschluesselstr '{fremdschluesselstr}'")
 
-        if fremdschluesselstr in subset:
-            logger.info(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
-            logger.info(f"check_fk_in_subsetid - tid = '{self.tid_maker.tid_for_row(relation)}' ")
+        # if no selection subset will be None
+        if subset is None:
             return self.tid_maker.tid_for_row(relation)
         else:
-            if self.filtered:
+            if fremdschluesselstr in subset:
+                logger.debug(f"check_fk_in_subsetid - '{fremdschluesselstr}' is in subset ")
+                logger.debug(
+                    f"check_fk_in_subsetid - tid = '{self.tid_maker.tid_for_row(relation)}' "
+                )
+                return self.tid_maker.tid_for_row(relation)
+            else:
+                # take out - as it has to work also without filtered (SIA405 Abwasser)
+                # if self.filtered:
                 logger.warning(
                     f"check_fk_in_subsetid - '{fremdschluesselstr}' is not in subset - replaced with None instead!"
                 )
                 return None
-            else:
-                return self.tid_maker.tid_for_row(relation)
+                # else:
+                #    return self.tid_maker.tid_for_row(relation)
 
     def create_metaattributes(self, row):
         metaattribute = self.abwasser_model.metaattribute(
@@ -174,9 +186,9 @@ class QgepExportUtils:
         """
         Returns common attributes for wastewater_structure
         """
-        logger.warning(
-            "Mapping of wastewater_structure->abwasserbauwerk is not fully implemented."
-        )
+        # logger.warning(
+        # "Mapping of wastewater_structure->abwasserbauwerk is not yet implemented for 3D extensions of SIA405 Abwasser, VSA-KEK and VSA-DSS 2015."
+        # )
         return {
             # --- abwasserbauwerk ---
             "akten": row.records,
@@ -204,10 +216,24 @@ class QgepExportUtils:
 
     def wastewater_networkelement_common(self, row):
         """
-        Returns common attributes for wastewater_networkelement
+        Returns common attributes for wastewater_networkelement - no check_fk_in_subsetid
         """
         return {
             "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
+            "bezeichnung": self.null_to_emptystr(row.identifier),
+        }
+
+    def wastewater_networkelement_common_check_fk_in_subset(self, row):
+        """
+        Returns common attributes for wastewater_networkelement with check_fk_in_subsetid
+        """
+        return {
+            # added check_fk_in_subsetid with subset_wws_ids (only needed for SIA405 Abwasser export wwtp_structure - but as now in qgep_export_utils done for all export - might slow donw export
+            # "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "abwasserbauwerkref": self.check_fk_in_subsetid(
+                self.subset_wws_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
             "bezeichnung": self.null_to_emptystr(row.identifier),
         }
@@ -218,6 +244,19 @@ class QgepExportUtils:
         """
         return {
             "abwasserbauwerkref": self.get_tid(row.fk_wastewater_structure__REL),
+            "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
+            "bezeichnung": self.null_to_emptystr(row.identifier),
+            "instandstellung": self.get_vl(row.renovation_demand__REL),
+        }
+
+    def structure_part_common_check_fk_in_subset(self, row):
+        """
+        Returns common attributes for structure_part
+        """
+        return {
+            "abwasserbauwerkref": self.check_fk_in_subsetid(
+                self.subset_wws_ids, row.fk_wastewater_structure__REL
+            ),
             "bemerkung": self.truncate(self.emptystr_to_null(row.remark), 80),
             "bezeichnung": self.null_to_emptystr(row.identifier),
             "instandstellung": self.get_vl(row.renovation_demand__REL),
@@ -416,10 +455,10 @@ class QgepExportUtils:
 
     def export_pipe_profile(self):
         query = self.qgep_session.query(self.qgep_model.pipe_profile)
-        if self.filtered:
-            query = query.join(self.qgep_model.reach).filter(
-                self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
-            )
+        # always export all pipe_profile
+        # add sql statement to logger
+        statement = query.statement
+        logger.info(f" always export all pipe_profile datasets query = {statement}")
         for row in query:
 
             # AVAILABLE FIELDS IN QGEP.pipe_profile
@@ -450,6 +489,90 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    # def export_wastewater_node(self):
+    # query = self.qgep_session.query(self.qgep_model.wastewater_node)
+    # if self.filtered:
+    # query = query.filter(
+    # self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+    # )
+    # # add sql statement to logger
+    # statement = query.statement
+    # logger.debug(f" selection query = {statement}")
+    # for row in query:
+    # # AVAILABLE FIELDS IN QGEP.wastewater_node
+
+    # # --- wastewater_networkelement ---
+    # # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+    # # --- wastewater_node ---
+
+    # # --- _bwrel_ ---
+    # # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
+
+    # # --- _rel_ ---
+    # # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
+
+    # abwasserknoten = self.abwasser_model.abwasserknoten(
+    # # FIELDS TO MAP TO ABWASSER.abwasserknoten
+    # # --- baseclass ---
+    # # --- sia405_baseclass ---
+    # **self.base_common(row, "abwasserknoten"),
+    # # --- abwassernetzelement ---
+    # **self.wastewater_networkelement_common(row),
+    # # --- abwasserknoten ---
+    # hydr_geometrieref=self.get_tid(row.fk_hydr_geometry__REL),
+    # lage=ST_Force2D(row.situation_geometry),
+    # rueckstaukote=row.backflow_level,
+    # sohlenkote=row.bottom_level,
+    # )
+    # self.abwasser_session.add(abwasserknoten)
+    # self.create_metaattributes(row)
+    # print(".", end="")
+    # logger.info("done")
+    # self.abwasser_session.flush()
+
+    # def export_wastewater_node_check_fk_in_subset(self):
+    # query = self.qgep_session.query(self.qgep_model.wastewater_node)
+    # if self.filtered:
+    # query = query.filter(
+    # self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+    # )
+    # # add sql statement to logger
+    # statement = query.statement
+    # logger.debug(f" selection query = {statement}")
+    # for row in query:
+    # # AVAILABLE FIELDS IN QGEP.wastewater_node
+
+    # # --- wastewater_networkelement ---
+    # # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+    # # --- wastewater_node ---
+
+    # # --- _bwrel_ ---
+    # # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, hydraulic_char_data__BWREL_fk_wastewater_node, overflow__BWREL_fk_overflow_to, overflow__BWREL_fk_wastewater_node, reach_point__BWREL_fk_wastewater_networkelement, throttle_shut_off_unit__BWREL_fk_wastewater_node, wastewater_structure__BWREL_fk_main_wastewater_node
+
+    # # --- _rel_ ---
+    # # fk_dataowner__REL, fk_hydr_geometry__REL, fk_provider__REL, fk_wastewater_structure__REL
+
+    # abwasserknoten = self.abwasser_model.abwasserknoten(
+    # # FIELDS TO MAP TO ABWASSER.abwasserknoten
+    # # --- baseclass ---
+    # # --- sia405_baseclass ---
+    # **self.base_common(row, "abwasserknoten"),
+    # # --- abwassernetzelement ---
+    # **self.wastewater_networkelement_common_check_fk_in_subset(row),
+    # # --- abwasserknoten ---
+    # hydr_geometrieref=self.get_tid(row.fk_hydr_geometry__REL),
+    # lage=ST_Force2D(row.situation_geometry),
+    # rueckstaukote=row.backflow_level,
+    # sohlenkote=row.bottom_level,
+    # )
+    # self.abwasser_session.add(abwasserknoten)
+    # self.create_metaattributes(row)
+    # print(".", end="")
+    # logger.info("done")
+    # self.abwasser_session.flush()
+
     def export_reach_point(self):
         query = self.qgep_session.query(self.qgep_model.reach_point)
         if self.filtered:
@@ -461,6 +584,57 @@ class QgepExportUtils:
                     self.qgep_model.reach_point.obj_id == self.qgep_model.reach.fk_reach_point_to,
                 ),
             ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+
+            # AVAILABLE FIELDS IN QGEP.reach_point
+
+            # --- reach_point ---
+            # elevation_accuracy, fk_dataowner, fk_provider, fk_wastewater_networkelement, identifier, last_modification, level, obj_id, outlet_shape, position_of_connection, remark, situation_geometry
+
+            # --- _bwrel_ ---
+            # examination__BWREL_fk_reach_point, reach__BWREL_fk_reach_point_from, reach__BWREL_fk_reach_point_to
+
+            # --- _rel_ ---
+            # elevation_accuracy__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_networkelement__REL, outlet_shape__REL
+
+            haltungspunkt = self.abwasser_model.haltungspunkt(
+                # FIELDS TO MAP TO ABWASSER.haltungspunkt
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "haltungspunkt"),
+                # --- haltungspunkt ---
+                abwassernetzelementref=self.get_tid(row.fk_wastewater_networkelement__REL),
+                auslaufform=self.get_vl(row.outlet_shape__REL),
+                bemerkung=self.truncate(self.emptystr_to_null(row.remark), 80),
+                bezeichnung=self.null_to_emptystr(row.identifier),
+                hoehengenauigkeit=self.get_vl(row.elevation_accuracy__REL),
+                kote=row.level,
+                lage=ST_Force2D(row.situation_geometry),
+                lage_anschluss=row.position_of_connection,
+            )
+            self.abwasser_session.add(haltungspunkt)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_reach_point_check_fk_in_subset(self):
+        query = self.qgep_session.query(self.qgep_model.reach_point)
+        if self.filtered:
+            query = query.join(
+                self.qgep_model.reach,
+                or_(
+                    self.qgep_model.reach_point.obj_id
+                    == self.qgep_model.reach.fk_reach_point_from,
+                    self.qgep_model.reach_point.obj_id == self.qgep_model.reach.fk_reach_point_to,
+                ),
+            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
 
             # AVAILABLE FIELDS IN QGEP.reach_point
@@ -505,6 +679,9 @@ class QgepExportUtils:
             query = query.filter(
                 self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
             )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.reach
 
@@ -557,12 +734,124 @@ class QgepExportUtils:
         logger.info("done")
         self.abwasser_session.flush()
 
+    def export_reach_check_fk_in_subset(self):
+        query = self.qgep_session.query(self.qgep_model.reach)
+        if self.filtered:
+            query = query.filter(
+                self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids)
+            )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.reach
+
+            # --- wastewater_networkelement ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark
+
+            # --- reach ---
+            # clear_height, coefficient_of_friction, elevation_determination, fk_pipe_profile, fk_reach_point_from, fk_reach_point_to, horizontal_positioning, inside_coating, length_effective, material, obj_id, progression_geometry, reliner_material, reliner_nominal_size, relining_construction, relining_kind, ring_stiffness, slope_building_plan, wall_roughness
+
+            # --- _bwrel_ ---
+            # catchment_area__BWREL_fk_wastewater_networkelement_rw_current, catchment_area__BWREL_fk_wastewater_networkelement_rw_planned, catchment_area__BWREL_fk_wastewater_networkelement_ww_current, catchment_area__BWREL_fk_wastewater_networkelement_ww_planned, connection_object__BWREL_fk_wastewater_networkelement, reach_point__BWREL_fk_wastewater_networkelement, reach_text__BWREL_fk_reach, txt_text__BWREL_fk_reach
+
+            # --- _rel_ ---
+            # elevation_determination__REL, fk_dataowner__REL, fk_pipe_profile__REL, fk_provider__REL, fk_reach_point_from__REL, fk_reach_point_to__REL, fk_wastewater_structure__REL, horizontal_positioning__REL, inside_coating__REL, material__REL, reliner_material__REL, relining_construction__REL, relining_kind__REL
+
+            # QGEP field reach.elevation_determination has no equivalent in the interlis model. It will be ignored.
+
+            haltung = self.abwasser_model.haltung(
+                # FIELDS TO MAP TO ABWASSER.haltung
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "haltung"),
+                # --- abwassernetzelement ---
+                **self.wastewater_networkelement_common_check_fk_in_subset(row),
+                # --- haltung ---
+                # NOT MAPPED : elevation_determination
+                innenschutz=self.get_vl(row.inside_coating__REL),
+                laengeeffektiv=row.length_effective,
+                lagebestimmung=self.get_vl(row.horizontal_positioning__REL),
+                lichte_hoehe=row.clear_height,
+                material=self.get_vl(row.material__REL),
+                nachhaltungspunktref=self.get_tid(row.fk_reach_point_to__REL),
+                plangefaelle=row.slope_building_plan,  # TODO : check, does this need conversion ?
+                reibungsbeiwert=row.coefficient_of_friction,
+                reliner_art=self.get_vl(row.relining_kind__REL),
+                reliner_bautechnik=self.get_vl(row.relining_construction__REL),
+                reliner_material=self.get_vl(row.reliner_material__REL),
+                reliner_nennweite=row.reliner_nominal_size,
+                ringsteifigkeit=row.ring_stiffness,
+                rohrprofilref=self.get_tid(row.fk_pipe_profile__REL),
+                verlauf=ST_Force2D(row.progression_geometry),
+                # -- attribute 3D ---
+                # verlauf3d=row.progression3d,
+                vonhaltungspunktref=self.get_tid(row.fk_reach_point_from__REL),
+                wandrauhigkeit=row.wall_roughness,
+            )
+            self.abwasser_session.add(haltung)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
     def export_dryweather_downspout(self):
         query = self.qgep_session.query(self.qgep_model.dryweather_downspout)
+        # if self.filtered:
+        # query = (
+        # query.join(self.qgep_model.wastewater_structure)
+        # .join(self.qgep_model.wastewater_networkelement)
+        # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
-            query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.dryweather_downspout
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- dryweather_downspout ---
+            # diameter, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, renovation_demand__REL
+
+            trockenwetterfallrohr = self.abwasser_model.trockenwetterfallrohr(
+                # FIELDS TO MAP TO ABWASSER.trockenwetterfallrohr
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "trockenwetterfallrohr"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- trockenwetterfallrohr ---
+                durchmesser=row.diameter,
+            )
+            self.abwasser_session.add(trockenwetterfallrohr)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_dryweather_downspout_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.dryweather_downspout)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_downspout
 
@@ -596,10 +885,60 @@ class QgepExportUtils:
 
     def export_access_aid(self):
         query = self.qgep_session.query(self.qgep_model.access_aid)
+        # if self.filtered:
+        # query = (
+        # query.join(self.qgep_model.wastewater_structure)
+        # .join(self.qgep_model.wastewater_networkelement)
+        # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
-            query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.access_aid
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- access_aid ---
+            # kind, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+            einstiegshilfe = self.abwasser_model.einstiegshilfe(
+                # FIELDS TO MAP TO ABWASSER.einstiegshilfe
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "einstiegshilfe"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- einstiegshilfe ---
+                art=self.get_vl(row.kind__REL),
+            )
+            self.abwasser_session.add(einstiegshilfe)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_access_aid_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.access_aid)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.access_aid
 
@@ -633,10 +972,60 @@ class QgepExportUtils:
 
     def export_dryweather_flume(self):
         query = self.qgep_session.query(self.qgep_model.dryweather_flume)
+        # if self.filtered:
+        # query = (
+        # query.join(self.qgep_model.wastewater_structure)
+        # .join(self.qgep_model.wastewater_networkelement)
+        # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
-            query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.dryweather_flume
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- dryweather_flume ---
+            # material, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, renovation_demand__REL
+
+            trockenwetterrinne = self.abwasser_model.trockenwetterrinne(
+                # FIELDS TO MAP TO ABWASSER.trockenwetterrinne
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "trockenwetterrinne"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- trockenwetterrinne ---
+                material=self.get_vl(row.material__REL),
+            )
+            self.abwasser_session.add(trockenwetterrinne)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_dryweather_flume_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.dryweather_flume)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.dryweather_flume
 
@@ -670,10 +1059,73 @@ class QgepExportUtils:
 
     def export_cover(self):
         query = self.qgep_session.query(self.qgep_model.cover)
+        # if self.filtered:
+        # query = (
+        # query.join(self.qgep_model.wastewater_structure)
+        # .join(self.qgep_model.wastewater_networkelement)
+        # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
             query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+                self.qgep_model.wastewater_structure,
+                self.qgep_model.cover.fk_wastewater_structure
+                == self.qgep_model.wastewater_structure.obj_id,
+            ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.cover
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- cover ---
+            # brand, cover_shape, diameter, fastening, level, material, obj_id, positional_accuracy, situation_geometry, sludge_bucket, venting
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id, wastewater_structure__BWREL_fk_main_cover
+
+            # --- _rel_ ---
+            # cover_shape__REL, fastening__REL, fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, material__REL, positional_accuracy__REL, renovation_demand__REL, sludge_bucket__REL, venting__REL
+
+            deckel = self.abwasser_model.deckel(
+                # FIELDS TO MAP TO ABWASSER.deckel
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "deckel"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- deckel ---
+                deckelform=self.get_vl(row.cover_shape__REL),
+                durchmesser=row.diameter,
+                entlueftung=self.get_vl(row.venting__REL),
+                fabrikat=row.brand,
+                kote=row.level,
+                lage=ST_Force2D(row.situation_geometry),
+                lagegenauigkeit=self.get_vl(row.positional_accuracy__REL),
+                material=self.get_vl(row.material__REL),
+                schlammeimer=self.get_vl(row.sludge_bucket__REL),
+                verschluss=self.get_vl(row.fastening__REL),
+            )
+            self.abwasser_session.add(deckel)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+    def export_cover_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.cover)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(
+            self.qgep_model.wastewater_structure,
+            self.qgep_model.cover.fk_wastewater_structure
+            == self.qgep_model.wastewater_structure.obj_id,
+        ).filter(self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids))
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.cover
 
@@ -716,10 +1168,20 @@ class QgepExportUtils:
 
     def export_benching(self):
         query = self.qgep_session.query(self.qgep_model.benching)
+        # if self.filtered:
+        # query = (
+        # query.join(self.qgep_model.wastewater_structure)
+        # .join(self.qgep_model.wastewater_networkelement)
+        # .filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+        # )
+        # filtering only on wastewater_structures that are in subset_wws_ids
         if self.filtered:
-            query = query.join(
-                self.qgep_model.wastewater_structure, self.qgep_model.wastewater_networkelement
-            ).filter(self.qgep_model.wastewater_networkelement.obj_id.in_(self.subset_ids))
+            query = query.join(self.qgep_model.wastewater_structure).filter(
+                self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+            )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
         for row in query:
             # AVAILABLE FIELDS IN QGEP.benching
 
@@ -750,3 +1212,463 @@ class QgepExportUtils:
             print(".", end="")
         logger.info("done")
         self.abwasser_session.flush()
+
+    def export_benching_ws_off_sia405abwasser(self):
+        query = self.qgep_session.query(self.qgep_model.benching)
+        # if ws_off_sia405abwasser always filter out with subset_wws_ids
+        query = query.join(self.qgep_model.wastewater_structure).filter(
+            self.qgep_model.wastewater_structure.obj_id.in_(self.subset_wws_ids)
+        )
+        # add sql statement to logger
+        statement = query.statement
+        logger.debug(f" selection query = {statement}")
+        for row in query:
+            # AVAILABLE FIELDS IN QGEP.benching
+
+            # --- structure_part ---
+            # fk_dataowner, fk_provider, fk_wastewater_structure, identifier, last_modification, remark, renovation_demand
+
+            # --- benching ---
+            # kind, obj_id
+
+            # --- _bwrel_ ---
+            # access_aid_kind__BWREL_obj_id, backflow_prevention__BWREL_obj_id, benching_kind__BWREL_obj_id, dryweather_flume_material__BWREL_obj_id, electric_equipment__BWREL_obj_id, electromechanical_equipment__BWREL_obj_id, solids_retention__BWREL_obj_id, tank_cleaning__BWREL_obj_id, tank_emptying__BWREL_obj_id
+
+            # --- _rel_ ---
+            # fk_dataowner__REL, fk_provider__REL, fk_wastewater_structure__REL, kind__REL, renovation_demand__REL
+
+            bankett = self.abwasser_model.bankett(
+                # FIELDS TO MAP TO ABWASSER.bankett
+                # --- baseclass ---
+                # --- sia405_baseclass ---
+                **self.base_common(row, "bankett"),
+                # --- bauwerksteil ---
+                **self.structure_part_common(row),
+                # --- bankett ---
+                art=self.get_vl(row.kind__REL),
+            )
+            self.abwasser_session.add(bankett)
+            self.create_metaattributes(row)
+            print(".", end="")
+        logger.info("done")
+        self.abwasser_session.flush()
+
+
+# end class QgepExportUtils
+
+
+# 10.12.2024
+def get_selection_text_for_in_statement(selection_list):
+    """
+    convert selection_list to selection_text to fit SQL IN statement
+    """
+    if selection_list is None:
+        selection_text = None
+    else:
+        if not selection_list:
+            # list is empty - no need for adaption
+            selection_text = None
+        else:
+            selection_text = ""
+
+            for list_item in selection_list:
+                selection_text += "'"
+                selection_text += list_item
+                selection_text += "',"
+
+            # remove last komma to make it a correct IN statement
+            selection_text = selection_text[:-1]
+
+    logger.debug(f"selection_text = {selection_text} ...")
+    return selection_text
+
+
+# 10.12.2024
+def get_connected_we_from_re(subset_reaches):
+    """
+    Get connected wastewater_networkelements (wastewater_nodes and reaches) from subset of reaches
+    """
+    if subset_reaches is None:
+        connected_wn_from_re_ids = None
+    else:
+        # check if list is empty https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty
+        if not subset_reaches:
+            connected_wn_from_re_ids = None
+        else:
+            logger.debug(
+                f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
+            )
+            connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+            connection.set_session(autocommit=True)
+            cursor = connection.cursor()
+
+            connected_wn_from_re_ids = []
+
+            subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
+
+            # select all connected from wastewater_nodes from provided subset of reaches
+            cursor.execute(
+                f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+            )
+
+            # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+            # ws_wn_ids_count = int(cursor.fetchone()[0])
+            # if ws_wn_ids_count == 0:
+            if cursor.fetchone() is None:
+                connected_wn_from_re_ids = None
+            else:
+                # added cursor.execute again to see if with this all records will be available
+                # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+                cursor.execute(
+                    f"SELECT  wef.obj_id as wef_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpf ON rpf.obj_id = re.fk_reach_point_from LEFT JOIN qgep_od.wastewater_networkelement wef ON wef.obj_id = rpf.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wef.obj_id isNull;"
+                )
+                records = cursor.fetchall()
+
+                # 15.11.2024 - does not get all records, but only n-1
+                for row in records:
+                    # logger.debug(f" row[0] = {row[0]}")
+                    # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                    strrow = str(row[0])
+                    if strrow is not None:
+                        connected_wn_from_re_ids.append(strrow)
+                        # logger.debug(f" building up '{connected_wn_from_re_ids}' ...")
+            logger.debug(f" connected_wn_from_re_ids: '{connected_wn_from_re_ids}'")
+    return connected_wn_from_re_ids
+
+
+# 10.12.2024
+def get_connected_we_to_re(subset_reaches):
+    """
+    Get connected wastewater_networkelements (wastewater_nodes and reaches) to subset of reaches
+    """
+    if subset_reaches is None:
+        return None
+    if not subset_reaches:
+        return None
+    else:
+        logger.debug(
+            f"get list of id's of connected wastewater_nodes of provides subset of reaches {subset_reaches} ..."
+        )
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        connected_wn_to_re_ids = []
+
+        subset_reaches_text = get_selection_text_for_in_statement(subset_reaches)
+
+        # select all connected to wastewater_nodes from provided subset of reaches
+        cursor.execute(
+            f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            connected_wn_to_re_ids = None
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute(
+                f"SELECT  wet.obj_id as wet_obj_id FROM qgep_od.reach re LEFT JOIN qgep_od.reach_point rpt ON rpt.obj_id = re.fk_reach_point_to LEFT JOIN qgep_od.wastewater_networkelement wet ON wet.obj_id = rpt.fk_wastewater_networkelement WHERE re.obj_id IN ({subset_reaches_text}) AND NOT wet.obj_id isNull;"
+            )
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                # logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    connected_wn_to_re_ids.append(strrow)
+                    # logger.debug(f" building up '{connected_wn_to_re_ids}' ...")
+    logger.debug(f" connected_wn_to_re_ids: '{connected_wn_to_re_ids}'")
+    return connected_wn_to_re_ids
+
+
+# 10.12.2024
+def get_connected_overflow_to_wn_ids(selected_ids_ov):
+    """
+    Get all connected wastewater_nodes from overflows.fk_overflow_to
+    """
+    if selected_ids_ov is None:
+        return None
+    if not selected_ids_ov:
+        return None
+    else:
+        logger.debug(
+            f"Get all connected wastewater_nodes from overflows.fk_overflow_to {selected_ids_ov} ..."
+        )
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        connected_overflow_to_wn_ids = []
+
+        subset_text = get_selection_text_for_in_statement(selected_ids_ov)
+
+        # select all connected to wastewater_nodes from provided subset of reaches
+        cursor.execute(
+            f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            connected_overflow_to_wn_ids = None
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute(
+                f"SELECT ov.fk_overflow_to FROM qgep_od.wastewater_node wn LEFT JOIN qgep_od.overflow ov ON wn.obj_id = ov.fk_wastewater_node WHERE wn.obj_id IN ({subset_text}) AND NOT ov.fk_overflow_to isNULL;"
+            )
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                # logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    connected_overflow_to_wn_ids.append(strrow)
+                    # logger.debug(f" building up '{connected_overflow_to_wn_ids}' ...")
+        logger.debug(f" connected_overflow_to_wn_ids: '{connected_overflow_to_wn_ids}'")
+    return connected_overflow_to_wn_ids
+
+
+def get_ws_wn_ids(classname):
+    """
+    Get list of id's of wastewater_nodes of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
+    """
+    if classname is None:
+        return None
+    else:
+        logger.debug(f"get list of id's of wastewater_nodes of {classname} ...")
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        ws_wn_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(
+            f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            ws_wn_ids = None
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute(
+                f"SELECT wn.obj_id FROM qgep_od.{classname} LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = {classname}.obj_id WHERE wn.obj_id is not NULL;"
+            )
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                # logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    ws_wn_ids.append(strrow)
+                    # logger.debug(f" building up '{ws_wn_ids}' ...")
+
+    return ws_wn_ids
+
+
+# 12.12.2024
+def get_ws_ids(classname):
+    """
+    Get list of id's of the wastewater_structure (sub)class provided, eg. wwtp_structure (ARABauwerk, does also work for channel (give reaches then)
+    """
+
+    if classname is None:
+        return None
+    else:
+        logger.debug(f"get list of id's of subclass {classname} ...")
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        ws_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(f"SELECT obj_id FROM qgep_od.{classname};")
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            pass
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute(f"SELECT obj_id FROM qgep_od.{classname};")
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                # logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    ws_ids.append(strrow)
+                    # logger.debug(f" building up '{ws_wn_ids}' ...")
+        logger.debug(f" ws_ids: '{ws_ids}' ...")
+    return ws_ids
+
+
+def get_ws_selected_ww_networkelements(selected_wwn):
+    """
+    Get list of id's of wastewater_structure from selected wastewater_network_elements
+    """
+
+    if selected_wwn is None:
+        return None
+    else:
+
+        logger.debug(
+            f"get list of id's of wastewater_structure of selected wastewater_network_elements {selected_wwn} ..."
+        )
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        selection_text = ""
+
+        for list_item in selected_wwn:
+            selection_text += "'"
+            selection_text += list_item
+            selection_text += "',"
+
+        # remove last komma to make it a correct IN statement
+        selection_text = selection_text[:-1]
+
+        logger.debug(f"selection_text = {selection_text} ...")
+
+        ws_selected_ww_networkelements_ids = []
+
+        # select all obj_id of the wastewater_nodes of wwtp_structure
+        cursor.execute(
+            f"SELECT ws.obj_id FROM qgep_od.wastewater_structure ws LEFT JOIN qgep_od.wastewater_networkelement wn ON wn.fk_wastewater_structure = ws.obj_id WHERE wn.obj_id IN ({selection_text});"
+        )
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            ws_selected_ww_networkelements_ids = None
+        else:
+            records = cursor.fetchall()
+            for row in records:
+                logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    ws_selected_ww_networkelements_ids.append(strrow)
+                    # logger.debug(f" building up '{ws_selected_ww_networkelements_ids}' ...")
+        logger.debug(
+            f" ws_selected_ww_networkelements_ids: '{ws_selected_ww_networkelements_ids}' ..."
+        )
+    return ws_selected_ww_networkelements_ids
+
+
+# 10.1.2024
+def filter_reaches(selected_ids_to_filter):
+    """
+    Filter out reaches from selected_ids_to_filter
+    """
+
+    if selected_ids_to_filter is None:
+        return None
+    else:
+        logger.debug(f"Filter out reaches from selected_ids {selected_ids_to_filter} ...")
+        connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+        connection.set_session(autocommit=True)
+        cursor = connection.cursor()
+
+        subset_reaches_ids = []
+        all_reaches_ids = []
+
+        get_selection_text_for_in_statement(selected_ids_to_filter)
+
+        # select all reaches
+        cursor.execute("SELECT obj_id FROM qgep_od.reach;")
+
+        # cursor.fetchall() - see https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+        # ws_wn_ids_count = int(cursor.fetchone()[0])
+        # if ws_wn_ids_count == 0:
+        if cursor.fetchone() is None:
+            all_reaches_ids = None
+        else:
+            # added cursor.execute again to see if with this all records will be available
+            # 15.11.2024 added - see https://stackoverflow.com/questions/58101874/cursor-fetchall-or-other-method-fetchone-is-not-working
+            cursor.execute("SELECT obj_id FROM qgep_od.reach;")
+            records = cursor.fetchall()
+
+            # 15.11.2024 - does not get all records, but only n-1
+            for row in records:
+                # logger.debug(f" row[0] = {row[0]}")
+                # https://www.pythontutorial.net/python-string-methods/python-string-concatenation/
+                strrow = str(row[0])
+                if strrow is not None:
+                    all_reaches_ids.append(strrow)
+                    # logger.debug(f" building up '{all_reaches_ids}' ...")
+
+            for list_item in selected_ids_to_filter:
+                if list_item in all_reaches_ids:
+                    subset_reaches_ids.append(list_item)
+                    logger.debug(
+                        f"'filter_reaches: {list_item}' is a reach id - added to subset_reaches_ids"
+                    )
+                else:
+                    logger.debug(f"'filter_reaches: {list_item}' is not a reach id")
+        logger.debug(f"'subset_reaches_ids: {subset_reaches_ids}'")
+    return subset_reaches_ids
+
+
+def remove_from_selection(selected_ids, remove_ids):
+    """
+    Remove ids from selected_ids if they are in selected_ids
+    """
+
+    if selected_ids is None:
+        return None
+    if remove_ids is None:
+        return selected_ids
+    else:
+        for list_item in remove_ids:
+            # selected_ids = selected_ids.remove(list_item)
+            try:
+                selected_ids.remove(list_item)
+            except Exception:
+                logger.debug(
+                    f" remove_from_selection: '{list_item}' not in selected_ids - could not be removed!"
+                )
+
+    return selected_ids
+
+
+def add_to_selection(selected_ids2, add_ids):
+    """
+    Append ids to selected_ids
+    """
+    if selected_ids2 is None:
+        return None
+    if add_ids is None:
+        return selected_ids2
+    else:
+        if selected_ids2 is None:
+            selected_ids2 = []
+
+        for list_item in add_ids:
+            # selected_ids = selected_ids.append(list_item)
+            selected_ids2.append(list_item)
+
+    return selected_ids2
