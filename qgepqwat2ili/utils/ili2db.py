@@ -38,17 +38,17 @@ def check_organisation_subclass_data():
             organisation_count = organisation_count - cursor.rowcount
 
         if organisation_count == 0:
-            organisation_subclass_check = True
             logger.info(
                 "OK: number of subclass elements of class organisation OK in schema qgep_od!"
             )
+            return True
         else:
-            organisation_subclass_check = False
-            logger.info(
+            logger.error(
                 f"ERROR: number of subclass elements of organisation NOT CORRECT in schema qgep_od: checksum = {organisation_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
+            return False
 
-    return organisation_subclass_check
+    return True
 
 
 def check_wastewater_structure_subclass_data():
@@ -78,17 +78,17 @@ def check_wastewater_structure_subclass_data():
             wastewater_structure_count = wastewater_structure_count - cursor.rowcount
 
         if wastewater_structure_count == 0:
-            wastewater_structure_subclass_check = True
             logger.info(
                 "OK: number of subclass elements of class wastewater_structure OK in schema qgep_od!"
             )
+            return True
         else:
-            wastewater_structure_subclass_check = False
-            logger.info(
+            logger.error(
                 f"ERROR: number of subclass elements of wastewater_structure NOT CORRECT in schema qgep_od: checksum = {wastewater_structure_count} (positiv number means missing entries, negativ means too many subclass entries)"
             )
+            return False
 
-    return wastewater_structure_subclass_check
+    return True
 
 
 def check_identifier_null():
@@ -260,15 +260,13 @@ def check_fk_operator_null():
         logger.info(f"missing_fk_operator_count : {missing_fk_operator_count}")
 
     if missing_fk_operator_count == 0:
-        check_fk_operator_null = True
         logger.info("OK: all mandatory fk_operator set in qgep_od!")
+        return True
     else:
-        check_fk_operator_null = False
-        logger.info(
+        logger.error(
             f"ERROR: Missing mandatory fk_operator in qgep_od: {missing_fk_operator_count}"
         )
-
-    return check_fk_operator_null
+        return False
 
 
 def check_fk_dataowner_null():
@@ -349,15 +347,13 @@ def check_fk_dataowner_null():
         logger.info(f"missing_fk_dataowner_count : {missing_fk_dataowner_count}")
 
     if missing_fk_dataowner_count == 0:
-        check_fk_dataowner_null = True
         logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
+        return True
     else:
-        check_fk_dataowner_null = False
-        logger.info(
+        logger.error(
             f"ERROR: Missing mandatory fk_dataowner in qgep_od: {missing_fk_dataowner_count}"
         )
-
-    return check_fk_dataowner_null
+        return False
 
 
 def check_fk_provider_null():
@@ -437,15 +433,13 @@ def check_fk_provider_null():
         logger.info(f"missing_fk_provider_count : {missing_fk_provider_count}")
 
     if missing_fk_provider_count == 0:
-        check_fk_provider_null = True
         logger.info("OK: all mandatory fk_provider set in qgep_od!")
+        return True
     else:
-        check_fk_provider_null = False
-        logger.info(
+        logger.error(
             f"ERROR: Missing mandatory fk_provider in qgep_od: {missing_fk_provider_count}"
         )
-
-    return check_fk_provider_null
+        return False
 
 
 def skip_wwtp_structure_ids():
