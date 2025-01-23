@@ -217,7 +217,7 @@ def check_fk_owner_null():
             missing_fk_owner_count = missing_fk_owner_count + class_fk_owner_count
 
         # add for testing
-        logger.info(f"missing_fk_owner_count : {missing_fk_owner_count}")
+        logger.debug(f"missing_fk_owner_count : {missing_fk_owner_count}")
 
     if missing_fk_owner_count == 0:
         check_fk_owner_null = True
@@ -258,7 +258,7 @@ def check_fk_operator_null():
         else:
             missing_fk_operator_count = missing_fk_operator_count + int(cursor.fetchone()[0])
         # add for testing
-        logger.info(f"missing_fk_operator_count : {missing_fk_operator_count}")
+        logger.debug(f"missing_fk_operator_count : {missing_fk_operator_count}")
 
     if missing_fk_operator_count == 0:
         logger.info("OK: all mandatory fk_operator set in qgep_od!")
@@ -345,7 +345,7 @@ def check_fk_dataowner_null():
             missing_fk_dataowner_count = missing_fk_dataowner_count + class_fk_dataowner_count
 
         # add for testing
-        logger.info(f"missing_fk_dataowner_count : {missing_fk_dataowner_count}")
+        logger.debug(f"missing_fk_dataowner_count : {missing_fk_dataowner_count}")
 
     if missing_fk_dataowner_count == 0:
         logger.info("OK: all mandatory fk_dataowner set in qgep_od!")
@@ -420,7 +420,7 @@ def check_fk_provider_null():
         #    f"Number of datasets in class '{notsubclass}' without fk_provider : {cursor.fetchone()[0]}"
         # )
         logger.info(
-            f"Number of datasets in class '{notsubclass}' without fk_dataowner : {class_fk_provider_count}"
+            f"Number of datasets in class '{notsubclass}' without fk_provider : {class_fk_provider_count}"
         )
 
         # if cursor.fetchone() is None:
@@ -431,7 +431,7 @@ def check_fk_provider_null():
             missing_fk_provider_count = missing_fk_provider_count + class_fk_provider_count
 
         # add for testing
-        logger.info(f"missing_fk_provider_count : {missing_fk_provider_count}")
+        logger.debug(f"missing_fk_provider_count : {missing_fk_provider_count}")
 
     if missing_fk_provider_count == 0:
         logger.info("OK: all mandatory fk_provider set in qgep_od!")
