@@ -146,7 +146,7 @@ def check_identifier_null():
         ("zone"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null or identifier = '';"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -198,7 +198,9 @@ def check_fk_owner_null():
         # SIA405 Abwasser
         ("wastewater_structure"),
     ]:
-        cursor.execute(f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null;")
+        cursor.execute(
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_owner is null or fk_owner = '';"
+        )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
         class_fk_owner_count = int(cursor.fetchone()[0])
@@ -246,7 +248,7 @@ def check_fk_operator_null():
         ("wastewater_structure"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_operator is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_operator is null or fk_operator = '';"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         logger.info(
@@ -324,7 +326,7 @@ def check_fk_dataowner_null():
         ("zone"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_dataowner is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_dataowner is null or fk_dataowner = '';"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
@@ -411,7 +413,7 @@ def check_fk_provider_null():
         ("zone"),
     ]:
         cursor.execute(
-            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_provider is null;"
+            f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE fk_provider is null or fk_provider = '';"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
