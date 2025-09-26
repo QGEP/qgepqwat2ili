@@ -181,6 +181,96 @@ def check_identifier_null():
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
     return identifier_null_check
 
+def check_identifier_length():
+    """
+    Check if attribute identifier is too long (more than 20 characters)
+    """
+    logger.info("INTEGRITY CHECK too long identifiers...")
+
+    connection = psycopg2.connect(get_pgconf_as_psycopg2_dsn())
+    connection.set_session(autocommit=True)
+    cursor = connection.cursor()
+
+    too_long_identifier_count = 0
+    # add classes to be checked
+    for notsubclass in [
+        # VSA-KEK
+        ("file"),
+        ("data_media"),
+        ("maintenance_event"),
+        # SIA405 Abwasser
+        ("organisation"),
+        ("wastewater_structure"),
+        ("wastewater_networkelement"),
+        ("structure_part"),
+        ("reach_point"),
+        ("pipe_profile"),
+        # VSA-DSS
+        ("catchment_area"),
+        ("connection_object"),
+        ("control_center"),
+        ("hazard_source"),
+        ("hydr_geometry"),
+        ("hydraulic_char_data"),
+        ("measurement_result"),
+        ("measurement_series"),
+        ("measuring_device"),
+        ("measuring_point"),
+        ("mechanical_pretreatment"),
+        ("overflow"),
+        ("overflow_char"),
+        ("retention_body"),
+        ("river_bank"),
+        ("river_bed"),
+        ("sector_water_body"),
+        ("substance"),
+        ("surface_runoff_parameters"),
+        ("surface_water_bodies"),
+        ("throttle_shut_off_unit"),
+        ("waste_water_treatment"),
+        ("water_catchment"),
+        ("water_control_structure"),
+        ("water_course_segment"),
+        ("wwtp_energy_use"),
+        ("zone"),
+    ]:
+        cursor.execute(
+            # f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null or identifier = '';"
+            f"SELECT COUNT(obj_id) FROM tww_od.wastewater_structure WHERE length(identifier) > 15;"
+        )
+        # use cursor.fetchone()[0] instead of cursor.rowcount
+        # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
+
+        try:
+            class_identifier_count = int(cursor.fetchone()[0])
+        except Exception:
+            class_identifier_count = 0
+            logger.debug(
+                f"Number of datasets in class '{notsubclass}' with too long identifier could not be identified (TypeError: 'NoneType' object is not subscriptable). Automatically set class_identifier_count = 0"
+            )
+        else:
+            logger.info(
+                f"Number of datasets in class '{notsubclass}' with too long identifier : {class_identifier_count}"
+            )
+
+        # if cursor.fetchone() is None:
+        if class_identifier_count == 0:
+            too_long_identifier_count = too_long_identifier_count
+        else:
+            # too_long_identifier_count = too_long_identifier_count + int(cursor.fetchone()[0])
+            too_long_identifier_count = too_long_identifier_count + class_identifier_count
+
+        # add for testing
+        logger.info(f"too_long_identifier_count : {too_long_identifier_count}")
+
+    if too_long_identifier_count == 0:
+        identifier_too_long_check = True
+        logger.info("OK: all identifiers short enough in qgep_od!")
+    else:
+        identifier_too_long_check = False
+        logger.info(f"ERROR: Too long identifiers in qgep_od: {too_long_identifier_count}")
+    return identifier_too_long_check
+
 
 def check_fk_owner_null():
     """
