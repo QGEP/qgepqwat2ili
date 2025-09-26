@@ -237,7 +237,7 @@ def check_identifier_length():
     ]:
         cursor.execute(
             # f"SELECT COUNT(obj_id) FROM qgep_od.{notsubclass} WHERE identifier is null or identifier = '';"
-            f"SELECT COUNT(obj_id) FROM tww_od.wastewater_structure WHERE length(identifier) > 15;"
+            f"SELECT COUNT(obj_id) FROM tww_od.{notsubclass} WHERE length(identifier) > 15;"
         )
         # use cursor.fetchone()[0] instead of cursor.rowcount
         # add variable and store result of cursor.fetchone()[0] as the next call will give None value instead of count https://pynative.com/python-cursor-fetchall-fetchmany-fetchone-to-read-rows-from-table/
