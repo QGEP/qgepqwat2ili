@@ -181,6 +181,7 @@ def check_identifier_null():
         logger.info(f"ERROR: Missing identifiers in qgep_od: {missing_identifier_count}")
     return identifier_null_check
 
+
 def check_identifier_length():
     """
     Check if attribute identifier is too long (more than 20 characters)
