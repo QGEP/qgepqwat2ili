@@ -19,8 +19,9 @@ jobs:
         matrix:
             suite: ["qgep", "qwat"]
             postgis:
-              - postgis/postgis:13-3.4
               - postgis/postgis:12-3.4
+              - postgis/postgis:15-3.4
+              - postgis/postgis:16-3.4
 
     steps:
       - uses: actions/checkout@v4
