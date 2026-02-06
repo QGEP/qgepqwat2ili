@@ -131,6 +131,40 @@ def qgep_import_dss(precommit_callback=None):
                     instance = obj
                     break
 
+        # set instance with organisation.obj instead of organisation.name, as fk_dataowner / fk_provider could already be a obj_id instead of an identifier
+        if not instance:
+            instance = (
+                qgep_session.query(QGEP.organisation)
+                .filter(QGEP.organisation.obj_id == name)
+                .first()
+            )
+
+        # also look for non-flushed objects in the session
+        if not instance:
+            for obj in qgep_session:
+                # for VSA-DSS look in subclasses instead of organisation
+                # if obj.__class__ is QGEP.organisation and obj.obj_id == name:
+                #    instance = obj
+                #    break
+                if obj.__class__ is QGEP.municipality and obj.obj_id == name:
+                    instance = obj
+                    break
+                if obj.__class__ is QGEP.administrative_office and obj.obj_id == name:
+                    instance = obj
+                    break
+                if obj.__class__ is QGEP.canton and obj.obj_id == name:
+                    instance = obj
+                    break
+                if obj.__class__ is QGEP.cooperative and obj.obj_id == name:
+                    instance = obj
+                    break
+                if obj.__class__ is QGEP.private and obj.obj_id == name:
+                    instance = obj
+                    break
+                if obj.__class__ is QGEP.waste_water_association and obj.obj_id == name:
+                    instance = obj
+                    break
+
         # if still nothing, we create it
         if not instance:
             # 10.8.2022 extra logger info added
