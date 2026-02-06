@@ -133,13 +133,17 @@ def qgep_import_dss(precommit_callback=None):
 
         # set instance with organisation.obj instead of organisation.name, as fk_dataowner / fk_provider could already be a obj_id instead of an identifier
         if not instance:
-            instance = qgep_session.query(QGEP.organisation).filter(QGEP.organisation.obj_id == name).first()
+            instance = (
+                qgep_session.query(QGEP.organisation)
+                .filter(QGEP.organisation.obj_id == name)
+                .first()
+            )
 
         # also look for non-flushed objects in the session
         if not instance:
             for obj in qgep_session:
                 # for VSA-DSS look in subclasses instead of organisation
-                #if obj.__class__ is QGEP.organisation and obj.obj_id == name:
+                # if obj.__class__ is QGEP.organisation and obj.obj_id == name:
                 #    instance = obj
                 #    break
                 if obj.__class__ is QGEP.municipality and obj.obj_id == name:
