@@ -30,6 +30,7 @@ from ..utils.ili2db import (  # neu 22.7.2022; get_xtf_model,; neu 31.3.2023; ne
     check_fk_operator_null,
     check_fk_owner_null,
     check_fk_provider_null,
+    check_identifier_length,
     check_identifier_null,
     check_organisation_subclass_data,
     check_wastewater_structure_subclass_data,
@@ -423,7 +424,7 @@ def action_export(plugin):
                 )
                 return
 
-        # 3. identifier check check_identifier_null
+        # 3a. identifier check check_identifier_null
         if flag_test:
             check_identifier = False
             check_identifier = check_identifier_null()
@@ -441,6 +442,29 @@ def action_export(plugin):
                 show_hint(
                     "INFO: Missing identifiers in schema qgep_od",
                     "Add missing identifiers to get a valid INTERLIS export file. See qgep logs tab for details.",
+                    None,
+                )
+                # just show hint, but continue
+                # return
+
+        # 3b. identifier check check_identifier_length
+        if flag_test:
+            check_identifier_too_long = False
+            check_identifier_too_long = check_identifier_length()
+            if check_identifier_too_long:
+                # print("OK: Integrity checks identifiers is not NULL")
+                show_success(
+                    "Sucess",
+                    "OK: Integrity checks identifiers too long",
+                    None,
+                )
+
+            else:
+                progress_dialog.close()
+                # print("INFO: too long identifiers")
+                show_hint(
+                    "INFO: Too long identifiers in schema qgep_od",
+                    "Adapt identifier length to get a valid INTERLIS export file. See qgep logs tab for details.",
                     None,
                 )
                 # just show hint, but continue
